@@ -105,23 +105,47 @@ export default function App() {
 
   const fetchUserData = async () => {
     try {
-      const walletRes = await fetch('/api/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
-      const walletData = await walletRes.json();
-      setWalletBalance(walletData.wallet_balance);
+      // 1. Fetch user info if not set
+      let currentUser = user;
+      if (!currentUser) {
+        const meRes = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          currentUser = meData.user;
+          setUser(currentUser);
+        } else {
+          logout();
+          return;
+        }
+      }
 
+      // 2. Fetch wallet (only for citizen)
+      if (currentUser?.role === 'citizen') {
+        const walletRes = await fetch('/api/citizen/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (walletRes.ok) {
+          const walletData = await walletRes.json();
+          setWalletBalance(walletData.wallet_balance);
+        }
+      }
+
+      // 3. Fetch history
       const historyRes = await fetch('/api/history', { headers: { 'Authorization': `Bearer ${token}` } });
-      const historyData = await historyRes.json();
-      setHistory(historyData);
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+        setHistory(historyData);
+      }
 
-      // Check if admin
+      // 4. Fetch admin stats
       const statsRes = await fetch('/api/admin/dashboard', { headers: { 'Authorization': `Bearer ${token}` } });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setAdminStats(statsData);
         
         const logsRes = await fetch('/api/audit-logs', { headers: { 'Authorization': `Bearer ${token}` } });
-        const logsData = await logsRes.json();
-        setAuditLogs(logsData);
+        if (logsRes.ok) {
+          const logsData = await logsRes.json();
+          setAuditLogs(logsData);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -163,22 +187,32 @@ export default function App() {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch('/api/upload-biomass', {
+      let endpoint = '/api/citizen/upload';
+      let payload: any = {
+        ...uploadData,
+        weight_kg: parseFloat(uploadData.weight_kg)
+      };
+
+      if (user?.role === 'aggregator') {
+        endpoint = '/api/aggregator/pickup';
+        payload = { record_id: uploadData.weight_kg }; // Reusing weight_kg field for record_id in UI for simplicity
+      } else if (user?.role === 'processor') {
+        endpoint = '/api/processor/receipt';
+        payload = { record_id: uploadData.weight_kg };
+      }
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          ...uploadData,
-          weight_kg: parseFloat(uploadData.weight_kg)
-        })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      if (!res.ok) throw new Error(data.error || 'Operation failed');
 
-      setMessage({ type: 'success', text: `Success! Earned ₹${data.value_breakdown.total_value.toFixed(2)}` });
-      setWalletBalance(data.wallet_balance);
+      setMessage({ type: 'success', text: data.message });
       setUploadData({ weight_kg: '', waste_type: 'Agricultural', village: '', geo_lat: 0, geo_long: 0 });
       fetchUserData();
       setTimeout(() => setView('dashboard'), 2000);

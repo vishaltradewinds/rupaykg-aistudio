@@ -221,6 +221,10 @@ async function startServer() {
     res.json({ token, user: tokenPayload });
   });
 
+  app.get("/api/me", authenticateToken, (req: AuthRequest, res: Response) => {
+    res.json({ user: req.user });
+  });
+
   // --- 2. CITIZEN ENDPOINTS ---
   app.post("/api/citizen/upload", authenticateToken, requireRole(['citizen']), (req: AuthRequest, res: Response) => {
     const { weight_kg, waste_type, geo_lat, geo_long, moisture_level = 15, image_proof } = req.body;
@@ -363,6 +367,22 @@ async function startServer() {
   });
 
   // --- 6. GEO HIERARCHY DASHBOARDS ---
+  app.get("/api/admin/dashboard", authenticateToken, (req: AuthRequest, res: Response) => {
+    const totalUsers = db.prepare("SELECT COUNT(*) as count FROM users").get() as any;
+    const totalRecords = db.prepare("SELECT COUNT(*) as count FROM biomass_records").get() as any;
+    const totalWallet = db.prepare("SELECT SUM(wallet_balance) as sum FROM users").get() as any;
+    const totalCarbon = db.prepare("SELECT SUM(carbon_reduction_kg) as sum FROM biomass_records").get() as any;
+    const totalWeight = db.prepare("SELECT SUM(weight_kg) as sum FROM biomass_records").get() as any;
+
+    res.json({
+      total_users: totalUsers.count,
+      total_biomass_records: totalRecords.count,
+      total_wallet_disbursed: totalWallet.sum || 0,
+      total_carbon_reduction_kg: totalCarbon.sum || 0,
+      total_weight_kg: totalWeight.sum || 0
+    });
+  });
+
   app.get("/api/dashboard/geo", authenticateToken, requireRole(['state_admin', 'municipal_admin', 'super_admin']), (req: AuthRequest, res: Response) => {
     const { level, name } = req.query; // level: 'district' | 'state', name: 'Pune' | 'Maharashtra'
     
