@@ -634,7 +634,7 @@ export default function App() {
             <History size={20} />
             <span className="hidden md:block font-medium">History</span>
           </button>
-          {adminStats && (
+          {['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('admin')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'admin' ? 'bg-blue-500/10 text-blue-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -762,74 +762,94 @@ export default function App() {
               className="max-w-2xl mx-auto"
             >
               <Card>
-                <h3 className="text-xl font-bold mb-6">Biomass Intake Form</h3>
+                <h3 className="text-xl font-bold mb-6">
+                  {user?.role === 'aggregator' ? 'Log Collection' : user?.role === 'processor' ? 'Log Processing' : 'Biomass Intake Form'}
+                </h3>
                 <form onSubmit={handleUpload} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {user?.role === 'citizen' ? (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Weight (kg)</label>
+                          <div className="relative">
+                            <input 
+                              type="number" 
+                              step="0.1"
+                              required
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                              placeholder="0.0"
+                              value={uploadData.weight_kg}
+                              onChange={e => setUploadData({...uploadData, weight_kg: e.target.value})}
+                            />
+                            <Scale className="absolute right-4 top-3.5 text-white/20" size={18} />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Waste Type</label>
+                          <select 
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 appearance-none text-white"
+                            value={uploadData.waste_type}
+                            onChange={e => setUploadData({...uploadData, waste_type: e.target.value})}
+                          >
+                            <option value="Agricultural" className="bg-[#0A0A0B]">Agricultural</option>
+                            <option value="Forestry" className="bg-[#0A0A0B]">Forestry</option>
+                            <option value="Municipal" className="bg-[#0A0A0B]">Municipal</option>
+                            <option value="Industrial" className="bg-[#0A0A0B]">Industrial</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Village / Location</label>
+                        <div className="relative">
+                          <input 
+                            type="text" 
+                            required
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                            placeholder="Village Name"
+                            value={uploadData.village}
+                            onChange={e => setUploadData({...uploadData, village: e.target.value})}
+                          />
+                          <MapPin className="absolute right-4 top-3.5 text-white/20" size={18} />
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-sm font-medium text-emerald-400">Estimated Value Breakdown</span>
+                          <TrendingUp size={16} className="text-emerald-400" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs text-white/40">
+                            <span>Recycler Rail (4x)</span>
+                            <span>₹{(parseFloat(uploadData.weight_kg || '0') * 4).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-xs text-white/40">
+                            <span>Carbon Rail (3x)</span>
+                            <span>₹{(parseFloat(uploadData.weight_kg || '0') * 3).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/5">
+                            <span>Total Sovereign Value</span>
+                            <span className="text-emerald-400">₹{(parseFloat(uploadData.weight_kg || '0') * 12).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Weight (kg)</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Record ID</label>
                       <div className="relative">
                         <input 
-                          type="number" 
-                          step="0.1"
+                          type="text" 
                           required
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                          placeholder="0.0"
-                          value={uploadData.weight_kg}
+                          placeholder="Enter Record ID to process"
+                          value={uploadData.weight_kg} // Reusing this field for simplicity
                           onChange={e => setUploadData({...uploadData, weight_kg: e.target.value})}
                         />
-                        <Scale className="absolute right-4 top-3.5 text-white/20" size={18} />
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Waste Type</label>
-                      <select 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 appearance-none"
-                        value={uploadData.waste_type}
-                        onChange={e => setUploadData({...uploadData, waste_type: e.target.value})}
-                      >
-                        <option value="Agricultural">Agricultural</option>
-                        <option value="Forestry">Forestry</option>
-                        <option value="Municipal">Municipal</option>
-                        <option value="Industrial">Industrial</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Village / Location</label>
-                    <div className="relative">
-                      <input 
-                        type="text" 
-                        required
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                        placeholder="Village Name"
-                        value={uploadData.village}
-                        onChange={e => setUploadData({...uploadData, village: e.target.value})}
-                      />
-                      <MapPin className="absolute right-4 top-3.5 text-white/20" size={18} />
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-medium text-emerald-400">Estimated Value Breakdown</span>
-                      <TrendingUp size={16} className="text-emerald-400" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-white/40">
-                        <span>Recycler Rail (4x)</span>
-                        <span>₹{(parseFloat(uploadData.weight_kg || '0') * 4).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-xs text-white/40">
-                        <span>Carbon Rail (3x)</span>
-                        <span>₹{(parseFloat(uploadData.weight_kg || '0') * 3).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/5">
-                        <span>Total Sovereign Value</span>
-                        <span className="text-emerald-400">₹{(parseFloat(uploadData.weight_kg || '0') * 12).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
+                  )}
 
                   {message && (
                     <div className={`p-4 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -842,7 +862,7 @@ export default function App() {
                     disabled={loading}
                     className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50"
                   >
-                    {loading ? 'Submitting to Blockchain...' : 'Confirm Intake & Mint Value'}
+                    {loading ? 'Processing...' : user?.role === 'citizen' ? 'Confirm Intake & Mint Value' : 'Confirm Record'}
                   </button>
                 </form>
               </Card>
