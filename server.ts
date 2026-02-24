@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import fs from "fs";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
+import { WASTE_TYPES } from "./src/constants";
 
 async function startServer() {
   const app = express();
@@ -94,8 +95,10 @@ async function startServer() {
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), (req: any, res) => {
     const { weight_kg, waste_type, village, geo_lat, geo_long } = req.body;
-    const total_value = weight_kg * 5; // 5 rupees per kg
-    const carbon_reduction_kg = weight_kg * 0.5; // Dummy calculation
+    
+    const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
+    const total_value = weight_kg * (wasteConfig.value + (wasteConfig.carbon * 10));
+    const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
     
     const record = {
       id: "REC" + Date.now(),
@@ -126,12 +129,19 @@ async function startServer() {
   });
 
   // ---------------- AGGREGATOR & PROCESSOR ROUTES ----------------
+  app.get("/api/aggregator/available", auth(["aggregator"]), (req: any, res) => {
+    const available = records.filter(r => r.status === "pending_pickup");
+    res.json(available);
+  });
+
   app.post("/api/aggregator/pickup", auth(["aggregator"]), (req: any, res) => {
     const { record_id } = req.body;
-    const record = records.find(r => r.id === record_id || r.weight_kg.toString() === record_id);
+    const record = records.find(r => r.id === record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
+    if (record.status !== "pending_pickup") return res.status(400).json({ error: "Record not available for pickup" });
     
     record.status = "in_transit";
+    record.aggregator_id = req.user.id;
     logs.push({ 
       id: Date.now(), 
       event: "BIOMASS_PICKUP", 
@@ -141,12 +151,19 @@ async function startServer() {
     res.json({ message: "Pickup confirmed" });
   });
 
+  app.get("/api/processor/available", auth(["processor"]), (req: any, res) => {
+    const available = records.filter(r => r.status === "in_transit");
+    res.json(available);
+  });
+
   app.post("/api/processor/receipt", auth(["processor"]), (req: any, res) => {
     const { record_id } = req.body;
-    const record = records.find(r => r.id === record_id || r.weight_kg.toString() === record_id);
+    const record = records.find(r => r.id === record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
+    if (record.status !== "in_transit") return res.status(400).json({ error: "Record not in transit" });
     
     record.status = "processed";
+    record.processor_id = req.user.id;
     logs.push({ 
       id: Date.now(), 
       event: "BIOMASS_PROCESSED", 
@@ -161,6 +178,10 @@ async function startServer() {
     let userRecords = records;
     if (req.user.role === "citizen" || req.user.role === "fpo") {
       userRecords = records.filter(r => r.citizen_id === req.user.id);
+    } else if (req.user.role === "aggregator") {
+      userRecords = records.filter(r => r.aggregator_id === req.user.id || r.status === "pending_pickup");
+    } else if (req.user.role === "processor") {
+      userRecords = records.filter(r => r.processor_id === req.user.id || r.status === "in_transit");
     }
     res.json(userRecords);
   });
