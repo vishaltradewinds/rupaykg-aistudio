@@ -634,15 +634,6 @@ export default function App() {
             <History size={20} />
             <span className="hidden md:block font-medium">History</span>
           </button>
-          {['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
-            <button 
-              onClick={() => setView('admin')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'admin' ? 'bg-blue-500/10 text-blue-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <Shield size={20} />
-              <span className="hidden md:block font-medium">Admin OS</span>
-            </button>
-          )}
         </div>
 
         <button 
@@ -662,7 +653,6 @@ export default function App() {
               {view === 'dashboard' && 'System Overview'}
               {view === 'upload' && (user?.role === 'aggregator' ? 'Log Collection' : user?.role === 'processor' ? 'Log Processing' : 'Biomass Intake')}
               {view === 'history' && 'Transaction Ledger'}
-              {view === 'admin' && 'Sovereign Control Panel'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               Welcome back, {user?.name || 'Citizen'}
@@ -695,63 +685,124 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Stat label="Carbon Offset" value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="blue" />
-                <Stat label="Total Biomass" value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" />
-                <Stat label="System Rank" value="Elite" icon={TrendingUp} color="purple" />
-              </div>
+              {(user?.role === 'citizen' || user?.role === 'fpo') && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Stat label="Carbon Offset" value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" />
+                  <Stat label="Total Biomass" value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" />
+                  <Stat label="System Rank" value="Elite" icon={TrendingUp} color="purple" />
+                </div>
+              )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {user?.role === 'aggregator' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Stat label="Total Collected" value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
+                  <Stat label="Active Pickups" value={history.filter(r => r.status === 'in_transit').length} icon={Activity} color="emerald" />
+                  <Stat label="Completed Deliveries" value={history.filter(r => r.status === 'processed').length} icon={CheckCircle2} color="purple" />
+                </div>
+              )}
+
+              {user?.role === 'processor' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Stat label="Total Processed" value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" />
+                  <Stat label="Carbon Credits Minted" value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" />
+                  <Stat label="Value Generated" value={`₹${history.reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" />
+                </div>
+              )}
+
+              {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && adminStats && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Stat label="Total Investment" value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
+                  <Stat label="Carbon Credits Acquired" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
+                  <Stat label="Biomass Diverted" value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="blue" />
+                </div>
+              )}
+
+              {['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && adminStats && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Stat label="Total Users" value={adminStats.total_users} icon={User} color="blue" />
+                  <Stat label="Total Records" value={adminStats.total_biomass_records} icon={Activity} color="emerald" />
+                  <Stat label="Total Weight" value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" />
+                  <Stat label="Carbon Reduced" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
+                </div>
+              )}
+
+              {/* Shared Recent Activity & Climate Impact for Citizen, FPO, Aggregator, Processor */}
+              {!['csr_partner', 'epr_partner', 'carbon_buyer', 'state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                      <Activity size={18} className="text-emerald-400" />
+                      Recent Activity
+                    </h3>
+                    <div className="space-y-4">
+                      {history.slice(0, 5).map(record => (
+                        <div key={record.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
+                              <Leaf size={16} />
+                            </div>
+                            <div>
+                              <p className="font-medium">{record.weight_kg}kg {record.waste_type}</p>
+                              <p className="text-xs text-white/40">{new Date(record.timestamp).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-emerald-400 font-bold">+₹{record.total_value.toFixed(2)}</p>
+                            <p className="text-[10px] text-white/40 uppercase tracking-tighter">Verified</p>
+                          </div>
+                        </div>
+                      ))}
+                      {history.length === 0 && <p className="text-center text-white/20 py-8">No records found</p>}
+                    </div>
+                  </Card>
+
+                  <Card className="flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Climate Impact</h3>
+                      <p className="text-white/40 text-sm mb-6">Your contribution to the global carbon reduction engine.</p>
+                      <div className="h-48 flex items-end gap-2 px-4">
+                        {history.slice(0, 7).reverse().map((r, i) => (
+                          <div 
+                            key={i} 
+                            className="flex-1 bg-emerald-500/40 rounded-t-lg transition-all hover:bg-emerald-500" 
+                            style={{ height: `${Math.min(100, (r.weight_kg / 10) * 100)}%` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setView('upload')}
+                      className="w-full mt-6 bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/90 transition-all"
+                    >
+                      <PlusCircle size={18} />
+                      {user?.role === 'aggregator' ? 'New Collection Record' : user?.role === 'processor' ? 'New Processing Record' : 'New Intake Record'}
+                    </button>
+                  </Card>
+                </div>
+              )}
+
+              {/* Partner & Admin specific content */}
+              {['csr_partner', 'epr_partner', 'carbon_buyer', 'state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
                 <Card>
                   <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                    <Activity size={18} className="text-emerald-400" />
-                    Recent Activity
+                    <Shield size={18} className="text-blue-400" />
+                    System Audit Logs
                   </h3>
-                  <div className="space-y-4">
-                    {history.slice(0, 5).map(record => (
-                      <div key={record.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
-                            <Leaf size={16} />
-                          </div>
-                          <div>
-                            <p className="font-medium">{record.weight_kg}kg {record.waste_type}</p>
-                            <p className="text-xs text-white/40">{new Date(record.timestamp).toLocaleDateString()}</p>
-                          </div>
+                  <div className="space-y-3">
+                    {auditLogs.slice(0, 5).map(log => (
+                      <div key={log.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-sm">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${log.event === 'BIOMASS_UPLOADED' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                          <span className="font-mono text-white/40">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
+                          <span className="font-medium">{log.event}</span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-emerald-400 font-bold">+₹{record.total_value.toFixed(2)}</p>
-                          <p className="text-[10px] text-white/40 uppercase tracking-tighter">Verified</p>
-                        </div>
+                        <span className="text-white/40 truncate max-w-[200px]">{log.details}</span>
                       </div>
                     ))}
-                    {history.length === 0 && <p className="text-center text-white/20 py-8">No records found</p>}
+                    {auditLogs.length === 0 && <p className="text-center text-white/20 py-8">No audit logs found</p>}
                   </div>
                 </Card>
-
-                <Card className="flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Climate Impact</h3>
-                    <p className="text-white/40 text-sm mb-6">Your contribution to the global carbon reduction engine.</p>
-                    <div className="h-48 flex items-end gap-2 px-4">
-                      {history.slice(0, 7).reverse().map((r, i) => (
-                        <div 
-                          key={i} 
-                          className="flex-1 bg-emerald-500/40 rounded-t-lg transition-all hover:bg-emerald-500" 
-                          style={{ height: `${Math.min(100, (r.weight_kg / 10) * 100)}%` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setView('upload')}
-                    className="w-full mt-6 bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/90 transition-all"
-                  >
-                    <PlusCircle size={18} />
-                    {user?.role === 'aggregator' ? 'New Collection Record' : user?.role === 'processor' ? 'New Processing Record' : 'New Intake Record'}
-                  </button>
-                </Card>
-              </div>
+              )}
             </motion.div>
           )}
 
@@ -913,77 +964,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'admin' && adminStats && (
-            <motion.div 
-              key="admin"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-8"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Stat label="Total Users" value={adminStats.total_users} icon={User} color="blue" />
-                <Stat label="Total Records" value={adminStats.total_biomass_records} icon={Activity} color="emerald" />
-                <Stat label="Total Weight" value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" />
-                <Stat label="Carbon Reduced" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
-              </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2">
-                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                    <Shield size={18} className="text-blue-400" />
-                    System Audit Logs
-                  </h3>
-                  <div className="space-y-3">
-                    {auditLogs.map(log => (
-                      <div key={log.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-sm">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${log.event === 'BIOMASS_UPLOADED' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
-                          <span className="font-mono text-white/40">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-                          <span className="font-medium">{log.event}</span>
-                        </div>
-                        <span className="text-white/40 truncate max-w-[200px]">{log.details}</span>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-
-                <Card>
-                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                    <BarChart3 size={18} className="text-purple-400" />
-                    Economy Health
-                  </h3>
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-white/40">Wallet Disbursement</span>
-                        <span>₹{adminStats.total_wallet_disbursed.toFixed(0)}</span>
-                      </div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500" style={{ width: '65%' }} />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-white/40">Biomass Velocity</span>
-                        <span>High</span>
-                      </div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500" style={{ width: '85%' }} />
-                      </div>
-                    </div>
-                    <div className="pt-6 border-t border-white/10">
-                      <p className="text-xs text-white/40 mb-4">System Status: <span className="text-emerald-400">Operational</span></p>
-                      <div className="flex items-center gap-2 text-xs text-white/60">
-                        <Shield size={14} />
-                        Sovereign Grade Security Active
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </motion.div>
-          )}
         </AnimatePresence>
       </main>
     </div>
