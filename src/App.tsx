@@ -119,8 +119,8 @@ export default function App() {
         }
       }
 
-      // 2. Fetch wallet (only for citizen)
-      if (currentUser?.role === 'citizen') {
+      // 2. Fetch wallet (only for citizen or fpo)
+      if (currentUser?.role === 'citizen' || currentUser?.role === 'fpo') {
         const walletRes = await fetch('/api/citizen/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
         if (walletRes.ok) {
           const walletData = await walletRes.json();
@@ -508,7 +508,7 @@ export default function App() {
                     </select>
                   </div>
                   
-                  {formData.role !== 'citizen' && (
+                  {formData.role !== 'citizen' && formData.role !== 'fpo' && (
                     <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">Organization Name</label>
                       <input 
@@ -610,7 +610,7 @@ export default function App() {
           <span className="text-xl font-bold tracking-tighter hidden md:block">RUPAYKG</span>
         </div>
 
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 flex flex-col gap-2">
           <button 
             onClick={() => setView('dashboard')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -647,7 +647,7 @@ export default function App() {
 
         <button 
           onClick={logout}
-          className="w-full flex items-center gap-3 p-3 rounded-xl text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all"
+          className="w-full flex items-center gap-3 p-3 rounded-xl text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all mt-auto"
         >
           <LogOut size={20} />
           <span className="hidden md:block font-medium">Logout</span>
@@ -674,13 +674,15 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
-              <Wallet className="text-emerald-400" size={20} />
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/40">Wallet Balance</p>
-                <p className="text-xl font-bold">₹{walletBalance.toFixed(2)}</p>
+            {(user?.role === 'citizen' || user?.role === 'fpo') && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
+                <Wallet className="text-emerald-400" size={20} />
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-white/40">Wallet Balance</p>
+                  <p className="text-xl font-bold">₹{walletBalance.toFixed(2)}</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </header>
 
@@ -766,7 +768,7 @@ export default function App() {
                   {user?.role === 'aggregator' ? 'Log Collection' : user?.role === 'processor' ? 'Log Processing' : 'Biomass Intake Form'}
                 </h3>
                 <form onSubmit={handleUpload} className="space-y-6">
-                  {user?.role === 'citizen' ? (
+                  {user?.role === 'citizen' || user?.role === 'fpo' ? (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -862,7 +864,7 @@ export default function App() {
                     disabled={loading}
                     className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50"
                   >
-                    {loading ? 'Processing...' : user?.role === 'citizen' ? 'Confirm Intake & Mint Value' : 'Confirm Record'}
+                    {loading ? 'Processing...' : (user?.role === 'citizen' || user?.role === 'fpo') ? 'Confirm Intake & Mint Value' : 'Confirm Record'}
                   </button>
                 </form>
               </Card>

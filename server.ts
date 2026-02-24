@@ -87,14 +87,15 @@ async function startServer() {
   });
 
   // ---------------- CITIZEN ROUTES ----------------
-  app.get("/api/citizen/wallet", auth(["citizen"]), (req: any, res) => {
+  app.get("/api/citizen/wallet", auth(["citizen", "fpo"]), (req: any, res) => {
     const user = users.find(u => u.id === req.user.id);
     res.json({ wallet_balance: user?.wallet_balance || 0 });
   });
 
-  app.post("/api/citizen/upload", auth(["citizen"]), (req: any, res) => {
+  app.post("/api/citizen/upload", auth(["citizen", "fpo"]), (req: any, res) => {
     const { weight_kg, waste_type, village, geo_lat, geo_long } = req.body;
     const total_value = weight_kg * 5; // 5 rupees per kg
+    const carbon_reduction_kg = weight_kg * 0.5; // Dummy calculation
     
     const record = {
       id: "REC" + Date.now(),
@@ -106,6 +107,7 @@ async function startServer() {
       geo_long,
       status: "pending_pickup",
       total_value,
+      carbon_reduction_kg,
       timestamp: new Date().toISOString()
     };
     records.push(record);
@@ -157,14 +159,14 @@ async function startServer() {
   // ---------------- COMMON ROUTES ----------------
   app.get("/api/history", auth(), (req: any, res) => {
     let userRecords = records;
-    if (req.user.role === "citizen") {
+    if (req.user.role === "citizen" || req.user.role === "fpo") {
       userRecords = records.filter(r => r.citizen_id === req.user.id);
     }
     res.json(userRecords);
   });
 
   // ---------------- ADMIN ROUTES ----------------
-  app.get("/api/admin/dashboard", auth(["state_admin", "municipal_admin", "super_admin"]), (req: any, res) => {
+  app.get("/api/admin/dashboard", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
     const totalUsers = users.length;
     const totalRecords = records.length;
     const totalWallet = users.reduce((sum, u) => sum + (u.wallet_balance || 0), 0);
@@ -180,7 +182,7 @@ async function startServer() {
     });
   });
 
-  app.get("/api/audit-logs", auth(["state_admin", "municipal_admin", "super_admin"]), (req: any, res) => {
+  app.get("/api/audit-logs", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
     res.json(logs.slice(-50).reverse());
   });
 
