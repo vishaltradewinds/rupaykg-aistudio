@@ -97,8 +97,10 @@ async function startServer() {
     const { weight_kg, waste_type, village, geo_lat, geo_long } = req.body;
     
     const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
-    const total_value = weight_kg * (wasteConfig.value + (wasteConfig.carbon * 10));
+    const base_value = weight_kg * wasteConfig.value;
     const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
+    const potential_carbon_value = carbon_reduction_kg * 10;
+    const total_value = base_value + potential_carbon_value;
     
     const record = {
       id: "REC" + Date.now(),
@@ -109,6 +111,9 @@ async function startServer() {
       geo_lat,
       geo_long,
       status: "pending_pickup",
+      mrv_status: "pending", // MRV Status: pending, verified, rejected
+      base_value,
+      potential_carbon_value,
       total_value,
       carbon_reduction_kg,
       timestamp: new Date().toISOString()
@@ -116,16 +121,54 @@ async function startServer() {
     records.push(record);
     
     const user = users.find(u => u.id === req.user.id);
-    if (user) user.wallet_balance += total_value;
+    if (user) user.wallet_balance += base_value; // Only base value is credited initially
 
     logs.push({ 
       id: Date.now(), 
-      event: "BIOMASS_UPLOADED", 
+      event: "WASTE_UPLOADED", 
       details: `Record ${record.id} uploaded by ${req.user.id}`, 
       timestamp: new Date().toISOString() 
     });
     
-    res.json({ message: `Success! Earned ₹${total_value.toFixed(2)}`, wallet_balance: user?.wallet_balance });
+    res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon value pending MRV.`, wallet_balance: user?.wallet_balance });
+  });
+
+  // ---------------- MRV ROUTES ----------------
+  app.get("/api/mrv/pending", auth(["regulator", "state_admin", "super_admin"]), (req: any, res) => {
+    const pendingMRV = records.filter(r => r.mrv_status === "pending" && r.status === "processed");
+    res.json(pendingMRV);
+  });
+
+  app.post("/api/mrv/verify", auth(["regulator", "state_admin", "super_admin"]), (req: any, res) => {
+    const { record_id, status } = req.body; // status: 'verified' or 'rejected'
+    const record = records.find(r => r.id === record_id);
+    if (!record) return res.status(404).json({ error: "Record not found" });
+    if (record.mrv_status !== "pending") return res.status(400).json({ error: "MRV already processed" });
+    if (record.status !== "processed") return res.status(400).json({ error: "Waste must be processed before MRV verification" });
+    
+    record.mrv_status = status;
+    
+    if (status === "verified") {
+      const user = users.find(u => u.id === record.citizen_id);
+      if (user) {
+        user.wallet_balance += record.potential_carbon_value;
+      }
+      logs.push({ 
+        id: Date.now(), 
+        event: "MRV_VERIFIED", 
+        details: `Carbon credits issued for ${record.id} by ${req.user.id}`, 
+        timestamp: new Date().toISOString() 
+      });
+    } else {
+      logs.push({ 
+        id: Date.now(), 
+        event: "MRV_REJECTED", 
+        details: `MRV rejected for ${record.id} by ${req.user.id}`, 
+        timestamp: new Date().toISOString() 
+      });
+    }
+    
+    res.json({ message: `MRV ${status} successfully` });
   });
 
   // ---------------- AGGREGATOR & PROCESSOR ROUTES ----------------
