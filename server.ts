@@ -64,11 +64,21 @@ async function startServer() {
 
   // ---------------- AUTH ROUTES ----------------
   app.post("/api/register", (req, res) => {
-    const { phone, password, role, name, district, state } = req.body;
+    const { phone, password, role, name, district, state, organization_name } = req.body;
     if (users.find(u => u.phone === phone)) {
       return res.status(400).json({ error: "User already exists" });
     }
-    const newUser = { id: Date.now().toString(), phone, password, role, name, district, state, wallet_balance: 0 };
+    const newUser = { 
+      id: Date.now().toString(), 
+      phone, 
+      password, 
+      role, 
+      name, 
+      district, 
+      state, 
+      organization_name: organization_name || null,
+      wallet_balance: 0 
+    };
     users.push(newUser);
     res.json({ message: "Registered successfully" });
   });
@@ -78,7 +88,14 @@ async function startServer() {
     const user = users.find(u => u.phone === phone && u.password === password);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-    const tokenPayload = { id: user.id, role: user.role, name: user.name, district: user.district, state: user.state };
+    const tokenPayload = { 
+      id: user.id, 
+      role: user.role, 
+      name: user.name, 
+      district: user.district, 
+      state: user.state,
+      organization_name: user.organization_name
+    };
     const token = jwt.sign(tokenPayload, privateKey, { algorithm: "RS256", expiresIn: "24h" });
     res.json({ token, user: tokenPayload });
   });
@@ -229,12 +246,98 @@ async function startServer() {
     res.json(userRecords);
   });
 
+  // ---------------- PARTNER ROUTES ----------------
+  app.get("/api/partner/wallet", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+    const user = users.find(u => u.id === req.user.id);
+    res.json({ wallet_balance: user?.wallet_balance || 0 });
+  });
+
+  app.post("/api/partner/fund", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+    const { amount } = req.body;
+    const user = users.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    user.wallet_balance = (user.wallet_balance || 0) + amount;
+    
+    logs.push({ 
+      id: Date.now(), 
+      event: "FUNDS_ADDED", 
+      details: `₹${amount} added to wallet by ${req.user.id}`, 
+      timestamp: new Date().toISOString() 
+    });
+    
+    res.json({ message: `Successfully added ₹${amount} to wallet`, wallet_balance: user.wallet_balance });
+  });
+
+  app.get("/api/partner/available-credits", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+    // In a real system, these would be aggregated from verified MRV records
+    const availableCredits = records
+      .filter(r => r.mrv_status === "verified" && !r.purchased_by)
+      .map(r => ({
+        id: r.id,
+        carbon_reduction_kg: r.carbon_reduction_kg,
+        price: r.potential_carbon_value,
+        waste_type: r.waste_type,
+        village: r.village
+      }));
+    res.json(availableCredits);
+  });
+
+  app.post("/api/partner/purchase-credits", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+    const { record_ids } = req.body;
+    const user = users.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const recordsToPurchase = records.filter(r => record_ids.includes(r.id) && r.mrv_status === "verified" && !r.purchased_by);
+    const totalCost = recordsToPurchase.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0);
+
+    if (user.wallet_balance < totalCost) {
+      return res.status(400).json({ error: "Insufficient funds" });
+    }
+
+    user.wallet_balance -= totalCost;
+    recordsToPurchase.forEach(r => {
+      r.purchased_by = user.id;
+    });
+
+    logs.push({ 
+      id: Date.now(), 
+      event: "CREDITS_PURCHASED", 
+      details: `${recordsToPurchase.length} credits purchased by ${req.user.id} for ₹${totalCost}`, 
+      timestamp: new Date().toISOString() 
+    });
+
+    res.json({ message: `Successfully purchased ${recordsToPurchase.length} credits`, wallet_balance: user.wallet_balance });
+  });
+
   // ---------------- ADMIN ROUTES ----------------
   app.get("/api/admin/dashboard", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
-    const totalUsers = users.length;
-    const totalRecords = records.length;
-    const totalWallet = users.reduce((sum, u) => sum + (u.wallet_balance || 0), 0);
-    const totalWeight = records.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
+    const { role } = req.query;
+    
+    let filteredUsers = users;
+    if (role && role !== 'all') {
+      filteredUsers = users.filter(u => u.role === role);
+    }
+    
+    let filteredRecords = records;
+    if (role && role !== 'all') {
+      if (role === 'citizen' || role === 'fpo') {
+        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.citizen_id));
+      } else if (role === 'aggregator') {
+        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.aggregator_id));
+      } else if (role === 'processor') {
+        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.processor_id));
+      } else if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(role)) {
+        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.purchased_by));
+      } else {
+        filteredRecords = [];
+      }
+    }
+
+    const totalUsers = filteredUsers.length;
+    const totalRecords = filteredRecords.length;
+    const totalWallet = filteredUsers.reduce((sum, u) => sum + (u.wallet_balance || 0), 0);
+    const totalWeight = filteredRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
     const totalCarbon = totalWeight * 0.5; // Dummy calculation
 
     res.json({

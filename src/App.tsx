@@ -257,9 +257,12 @@ export default function App() {
   // Data States
   const [walletBalance, setWalletBalance] = useState(0);
   const [history, setHistory] = useState<BiomassRecord[]>([]);
+  const [historyFilter, setHistoryFilter] = useState<string>('all');
+  const [adminRoleFilter, setAdminRoleFilter] = useState<string>('all');
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
+  const [availableCredits, setAvailableCredits] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -267,7 +270,7 @@ export default function App() {
     if (token) {
       fetchUserData();
     }
-  }, [token]);
+  }, [token, adminRoleFilter]);
 
   useEffect(() => {
     if (view === 'upload' && (user?.role === 'citizen' || user?.role === 'fpo')) {
@@ -322,6 +325,12 @@ export default function App() {
           const walletData = await walletRes.json();
           setWalletBalance(walletData.wallet_balance);
         }
+      } else if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
+        const walletRes = await fetch('/api/partner/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (walletRes.ok) {
+          const walletData = await walletRes.json();
+          setWalletBalance(walletData.wallet_balance);
+        }
       }
 
       // 3. Fetch history
@@ -332,7 +341,7 @@ export default function App() {
       }
 
       // 4. Fetch admin stats
-      const statsRes = await fetch('/api/admin/dashboard', { headers: { 'Authorization': `Bearer ${token}` } });
+      const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setAdminStats(statsData);
@@ -357,6 +366,12 @@ export default function App() {
       if (['regulator', 'state_admin', 'super_admin'].includes(currentUser?.role || '')) {
         const mrvRes = await fetch('/api/mrv/pending', { headers: { 'Authorization': `Bearer ${token}` } });
         if (mrvRes.ok) setMrvRecords(await mrvRes.json());
+      }
+
+      // 7. Fetch available credits for partners
+      if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
+        const creditsRes = await fetch('/api/partner/available-credits', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (creditsRes.ok) setAvailableCredits(await creditsRes.json());
       }
     } catch (err) {
       console.error(err);
@@ -476,6 +491,54 @@ export default function App() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'MRV Operation failed');
+
+      setMessage({ type: 'success', text: data.message });
+      fetchUserData();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePurchaseCredits = async (recordIds: string[]) => {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/partner/purchase-credits', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ record_ids: recordIds })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Purchase failed');
+
+      setMessage({ type: 'success', text: data.message });
+      fetchUserData();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFundWallet = async (amount: number) => {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/partner/fund', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ amount })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Funding failed');
 
       setMessage({ type: 'success', text: data.message });
       fetchUserData();
@@ -1007,6 +1070,15 @@ export default function App() {
               <span className="hidden md:block font-medium">MRV Dashboard</span>
             </button>
           )}
+          {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('partner')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'partner' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <Globe size={20} />
+              <span className="hidden md:block font-medium">Carbon Market</span>
+            </button>
+          )}
         </div>
 
         <button 
@@ -1038,7 +1110,7 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            {(user?.role === 'citizen' || user?.role === 'fpo') && (
+            {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '')) && (
               <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
                 <Wallet className="text-emerald-400" size={20} />
                 <div>
@@ -1096,11 +1168,33 @@ export default function App() {
               )}
 
               {['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && adminStats && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label="Total Users" value={adminStats.total_users} icon={User} color="blue" />
-                  <Stat label="Total Weight" value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" />
-                  <Stat label="Carbon Reduced" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
-                  <Stat label="Active Villages" value="42" icon={MapPin} color="emerald" />
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Activity size={18} className="text-emerald-400" />
+                      Platform Statistics
+                    </h3>
+                    <select 
+                      value={adminRoleFilter}
+                      onChange={(e) => setAdminRoleFilter(e.target.value)}
+                      className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
+                    >
+                      <option value="all" className="bg-[#0A0A0B]">All Roles</option>
+                      <option value="citizen" className="bg-[#0A0A0B]">Citizens</option>
+                      <option value="fpo" className="bg-[#0A0A0B]">FPOs</option>
+                      <option value="aggregator" className="bg-[#0A0A0B]">Aggregators</option>
+                      <option value="processor" className="bg-[#0A0A0B]">Processors</option>
+                      <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partners</option>
+                      <option value="epr_partner" className="bg-[#0A0A0B]">EPR Partners</option>
+                      <option value="carbon_buyer" className="bg-[#0A0A0B]">Carbon Buyers</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <Stat label="Total Users" value={adminStats.total_users} icon={User} color="blue" />
+                    <Stat label="Total Weight" value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" />
+                    <Stat label="Carbon Reduced" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
+                    <Stat label="Total Value" value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
+                  </div>
                 </div>
               )}
 
@@ -1281,6 +1375,22 @@ export default function App() {
                           </button>
                         )}
                       </div>
+                      
+                      {locationStatus === 'success' && (
+                        <div className="mt-4">
+                          <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Location Confirmation (Google Maps)</label>
+                          <iframe 
+                            width="100%" 
+                            height="200" 
+                            frameBorder="0" 
+                            scrolling="no" 
+                            marginHeight={0} 
+                            marginWidth={0} 
+                            src={`https://maps.google.com/maps?q=${uploadData.geo_lat},${uploadData.geo_long}&z=15&output=embed`}
+                            className="rounded-xl border border-white/10"
+                          ></iframe>
+                        </div>
+                      )}
                     </div>
 
                     <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
@@ -1375,6 +1485,20 @@ export default function App() {
                             <MapPin size={14} />
                             <span>{record.village}</span>
                           </div>
+                          {record.geo_lat && record.geo_long && (
+                            <div className="mt-2">
+                              <iframe 
+                                width="100%" 
+                                height="120" 
+                                frameBorder="0" 
+                                scrolling="no" 
+                                marginHeight={0} 
+                                marginWidth={0} 
+                                src={`https://maps.google.com/maps?q=${record.geo_lat},${record.geo_long}&z=14&output=embed`}
+                                className="rounded-lg border border-white/5"
+                              ></iframe>
+                            </div>
+                          )}
                         </div>
                         <button 
                           onClick={() => handleSupplyChainAction(record.id)}
@@ -1434,7 +1558,38 @@ export default function App() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
             >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h3 className="text-xl font-bold">Transaction Ledger</h3>
+                <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10 w-fit">
+                  <button 
+                    onClick={() => setHistoryFilter('all')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'all' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
+                  >
+                    All
+                  </button>
+                  <button 
+                    onClick={() => setHistoryFilter('pending_pickup')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'pending_pickup' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
+                  >
+                    Pending Pickup
+                  </button>
+                  <button 
+                    onClick={() => setHistoryFilter('in_transit')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'in_transit' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
+                  >
+                    In Transit
+                  </button>
+                  <button 
+                    onClick={() => setHistoryFilter('processed')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'processed' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
+                  >
+                    Processed
+                  </button>
+                </div>
+              </div>
+
               <Card className="overflow-hidden p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
@@ -1451,7 +1606,9 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {history.map(record => (
+                      {history
+                        .filter(record => historyFilter === 'all' || record.status === historyFilter)
+                        .map(record => (
                         <tr key={record.id} className="hover:bg-white/5 transition-colors">
                           <td className="p-4 text-sm text-white/60">{new Date(record.timestamp).toLocaleString()}</td>
                           <td className="p-4 text-sm font-medium">{record.waste_type}</td>
@@ -1477,6 +1634,13 @@ export default function App() {
                           </td>
                         </tr>
                       ))}
+                      {history.filter(record => historyFilter === 'all' || record.status === historyFilter).length === 0 && (
+                        <tr>
+                          <td colSpan={8} className="p-8 text-center text-white/40">
+                            No records found for the selected filter.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1548,6 +1712,22 @@ export default function App() {
                           </div>
                         </div>
 
+                        {record.geo_lat && record.geo_long && (
+                          <div className="mb-6">
+                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Location Verification</p>
+                            <iframe 
+                              width="100%" 
+                              height="120" 
+                              frameBorder="0" 
+                              scrolling="no" 
+                              marginHeight={0} 
+                              marginWidth={0} 
+                              src={`https://maps.google.com/maps?q=${record.geo_lat},${record.geo_long}&z=14&output=embed`}
+                              className="rounded-lg border border-white/5"
+                            ></iframe>
+                          </div>
+                        )}
+
                         <div className="flex gap-3">
                           <button 
                             onClick={() => handleMRVAction(record.id, 'verified')}
@@ -1566,6 +1746,92 @@ export default function App() {
                             <AlertCircle size={16} />
                           </button>
                         </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {view === 'partner' && ['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+            <motion.div 
+              key="partner"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Carbon Credit Market</h2>
+                  <p className="text-white/40 text-sm">Purchase verified carbon credits to offset your footprint.</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => handleFundWallet(10000)}
+                    disabled={loading}
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl border border-white/20 transition-all disabled:opacity-50"
+                  >
+                    <PlusCircle size={18} />
+                    <span className="font-bold">Add ₹10,000</span>
+                  </button>
+                </div>
+              </div>
+
+              {message && (
+                <div className={`p-4 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                  {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                  {message.text}
+                </div>
+              )}
+
+              {availableCredits.length === 0 ? (
+                <Card className="py-12 text-center border-dashed">
+                  <Globe size={48} className="mx-auto text-white/20 mb-4" />
+                  <p className="text-white/60 text-lg font-medium">No credits available</p>
+                  <p className="text-white/40 text-sm mt-2">Check back later for newly verified carbon credits.</p>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {availableCredits.map(credit => (
+                    <Card key={credit.id} className="border-emerald-500/20 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Leaf size={100} className="text-emerald-400" />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <p className="text-[10px] font-mono text-white/40 mb-1">ID: {credit.id}</p>
+                            <h4 className="font-bold text-lg">{credit.waste_type}</h4>
+                            <p className="text-sm text-white/60 flex items-center gap-1 mt-1">
+                              <MapPin size={12} /> {credit.village}
+                            </p>
+                          </div>
+                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded uppercase font-bold border border-emerald-500/20">
+                            Verified
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Offset</p>
+                            <p className="text-lg font-mono text-emerald-400">{credit.carbon_reduction_kg?.toFixed(2)} kg</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Price</p>
+                            <p className="text-lg font-bold text-white">₹{credit.price?.toFixed(2)}</p>
+                          </div>
+                        </div>
+
+                        <button 
+                          onClick={() => handlePurchaseCredits([credit.id])}
+                          disabled={loading || walletBalance < (credit.price || 0)}
+                          className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Wallet size={16} />
+                          {walletBalance < (credit.price || 0) ? 'Insufficient Funds' : 'Purchase Credit'}
+                        </button>
                       </div>
                     </Card>
                   ))}
