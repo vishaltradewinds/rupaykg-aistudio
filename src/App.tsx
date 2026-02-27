@@ -71,6 +71,7 @@ interface BiomassRecord {
   potential_carbon_value?: number;
   geo_lat: number;
   geo_long: number;
+  image_url?: string;
 }
 
 interface AdminStats {
@@ -250,7 +251,7 @@ export default function App() {
     district: '',
     state: ''
   });
-  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0 });
+  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '' });
   const [availableRecords, setAvailableRecords] = useState<BiomassRecord[]>([]);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'fetching' | 'success' | 'error'>('idle');
   
@@ -408,6 +409,17 @@ export default function App() {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadData(prev => ({ ...prev, image_url: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -418,6 +430,11 @@ export default function App() {
 
     if (locationStatus === 'error') {
       setMessage({ type: 'error', text: 'GPS coordinates are required for verification. Please retry GPS capture.' });
+      return;
+    }
+
+    if (!uploadData.image_url) {
+      setMessage({ type: 'error', text: 'Please upload an image for verification.' });
       return;
     }
 
@@ -442,7 +459,7 @@ export default function App() {
       if (!res.ok) throw new Error(data.error || 'Operation failed');
 
       setMessage({ type: 'success', text: data.message });
-      setUploadData({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0 });
+      setUploadData({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '' });
       fetchUserData();
       setTimeout(() => setView('dashboard'), 2000);
     } catch (err: any) {
@@ -1420,6 +1437,23 @@ export default function App() {
                       </div>
                     </div>
 
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Verification Image</label>
+                      <div className="relative">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-500/10 file:text-emerald-400 hover:file:bg-emerald-500/20"
+                        />
+                      </div>
+                      {uploadData.image_url && (
+                        <div className="mt-4">
+                          <img src={uploadData.image_url} alt="Waste Verification" className="w-full h-48 object-cover rounded-xl border border-white/10" />
+                        </div>
+                      )}
+                    </div>
+
                     {message && (
                       <div className={`p-4 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                         {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
@@ -1602,7 +1636,9 @@ export default function App() {
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Value</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Carbon Reduction</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Status</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">MRV Status</th>
+                        {['citizen', 'fpo', 'regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">MRV Status</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -1621,17 +1657,19 @@ export default function App() {
                               {record.status}
                             </span>
                           </td>
-                          <td className="p-4">
-                            {record.mrv_status && (
-                              <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase tracking-tighter border ${
-                                record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                record.mrv_status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                              }`}>
-                                {record.mrv_status}
-                              </span>
-                            )}
-                          </td>
+                          {['citizen', 'fpo', 'regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
+                            <td className="p-4">
+                              {record.mrv_status && (
+                                <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase tracking-tighter border ${
+                                  record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  record.mrv_status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                  'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                                }`}>
+                                  {record.mrv_status}
+                                </span>
+                              )}
+                            </td>
+                          )}
                         </tr>
                       ))}
                       {history.filter(record => historyFilter === 'all' || record.status === historyFilter).length === 0 && (

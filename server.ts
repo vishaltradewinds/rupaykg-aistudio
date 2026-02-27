@@ -111,7 +111,7 @@ async function startServer() {
   });
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), (req: any, res) => {
-    const { weight_kg, waste_type, village, geo_lat, geo_long } = req.body;
+    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url } = req.body;
     
     const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
     const base_value = weight_kg * wasteConfig.value;
@@ -127,6 +127,7 @@ async function startServer() {
       village,
       geo_lat,
       geo_long,
+      image_url,
       status: "pending_pickup",
       mrv_status: "pending", // MRV Status: pending, verified, rejected
       base_value,
@@ -243,6 +244,15 @@ async function startServer() {
     } else if (req.user.role === "processor") {
       userRecords = records.filter(r => r.processor_id === req.user.id || r.status === "in_transit");
     }
+
+    // Hide MRV status from non-citizens and non-admins
+    if (!["citizen", "fpo", "regulator", "state_admin", "super_admin"].includes(req.user.role)) {
+      userRecords = userRecords.map(r => {
+        const { mrv_status, ...rest } = r;
+        return rest;
+      });
+    }
+
     res.json(userRecords);
   });
 
