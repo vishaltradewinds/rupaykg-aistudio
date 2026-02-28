@@ -136,7 +136,7 @@ async function startServer() {
   });
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), (req: any, res) => {
-    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url } = req.body;
+    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context } = req.body;
     
     const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
     const base_value = weight_kg * wasteConfig.value;
@@ -153,6 +153,7 @@ async function startServer() {
       geo_lat,
       geo_long,
       image_url,
+      context: context || "rural", // Default to rural if not provided
       status: "pending_pickup",
       mrv_status: "pending", // MRV Status: pending, verified, rejected
       base_value,
@@ -278,13 +279,19 @@ async function startServer() {
 
   // ---------------- COMMON ROUTES ----------------
   app.get("/api/history", auth(), (req: any, res) => {
+    const { context } = req.query;
     let userRecords = records;
+    
+    if (context && context !== 'all') {
+      userRecords = userRecords.filter(r => r.context === context);
+    }
+
     if (req.user.role === "citizen" || req.user.role === "fpo") {
-      userRecords = records.filter(r => r.citizen_id === req.user.id);
+      userRecords = userRecords.filter(r => r.citizen_id === req.user.id);
     } else if (req.user.role === "aggregator") {
-      userRecords = records.filter(r => r.aggregator_id === req.user.id || r.status === "pending_pickup");
+      userRecords = userRecords.filter(r => r.aggregator_id === req.user.id || r.status === "pending_pickup");
     } else if (req.user.role === "processor") {
-      userRecords = records.filter(r => r.processor_id === req.user.id || r.status === "in_transit");
+      userRecords = userRecords.filter(r => r.processor_id === req.user.id || r.status === "in_transit");
     }
 
     // Hide MRV status from non-citizens and non-admins
@@ -367,12 +374,18 @@ async function startServer() {
   // SERIES A KPI ENDPOINT
   // ================================
   app.get("/api/admin/kpi", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
-    const total_waste = records.length;
-    const processed = records.filter(r => r.status === "processed").length;
+    const { context } = req.query;
+    let filteredRecords = records;
+    if (context && context !== 'all') {
+      filteredRecords = filteredRecords.filter(r => r.context === context);
+    }
+
+    const total_waste = filteredRecords.length;
+    const processed = filteredRecords.filter(r => r.status === "processed").length;
     const total_users = users.length;
     
     // Calculate total wallet disbursed (sum of all potential_carbon_value of verified records)
-    const total_wallet = records.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0);
+    const total_wallet = filteredRecords.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0);
 
     res.json({
         total_waste_events: total_waste,
@@ -386,9 +399,15 @@ async function startServer() {
   // WARD LEVEL GOVERNMENT ANALYTICS
   // ================================
   app.get("/api/municipal/ward-analytics", auth(["municipal_admin", "state_admin", "super_admin"]), (req: any, res) => {
+    const { context } = req.query;
     const wardData: Record<string, { _id: string, total_weight: number, count: number }> = {};
     
-    records.forEach(r => {
+    let filteredRecords = records;
+    if (context && context !== 'all') {
+      filteredRecords = filteredRecords.filter(r => r.context === context);
+    }
+
+    filteredRecords.forEach(r => {
       const ward = r.village || "Unknown";
       if (!wardData[ward]) {
         wardData[ward] = { _id: ward, total_weight: 0, count: 0 };
@@ -404,20 +423,33 @@ async function startServer() {
   // FRAUD HEATMAP DATA
   // ================================
   app.get("/api/admin/fraud-map", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
-    const flagged = records.filter(r => r.mrv_status === "rejected" || r.status === "flagged");
-    res.json({ flagged_events: flagged });
+    const { context } = req.query;
+    let filteredRecords = records.filter(r => r.mrv_status === "rejected" || r.status === "flagged");
+    
+    if (context && context !== 'all') {
+      filteredRecords = filteredRecords.filter(r => r.context === context);
+    }
+
+    res.json({ flagged_events: filteredRecords });
   });
 
   // ================================
   // CARBON POOL STATUS
   // ================================
   app.get("/api/carbon/pool", auth(["carbon_buyer", "regulator", "super_admin", "csr_partner", "epr_partner"]), (req: any, res) => {
-    const total_minted = records.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    const { context } = req.query;
+    let filteredRecords = records.filter(r => r.mrv_status === "verified");
+    
+    if (context && context !== 'all') {
+      filteredRecords = filteredRecords.filter(r => r.context === context);
+    }
+
+    const total_minted = filteredRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
     res.json({ total_carbon_units_minted: total_minted });
   });
 
   app.get("/api/admin/dashboard", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
-    const { role } = req.query;
+    const { role, context } = req.query;
     
     let filteredUsers = users;
     if (role && role !== 'all') {
@@ -425,15 +457,19 @@ async function startServer() {
     }
     
     let filteredRecords = records;
+    if (context && context !== 'all') {
+      filteredRecords = filteredRecords.filter(r => r.context === context);
+    }
+
     if (role && role !== 'all') {
       if (role === 'citizen' || role === 'fpo') {
-        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.citizen_id));
+        filteredRecords = filteredRecords.filter(r => filteredUsers.some(u => u.id === r.citizen_id));
       } else if (role === 'aggregator') {
-        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.aggregator_id));
+        filteredRecords = filteredRecords.filter(r => filteredUsers.some(u => u.id === r.aggregator_id));
       } else if (role === 'processor') {
-        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.processor_id));
+        filteredRecords = filteredRecords.filter(r => filteredUsers.some(u => u.id === r.processor_id));
       } else if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(role)) {
-        filteredRecords = records.filter(r => filteredUsers.some(u => u.id === r.purchased_by));
+        filteredRecords = filteredRecords.filter(r => filteredUsers.some(u => u.id === r.purchased_by));
       } else {
         filteredRecords = [];
       }

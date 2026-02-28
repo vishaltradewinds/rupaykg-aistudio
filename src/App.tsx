@@ -325,7 +325,7 @@ export default function App() {
     if (token) {
       fetchUserData();
     }
-  }, [token, adminRoleFilter]);
+  }, [token, adminRoleFilter, operatingContext]);
 
   useEffect(() => {
     const checkDbStatus = async () => {
@@ -440,14 +440,14 @@ export default function App() {
       }
 
       // 3. Fetch history
-      const historyRes = await fetch('/api/history', { headers: { 'Authorization': `Bearer ${token}` } });
+      const historyRes = await fetch(`/api/history?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
       if (historyRes.ok) {
         const historyData = await historyRes.json();
         setHistory(historyData);
       }
 
       // 4. Fetch admin stats
-      const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}&context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setAdminStats(statsData);
@@ -485,10 +485,10 @@ export default function App() {
 
       // 8. Fetch Series A / Admin KPI data
       if (['super_admin', 'state_admin', 'regulator'].includes(currentUser?.role || '')) {
-        const kpiRes = await fetch('/api/admin/kpi', { headers: { 'Authorization': `Bearer ${token}` } });
+        const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) setAdminKpi(await kpiRes.json());
 
-        const fraudRes = await fetch('/api/admin/fraud-map', { headers: { 'Authorization': `Bearer ${token}` } });
+        const fraudRes = await fetch(`/api/admin/fraud-map?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (fraudRes.ok) {
           const fraudData = await fraudRes.json();
           setFraudMap(fraudData.flagged_events);
@@ -497,7 +497,7 @@ export default function App() {
 
       // 9. Fetch Municipal Analytics
       if (['municipal_admin', 'state_admin', 'super_admin'].includes(currentUser?.role || '')) {
-        const wardRes = await fetch('/api/municipal/ward-analytics', { headers: { 'Authorization': `Bearer ${token}` } });
+        const wardRes = await fetch(`/api/municipal/ward-analytics?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (wardRes.ok) {
           const wardData = await wardRes.json();
           setWardAnalytics(wardData.ward_data);
@@ -506,7 +506,7 @@ export default function App() {
 
       // 10. Fetch Carbon Pool
       if (['carbon_buyer', 'regulator', 'super_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
-        const poolRes = await fetch('/api/carbon/pool', { headers: { 'Authorization': `Bearer ${token}` } });
+        const poolRes = await fetch(`/api/carbon/pool?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (poolRes.ok) setCarbonPool(await poolRes.json());
       }
     } catch (err) {
@@ -579,7 +579,8 @@ export default function App() {
       const endpoint = '/api/citizen/upload';
       const payload = {
         ...uploadData,
-        weight_kg: parseFloat(uploadData.weight_kg)
+        weight_kg: parseFloat(uploadData.weight_kg),
+        context: operatingContext
       };
 
       const res = await fetch(endpoint, {
