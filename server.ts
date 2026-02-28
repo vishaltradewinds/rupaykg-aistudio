@@ -453,7 +453,11 @@ async function startServer() {
     
     let filteredUsers = users;
     if (role && role !== 'all') {
-      filteredUsers = users.filter(u => u.role === role);
+      if (role === 'citizen' || role === 'fpo') {
+        filteredUsers = users.filter(u => u.role === 'citizen' || u.role === 'fpo');
+      } else {
+        filteredUsers = users.filter(u => u.role === role);
+      }
     }
     
     let filteredRecords = records;

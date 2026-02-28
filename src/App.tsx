@@ -305,7 +305,9 @@ export default function App() {
       waste: 'MSW',
       analytics: 'Ward Analytics',
       viewTitle: 'Ward-Level Analytics',
-      allowedCategories: ["Municipal", "Plastics", "Metals", "E-Waste", "Textiles", "Hazardous", "Construction", "Industrial"]
+      citizenLabel: 'Citizen (MSW Generator)',
+      allowedCategories: ["Municipal", "Plastics", "Metals", "E-Waste", "Textiles", "Hazardous", "Construction", "Industrial"],
+      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin']
     },
     rural: {
       anchor: 'Gram Panchayat',
@@ -313,9 +315,17 @@ export default function App() {
       waste: 'Biomass',
       analytics: 'Village Analytics',
       viewTitle: 'Village-Level Analytics',
-      allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"]
+      citizenLabel: 'Farmer / FPO (Biomass Generator)',
+      allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"],
+      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin']
     }
   }[operatingContext];
+
+  useEffect(() => {
+    if (!labels.allowedRoles.includes(formData.role)) {
+      setFormData(prev => ({ ...prev, role: labels.allowedRoles[0] }));
+    }
+  }, [operatingContext]);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -1029,6 +1039,26 @@ export default function App() {
           </div>
 
           <Card>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex gap-2 p-1 bg-white/5 rounded-xl">
+                <button 
+                  onClick={() => setOperatingContext('urban')}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                >
+                  URBAN
+                </button>
+                <button 
+                  onClick={() => setOperatingContext('rural')}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                >
+                  RURAL
+                </button>
+              </div>
+              <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold">
+                Context: {operatingContext}
+              </div>
+            </div>
+
             <div className="flex gap-4 mb-8 p-1 bg-white/5 rounded-xl">
               <button 
                 onClick={() => setAuthMode('login')}
@@ -1065,17 +1095,16 @@ export default function App() {
                       value={formData.role}
                       onChange={e => setFormData({...formData, role: e.target.value})}
                     >
-                      <option value="citizen" className="bg-[#0A0A0B]">Citizen (Waste Generator)</option>
-                      <option value="fpo" className="bg-[#0A0A0B]">FPO (Farmer Producer Org)</option>
-                      <option value="aggregator" className="bg-[#0A0A0B]">Aggregator (Collection & Transport)</option>
-                      <option value="processor" className="bg-[#0A0A0B]">Processor (Recycler)</option>
-                      <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partner</option>
-                      <option value="epr_partner" className="bg-[#0A0A0B]">EPR Partner</option>
-                      <option value="municipal_admin" className="bg-[#0A0A0B]">Municipal Body</option>
-                      <option value="state_admin" className="bg-[#0A0A0B]">State Admin</option>
-                      <option value="carbon_buyer" className="bg-[#0A0A0B]">Carbon Buyer</option>
-                      <option value="regulator" className="bg-[#0A0A0B]">National Regulator</option>
-                      <option value="super_admin" className="bg-[#0A0A0B]">Super Admin</option>
+                      {labels.allowedRoles.includes('citizen') && <option value="citizen" className="bg-[#0A0A0B]">{labels.citizenLabel}</option>}
+                      {labels.allowedRoles.includes('aggregator') && <option value="aggregator" className="bg-[#0A0A0B]">Aggregator (Collection & Transport)</option>}
+                      {labels.allowedRoles.includes('processor') && <option value="processor" className="bg-[#0A0A0B]">Processor (Recycler)</option>}
+                      {labels.allowedRoles.includes('csr_partner') && <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partner</option>}
+                      {labels.allowedRoles.includes('epr_partner') && <option value="epr_partner" className="bg-[#0A0A0B]">EPR Partner</option>}
+                      {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[#0A0A0B]">{labels.anchor} Admin</option>}
+                      {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[#0A0A0B]">State Admin</option>}
+                      {labels.allowedRoles.includes('carbon_buyer') && <option value="carbon_buyer" className="bg-[#0A0A0B]">Carbon Buyer</option>}
+                      {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[#0A0A0B]">National Regulator</option>}
+                      {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[#0A0A0B]">Super Admin</option>}
                     </select>
                   </div>
                   
@@ -1398,8 +1427,7 @@ export default function App() {
                       className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
                     >
                       <option value="all" className="bg-[#0A0A0B]">All Roles</option>
-                      <option value="citizen" className="bg-[#0A0A0B]">Citizens</option>
-                      <option value="fpo" className="bg-[#0A0A0B]">FPOs</option>
+                      <option value="citizen" className="bg-[#0A0A0B]">{operatingContext === 'urban' ? 'Citizens' : 'Farmers / FPOs'}</option>
                       <option value="aggregator" className="bg-[#0A0A0B]">Aggregators</option>
                       <option value="processor" className="bg-[#0A0A0B]">Processors</option>
                       <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partners</option>
