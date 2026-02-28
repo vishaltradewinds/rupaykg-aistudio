@@ -12,7 +12,7 @@ async function startServer() {
 
   // MUST run on port 3000 in this environment
   const PORT = 3000; 
-  const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/rupaykg";
+  const MONGO_URI = process.env.MONGO_URI;
   const INTERNAL_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || "super_internal_token";
 
   // Ensure public.pem and private.pem exist for RS256
@@ -30,13 +30,38 @@ async function startServer() {
   const publicKey = fs.readFileSync("./public.pem", "utf8");
   const privateKey = fs.readFileSync("./private.pem", "utf8");
 
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log("Connected to MongoDB");
-  } catch (err: any) {
-    console.log("MongoDB connection skipped or failed:", err.message);
-    console.log("Using in-memory fallback for demo purposes.");
+  let dbStatus = "disconnected";
+  let dbError = "";
+
+  async function connectDB() {
+    if (MONGO_URI) {
+      try {
+        dbStatus = "connecting";
+        await mongoose.connect(MONGO_URI);
+        dbStatus = "connected";
+        dbError = "";
+        console.log("Connected to MongoDB");
+      } catch (err: any) {
+        dbStatus = "failed";
+        dbError = err.message;
+        console.log("MongoDB connection failed:", err.message);
+      }
+    } else {
+      dbStatus = "no_uri";
+      console.log("No MONGO_URI provided. Using in-memory fallback for demo purposes.");
+    }
   }
+
+  await connectDB();
+
+  app.get("/api/db-status", (req, res) => {
+    res.json({ status: dbStatus, error: dbError });
+  });
+
+  app.post("/api/db-retry", async (req, res) => {
+    await connectDB();
+    res.json({ status: dbStatus, error: dbError });
+  });
 
   // --- IN-MEMORY FALLBACK DB ---
   const users: any[] = [];

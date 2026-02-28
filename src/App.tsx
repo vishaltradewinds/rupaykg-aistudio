@@ -23,23 +23,13 @@ import {
   Sprout,
   Zap,
   Layers,
-  Cpu
+  Cpu,
+  AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
 import { WASTE_TYPES, WASTE_CATEGORIES } from './constants';
 
 // Fix Leaflet marker icon issue
@@ -266,12 +256,47 @@ export default function App() {
   const [availableCredits, setAvailableCredits] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [dbStatus, setDbStatus] = useState<{ status: string, error: string } | null>(null);
 
   useEffect(() => {
     if (token) {
       fetchUserData();
     }
   }, [token, adminRoleFilter]);
+
+  useEffect(() => {
+    const checkDbStatus = async () => {
+      try {
+        const res = await fetch('/api/db-status');
+        if (res.ok) {
+          const data = await res.json();
+          setDbStatus(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch DB status", err);
+      }
+    };
+    checkDbStatus();
+  }, []);
+
+  const handleRetryDb = async () => {
+    try {
+      setDbStatus(prev => prev ? { ...prev, status: 'connecting' } : null);
+      const res = await fetch('/api/db-retry', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setDbStatus(data);
+        if (data.status === 'connected') {
+          setMessage({ type: 'success', text: 'Successfully connected to MongoDB' });
+        } else if (data.status === 'failed') {
+          setMessage({ type: 'error', text: `Failed to connect: ${data.error}` });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to retry DB connection", err);
+      setMessage({ type: 'error', text: 'Failed to retry database connection' });
+    }
+  };
 
   useEffect(() => {
     if (view === 'upload' && (user?.role === 'citizen' || user?.role === 'fpo')) {
@@ -302,6 +327,23 @@ export default function App() {
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
+
+  const wasteDistributionData = React.useMemo(() => {
+    const distribution: Record<string, number> = {};
+    history.forEach(record => {
+      if (!distribution[record.waste_type]) {
+        distribution[record.waste_type] = 0;
+      }
+      distribution[record.waste_type] += record.weight_kg;
+    });
+    
+    return Object.entries(distribution).map(([name, value]) => ({
+      name,
+      value: Number(value.toFixed(1))
+    }));
+  }, [history]);
+
+  const PIE_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6'];
 
   const fetchUserData = async () => {
     try {
@@ -1148,6 +1190,29 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
+              {dbStatus?.status === 'failed' && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-500/20 text-red-400 rounded-xl">
+                      <AlertTriangle size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-red-400 font-semibold">Database Connection Failed</h3>
+                      <p className="text-sm text-red-400/80 mt-1">
+                        {dbStatus.error || "Could not connect to MongoDB. Using in-memory fallback for demo purposes."}
+                      </p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleRetryDb}
+                    disabled={dbStatus.status === 'connecting'}
+                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {dbStatus.status === 'connecting' ? 'Connecting...' : 'Retry Connection'}
+                  </button>
+                </div>
+              )}
+
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label="Carbon Offset" value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" />
@@ -1213,6 +1278,41 @@ export default function App() {
                     <Stat label="Total Value" value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
                   </div>
                 </div>
+              )}
+
+              {/* Waste Distribution Chart */}
+              {wasteDistributionData.length > 0 && (
+                <Card>
+                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                    <Leaf size={18} className="text-emerald-400" />
+                    Waste Distribution
+                  </h3>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={wasteDistributionData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {wasteDistributionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip 
+                          contentStyle={{ backgroundColor: '#0A0A0B', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                          itemStyle={{ color: '#fff' }}
+                          formatter={(value: number) => [`${value} kg`, 'Weight']}
+                        />
+                        <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
               )}
 
               {/* Shared Recent Activity & Climate Impact for Citizen, FPO, Aggregator, Processor */}

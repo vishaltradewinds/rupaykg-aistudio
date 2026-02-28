@@ -1,5 +1,7 @@
 {
-  "name": "RupayKg Circular Economy OS",
+  "name": "RupayKg Circular Economy Engine",
   "description": "Sovereign-grade biomass waste engine for rural circular economies, converting waste to climate value.",
-  "requestFramePermissions": ["geolocation"]
+  "requestFramePermissions": [
+    "geolocation"
+  ]
 }
