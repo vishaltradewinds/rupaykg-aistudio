@@ -25,7 +25,8 @@ import {
   Layers,
   Cpu,
   AlertTriangle,
-  Map
+  Map,
+  BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -231,7 +232,7 @@ const BiomassMap = ({ records }: { records: BiomassRecord[] }) => {
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis'>('dashboard');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
   
@@ -1196,6 +1197,13 @@ export default function App() {
               <span className="hidden md:block font-medium">Carbon Market</span>
             </button>
           )}
+          <button 
+            onClick={() => setView('genesis')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <BookOpen size={20} />
+            <span className="hidden md:block font-medium">Genesis</span>
+          </button>
         </div>
 
         <button 
@@ -1218,6 +1226,7 @@ export default function App() {
               {view === 'history' && 'Transaction Ledger'}
               {view === 'admin' && 'National Dashboard'}
               {view === 'municipal' && 'Ward-Level Analytics'}
+              {view === 'genesis' && 'Foundational Doctrine'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               Welcome back, {user?.name || 'Citizen'}
@@ -2198,6 +2207,209 @@ export default function App() {
                   ))}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {view === 'genesis' && (
+            <motion.div 
+              key="genesis"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="max-w-5xl mx-auto space-y-12 pb-20"
+            >
+              {/* Hero Section */}
+              <section className="text-center space-y-4 py-12">
+                <h1 className="text-6xl font-black tracking-tighter text-emerald-500">GENESIS</h1>
+                <p className="text-xl text-white/60 max-w-2xl mx-auto">
+                  The Foundational Structure and Operating Doctrine of RupayKg
+                </p>
+              </section>
+
+              {/* I. Introduction */}
+              <Card className="p-8 border-white/10 bg-white/5">
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <Shield className="text-emerald-400" /> I. Introduction
+                </h2>
+                <div className="space-y-4 text-white/70 leading-relaxed">
+                  <p>
+                    RupayKg has been established as a <strong>Unified Waste-to-Carbon Digital Operating System</strong> designed to support India’s transition toward a compliance-based carbon market.
+                  </p>
+                  <p>
+                    The platform addresses a structural gap in India’s carbon ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade carbon supply.
+                  </p>
+                  <p>
+                    RupayKg is not structured as a project developer, carbon trader, or recycling entity. It is an <strong>infrastructure layer</strong> designed to operate across urban and rural administrative frameworks without architectural duplication.
+                  </p>
+                </div>
+              </Card>
+
+              {/* II. Unified Operating System Model */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card className="p-8 border-white/10 bg-white/5">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Layers className="text-emerald-400" /> II. Unified Operating System Model
+                  </h2>
+                  <div className="overflow-hidden rounded-xl border border-white/10">
+                    <table className="w-full text-left">
+                      <thead className="bg-white/10">
+                        <tr>
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">Context</th>
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">Anchor</th>
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">Category</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        <tr>
+                          <td className="p-4 font-bold">Urban</td>
+                          <td className="p-4 text-white/60">Municipal Corp + Ward</td>
+                          <td className="p-4 text-emerald-400">MSW</td>
+                        </tr>
+                        <tr>
+                          <td className="p-4 font-bold">Rural</td>
+                          <td className="p-4 text-white/60">Gram Panchayat + Village</td>
+                          <td className="p-4 text-emerald-400">Biomass</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-4 text-sm text-white/40 italic">
+                    * All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.
+                  </p>
+                </Card>
+
+                <Card className="p-8 border-white/10 bg-white/5">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <User className="text-emerald-400" /> III. Unified Stakeholder Architecture
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Waste Generator", "Aggregator", "Processor", 
+                      "Administrative Authority", "Producers (EPR)", 
+                      "CSR Contributors", "Carbon Buyers", "Regulator"
+                    ].map((s, i) => (
+                      <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-sm border border-white/10">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-6 text-sm text-white/60">
+                    The <strong>Aggregator</strong> is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.
+                  </p>
+                </Card>
+              </div>
+
+              {/* IV & V */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card className="p-8 border-white/10 bg-white/5">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <Zap className="text-emerald-400" /> IV. Carbon Origination
+                  </h2>
+                  <ul className="space-y-3 text-white/70">
+                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Methane avoidance through diversion</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Biomass-based fossil substitution</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Recycling substitution</li>
+                  </ul>
+                </Card>
+
+                <Card className="p-8 border-white/10 bg-white/5">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <TrendingUp className="text-emerald-400" /> V. Multi-Rail Architecture
+                  </h2>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["Recycler Rail", "CSR Rail", "EPR Rail", "Governance Layer", "Carbon Rail"].map((r, i) => (
+                      <div key={i} className="p-2 bg-white/5 rounded border border-white/5 text-xs text-center">
+                        {r}
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+
+              {/* VI & VII */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card className="p-8 border-white/10 bg-white/5 border-l-4 border-l-emerald-500">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <Scale className="text-emerald-400" /> VI. Regulator Sovereignty
+                  </h2>
+                  <p className="text-white/70 text-sm leading-relaxed">
+                    Carbon issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national carbon governance frameworks.
+                  </p>
+                </Card>
+
+                <Card className="p-8 border-emerald-500/20 bg-emerald-500/5">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <Activity className="text-emerald-400" /> VII. Strategic Position
+                  </h2>
+                  <p className="text-lg font-medium text-emerald-400 italic">
+                    "India’s Unified Waste-to-Carbon Infrastructure Layer for the Compliance Carbon Era."
+                  </p>
+                </Card>
+              </div>
+
+              {/* Founder's Note */}
+              <section className="bg-white/5 border border-white/10 rounded-3xl p-12 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                  <Leaf size={200} />
+                </div>
+                <div className="relative z-10 max-w-3xl">
+                  <h2 className="text-3xl font-black mb-8 italic">Founder's Note</h2>
+                  <div className="space-y-6 text-xl text-white/80 font-light leading-relaxed">
+                    <p>When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated carbon value?</p>
+                    <p>India is entering a compliance carbon era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.</p>
+                    <p>RupayKg was built to unify them. Not as a carbon trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.</p>
+                    <p className="text-emerald-400 font-bold">Waste is no longer disposal. It is governance-linked climate infrastructure.</p>
+                  </div>
+                  <p className="mt-12 font-bold text-white/40 uppercase tracking-widest">— Founder, RupayKg</p>
+                </div>
+              </section>
+
+              {/* Constitutional Declaration */}
+              <section className="border-2 border-white/10 rounded-3xl p-12 bg-white/[0.02] font-serif">
+                <div className="text-center mb-12">
+                  <h2 className="text-sm uppercase tracking-[0.5em] text-white/40 mb-4">Legally Styled</h2>
+                  <h3 className="text-4xl font-bold">DECLARATION OF FOUNDATIONAL STRUCTURE</h3>
+                  <div className="w-24 h-1 bg-emerald-500 mx-auto mt-6"></div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-sm text-white/60">
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-bold text-white mb-2">Article I — Unified Operating System</h4>
+                      <p>RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white mb-2">Article II — Unified Stakeholder Doctrine</h4>
+                      <p>The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, Carbon Buyers, Regulator.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white mb-2">Article III — Waste Classification</h4>
+                      <p>Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.</p>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-bold text-white mb-2">Article IV — Carbon Engine</h4>
+                      <p>All emission reductions shall be processed through a single carbon calculation engine with event-level MRV validation.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white mb-2">Article V — Rail Separation</h4>
+                      <p>RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, Carbon issuance. Double counting is prohibited.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white mb-2">Article VI — Regulator Sovereignty</h4>
+                      <p>Carbon mint authority shall remain under regulator control. RupayKg shall not independently issue carbon credits.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-12 pt-12 border-t border-white/10 text-center">
+                  <p className="text-emerald-400 font-bold text-xl">Institutional Identity</p>
+                  <p className="text-white/40 mt-2 max-w-2xl mx-auto">
+                    RupayKg is hereby defined as: A Unified Waste-to-Carbon Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned carbon origination capability.
+                  </p>
+                </div>
+              </section>
             </motion.div>
           )}
 
