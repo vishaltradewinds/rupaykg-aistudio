@@ -229,6 +229,37 @@ const BiomassMap = ({ records }: { records: BiomassRecord[] }) => {
   );
 };
 
+const FraudMap = ({ alerts, subLabel }: { alerts: any[], subLabel: string }) => {
+  const alertsWithCoords = alerts.filter(a => a.geo_lat && a.geo_long);
+  const center: [number, number] = alertsWithCoords.length > 0 
+    ? [alertsWithCoords[0].geo_lat, alertsWithCoords[0].geo_long]
+    : [20.5937, 78.9629];
+
+  return (
+    <Card className="p-0 overflow-hidden h-[400px] relative z-0 border-red-500/20">
+      <MapContainer center={center} zoom={5} style={{ height: '100%', width: '100%' }}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {alertsWithCoords.map((alert, i) => (
+          <Marker key={i} position={[alert.geo_lat, alert.geo_long]}>
+            <Popup>
+              <div className="text-black p-1">
+                <h4 className="font-bold border-b mb-1 text-red-600">FRAUD ALERT</h4>
+                <p className="text-xs">Type: <b>{alert.waste_type}</b></p>
+                <p className="text-xs">Weight: <b>{alert.weight_kg}kg</b></p>
+                <p className="text-xs">{subLabel}: <b>{alert.village}</b></p>
+                <p className="text-[10px] text-gray-500 mt-1 uppercase">ID: {alert.id}</p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </Card>
+  );
+};
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
@@ -265,6 +296,27 @@ export default function App() {
   const [mrvHistory, setMrvHistory] = useState<BiomassRecord[]>([]);
   const [mrvTab, setMrvTab] = useState<'pending' | 'history'>('pending');
   const [availableCredits, setAvailableCredits] = useState<any[]>([]);
+  const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
+
+  const labels = {
+    urban: {
+      anchor: 'Municipal Corporation',
+      sub: 'Ward',
+      waste: 'MSW',
+      analytics: 'Ward Analytics',
+      viewTitle: 'Ward-Level Analytics',
+      allowedCategories: ["Municipal", "Plastics", "Metals", "E-Waste", "Textiles", "Hazardous", "Construction", "Industrial"]
+    },
+    rural: {
+      anchor: 'Gram Panchayat',
+      sub: 'Village',
+      waste: 'Biomass',
+      analytics: 'Village Analytics',
+      viewTitle: 'Village-Level Analytics',
+      allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"]
+    }
+  }[operatingContext];
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [dbStatus, setDbStatus] = useState<{ status: string, error: string } | null>(null);
@@ -1185,7 +1237,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'municipal' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Map size={20} />
-              <span className="hidden md:block font-medium">Ward Analytics</span>
+              <span className="hidden md:block font-medium">{labels.analytics}</span>
             </button>
           )}
           {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
@@ -1221,11 +1273,11 @@ export default function App() {
           <div>
             <h2 className="text-3xl font-bold tracking-tight">
               {view === 'dashboard' && 'System Overview'}
-              {view === 'upload' && 'Biomass Intake'}
+              {view === 'upload' && `${labels.waste} Intake`}
               {view === 'tasks' && 'Operations Management'}
               {view === 'history' && 'Transaction Ledger'}
               {view === 'admin' && 'National Dashboard'}
-              {view === 'municipal' && 'Ward-Level Analytics'}
+              {view === 'municipal' && labels.viewTitle}
               {view === 'genesis' && 'Foundational Doctrine'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
@@ -1238,6 +1290,20 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
+              <button 
+                onClick={() => setOperatingContext('urban')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+              >
+                URBAN
+              </button>
+              <button 
+                onClick={() => setOperatingContext('rural')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+              >
+                RURAL
+              </button>
+            </div>
             {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '')) && (
               <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
                 <Wallet className="text-emerald-400" size={20} />
@@ -1285,7 +1351,7 @@ export default function App() {
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label="Carbon Offset" value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" />
-                  <Stat label="Total Biomass" value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" />
+                  <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" />
                   <Stat label="Total Earnings" value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" />
                   <Stat label="Community Rank" value="#12" icon={TrendingUp} color="purple" />
                 </div>
@@ -1313,7 +1379,7 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label="Total Investment" value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
                   <Stat label="Carbon Credits" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
-                  <Stat label="Biomass Diverted" value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="blue" />
+                  <Stat label={`${labels.waste} Diverted`} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="blue" />
                   <Stat label="ESG Score" value="A+" icon={ShieldCheck} color="purple" />
                 </div>
               )}
@@ -1516,7 +1582,7 @@ export default function App() {
                           value={uploadData.waste_type}
                           onChange={e => setUploadData({...uploadData, waste_type: e.target.value})}
                         >
-                          {WASTE_CATEGORIES.map(category => (
+                          {WASTE_CATEGORIES.filter(c => labels.allowedCategories.includes(c)).map(category => (
                             <optgroup key={category} label={category} className="bg-[#0A0A0B] text-emerald-400">
                               {WASTE_TYPES.filter(w => w.category === category).map(item => (
                                 <option key={item.type} value={item.type} className="bg-[#0A0A0B] text-white">{item.type}</option>
@@ -1528,13 +1594,13 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Village / Location</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{labels.sub} / Location</label>
                       <div className="relative">
                         <input 
                           type="text" 
                           required
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                          placeholder="Village Name"
+                          placeholder={`${labels.sub} Name`}
                           value={uploadData.village}
                           onChange={e => setUploadData({...uploadData, village: e.target.value})}
                         />
@@ -1801,7 +1867,7 @@ export default function App() {
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Timestamp</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Type</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Weight</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Village</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{labels.sub}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Value</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Carbon Reduction</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Status</th>
@@ -1988,7 +2054,7 @@ export default function App() {
                             <td className="p-4 font-mono text-xs text-white/60">{record.id}</td>
                             <td className="p-4">
                               <p className="font-medium">{record.weight_kg}kg {record.waste_type}</p>
-                              <p className="text-xs text-white/40">{record.village}</p>
+                              <p className="text-xs text-white/40">{labels.sub}: {record.village}</p>
                             </td>
                             <td className="p-4">
                               <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
@@ -2050,23 +2116,30 @@ export default function App() {
                     <AlertTriangle className="text-red-400" size={20} />
                     Fraud Alerts & Flagged Events
                   </h3>
-                  {fraudMap.length === 0 ? (
-                    <p className="text-white/40 text-sm">No flagged events detected.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {fraudMap.map((f, i) => (
-                        <div key={i} className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex justify-between items-center">
-                          <div>
-                            <p className="font-medium text-red-400">{f.waste_type} - {f.weight_kg}kg</p>
-                            <p className="text-xs text-red-400/60 flex items-center gap-1 mt-1">
-                              <MapPin size={12} /> {f.village}
-                            </p>
+                  <div className="space-y-6">
+                    {fraudMap.length === 0 ? (
+                      <p className="text-white/40 text-sm">No flagged events detected.</p>
+                    ) : (
+                      <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                        {fraudMap.map((f, i) => (
+                          <div key={i} className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-red-400">{f.waste_type} - {f.weight_kg}kg</p>
+                              <p className="text-xs text-red-400/60 flex items-center gap-1 mt-1">
+                                <MapPin size={12} /> {labels.sub}: {f.village}
+                              </p>
+                            </div>
+                            <span className="text-xs font-mono text-red-400/80">ID: {f.id}</span>
                           </div>
-                          <span className="text-xs font-mono text-red-400/80">ID: {f.id}</span>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="mt-4">
+                      <p className="text-xs uppercase tracking-widest text-white/40 mb-3">Geospatial Fraud Distribution</p>
+                      <FraudMap alerts={fraudMap} subLabel={labels.sub} />
                     </div>
-                  )}
+                  </div>
                 </Card>
                 
                 <Card className="p-6 border-white/5 bg-white/5">
@@ -2100,7 +2173,7 @@ export default function App() {
                       </div>
                       <div>
                         <h3 className="text-lg font-bold">{w._id}</h3>
-                        <p className="text-xs text-white/40 uppercase tracking-widest">Ward / Village</p>
+                        <p className="text-xs text-white/40 uppercase tracking-widest">{labels.sub}</p>
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -2220,6 +2293,9 @@ export default function App() {
             >
               {/* Hero Section */}
               <section className="text-center space-y-4 py-12">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">
+                  <Activity size={12} /> Currently Active: {operatingContext} Context ({labels.anchor})
+                </div>
                 <h1 className="text-6xl font-black tracking-tighter text-emerald-500">GENESIS</h1>
                 <p className="text-xl text-white/60 max-w-2xl mx-auto">
                   The Foundational Structure and Operating Doctrine of RupayKg
