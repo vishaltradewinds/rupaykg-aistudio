@@ -363,6 +363,59 @@ async function startServer() {
   });
 
   // ---------------- ADMIN ROUTES ----------------
+  // ================================
+  // SERIES A KPI ENDPOINT
+  // ================================
+  app.get("/api/admin/kpi", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
+    const total_waste = records.length;
+    const processed = records.filter(r => r.status === "processed").length;
+    const total_users = users.length;
+    
+    // Calculate total wallet disbursed (sum of all potential_carbon_value of verified records)
+    const total_wallet = records.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0);
+
+    res.json({
+        total_waste_events: total_waste,
+        processed_events: processed,
+        total_users: total_users,
+        wallet_disbursed: total_wallet
+    });
+  });
+
+  // ================================
+  // WARD LEVEL GOVERNMENT ANALYTICS
+  // ================================
+  app.get("/api/municipal/ward-analytics", auth(["municipal_admin", "state_admin", "super_admin"]), (req: any, res) => {
+    const wardData: Record<string, { _id: string, total_weight: number, count: number }> = {};
+    
+    records.forEach(r => {
+      const ward = r.village || "Unknown";
+      if (!wardData[ward]) {
+        wardData[ward] = { _id: ward, total_weight: 0, count: 0 };
+      }
+      wardData[ward].total_weight += (r.weight_kg || 0);
+      wardData[ward].count += 1;
+    });
+
+    res.json({ ward_data: Object.values(wardData) });
+  });
+
+  // ================================
+  // FRAUD HEATMAP DATA
+  // ================================
+  app.get("/api/admin/fraud-map", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
+    const flagged = records.filter(r => r.mrv_status === "rejected" || r.status === "flagged");
+    res.json({ flagged_events: flagged });
+  });
+
+  // ================================
+  // CARBON POOL STATUS
+  // ================================
+  app.get("/api/carbon/pool", auth(["carbon_buyer", "regulator", "super_admin", "csr_partner", "epr_partner"]), (req: any, res) => {
+    const total_minted = records.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    res.json({ total_carbon_units_minted: total_minted });
+  });
+
   app.get("/api/admin/dashboard", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
     const { role } = req.query;
     

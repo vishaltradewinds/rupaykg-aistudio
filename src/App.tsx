@@ -24,7 +24,8 @@ import {
   Zap,
   Layers,
   Cpu,
-  AlertTriangle
+  AlertTriangle,
+  Map
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -254,6 +255,10 @@ export default function App() {
   const [historyFilter, setHistoryFilter] = useState<string>('all');
   const [adminRoleFilter, setAdminRoleFilter] = useState<string>('all');
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
+  const [adminKpi, setAdminKpi] = useState<any>({});
+  const [fraudMap, setFraudMap] = useState<any[]>([]);
+  const [carbonPool, setCarbonPool] = useState<any>({});
+  const [wardAnalytics, setWardAnalytics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
   const [mrvHistory, setMrvHistory] = useState<BiomassRecord[]>([]);
@@ -423,6 +428,33 @@ export default function App() {
       if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
         const creditsRes = await fetch('/api/partner/available-credits', { headers: { 'Authorization': `Bearer ${token}` } });
         if (creditsRes.ok) setAvailableCredits(await creditsRes.json());
+      }
+
+      // 8. Fetch Series A / Admin KPI data
+      if (['super_admin', 'state_admin', 'regulator'].includes(currentUser?.role || '')) {
+        const kpiRes = await fetch('/api/admin/kpi', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (kpiRes.ok) setAdminKpi(await kpiRes.json());
+
+        const fraudRes = await fetch('/api/admin/fraud-map', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (fraudRes.ok) {
+          const fraudData = await fraudRes.json();
+          setFraudMap(fraudData.flagged_events);
+        }
+      }
+
+      // 9. Fetch Municipal Analytics
+      if (['municipal_admin', 'state_admin', 'super_admin'].includes(currentUser?.role || '')) {
+        const wardRes = await fetch('/api/municipal/ward-analytics', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (wardRes.ok) {
+          const wardData = await wardRes.json();
+          setWardAnalytics(wardData.ward_data);
+        }
+      }
+
+      // 10. Fetch Carbon Pool
+      if (['carbon_buyer', 'regulator', 'super_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
+        const poolRes = await fetch('/api/carbon/pool', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (poolRes.ok) setCarbonPool(await poolRes.json());
       }
     } catch (err) {
       console.error(err);
@@ -1137,6 +1169,24 @@ export default function App() {
               <span className="hidden md:block font-medium">MRV Dashboard</span>
             </button>
           )}
+          {['super_admin', 'state_admin', 'regulator'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('admin')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'admin' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <BarChart3 size={20} />
+              <span className="hidden md:block font-medium">National KPI</span>
+            </button>
+          )}
+          {['municipal_admin', 'state_admin', 'super_admin'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('municipal')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'municipal' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <Map size={20} />
+              <span className="hidden md:block font-medium">Ward Analytics</span>
+            </button>
+          )}
           {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('partner')}
@@ -1166,6 +1216,8 @@ export default function App() {
               {view === 'upload' && 'Biomass Intake'}
               {view === 'tasks' && 'Operations Management'}
               {view === 'history' && 'Transaction Ledger'}
+              {view === 'admin' && 'National Dashboard'}
+              {view === 'municipal' && 'Ward-Level Analytics'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               Welcome back, {user?.name || 'Citizen'}
@@ -1953,6 +2005,113 @@ export default function App() {
                   </div>
                 </Card>
               )}
+            </motion.div>
+          )}
+
+          {view === 'admin' && ['super_admin', 'state_admin', 'regulator'].includes(user?.role || '') && (
+            <motion.div 
+              key="admin"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Waste Events</h4>
+                  <p className="text-3xl font-bold">{adminKpi.total_waste_events || 0}</p>
+                </Card>
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Processed Events</h4>
+                  <p className="text-3xl font-bold">{adminKpi.processed_events || 0}</p>
+                </Card>
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Users</h4>
+                  <p className="text-3xl font-bold">{adminKpi.total_users || 0}</p>
+                </Card>
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Wallet Disbursed</h4>
+                  <p className="text-3xl font-bold text-emerald-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <AlertTriangle className="text-red-400" size={20} />
+                    Fraud Alerts & Flagged Events
+                  </h3>
+                  {fraudMap.length === 0 ? (
+                    <p className="text-white/40 text-sm">No flagged events detected.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {fraudMap.map((f, i) => (
+                        <div key={i} className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex justify-between items-center">
+                          <div>
+                            <p className="font-medium text-red-400">{f.waste_type} - {f.weight_kg}kg</p>
+                            <p className="text-xs text-red-400/60 flex items-center gap-1 mt-1">
+                              <MapPin size={12} /> {f.village}
+                            </p>
+                          </div>
+                          <span className="text-xs font-mono text-red-400/80">ID: {f.id}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+                
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Globe className="text-cyan-400" size={20} />
+                    Carbon Pool Status
+                  </h3>
+                  <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5">
+                    <p className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Minted Carbon Units</p>
+                    <p className="text-5xl font-mono text-cyan-400">{carbonPool.total_carbon_units_minted?.toFixed(2) || 0} kg</p>
+                  </div>
+                </Card>
+              </div>
+            </motion.div>
+          )}
+
+          {view === 'municipal' && ['municipal_admin', 'state_admin', 'super_admin'].includes(user?.role || '') && (
+            <motion.div 
+              key="municipal"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {wardAnalytics.map((w, i) => (
+                  <Card key={i} className="p-6 border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
+                        <MapPin size={24} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold">{w._id}</h3>
+                        <p className="text-xs text-white/40 uppercase tracking-widest">Ward / Village</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-black/40 rounded-lg">
+                        <span className="text-sm text-white/60">Total Waste</span>
+                        <span className="font-mono font-bold">{w.total_weight.toFixed(2)} kg</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-black/40 rounded-lg">
+                        <span className="text-sm text-white/60">Total Events</span>
+                        <span className="font-mono font-bold">{w.count}</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {wardAnalytics.length === 0 && (
+                  <div className="col-span-full py-12 text-center">
+                    <p className="text-white/40">No ward data available.</p>
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 
