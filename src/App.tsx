@@ -352,6 +352,24 @@ export default function App() {
     checkDbStatus();
   }, []);
 
+  const seedDemoData = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/seed', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'Demo data seeded successfully' });
+        fetchUserData();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRetryDb = async () => {
     try {
       setDbStatus(prev => prev ? { ...prev, status: 'connecting' } : null);
@@ -1184,6 +1202,40 @@ export default function App() {
               >
                 {loading ? 'Processing...' : authMode === 'login' ? 'Access OS' : 'Create Account'}
               </button>
+
+              {authMode === 'login' && (
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <p className="text-xs uppercase tracking-widest text-white/40 mb-4 text-center font-bold">Quick Demo Access</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: operatingContext === 'urban' ? 'Citizen' : 'Farmer', role: 'citizen', phone: '9000000001' },
+                      { label: 'Aggregator', role: 'aggregator', phone: '9000000002' },
+                      { label: 'Processor', role: 'processor', phone: '9000000003' },
+                      { label: labels.anchor, role: 'municipal_admin', phone: '9000000004' },
+                      { label: 'State Admin', role: 'state_admin', phone: '9000000005' },
+                      { label: 'Carbon Buyer', role: 'carbon_buyer', phone: '9000000006' },
+                      { label: 'National Regulator', role: 'regulator', phone: '9000000007' }
+                    ].map((demo) => (
+                      <button
+                        key={demo.role}
+                        type="button"
+                        onClick={() => {
+                          setFormData({ ...formData, phone: demo.phone, password: 'password' });
+                          // Small delay to ensure state update before form submission
+                          setTimeout(() => {
+                            const form = document.querySelector('form');
+                            if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                          }, 100);
+                        }}
+                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold text-white/60 hover:text-white transition-all text-left flex items-center justify-between"
+                      >
+                        {demo.label}
+                        <ArrowRight size={10} className="opacity-40" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               <button 
                 type="button"
@@ -1421,19 +1473,29 @@ export default function App() {
                       <Activity size={18} className="text-emerald-400" />
                       Platform Statistics
                     </h3>
-                    <select 
-                      value={adminRoleFilter}
-                      onChange={(e) => setAdminRoleFilter(e.target.value)}
-                      className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
-                    >
-                      <option value="all" className="bg-[#0A0A0B]">All Roles</option>
-                      <option value="citizen" className="bg-[#0A0A0B]">{operatingContext === 'urban' ? 'Citizens' : 'Farmers / FPOs'}</option>
-                      <option value="aggregator" className="bg-[#0A0A0B]">Aggregators</option>
-                      <option value="processor" className="bg-[#0A0A0B]">Processors</option>
-                      <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partners</option>
-                      <option value="epr_partner" className="bg-[#0A0A0B]">EPR Partners</option>
-                      <option value="carbon_buyer" className="bg-[#0A0A0B]">Carbon Buyers</option>
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={seedDemoData}
+                        disabled={loading}
+                        className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/20 transition-all flex items-center gap-2"
+                      >
+                        <PlusCircle size={14} />
+                        Seed Demo Data
+                      </button>
+                      <select 
+                        value={adminRoleFilter}
+                        onChange={(e) => setAdminRoleFilter(e.target.value)}
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
+                      >
+                        <option value="all" className="bg-[#0A0A0B]">All Roles</option>
+                        <option value="citizen" className="bg-[#0A0A0B]">{operatingContext === 'urban' ? 'Citizens' : 'Farmers / FPOs'}</option>
+                        <option value="aggregator" className="bg-[#0A0A0B]">Aggregators</option>
+                        <option value="processor" className="bg-[#0A0A0B]">Processors</option>
+                        <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partners</option>
+                        <option value="epr_partner" className="bg-[#0A0A0B]">EPR Partners</option>
+                        <option value="carbon_buyer" className="bg-[#0A0A0B]">Carbon Buyers</option>
+                      </select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <Stat label="Total Users" value={adminStats.total_users} icon={User} color="blue" />

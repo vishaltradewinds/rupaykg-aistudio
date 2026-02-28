@@ -64,8 +64,19 @@ async function startServer() {
   });
 
   // --- IN-MEMORY FALLBACK DB ---
-  const users: any[] = [];
-  const records: any[] = [];
+  const users: any[] = [
+    { id: "demo_citizen", phone: "9000000001", password: "password", role: "citizen", name: "Ramesh Kumar", district: "Pune", state: "Maharashtra", wallet_balance: 1250.50 },
+    { id: "demo_aggregator", phone: "9000000002", password: "password", role: "aggregator", name: "Logistics Pro", organization_name: "Green Logistics Ltd", district: "Pune", state: "Maharashtra", wallet_balance: 5400.00 },
+    { id: "demo_processor", phone: "9000000003", password: "password", role: "processor", name: "Recycle Master", organization_name: "EcoProcessors Inc", district: "Pune", state: "Maharashtra", wallet_balance: 12000.00 },
+    { id: "demo_municipal", phone: "9000000004", password: "password", role: "municipal_admin", name: "Municipal Officer", organization_name: "Pune Municipal Corp", district: "Pune", state: "Maharashtra", wallet_balance: 0 },
+    { id: "demo_state", phone: "9000000005", password: "password", role: "state_admin", name: "State Secretary", organization_name: "Maharashtra Environment Dept", district: "Mumbai", state: "Maharashtra", wallet_balance: 0 },
+    { id: "demo_buyer", phone: "9000000006", password: "password", role: "carbon_buyer", name: "ESG Manager", organization_name: "Global Corp ESG", district: "Delhi", state: "Delhi", wallet_balance: 50000.00 },
+    { id: "demo_regulator", phone: "9000000007", password: "password", role: "regulator", name: "National Auditor", organization_name: "Central Pollution Control Board", district: "Delhi", state: "Delhi", wallet_balance: 0 }
+  ];
+  const records: any[] = [
+    { id: "REC1", citizen_id: "demo_citizen", weight_kg: 50, waste_type: "Agricultural", village: "Ambegaon", status: "processed", carbon_reduction_kg: 25, total_value: 750, context: "rural", timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), mrv_status: "verified" },
+    { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified" }
+  ];
   const logs: any[] = [];
 
   // ---------------- AUTH MIDDLEWARE ----------------
@@ -303,6 +314,42 @@ async function startServer() {
     }
 
     res.json(userRecords);
+  });
+
+  app.post("/api/admin/seed", auth(["super_admin", "state_admin", "municipal_admin"]), (req, res) => {
+    // Add some random records to make dashboards look good
+    const contexts = ["urban", "rural"];
+    const statuses = ["pending_pickup", "in_transit", "processed"];
+    const wasteTypes = WASTE_TYPES.map(w => w.type);
+    
+    for (let i = 0; i < 20; i++) {
+      const context = contexts[Math.floor(Math.random() * contexts.length)];
+      const waste_type = wasteTypes[Math.floor(Math.random() * wasteTypes.length)];
+      const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
+      const weight_kg = Math.floor(Math.random() * 100) + 10;
+      const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
+      const total_value = (weight_kg * wasteConfig.value) + (carbon_reduction_kg * 10);
+      
+      records.push({
+        id: "SEED" + i + Date.now(),
+        citizen_id: "demo_citizen",
+        aggregator_id: "demo_aggregator",
+        processor_id: "demo_processor",
+        weight_kg,
+        waste_type,
+        village: context === "urban" ? "Ward " + (Math.floor(Math.random() * 20) + 1) : "Village " + String.fromCharCode(65 + Math.floor(Math.random() * 10)),
+        geo_lat: 18.5204 + (Math.random() * 0.1),
+        geo_long: 73.8567 + (Math.random() * 0.1),
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        timestamp: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString(),
+        carbon_reduction_kg,
+        total_value,
+        context,
+        mrv_status: Math.random() > 0.3 ? "verified" : "pending"
+      });
+    }
+    
+    res.json({ message: "Seeded 20 records" });
   });
 
   // ---------------- PARTNER ROUTES ----------------
