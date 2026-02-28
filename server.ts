@@ -182,6 +182,21 @@ async function startServer() {
     res.json(pendingMRV);
   });
 
+  app.get("/api/mrv/history", auth(["regulator", "state_admin", "super_admin"]), (req: any, res) => {
+    const historyMRV = records
+      .filter(r => r.mrv_status === "verified" || r.mrv_status === "rejected")
+      .map(r => {
+        const verifier = users.find(u => u.id === r.mrv_verified_by);
+        return {
+          ...r,
+          mrv_verified_by_name: verifier ? verifier.name : "Unknown",
+          mrv_verified_by_role: verifier ? verifier.role : "Unknown"
+        };
+      })
+      .sort((a, b) => new Date(b.mrv_verified_at || 0).getTime() - new Date(a.mrv_verified_at || 0).getTime());
+    res.json(historyMRV);
+  });
+
   app.post("/api/mrv/verify", auth(["regulator", "state_admin", "super_admin"]), (req: any, res) => {
     const { record_id, status } = req.body; // status: 'verified' or 'rejected'
     const record = records.find(r => r.id === record_id);
@@ -190,6 +205,8 @@ async function startServer() {
     if (record.status !== "processed") return res.status(400).json({ error: "Waste must be processed before MRV verification" });
     
     record.mrv_status = status;
+    record.mrv_verified_by = req.user.id;
+    record.mrv_verified_at = new Date().toISOString();
     
     if (status === "verified") {
       const user = users.find(u => u.id === record.citizen_id);

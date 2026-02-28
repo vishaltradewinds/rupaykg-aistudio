@@ -58,6 +58,9 @@ interface BiomassRecord {
   timestamp: string;
   status: string;
   mrv_status?: string;
+  mrv_verified_by_name?: string;
+  mrv_verified_by_role?: string;
+  mrv_verified_at?: string;
   potential_carbon_value?: number;
   geo_lat: number;
   geo_long: number;
@@ -253,6 +256,8 @@ export default function App() {
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
+  const [mrvHistory, setMrvHistory] = useState<BiomassRecord[]>([]);
+  const [mrvTab, setMrvTab] = useState<'pending' | 'history'>('pending');
   const [availableCredits, setAvailableCredits] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -409,6 +414,9 @@ export default function App() {
       if (['regulator', 'state_admin', 'super_admin'].includes(currentUser?.role || '')) {
         const mrvRes = await fetch('/api/mrv/pending', { headers: { 'Authorization': `Bearer ${token}` } });
         if (mrvRes.ok) setMrvRecords(await mrvRes.json());
+        
+        const mrvHistRes = await fetch('/api/mrv/history', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (mrvHistRes.ok) setMrvHistory(await mrvHistRes.json());
       }
 
       // 7. Fetch available credits for partners
@@ -1794,14 +1802,24 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold">MRV Verification Dashboard</h2>
                   <p className="text-white/40 text-sm">Verify processed waste records to issue carbon credits.</p>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-xl border border-emerald-500/20">
-                  <ShieldCheck size={18} />
-                  <span className="font-bold">{mrvRecords.length} Pending</span>
+                <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+                  <button
+                    onClick={() => setMrvTab('pending')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mrvTab === 'pending' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
+                  >
+                    Pending ({mrvRecords.length})
+                  </button>
+                  <button
+                    onClick={() => setMrvTab('history')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mrvTab === 'history' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
+                  >
+                    History
+                  </button>
                 </div>
               </div>
 
@@ -1812,82 +1830,128 @@ export default function App() {
                 </div>
               )}
 
-              {mrvRecords.length === 0 ? (
-                <Card className="py-12 text-center border-dashed">
-                  <ShieldCheck size={48} className="mx-auto text-white/20 mb-4" />
-                  <p className="text-white/60 text-lg font-medium">No pending MRV records</p>
-                  <p className="text-white/40 text-sm mt-2">All processed waste has been verified.</p>
-                </Card>
+              {mrvTab === 'pending' ? (
+                mrvRecords.length === 0 ? (
+                  <Card className="py-12 text-center border-dashed">
+                    <ShieldCheck size={48} className="mx-auto text-white/20 mb-4" />
+                    <p className="text-white/60 text-lg font-medium">No pending MRV records</p>
+                    <p className="text-white/40 text-sm mt-2">All processed waste has been verified.</p>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {mrvRecords.map(record => (
+                      <Card key={record.id} className="border-cyan-500/20 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                          <Globe size={100} className="text-cyan-400" />
+                        </div>
+                        <div className="relative z-10">
+                          <div className="flex justify-between items-start mb-6">
+                            <div>
+                              <p className="text-[10px] font-mono text-white/40 mb-1">ID: {record.id}</p>
+                              <h4 className="font-bold text-lg">{record.weight_kg}kg {record.waste_type}</h4>
+                              <p className="text-sm text-white/60 flex items-center gap-1 mt-1">
+                                <MapPin size={12} /> {record.village}
+                              </p>
+                            </div>
+                            <span className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded uppercase font-bold border border-cyan-500/20">
+                              Pending MRV
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Carbon Reduction</p>
+                              <p className="text-lg font-mono text-cyan-400">{record.carbon_reduction_kg?.toFixed(2)} kg</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Credit Value</p>
+                              <p className="text-lg font-bold text-emerald-400">₹{record.potential_carbon_value?.toFixed(2)}</p>
+                            </div>
+                          </div>
+
+                          {record.geo_lat && record.geo_long && (
+                            <div className="mb-6">
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Location Verification</p>
+                              <iframe 
+                                width="100%" 
+                                height="120" 
+                                frameBorder="0" 
+                                scrolling="no" 
+                                marginHeight={0} 
+                                marginWidth={0} 
+                                src={`https://maps.google.com/maps?q=${record.geo_lat},${record.geo_long}&z=14&output=embed`}
+                                className="rounded-lg border border-white/5"
+                              ></iframe>
+                            </div>
+                          )}
+
+                          <div className="flex gap-3">
+                            <button 
+                              onClick={() => handleMRVAction(record.id, 'verified')}
+                              disabled={loading}
+                              className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <CheckCircle2 size={16} />
+                              Verify & Issue Credits
+                            </button>
+                            <button 
+                              onClick={() => handleMRVAction(record.id, 'rejected')}
+                              disabled={loading}
+                              className="px-4 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl text-sm transition-all flex items-center justify-center disabled:opacity-50"
+                              title="Reject MRV"
+                            >
+                              <AlertCircle size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {mrvRecords.map(record => (
-                    <Card key={record.id} className="border-cyan-500/20 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                        <Globe size={100} className="text-cyan-400" />
-                      </div>
-                      <div className="relative z-10">
-                        <div className="flex justify-between items-start mb-6">
-                          <div>
-                            <p className="text-[10px] font-mono text-white/40 mb-1">ID: {record.id}</p>
-                            <h4 className="font-bold text-lg">{record.weight_kg}kg {record.waste_type}</h4>
-                            <p className="text-sm text-white/60 flex items-center gap-1 mt-1">
-                              <MapPin size={12} /> {record.village}
-                            </p>
-                          </div>
-                          <span className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded uppercase font-bold border border-cyan-500/20">
-                            Pending MRV
-                          </span>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
-                          <div>
-                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Carbon Reduction</p>
-                            <p className="text-lg font-mono text-cyan-400">{record.carbon_reduction_kg?.toFixed(2)} kg</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Credit Value</p>
-                            <p className="text-lg font-bold text-emerald-400">₹{record.potential_carbon_value?.toFixed(2)}</p>
-                          </div>
-                        </div>
-
-                        {record.geo_lat && record.geo_long && (
-                          <div className="mb-6">
-                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Location Verification</p>
-                            <iframe 
-                              width="100%" 
-                              height="120" 
-                              frameBorder="0" 
-                              scrolling="no" 
-                              marginHeight={0} 
-                              marginWidth={0} 
-                              src={`https://maps.google.com/maps?q=${record.geo_lat},${record.geo_long}&z=14&output=embed`}
-                              className="rounded-lg border border-white/5"
-                            ></iframe>
-                          </div>
+                <Card className="p-0 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-white/5 text-white/60 border-b border-white/10">
+                        <tr>
+                          <th className="p-4 font-medium">Record ID</th>
+                          <th className="p-4 font-medium">Details</th>
+                          <th className="p-4 font-medium">Status</th>
+                          <th className="p-4 font-medium">Verified By</th>
+                          <th className="p-4 font-medium">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {mrvHistory.map(record => (
+                          <tr key={record.id} className="hover:bg-white/5 transition-colors">
+                            <td className="p-4 font-mono text-xs text-white/60">{record.id}</td>
+                            <td className="p-4">
+                              <p className="font-medium">{record.weight_kg}kg {record.waste_type}</p>
+                              <p className="text-xs text-white/40">{record.village}</p>
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                {record.mrv_status}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <p className="font-medium">{record.mrv_verified_by_name}</p>
+                              <p className="text-xs text-white/40 capitalize">{record.mrv_verified_by_role?.replace('_', ' ')}</p>
+                            </td>
+                            <td className="p-4 text-white/60">
+                              {record.mrv_verified_at ? new Date(record.mrv_verified_at).toLocaleString() : 'N/A'}
+                            </td>
+                          </tr>
+                        ))}
+                        {mrvHistory.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="p-8 text-center text-white/40">No MRV history found</td>
+                          </tr>
                         )}
-
-                        <div className="flex gap-3">
-                          <button 
-                            onClick={() => handleMRVAction(record.id, 'verified')}
-                            disabled={loading}
-                            className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                          >
-                            <CheckCircle2 size={16} />
-                            Verify & Issue Credits
-                          </button>
-                          <button 
-                            onClick={() => handleMRVAction(record.id, 'rejected')}
-                            disabled={loading}
-                            className="px-4 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl text-sm transition-all flex items-center justify-center disabled:opacity-50"
-                            title="Reject MRV"
-                          >
-                            <AlertCircle size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
               )}
             </motion.div>
           )}
