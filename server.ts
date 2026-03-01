@@ -565,6 +565,23 @@ async function startServer() {
     });
   });
 
+  // ================================
+  // KPI DASHBOARD
+  // ================================
+  app.get("/api/dashboard/kpi", auth(["super_admin", "state_admin", "municipal_admin", "aggregator"]), (req: any, res) => {
+    const total_farmers = users.filter(u => u.role === 'citizen' || u.role === 'fpo').length;
+    const total_events = records.length;
+    const total_biomass_tonnes = records.reduce((sum, r) => sum + (r.weight_kg || 0), 0) / 1000;
+    const total_carbon_estimate = records.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+
+    res.json({
+      total_farmers,
+      total_events,
+      total_biomass_tonnes: Number(total_biomass_tonnes.toFixed(2)),
+      total_carbon_estimate: Number(total_carbon_estimate.toFixed(2))
+    });
+  });
+
   app.get("/api/audit-logs", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
     res.json(logs.slice(-50).reverse());
   });
