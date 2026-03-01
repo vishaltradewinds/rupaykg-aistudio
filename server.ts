@@ -74,8 +74,8 @@ async function startServer() {
     { id: "demo_regulator", phone: "9000000007", password: "password", role: "regulator", name: "National Auditor", organization_name: "Central Pollution Control Board", district: "Delhi", state: "Delhi", wallet_balance: 0 }
   ];
   const records: any[] = [
-    { id: "REC1", citizen_id: "demo_citizen", weight_kg: 50, waste_type: "Agricultural", village: "Ambegaon", status: "processed", carbon_reduction_kg: 25, total_value: 750, context: "rural", timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), mrv_status: "verified" },
-    { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified" }
+    { id: "REC1", citizen_id: "demo_citizen", weight_kg: 50, waste_type: "Agricultural", village: "Ambegaon", status: "processed", carbon_reduction_kg: 25, total_value: 750, context: "rural", timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 86400000).toISOString() },
+    { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 43200000).toISOString() }
   ];
   const logs: any[] = [];
 
@@ -308,8 +308,21 @@ async function startServer() {
     // Hide MRV status from non-citizens and non-admins
     if (!["citizen", "fpo", "regulator", "state_admin", "super_admin"].includes(req.user.role)) {
       userRecords = userRecords.map(r => {
-        const { mrv_status, ...rest } = r;
+        const { mrv_status, mrv_verified_by, mrv_verified_by_name, mrv_verified_by_role, mrv_verified_at, ...rest } = r;
         return rest;
+      });
+    } else {
+      // Populate verifier details for authorized roles
+      userRecords = userRecords.map(r => {
+        if (r.mrv_verified_by) {
+          const verifier = users.find(u => u.id === r.mrv_verified_by);
+          return {
+            ...r,
+            mrv_verified_by_name: verifier ? verifier.name : "Unknown",
+            mrv_verified_by_role: verifier ? verifier.role : "Unknown"
+          };
+        }
+        return r;
       });
     }
 
@@ -330,6 +343,7 @@ async function startServer() {
       const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
       const total_value = (weight_kg * wasteConfig.value) + (carbon_reduction_kg * 10);
       
+      const isVerified = Math.random() > 0.3;
       records.push({
         id: "SEED" + i + Date.now(),
         citizen_id: "demo_citizen",
@@ -345,7 +359,11 @@ async function startServer() {
         carbon_reduction_kg,
         total_value,
         context,
-        mrv_status: Math.random() > 0.3 ? "verified" : "pending"
+        mrv_status: isVerified ? "verified" : "pending",
+        ...(isVerified && {
+          mrv_verified_by: "demo_regulator",
+          mrv_verified_at: new Date(Date.now() - Math.floor(Math.random() * 500000000)).toISOString()
+        })
       });
     }
     

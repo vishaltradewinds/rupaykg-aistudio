@@ -1986,13 +1986,21 @@ export default function App() {
                           {['citizen', 'fpo', 'regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
                             <td className="p-4">
                               {record.mrv_status && (
-                                <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase tracking-tighter border ${
-                                  record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                  record.mrv_status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                  'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                                }`}>
-                                  {record.mrv_status}
-                                </span>
+                                <div className="flex flex-col gap-1">
+                                  <span className={`w-fit px-2 py-1 text-[10px] font-bold rounded uppercase tracking-tighter border ${
+                                    record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                    record.mrv_status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                    'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                                  }`}>
+                                    {record.mrv_status}
+                                  </span>
+                                  {record.mrv_verified_by_name && (
+                                    <div className="text-[10px] text-white/40 leading-tight mt-1">
+                                      <span className="block font-medium text-white/60">{record.mrv_verified_by_name}</span>
+                                      <span className="block capitalize">{record.mrv_verified_by_role?.replace('_', ' ')}</span>
+                                    </div>
+                                  )}
+                                </div>
                               )}
                             </td>
                           )}
