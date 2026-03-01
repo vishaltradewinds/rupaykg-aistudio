@@ -10,6 +10,7 @@ import {
   Scale, 
   LogOut, 
   User,
+  Users,
   Activity,
   BarChart3,
   AlertCircle,
@@ -73,6 +74,7 @@ interface BiomassRecord {
 
 interface AdminStats {
   total_users: number;
+  total_farmers?: number;
   total_biomass_records: number;
   total_wallet_disbursed: number;
   total_carbon_reduction_kg: number;
@@ -294,6 +296,8 @@ export default function App() {
   const [carbonPool, setCarbonPool] = useState<any>({});
   const [wardAnalytics, setWardAnalytics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users'>('dashboard');
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
   const [mrvHistory, setMrvHistory] = useState<BiomassRecord[]>([]);
   const [mrvTab, setMrvTab] = useState<'pending' | 'history'>('pending');
@@ -337,7 +341,7 @@ export default function App() {
     if (token) {
       fetchUserData();
     }
-  }, [token, adminRoleFilter, operatingContext]);
+  }, [token, adminRoleFilter, operatingContext, adminSubView]);
 
   useEffect(() => {
     const checkDbStatus = async () => {
@@ -375,7 +379,7 @@ export default function App() {
   const handleRetryDb = async () => {
     try {
       setDbStatus(prev => prev ? { ...prev, status: 'connecting' } : null);
-      const res = await fetch('/api/db-retry', { method: 'POST' });
+      const res = await fetch('/api/db-retry', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) {
         const data = await res.json();
         setDbStatus(data);
@@ -388,6 +392,53 @@ export default function App() {
     } catch (err) {
       console.error("Failed to retry DB connection", err);
       setMessage({ type: 'error', text: 'Failed to retry database connection' });
+    }
+  };
+
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      const res = await fetch('/api/admin/users/role', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ user_id: userId, new_role: newRole })
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'User role updated successfully' });
+        fetchUserData();
+      } else {
+        const data = await res.json();
+        setMessage({ type: 'error', text: data.error || 'Failed to update user role' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'An error occurred while updating user role' });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    try {
+      const res = await fetch('/api/admin/users/delete', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ user_id: userId })
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'User deleted successfully' });
+        fetchUserData();
+      } else {
+        const data = await res.json();
+        setMessage({ type: 'error', text: data.error || 'Failed to delete user' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'An error occurred while deleting user' });
     }
   };
 
@@ -486,6 +537,24 @@ export default function App() {
         if (logsRes.ok) {
           const logsData = await logsRes.json();
           setAuditLogs(logsData);
+        }
+      }
+
+      // 5. Fetch users for Super Admins
+      if (currentUser?.role === 'super_admin' && adminSubView === 'users') {
+        const usersRes = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          setUsersList(usersData);
+        }
+      }
+
+      // Fetch KPI stats for aggregators and admins
+      if (['aggregator', 'super_admin', 'state_admin', 'municipal_admin'].includes(currentUser?.role || '')) {
+        const kpiRes = await fetch('/api/dashboard/kpi', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (kpiRes.ok) {
+          const kpiData = await kpiRes.json();
+          setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : null);
         }
       }
 
@@ -1444,7 +1513,7 @@ export default function App() {
               {user?.role === 'aggregator' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label="Total Collected" value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
-                  <Stat label="Active Pickups" value={history.filter(r => r.status === 'in_transit').length} icon={Activity} color="emerald" />
+                  <Stat label="Farmers Registered" value={adminStats?.total_farmers || 0} icon={Users} color="emerald" />
                   <Stat label="Logistics Margin" value={`₹${(history.reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" />
                   <Stat label="Fleet Efficiency" value="94%" icon={Truck} color="cyan" />
                 </div>
@@ -1582,13 +1651,24 @@ export default function App() {
                         </p>
                         <ImpactChart />
                       </div>
-                      <button 
-                        onClick={() => setView('upload')}
-                        className="w-full mt-6 bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/90 transition-all"
-                      >
-                        <PlusCircle size={18} />
-                        {user?.role === 'aggregator' ? 'New Collection Record' : user?.role === 'processor' ? 'New Processing Record' : 'New Intake Record'}
-                      </button>
+                      <div className="flex flex-col gap-3 mt-6">
+                        {user?.role === 'aggregator' && (
+                          <button 
+                            onClick={() => alert('Farmer Registration Modal - Coming Soon')}
+                            className="w-full bg-emerald-500/10 text-emerald-400 font-bold py-3 rounded-xl flex items-center justify-center gap-2 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                          >
+                            <Users size={18} />
+                            Register New Farmer
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => setView('upload')}
+                          className="w-full bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/90 transition-all"
+                        >
+                          <PlusCircle size={18} />
+                          {user?.role === 'aggregator' ? 'New Collection Record' : user?.role === 'processor' ? 'New Processing Record' : 'New Intake Record'}
+                        </button>
+                      </div>
                     </Card>
                   </div>
 
@@ -2217,68 +2297,157 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="p-6 border-white/5 bg-white/5">
-                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Waste Events</h4>
-                  <p className="text-3xl font-bold">{adminKpi.total_waste_events || 0}</p>
-                </Card>
-                <Card className="p-6 border-white/5 bg-white/5">
-                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Processed Events</h4>
-                  <p className="text-3xl font-bold">{adminKpi.processed_events || 0}</p>
-                </Card>
-                <Card className="p-6 border-white/5 bg-white/5">
-                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Users</h4>
-                  <p className="text-3xl font-bold">{adminKpi.total_users || 0}</p>
-                </Card>
-                <Card className="p-6 border-white/5 bg-white/5">
-                  <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Wallet Disbursed</h4>
-                  <p className="text-3xl font-bold text-emerald-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
-                </Card>
-              </div>
+              {user?.role === 'super_admin' && (
+                <div className="flex gap-4 mb-6">
+                  <button 
+                    onClick={() => setAdminSubView('dashboard')}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'dashboard' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    National Dashboard
+                  </button>
+                  <button 
+                    onClick={() => setAdminSubView('users')}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'users' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    User Management
+                  </button>
+                </div>
+              )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                <Card className="p-6 border-white/5 bg-white/5">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <AlertTriangle className="text-red-400" size={20} />
-                    Fraud Alerts & Flagged Events
-                  </h3>
-                  <div className="space-y-6">
-                    {fraudMap.length === 0 ? (
-                      <p className="text-white/40 text-sm">No flagged events detected.</p>
-                    ) : (
-                      <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                        {fraudMap.map((f, i) => (
-                          <div key={i} className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex justify-between items-center">
-                            <div>
-                              <p className="font-medium text-red-400">{f.waste_type} - {f.weight_kg}kg</p>
-                              <p className="text-xs text-red-400/60 flex items-center gap-1 mt-1">
-                                <MapPin size={12} /> {labels.sub}: {f.village}
-                              </p>
-                            </div>
-                            <span className="text-xs font-mono text-red-400/80">ID: {f.id}</span>
+              {adminSubView === 'dashboard' ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Waste Events</h4>
+                      <p className="text-3xl font-bold">{adminKpi.total_waste_events || 0}</p>
+                    </Card>
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Processed Events</h4>
+                      <p className="text-3xl font-bold">{adminKpi.processed_events || 0}</p>
+                    </Card>
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Users</h4>
+                      <p className="text-3xl font-bold">{adminKpi.total_users || 0}</p>
+                    </Card>
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Wallet Disbursed</h4>
+                      <p className="text-3xl font-bold text-emerald-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
+                    </Card>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <AlertTriangle className="text-red-400" size={20} />
+                        Fraud Alerts & Flagged Events
+                      </h3>
+                      <div className="space-y-6">
+                        {fraudMap.length === 0 ? (
+                          <p className="text-white/40 text-sm">No flagged events detected.</p>
+                        ) : (
+                          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                            {fraudMap.map((f, i) => (
+                              <div key={i} className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex justify-between items-center">
+                                <div>
+                                  <p className="font-medium text-red-400">{f.waste_type} - {f.weight_kg}kg</p>
+                                  <p className="text-xs text-red-400/60 flex items-center gap-1 mt-1">
+                                    <MapPin size={12} /> {labels.sub}: {f.village}
+                                  </p>
+                                </div>
+                                <span className="text-xs font-mono text-red-400/80">ID: {f.id}</span>
+                              </div>
+                            ))}
                           </div>
+                        )}
+                        
+                        <div className="mt-4">
+                          <p className="text-xs uppercase tracking-widest text-white/40 mb-3">Geospatial Fraud Distribution</p>
+                          <FraudMap alerts={fraudMap} subLabel={labels.sub} />
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <Globe className="text-cyan-400" size={20} />
+                        Carbon Pool Status
+                      </h3>
+                      <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5">
+                        <p className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Minted Carbon Units</p>
+                        <p className="text-5xl font-mono text-cyan-400">{carbonPool.total_carbon_units_minted?.toFixed(2) || 0} kg</p>
+                      </div>
+                    </Card>
+                  </div>
+                </>
+              ) : (
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <Users className="text-emerald-400" size={20} />
+                    User Management
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="text-white/40 text-xs uppercase tracking-widest border-b border-white/5">
+                          <th className="pb-4 font-medium">User</th>
+                          <th className="pb-4 font-medium">Role</th>
+                          <th className="pb-4 font-medium">Location</th>
+                          <th className="pb-4 font-medium">Wallet</th>
+                          <th className="pb-4 font-medium text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {usersList.map(u => (
+                          <tr key={u.id} className="text-sm">
+                            <td className="py-4">
+                              <div className="font-bold">{u.name}</div>
+                              <div className="text-xs text-white/40">{u.phone}</div>
+                            </td>
+                            <td className="py-4">
+                              <select 
+                                value={u.role}
+                                onChange={(e) => handleUpdateUserRole(u.id, e.target.value)}
+                                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-emerald-500/50"
+                              >
+                                <option value="citizen">Citizen</option>
+                                <option value="aggregator">Aggregator</option>
+                                <option value="processor">Processor</option>
+                                <option value="regulator">Regulator</option>
+                                <option value="municipal_admin">Municipal Admin</option>
+                                <option value="state_admin">State Admin</option>
+                                <option value="super_admin">Super Admin</option>
+                                <option value="csr_partner">CSR Partner</option>
+                                <option value="epr_partner">EPR Partner</option>
+                                <option value="carbon_buyer">Carbon Buyer</option>
+                              </select>
+                            </td>
+                            <td className="py-4">
+                              <div className="text-xs">{u.district}, {u.state}</div>
+                            </td>
+                            <td className="py-4">
+                              <div className="font-mono text-emerald-400">₹{u.wallet_balance?.toFixed(2)}</div>
+                            </td>
+                            <td className="py-4 text-right">
+                              <button 
+                                onClick={() => handleDeleteUser(u.id)}
+                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                title="Delete User"
+                              >
+                                <LogOut size={16} />
+                              </button>
+                            </td>
+                          </tr>
                         ))}
+                      </tbody>
+                    </table>
+                    {usersList.length === 0 && (
+                      <div className="py-12 text-center text-white/20">
+                        No users found.
                       </div>
                     )}
-                    
-                    <div className="mt-4">
-                      <p className="text-xs uppercase tracking-widest text-white/40 mb-3">Geospatial Fraud Distribution</p>
-                      <FraudMap alerts={fraudMap} subLabel={labels.sub} />
-                    </div>
                   </div>
                 </Card>
-                
-                <Card className="p-6 border-white/5 bg-white/5">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Globe className="text-cyan-400" size={20} />
-                    Carbon Pool Status
-                  </h3>
-                  <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5">
-                    <p className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Minted Carbon Units</p>
-                    <p className="text-5xl font-mono text-cyan-400">{carbonPool.total_carbon_units_minted?.toFixed(2) || 0} kg</p>
-                  </div>
-                </Card>
-              </div>
+              )}
             </motion.div>
           )}
 

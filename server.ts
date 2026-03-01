@@ -54,11 +54,11 @@ async function startServer() {
 
   await connectDB();
 
-  app.get("/api/db-status", (req, res) => {
+  app.get("/api/db-status", auth(["super_admin", "state_admin"]), (req, res) => {
     res.json({ status: dbStatus, error: dbError });
   });
 
-  app.post("/api/db-retry", async (req, res) => {
+  app.post("/api/db-retry", auth(["super_admin"]), async (req, res) => {
     await connectDB();
     res.json({ status: dbStatus, error: dbError });
   });
@@ -78,6 +78,11 @@ async function startServer() {
     { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 43200000).toISOString(), acreage: 0.1, risk_score: 0.2 }
   ];
   const logs: any[] = [];
+  const farmers: any[] = [
+    { farmer_id: "FARMER_1", name: "Suresh Patil", mobile: "9876543210", land_area: 5.5, crop_type: "Sugarcane", geo_location: { lat: 18.5204, lng: 73.8567 }, created_at: new Date().toISOString() },
+    { farmer_id: "FARMER_2", name: "Anil Deshmukh", mobile: "9876543211", land_area: 3.2, crop_type: "Cotton", geo_location: { lat: 18.5304, lng: 73.8667 }, created_at: new Date().toISOString() }
+  ];
+  const notifications: any[] = [];
 
   // ---------------- AUTH MIDDLEWARE ----------------
   function auth(roles: string[] = []) {
@@ -136,14 +141,85 @@ async function startServer() {
     res.json({ token, user: tokenPayload });
   });
 
+  app.post("/api/auth/reset-password", (req, res) => {
+    const { phone, new_password } = req.body;
+    const user = users.find(u => u.phone === phone);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    user.password = new_password;
+    res.json({ message: "Password reset successfully" });
+  });
+
   app.get("/api/me", auth(), (req: any, res) => {
     res.json({ user: req.user });
+  });
+
+  // ---------------- FARMER ROUTES ----------------
+  app.post("/api/farmer/create", auth(["aggregator"]), (req: any, res) => {
+    const { name, mobile, land_area, crop_type, latitude, longitude } = req.body;
+    
+    const farmer_id = "FARMER_" + Date.now();
+    const newFarmer = {
+      farmer_id,
+      name,
+      mobile,
+      land_area,
+      crop_type,
+      geo_location: {
+        lat: latitude,
+        lng: longitude
+      },
+      created_at: new Date().toISOString(),
+      created_by: req.user.id
+    };
+    
+    farmers.push(newFarmer);
+    
+    // Also log this action
+    logs.push({
+      id: Date.now(),
+      event: "FARMER_CREATED",
+      actor: req.user.name,
+      details: `Farmer ${name} registered by aggregator`,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({ farmer_id, message: "Farmer record created successfully" });
+  });
+
+  app.get("/api/farmer/:id", auth(["aggregator", "super_admin", "state_admin", "municipal_admin"]), (req: any, res) => {
+    const farmer = farmers.find(f => f.farmer_id === req.params.id);
+    if (!farmer) return res.status(404).json({ error: "Farmer not found" });
+    res.json(farmer);
+  });
+
+  app.get("/api/farmer/list", auth(["aggregator", "super_admin", "state_admin", "municipal_admin"]), (req: any, res) => {
+    res.json(farmers);
   });
 
   // ---------------- CITIZEN ROUTES ----------------
   app.get("/api/citizen/wallet", auth(["citizen", "fpo"]), (req: any, res) => {
     const user = users.find(u => u.id === req.user.id);
     res.json({ wallet_balance: user?.wallet_balance || 0 });
+  });
+
+  app.get("/api/citizen/profile", auth(["citizen", "fpo"]), (req: any, res) => {
+    const user = users.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const { password, ...safeUser } = user;
+    res.json(safeUser);
+  });
+
+  app.post("/api/citizen/profile/update", auth(["citizen", "fpo"]), (req: any, res) => {
+    const { name, district, state } = req.body;
+    const user = users.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    if (name) user.name = name;
+    if (district) user.district = district;
+    if (state) user.state = state;
+
+    res.json({ message: "Profile updated successfully", user: { id: user.id, name: user.name, role: user.role } });
   });
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), (req: any, res) => {
@@ -186,6 +262,26 @@ async function startServer() {
     });
     
     res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon value pending MRV.`, wallet_balance: user?.wallet_balance });
+  });
+
+  app.get("/api/citizen/records", auth(["citizen", "fpo"]), (req: any, res) => {
+    const userRecords = records.filter(r => r.citizen_id === req.user.id);
+    res.json(userRecords);
+  });
+
+  app.get("/api/citizen/impact", auth(["citizen", "fpo"]), (req: any, res) => {
+    const userRecords = records.filter(r => r.citizen_id === req.user.id);
+    const total_weight = userRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
+    const total_carbon = userRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    const verified_carbon = userRecords.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    
+    res.json({
+      total_weight_kg: total_weight,
+      total_carbon_reduction_kg: total_carbon,
+      verified_carbon_reduction_kg: verified_carbon,
+      trees_equivalent: Number((total_carbon / 20).toFixed(1)), // 1 tree = 20kg CO2/year
+      rank: Math.floor(Math.random() * 100) + 1
+    });
   });
 
   // ---------------- MRV ROUTES ----------------
@@ -243,6 +339,24 @@ async function startServer() {
     res.json({ message: `MRV ${status} successfully` });
   });
 
+  app.post("/api/regulator/flag", auth(["regulator", "super_admin"]), (req: any, res) => {
+    const { record_id, reason } = req.body;
+    const record = records.find(r => r.id === record_id);
+    if (!record) return res.status(404).json({ error: "Record not found" });
+    
+    record.status = "flagged";
+    record.flag_reason = reason;
+    record.flagged_by = req.user.id;
+    
+    logs.push({ 
+      id: Date.now(), 
+      event: "RECORD_FLAGGED", 
+      details: `Record ${record_id} flagged by ${req.user.id}: ${reason}`, 
+      timestamp: new Date().toISOString() 
+    });
+    res.json({ message: "Record flagged for investigation" });
+  });
+
   // ---------------- AGGREGATOR & PROCESSOR ROUTES ----------------
   app.get("/api/aggregator/available", auth(["aggregator"]), (req: any, res) => {
     const available = records.filter(r => r.status === "pending_pickup");
@@ -266,6 +380,34 @@ async function startServer() {
     res.json({ message: "Pickup confirmed" });
   });
 
+  app.post("/api/aggregator/assign", auth(["aggregator"]), (req: any, res) => {
+    const { record_id, driver_name, vehicle_no } = req.body;
+    const record = records.find(r => r.id === record_id);
+    if (!record) return res.status(404).json({ error: "Record not found" });
+    
+    record.assigned_driver = driver_name;
+    record.assigned_vehicle = vehicle_no;
+    
+    logs.push({ 
+      id: Date.now(), 
+      event: "PICKUP_ASSIGNED", 
+      details: `Driver ${driver_name} assigned to record ${record_id}`, 
+      timestamp: new Date().toISOString() 
+    });
+    res.json({ message: "Driver assigned successfully" });
+  });
+
+  app.get("/api/aggregator/fleet", auth(["aggregator"]), (req: any, res) => {
+    // Dummy fleet data
+    res.json({
+      active_vehicles: 12,
+      in_maintenance: 2,
+      total_capacity_kg: 50000,
+      current_load_kg: 12400,
+      drivers_online: 10
+    });
+  });
+
   app.get("/api/processor/available", auth(["processor"]), (req: any, res) => {
     const available = records.filter(r => r.status === "in_transit");
     res.json(available);
@@ -286,6 +428,30 @@ async function startServer() {
       timestamp: new Date().toISOString() 
     });
     res.json({ message: "Processing confirmed" });
+  });
+
+  app.post("/api/processor/report", auth(["processor"]), (req: any, res) => {
+    const { output_type, quantity_kg, energy_kwh } = req.body;
+    // In a real app, this would update a processing batch or inventory
+    logs.push({ 
+      id: Date.now(), 
+      event: "PROCESSING_REPORT", 
+      details: `Processor ${req.user.id} reported ${quantity_kg}kg of ${output_type}`, 
+      timestamp: new Date().toISOString() 
+    });
+    res.json({ message: "Processing report submitted" });
+  });
+
+  app.get("/api/processor/inventory", auth(["processor"]), (req: any, res) => {
+    const processedWeight = records
+      .filter(r => r.processor_id === req.user.id && r.status === "processed")
+      .reduce((sum, r) => sum + (r.weight_kg || 0), 0);
+    
+    res.json({
+      biomass_in_stock_kg: processedWeight,
+      output_material_ready_kg: processedWeight * 0.85, // 15% loss in processing
+      storage_utilization: "65%"
+    });
   });
 
   // ---------------- COMMON ROUTES ----------------
@@ -327,6 +493,20 @@ async function startServer() {
     }
 
     res.json(userRecords);
+  });
+
+  app.get("/api/notifications", auth(), (req: any, res) => {
+    const userNotifications = notifications.filter(n => n.user_id === req.user.id || n.user_id === "all");
+    res.json(userNotifications.slice(-20).reverse());
+  });
+
+  app.post("/api/notifications/read", auth(), (req: any, res) => {
+    const { notification_id } = req.body;
+    const notification = notifications.find(n => n.id === notification_id && (n.user_id === req.user.id || n.user_id === "all"));
+    if (notification) {
+      notification.read = true;
+    }
+    res.json({ success: true });
   });
 
   app.post("/api/admin/seed", auth(["super_admin", "state_admin", "municipal_admin"]), (req, res) => {
@@ -373,7 +553,22 @@ async function startServer() {
       });
     }
     
-    res.json({ message: "Seeded 20 records" });
+    for (let i = 0; i < 10; i++) {
+      farmers.push({
+        farmer_id: "SEED_FARMER_" + i + Date.now(),
+        name: ["Rajesh", "Amit", "Vijay", "Sanjay", "Sunil"][Math.floor(Math.random() * 5)] + " " + ["Patil", "Deshmukh", "Pawar", "Shinde"][Math.floor(Math.random() * 4)],
+        mobile: "9" + Math.floor(Math.random() * 1000000000),
+        land_area: Number((Math.random() * 10 + 1).toFixed(1)),
+        crop_type: ["Sugarcane", "Cotton", "Wheat", "Rice"][Math.floor(Math.random() * 4)],
+        geo_location: {
+          lat: 18.5204 + (Math.random() * 0.2),
+          lng: 73.8567 + (Math.random() * 0.2)
+        },
+        created_at: new Date().toISOString()
+      });
+    }
+    
+    res.json({ message: "Seeded 20 records and 10 farmers" });
   });
 
   // ---------------- PARTNER ROUTES ----------------
@@ -438,6 +633,11 @@ async function startServer() {
     });
 
     res.json({ message: `Successfully purchased ${recordsToPurchase.length} credits`, wallet_balance: user.wallet_balance });
+  });
+
+  app.get("/api/partner/purchases", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+    const purchases = records.filter(r => r.purchased_by === req.user.id);
+    res.json(purchases);
   });
 
   // ---------------- ADMIN ROUTES ----------------
@@ -565,11 +765,63 @@ async function startServer() {
     });
   });
 
+  app.get("/api/admin/users", auth(["super_admin", "state_admin"]), (req: any, res) => {
+    res.json(users.map(u => {
+      const { password, ...safeUser } = u;
+      return safeUser;
+    }));
+  });
+
+  app.post("/api/admin/users/role", auth(["super_admin"]), (req: any, res) => {
+    const { user_id, new_role } = req.body;
+    const user = users.find(u => u.id === user_id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    user.role = new_role;
+    res.json({ message: `Role updated to ${new_role} for user ${user.name}` });
+  });
+
+  app.post("/api/admin/users/delete", auth(["super_admin"]), (req: any, res) => {
+    const { user_id } = req.body;
+    const index = users.findIndex(u => u.id === user_id);
+    if (index !== -1) {
+      users.splice(index, 1);
+      res.json({ message: "User deleted successfully" });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  });
+
+  app.post("/api/admin/broadcast", auth(["super_admin", "state_admin"]), (req: any, res) => {
+    const { message, target_role } = req.body;
+    const newNotification = {
+      id: "NOTIF_" + Date.now(),
+      user_id: target_role || "all",
+      message,
+      read: false,
+      timestamp: new Date().toISOString(),
+      type: "broadcast"
+    };
+    notifications.push(newNotification);
+    res.json({ message: "Broadcast sent successfully" });
+  });
+
+  app.get("/api/admin/system-health", auth(["super_admin", "state_admin"]), (req, res) => {
+    res.json({
+      status: "healthy",
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      db_status: dbStatus,
+      active_connections: users.length + 5, // Simulated
+      last_backup: new Date(Date.now() - 3600000).toISOString()
+    });
+  });
+
   // ================================
   // KPI DASHBOARD
   // ================================
   app.get("/api/dashboard/kpi", auth(["super_admin", "state_admin", "municipal_admin", "aggregator"]), (req: any, res) => {
-    const total_farmers = users.filter(u => u.role === 'citizen' || u.role === 'fpo').length;
+    const total_farmers = farmers.length;
     const total_events = records.length;
     const total_biomass_tonnes = records.reduce((sum, r) => sum + (r.weight_kg || 0), 0) / 1000;
     const total_carbon_estimate = records.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
@@ -591,7 +843,7 @@ async function startServer() {
     res.json({ service: "RUPAYKG", issuer: "ALLIANCEVENTURES", auth: "RS256", status: "Active" });
   });
 
-  app.get("/api/carbon", auth(["admin","investor"]), (req: any, res: any) => {
+  app.get("/api/carbon", auth(["super_admin", "state_admin", "regulator", "carbon_buyer"]), (req: any, res: any) => {
     res.json({ message: "Carbon Credit Secure Data", user: req.user });
   });
 
