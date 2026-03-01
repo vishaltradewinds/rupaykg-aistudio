@@ -74,8 +74,8 @@ async function startServer() {
     { id: "demo_regulator", phone: "9000000007", password: "password", role: "regulator", name: "National Auditor", organization_name: "Central Pollution Control Board", district: "Delhi", state: "Delhi", wallet_balance: 0 }
   ];
   const records: any[] = [
-    { id: "REC1", citizen_id: "demo_citizen", weight_kg: 50, waste_type: "Agricultural", village: "Ambegaon", status: "processed", carbon_reduction_kg: 25, total_value: 750, context: "rural", timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 86400000).toISOString() },
-    { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 43200000).toISOString() }
+    { id: "REC1", citizen_id: "demo_citizen", weight_kg: 50, waste_type: "Agricultural", village: "Ambegaon", status: "processed", carbon_reduction_kg: 25, total_value: 750, context: "rural", timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 86400000).toISOString(), acreage: 0.2, risk_score: 0.1 },
+    { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 43200000).toISOString(), acreage: 0.1, risk_score: 0.2 }
   ];
   const logs: any[] = [];
 
@@ -343,6 +343,10 @@ async function startServer() {
       const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
       const total_value = (weight_kg * wasteConfig.value) + (carbon_reduction_kg * 10);
       
+      const acreage = Math.random() * 0.5 + 0.05;
+      const expected_kg = acreage * 2500; // 2.5 tonnes per acre
+      const risk_score = Math.abs(expected_kg - weight_kg) / expected_kg;
+
       const isVerified = Math.random() > 0.3;
       records.push({
         id: "SEED" + i + Date.now(),
@@ -359,6 +363,8 @@ async function startServer() {
         carbon_reduction_kg,
         total_value,
         context,
+        acreage,
+        risk_score,
         mrv_status: isVerified ? "verified" : "pending",
         ...(isVerified && {
           mrv_verified_by: "demo_regulator",

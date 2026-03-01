@@ -63,6 +63,8 @@ interface BiomassRecord {
   mrv_verified_by_name?: string;
   mrv_verified_by_role?: string;
   mrv_verified_at?: string;
+  acreage?: number;
+  risk_score?: number;
   potential_carbon_value?: number;
   geo_lat: number;
   geo_long: number;
@@ -2092,6 +2094,31 @@ export default function App() {
                             <div>
                               <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Credit Value</p>
                               <p className="text-lg font-bold text-emerald-400">₹{record.potential_carbon_value?.toFixed(2)}</p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-white/5 rounded-xl border border-white/5">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Acreage</p>
+                              <p className="text-sm font-mono text-white/80">{record.acreage?.toFixed(2)} acres</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">AI Risk Score</p>
+                              <div className="flex items-center gap-2">
+                                <p className={`text-sm font-bold ${
+                                  (record.risk_score || 0) < 0.2 ? 'text-emerald-400' :
+                                  (record.risk_score || 0) < 0.5 ? 'text-amber-400' : 'text-red-400'
+                                }`}>
+                                  {((record.risk_score || 0) * 100).toFixed(0)}%
+                                </p>
+                                <span className={`text-[8px] px-1 rounded uppercase font-bold border ${
+                                  (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                  'bg-red-500/10 text-red-400 border-red-500/20'
+                                }`}>
+                                  {(record.risk_score || 0) < 0.2 ? 'Low' : (record.risk_score || 0) < 0.5 ? 'Med' : 'High'}
+                                </span>
+                              </div>
                             </div>
                           </div>
 
