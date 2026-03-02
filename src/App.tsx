@@ -81,8 +81,8 @@ interface AdminStats {
   total_weight_kg: number;
 }
 
-const ImpactChart = () => {
-  const data = [
+const ImpactChart = ({ data }: { data?: any[] }) => {
+  const defaultData = [
     { name: 'Jan', value: 400 },
     { name: 'Feb', value: 700 },
     { name: 'Mar', value: 600 },
@@ -92,10 +92,12 @@ const ImpactChart = () => {
     { name: 'Jul', value: 2800 },
   ];
 
+  const chartData = data && data.length > 0 ? data.map(d => ({ name: d.month, value: d.weight })) : defaultData;
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data}>
+        <AreaChart data={chartData}>
           <defs>
             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -298,10 +300,14 @@ export default function App() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users'>('dashboard');
+  const [comprehensiveMetrics, setComprehensiveMetrics] = useState<any>(null);
+  const [trendsData, setTrendsData] = useState<any[]>([]);
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
   const [mrvHistory, setMrvHistory] = useState<BiomassRecord[]>([]);
   const [mrvTab, setMrvTab] = useState<'pending' | 'history'>('pending');
   const [availableCredits, setAvailableCredits] = useState<any[]>([]);
+  const [aggregatorFleet, setAggregatorFleet] = useState<any>(null);
+  const [processorInventory, setProcessorInventory] = useState<any>(null);
   const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
 
   const labels = {
@@ -562,9 +568,15 @@ export default function App() {
       if (currentUser?.role === 'aggregator') {
         const availRes = await fetch('/api/aggregator/available', { headers: { 'Authorization': `Bearer ${token}` } });
         if (availRes.ok) setAvailableRecords(await availRes.json());
+        
+        const fleetRes = await fetch('/api/aggregator/fleet', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (fleetRes.ok) setAggregatorFleet(await fleetRes.json());
       } else if (currentUser?.role === 'processor') {
         const availRes = await fetch('/api/processor/available', { headers: { 'Authorization': `Bearer ${token}` } });
         if (availRes.ok) setAvailableRecords(await availRes.json());
+
+        const invRes = await fetch('/api/processor/inventory', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (invRes.ok) setProcessorInventory(await invRes.json());
       }
 
       // 6. Fetch MRV records for regulators
@@ -592,6 +604,12 @@ export default function App() {
           const fraudData = await fraudRes.json();
           setFraudMap(fraudData.flagged_events);
         }
+
+        const compRes = await fetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (compRes.ok) setComprehensiveMetrics(await compRes.json());
+
+        const trendsRes = await fetch('/api/analytics/trends', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (trendsRes.ok) setTrendsData(await trendsRes.json());
       }
 
       // 9. Fetch Municipal Analytics
@@ -1649,7 +1667,7 @@ export default function App() {
                         <p className="text-white/40 text-sm mb-6">
                           {user?.role === 'citizen' ? 'Your personal contribution trend.' : 'System-wide throughput and efficiency.'}
                         </p>
-                        <ImpactChart />
+                        <ImpactChart data={trendsData} />
                       </div>
                       <div className="flex flex-col gap-3 mt-6">
                         {user?.role === 'aggregator' && (
@@ -1683,7 +1701,79 @@ export default function App() {
               )}
 
               {/* Partner & Admin specific content */}
-              {['csr_partner', 'epr_partner', 'carbon_buyer', 'state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
+              {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">Total Offset</h4>
+                      <p className="text-3xl font-bold text-cyan-400">
+                        {history.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0).toFixed(2)} kg
+                      </p>
+                    </Card>
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">Farmers Supported</h4>
+                      <p className="text-3xl font-bold text-emerald-400">
+                        {new Set(history.map(r => r.citizen_id)).size}
+                      </p>
+                    </Card>
+                    <Card className="p-6 border-white/5 bg-white/5">
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">Waste Diverted</h4>
+                      <p className="text-3xl font-bold text-blue-400">
+                        {history.reduce((sum, r) => sum + (r.weight_kg || 0), 0).toFixed(2)} kg
+                      </p>
+                    </Card>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                        <BarChart3 size={18} className="text-indigo-400" />
+                        Portfolio Composition
+                      </h3>
+                      <div className="h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={Object.values(history.reduce((acc: any, r) => {
+                                acc[r.waste_type] = acc[r.waste_type] || { name: r.waste_type, value: 0 };
+                                acc[r.waste_type].value += r.weight_kg;
+                                return acc;
+                              }, {}))}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={80}
+                              paddingAngle={5}
+                              dataKey="value"
+                            >
+                              {history.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip 
+                              contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                            />
+                            <Legend />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </Card>
+
+                    <Card>
+                      <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                        <Globe size={18} className="text-cyan-400" />
+                        Impact Distribution
+                      </h3>
+                      <div className="h-[250px] rounded-xl overflow-hidden">
+                        <BiomassMap records={history} />
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              )}
+
+              {/* Admin specific content */}
+              {['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <Card className="lg:col-span-2">
@@ -1898,6 +1988,65 @@ export default function App() {
                   </button>
                 </div>
               </div>
+
+              {user?.role === 'aggregator' && aggregatorFleet && (
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <Card className="p-4 border-white/5 bg-white/5">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Active Fleet</p>
+                    <p className="text-xl font-bold">{aggregatorFleet.active_vehicles}</p>
+                  </Card>
+                  <Card className="p-4 border-white/5 bg-white/5">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Drivers Online</p>
+                    <p className="text-xl font-bold">{aggregatorFleet.drivers_online}</p>
+                  </Card>
+                  <Card className="p-4 border-white/5 bg-white/5">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Current Load</p>
+                    <p className="text-xl font-bold text-blue-400">{aggregatorFleet.current_load_kg} kg</p>
+                  </Card>
+                  <Card className="p-4 border-white/5 bg-white/5">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Total Capacity</p>
+                    <p className="text-xl font-bold">{aggregatorFleet.total_capacity_kg} kg</p>
+                  </Card>
+                  <Card className="p-4 border-white/5 bg-white/5">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Utilization</p>
+                    <p className="text-xl font-bold text-emerald-400">
+                      {Math.round((aggregatorFleet.current_load_kg / aggregatorFleet.total_capacity_kg) * 100)}%
+                    </p>
+                  </Card>
+                </div>
+              )}
+
+              {user?.role === 'processor' && processorInventory && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="p-4 border-white/5 bg-white/5 flex items-center gap-4">
+                    <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
+                      <Layers size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Biomass in Stock</p>
+                      <p className="text-xl font-bold">{processorInventory.biomass_in_stock_kg} kg</p>
+                    </div>
+                  </Card>
+                  <Card className="p-4 border-white/5 bg-white/5 flex items-center gap-4">
+                    <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400">
+                      <Zap size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Output Material</p>
+                      <p className="text-xl font-bold">{processorInventory.output_material_ready_kg.toFixed(0)} kg</p>
+                    </div>
+                  </Card>
+                  <Card className="p-4 border-white/5 bg-white/5 flex items-center gap-4">
+                    <div className="p-3 bg-amber-500/10 rounded-xl text-amber-400">
+                      <Activity size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Storage Utilization</p>
+                      <p className="text-xl font-bold">{processorInventory.storage_utilization}</p>
+                    </div>
+                  </Card>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Available for Action */}
@@ -2334,6 +2483,147 @@ export default function App() {
                       <p className="text-3xl font-bold text-emerald-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
                     </Card>
                   </div>
+
+                  {comprehensiveMetrics && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                      <Card className="p-6 border-white/5 bg-white/5 col-span-2">
+                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                          <TrendingUp className="text-emerald-400" size={20} />
+                          Growth & Impact Trends
+                        </h3>
+                        <div className="h-[300px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={trendsData}>
+                              <defs>
+                                <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                              <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                              <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                                itemStyle={{ color: '#10b981' }}
+                              />
+                              <Area type="monotone" dataKey="weight" stroke="#10b981" fillOpacity={1} fill="url(#colorWeight)" strokeWidth={3} />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </Card>
+
+                      <Card className="p-6 border-white/5 bg-white/5">
+                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                          <Sprout className="text-emerald-400" size={20} />
+                          Environmental Impact
+                        </h3>
+                        <div className="space-y-6">
+                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
+                            <div>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">Methane Avoided</p>
+                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.methane_avoided_kg} kg</p>
+                            </div>
+                            <Zap className="text-yellow-400/40" size={24} />
+                          </div>
+                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
+                            <div>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">Water Saved</p>
+                              <p className="text-2xl font-bold text-blue-400">{comprehensiveMetrics.environmental.water_saved_liters} L</p>
+                            </div>
+                            <Globe className="text-blue-400/40" size={24} />
+                          </div>
+                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
+                            <div>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">Trees Equivalent</p>
+                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.trees_equivalent} Trees</p>
+                            </div>
+                            <Leaf className="text-emerald-400/40" size={24} />
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+
+                  {comprehensiveMetrics && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                      <Card className="p-6 border-white/5 bg-white/5">
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                          <Scale className="text-amber-400" size={18} />
+                          Economic Efficiency
+                        </h3>
+                        <div className="space-y-4">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">Avg Price / kg</span>
+                            <span className="font-mono">₹{comprehensiveMetrics.economic.avg_price_per_kg}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">Govt Cost Savings</span>
+                            <span className="font-mono text-emerald-400">₹{comprehensiveMetrics.economic.govt_cost_savings}</span>
+                          </div>
+                          <div className="pt-4 border-t border-white/5">
+                            <p className="text-xs text-white/40 leading-relaxed italic">
+                              * Government savings calculated based on avoided landfill management and environmental remediation costs.
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+
+                      <Card className="p-6 border-white/5 bg-white/5">
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                          <Activity className="text-cyan-400" size={18} />
+                          Operational Health
+                        </h3>
+                        <div className="space-y-4">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">Processing Efficiency</span>
+                            <span className="font-mono">{comprehensiveMetrics.operational.processing_efficiency}%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">MRV Rejection Rate</span>
+                            <span className={`font-mono ${comprehensiveMetrics.operational.rejection_rate > 10 ? 'text-red-400' : 'text-emerald-400'}`}>
+                              {comprehensiveMetrics.operational.rejection_rate}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-white/5 rounded-full h-2 mt-4">
+                            <div 
+                              className="bg-cyan-500 h-2 rounded-full transition-all duration-1000" 
+                              style={{ width: `${comprehensiveMetrics.operational.processing_efficiency}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </Card>
+
+                      <Card className="p-6 border-white/5 bg-white/5">
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                          <BarChart3 className="text-indigo-400" size={18} />
+                          Waste Composition
+                        </h3>
+                        <div className="h-[150px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={WASTE_TYPES}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={40}
+                                outerRadius={60}
+                                paddingAngle={5}
+                                dataKey="value"
+                              >
+                                {WASTE_TYPES.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} stroke="none" />
+                                ))}
+                              </Pie>
+                              <RechartsTooltip 
+                                contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                     <Card className="p-6 border-white/5 bg-white/5">

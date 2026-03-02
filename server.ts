@@ -838,6 +838,81 @@ async function startServer() {
     res.json(logs.slice(-50).reverse());
   });
 
+  // ---------------- ANALYTICS & METRICS ----------------
+  app.get("/api/analytics/comprehensive", auth(["super_admin", "state_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+    const { context } = req.query;
+    let filteredRecords = records;
+    if (context && context !== 'all') {
+      filteredRecords = filteredRecords.filter(r => r.context === context);
+    }
+
+    const verifiedRecords = filteredRecords.filter(r => r.mrv_status === "verified");
+    
+    // Environmental Metrics
+    const total_carbon_kg = verifiedRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    const methane_avoided_kg = total_carbon_kg * 0.21; // Simulated ratio
+    const water_saved_liters = total_carbon_kg * 150; // Simulated ratio
+    const trees_equivalent = total_carbon_kg / 20;
+
+    // Economic Metrics
+    const total_farmer_earnings = verifiedRecords.reduce((sum, r) => sum + (r.total_value || 0), 0);
+    const avg_price_per_kg = total_farmer_earnings / (verifiedRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0) || 1);
+    const govt_cost_savings = total_carbon_kg * 5; // Simulated savings in waste management costs
+
+    // Operational Metrics
+    const total_weight = filteredRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
+    const processed_weight = filteredRecords.filter(r => r.status === "processed").reduce((sum, r) => sum + (r.weight_kg || 0), 0);
+    const processing_efficiency = (processed_weight / (total_weight || 1)) * 100;
+    
+    // MRV Metrics
+    const total_mrv_processed = filteredRecords.filter(r => r.mrv_status !== "pending").length;
+    const rejection_rate = (filteredRecords.filter(r => r.mrv_status === "rejected").length / (total_mrv_processed || 1)) * 100;
+
+    res.json({
+      environmental: {
+        carbon_offset_kg: Number(total_carbon_kg.toFixed(2)),
+        methane_avoided_kg: Number(methane_avoided_kg.toFixed(2)),
+        water_saved_liters: Number(water_saved_liters.toFixed(0)),
+        trees_equivalent: Number(trees_equivalent.toFixed(1))
+      },
+      economic: {
+        total_farmer_earnings: Number(total_farmer_earnings.toFixed(2)),
+        avg_price_per_kg: Number(avg_price_per_kg.toFixed(2)),
+        govt_cost_savings: Number(govt_cost_savings.toFixed(2))
+      },
+      operational: {
+        total_weight_kg: total_weight,
+        processing_efficiency: Number(processing_efficiency.toFixed(1)),
+        rejection_rate: Number(rejection_rate.toFixed(1))
+      }
+    });
+  });
+
+  app.get("/api/analytics/trends", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
+    // Group records by month for the last 6 months
+    const now = new Date();
+    const trends = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = monthDate.toLocaleString('default', { month: 'short' });
+      
+      const monthRecords = records.filter(r => {
+        const d = new Date(r.timestamp);
+        return d.getMonth() === monthDate.getMonth() && d.getFullYear() === monthDate.getFullYear();
+      });
+      
+      trends.push({
+        month: monthName,
+        weight: monthRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0),
+        events: monthRecords.length,
+        carbon: monthRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0)
+      });
+    }
+    
+    res.json(trends);
+  });
+
   // ---------------- STATUS & INTERNAL ----------------
   app.get("/api/status", (req, res) => {
     res.json({ service: "RUPAYKG", issuer: "ALLIANCEVENTURES", auth: "RS256", status: "Active" });
