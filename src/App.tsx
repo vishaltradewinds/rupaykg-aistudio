@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Leaf, 
   Wallet, 
@@ -267,6 +268,7 @@ const FraudMap = ({ alerts, subLabel }: { alerts: any[], subLabel: string }) => 
 };
 
 export default function App() {
+  const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
   const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer'>('dashboard');
@@ -1359,7 +1361,7 @@ export default function App() {
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
             <Activity size={20} />
-            <span className="hidden md:block font-medium">Dashboard</span>
+            <span className="hidden md:block font-medium">{t('Dashboard')}</span>
           </button>
           {(user?.role === 'citizen' || user?.role === 'fpo') && (
             <button 
@@ -1367,7 +1369,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'upload' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <PlusCircle size={20} />
-              <span className="hidden md:block font-medium">Upload Waste</span>
+              <span className="hidden md:block font-medium">{t('Upload Waste')}</span>
             </button>
           )}
           {(user?.role === 'aggregator' || user?.role === 'processor') && (
@@ -1376,7 +1378,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'tasks' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Activity size={20} />
-              <span className="hidden md:block font-medium">Task Board</span>
+              <span className="hidden md:block font-medium">{t('Task Board')}</span>
             </button>
           )}
           <button 
@@ -1384,7 +1386,7 @@ export default function App() {
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'history' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
             <History size={20} />
-            <span className="hidden md:block font-medium">History</span>
+            <span className="hidden md:block font-medium">{t('History')}</span>
           </button>
           {['regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
             <button 
@@ -1392,7 +1394,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'mrv' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <ShieldCheck size={20} />
-              <span className="hidden md:block font-medium">MRV Dashboard</span>
+              <span className="hidden md:block font-medium">{t('MRV Dashboard')}</span>
             </button>
           )}
           {['super_admin', 'state_admin', 'regulator'].includes(user?.role || '') && (
@@ -1401,7 +1403,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'admin' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <BarChart3 size={20} />
-              <span className="hidden md:block font-medium">National KPI</span>
+              <span className="hidden md:block font-medium">{t('National KPI')}</span>
             </button>
           )}
           {['municipal_admin', 'state_admin', 'super_admin'].includes(user?.role || '') && (
@@ -1419,7 +1421,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'partner' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Globe size={20} />
-              <span className="hidden md:block font-medium">Carbon Market</span>
+              <span className="hidden md:block font-medium">{t('Carbon Market')}</span>
             </button>
           )}
           <button 
@@ -1427,14 +1429,14 @@ export default function App() {
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
             <BookOpen size={20} />
-            <span className="hidden md:block font-medium">Genesis</span>
+            <span className="hidden md:block font-medium">{t('Genesis')}</span>
           </button>
           <button 
             onClick={() => setView('settings')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'settings' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
             <User size={20} />
-            <span className="hidden md:block font-medium">Settings</span>
+            <span className="hidden md:block font-medium">{t('Settings')}</span>
           </button>
         </div>
 
@@ -1443,7 +1445,7 @@ export default function App() {
           className="w-full flex items-center gap-3 p-3 rounded-xl text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all mt-auto"
         >
           <LogOut size={20} />
-          <span className="hidden md:block font-medium">Logout</span>
+          <span className="hidden md:block font-medium">{t('Logout')}</span>
         </button>
       </nav>
 
@@ -1452,7 +1454,7 @@ export default function App() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">
-              {view === 'dashboard' && 'System Overview'}
+              {view === 'dashboard' && t('System Overview')}
               {view === 'upload' && `${labels.waste} Intake`}
               {view === 'tasks' && 'Operations Management'}
               {view === 'history' && 'Transaction Ledger'}
@@ -1462,7 +1464,7 @@ export default function App() {
               {view === 'settings' && 'Account Settings'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
-              Welcome back, {user?.name || 'Citizen'}
+              {t('Welcome back')}, {user?.name || 'Citizen'}
               {user?.role && (
                 <span className="px-2 py-0.5 bg-white/10 rounded-full text-[10px] uppercase tracking-wider text-white/80">
                   {user.role}
@@ -1471,6 +1473,15 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
+              <button 
+                onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'hi' : 'en')}
+                className="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white/10 hover:bg-white/20 text-white flex items-center gap-2"
+              >
+                <Globe size={14} />
+                {i18n.language === 'en' ? 'हिंदी' : 'English'}
+              </button>
+            </div>
             <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
               <button 
                 onClick={() => setOperatingContext('urban')}
@@ -1531,37 +1542,37 @@ export default function App() {
 
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label="Carbon Offset" value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" />
+                  <Stat label={t('Carbon Offset')} value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" />
                   <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" />
-                  <Stat label="Total Earnings" value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" />
-                  <Stat label="Community Rank" value="#12" icon={TrendingUp} color="purple" />
+                  <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" />
+                  <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" />
                 </div>
               )}
 
               {user?.role === 'aggregator' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label="Total Collected" value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
-                  <Stat label="Farmers Registered" value={adminStats?.total_farmers || 0} icon={Users} color="emerald" />
-                  <Stat label="Logistics Margin" value={`₹${(history.reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" />
-                  <Stat label="Fleet Efficiency" value="94%" icon={Truck} color="cyan" />
+                  <Stat label={t('Total Collected')} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
+                  <Stat label={t('Farmers Registered')} value={adminStats?.total_farmers || 0} icon={Users} color="emerald" />
+                  <Stat label={t('Logistics Margin')} value={`₹${(history.reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" />
+                  <Stat label={t('Fleet Efficiency')} value="94%" icon={Truck} color="cyan" />
                 </div>
               )}
 
               {user?.role === 'processor' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label="Total Processed" value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" />
-                  <Stat label="Carbon Credits" value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" />
-                  <Stat label="Value Generated" value={`₹${history.reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" />
-                  <Stat label="Processing Yield" value="98.2%" icon={Zap} color="cyan" />
+                  <Stat label={t('Total Processed')} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" />
+                  <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" />
+                  <Stat label={t('Value Generated')} value={`₹${history.reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" />
+                  <Stat label={t('Processing Yield')} value="98.2%" icon={Zap} color="cyan" />
                 </div>
               )}
 
               {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && adminStats && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label="Total Investment" value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
-                  <Stat label="Carbon Credits" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
+                  <Stat label={t('Total Investment')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
+                  <Stat label={t('Carbon Credits')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
                   <Stat label={`${labels.waste} Diverted`} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="blue" />
-                  <Stat label="ESG Score" value="A+" icon={ShieldCheck} color="purple" />
+                  <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" />
                 </div>
               )}
 
@@ -1570,7 +1581,7 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
                       <Activity size={18} className="text-emerald-400" />
-                      Platform Statistics
+                      {t('Platform Statistics')}
                     </h3>
                     <div className="flex items-center gap-2">
                       <button 
@@ -1579,7 +1590,7 @@ export default function App() {
                         className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/20 transition-all flex items-center gap-2"
                       >
                         <PlusCircle size={14} />
-                        Seed Demo Data
+                        {t('Seed Demo Data')}
                       </button>
                       <select 
                         value={adminRoleFilter}
@@ -1597,10 +1608,10 @@ export default function App() {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Stat label="Total Users" value={adminStats.total_users} icon={User} color="blue" />
-                    <Stat label="Total Weight" value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" />
-                    <Stat label="Carbon Reduced" value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
-                    <Stat label="Total Value" value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
+                    <Stat label={t('Total Users')} value={adminStats.total_users} icon={User} color="blue" />
+                    <Stat label={t('Total Weight')} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" />
+                    <Stat label={t('Carbon Reduced')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
+                    <Stat label={t('Total Value')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
                   </div>
                 </div>
               )}
@@ -1647,7 +1658,7 @@ export default function App() {
                     <Card>
                       <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
                         <Activity size={18} className="text-emerald-400" />
-                        Recent Activity
+                        {t('Recent Activity')}
                       </h3>
                       <div className="space-y-4">
                         {history.slice(0, 5).map(record => (
@@ -1673,7 +1684,7 @@ export default function App() {
 
                     <Card className="flex flex-col justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold mb-2">Performance Analytics</h3>
+                        <h3 className="text-lg font-semibold mb-2">{t('Performance Analytics')}</h3>
                         <p className="text-white/40 text-sm mb-6">
                           {user?.role === 'citizen' ? 'Your personal contribution trend.' : 'System-wide throughput and efficiency.'}
                         </p>
@@ -1686,7 +1697,7 @@ export default function App() {
                             className="w-full bg-emerald-500/10 text-emerald-400 font-bold py-3 rounded-xl flex items-center justify-center gap-2 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
                           >
                             <Users size={18} />
-                            Register New Farmer
+                            {t('Register New Farmer')}
                           </button>
                         )}
                         <button 
@@ -1694,7 +1705,7 @@ export default function App() {
                           className="w-full bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/90 transition-all"
                         >
                           <PlusCircle size={18} />
-                          {user?.role === 'aggregator' ? 'New Collection Record' : user?.role === 'processor' ? 'New Processing Record' : 'New Intake Record'}
+                          {user?.role === 'aggregator' ? t('New Collection Record') : user?.role === 'processor' ? t('New Processing Record') : t('New Intake Record')}
                         </button>
                       </div>
                     </Card>
@@ -1991,7 +2002,7 @@ export default function App() {
               <Card className="max-w-2xl mx-auto">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <Users className="text-emerald-400" size={20} />
-                  Register New Farmer
+                  {t('Register New Farmer')}
                 </h3>
                 
                 {message && (
@@ -2005,31 +2016,48 @@ export default function App() {
                   e.preventDefault();
                   setLoading(true);
                   try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    setMessage({ type: 'success', text: 'Farmer registered successfully' });
+                    const response = await fetch('/api/farmer/create', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        name: farmerData.name,
+                        mobile: farmerData.phone,
+                        land_area: parseFloat(farmerData.land_area),
+                        crop_type: farmerData.crop_type,
+                        latitude: farmerData.geo_lat,
+                        longitude: farmerData.geo_long
+                      })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to register farmer');
+
+                    setMessage({ type: 'success', text: 'Farmer registered successfully! ID: ' + data.farmer_id });
                     setFarmerData({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
-                    setTimeout(() => setMessage(null), 3000);
-                  } catch (err) {
-                    setMessage({ type: 'error', text: 'Failed to register farmer' });
+                    setTimeout(() => setMessage(null), 5000);
+                  } catch (err: any) {
+                    setMessage({ type: 'error', text: err.message });
                   } finally {
                     setLoading(false);
                   }
                 }} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Full Name</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Full Name')}</label>
                       <input 
                         type="text" 
                         required
                         value={farmerData.name}
                         onChange={e => setFarmerData({...farmerData, name: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                        placeholder="Farmer Name"
+                        placeholder={t('Full Name')}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Mobile Number</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Mobile Number')}</label>
                       <input 
                         type="tel" 
                         required
@@ -2040,7 +2068,7 @@ export default function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Land Area (Acres)</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Land Area (Acres)')}</label>
                       <input 
                         type="number" 
                         step="0.1"
@@ -2052,7 +2080,7 @@ export default function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Crop Type</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Crop Type')}</label>
                       <input 
                         type="text" 
                         required
@@ -2065,7 +2093,7 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Farm Location</label>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Farm Location')}</label>
                     <div className="flex gap-4 mb-2">
                       <div className="flex-1 relative">
                         <input 
@@ -2075,7 +2103,7 @@ export default function App() {
                           value={farmerData.geo_lat || ''}
                           onChange={e => setFarmerData({...farmerData, geo_lat: parseFloat(e.target.value)})}
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                          placeholder="Latitude"
+                          placeholder={t('Latitude')}
                         />
                       </div>
                       <div className="flex-1 relative">
@@ -2086,7 +2114,7 @@ export default function App() {
                           value={farmerData.geo_long || ''}
                           onChange={e => setFarmerData({...farmerData, geo_long: parseFloat(e.target.value)})}
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                          placeholder="Longitude"
+                          placeholder={t('Longitude')}
                         />
                       </div>
                     </div>
@@ -2113,7 +2141,7 @@ export default function App() {
                       }}
                       className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
                     >
-                      <MapPin size={12} /> Get Current Location
+                      <MapPin size={12} /> {t('Get Current Location')}
                     </button>
                   </div>
 
@@ -2122,7 +2150,7 @@ export default function App() {
                     disabled={loading}
                     className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50"
                   >
-                    {loading ? 'Registering...' : 'Register Farmer'}
+                    {loading ? t('Registering...') : t('Register Farmer')}
                   </button>
                 </form>
               </Card>
