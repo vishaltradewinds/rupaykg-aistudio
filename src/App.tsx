@@ -285,7 +285,7 @@ export default function App() {
     district: '',
     state: ''
   });
-  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '' });
+  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '' });
   const [farmerData, setFarmerData] = useState({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
   const [availableRecords, setAvailableRecords] = useState<BiomassRecord[]>([]);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'fetching' | 'success' | 'error'>('idle');
@@ -700,6 +700,7 @@ export default function App() {
       const payload = {
         ...uploadData,
         weight_kg: parseFloat(uploadData.weight_kg),
+        acreage: parseFloat(uploadData.acreage) || 0,
         context: operatingContext
       };
 
@@ -715,7 +716,7 @@ export default function App() {
       if (!res.ok) throw new Error(data.error || 'Operation failed');
 
       setMessage({ type: 'success', text: data.message });
-      setUploadData({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '' });
+      setUploadData({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '' });
       fetchUserData();
       setTimeout(() => setView('dashboard'), 2000);
     } catch (err: any) {
@@ -845,12 +846,34 @@ export default function App() {
               <a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a>
               <a href="#roles" className="hover:text-white transition-colors">Ecosystem Roles</a>
             </div>
-            <button 
-              onClick={() => setShowAuth(true)}
-              className="bg-white text-black px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-white/90 transition-all flex items-center gap-2"
-            >
-              Launch OS <ArrowRight size={16} />
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <button className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium">
+                  <Globe size={16} />
+                  {i18n.language === 'en' ? 'EN' : 'HI'}
+                </button>
+                <div className="absolute right-0 mt-2 w-32 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
+                  <button 
+                    onClick={() => i18n.changeLanguage('en')}
+                    className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                  >
+                    English
+                  </button>
+                  <button 
+                    onClick={() => i18n.changeLanguage('hi')}
+                    className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                  >
+                    हिंदी
+                  </button>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowAuth(true)}
+                className="bg-white text-black px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-white/90 transition-all flex items-center gap-2"
+              >
+                Launch OS <ArrowRight size={16} />
+              </button>
+            </div>
           </nav>
 
           {/* Hero Section */}
@@ -879,6 +902,26 @@ export default function App() {
                 >
                   Access the OS <ArrowRight size={20} />
                 </button>
+                <div className="relative group w-full sm:w-auto">
+                  <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2">
+                    <Globe size={20} />
+                    {i18n.language === 'en' ? 'English' : 'हिंदी'}
+                  </button>
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
+                    <button 
+                      onClick={() => i18n.changeLanguage('en')}
+                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                    >
+                      English
+                    </button>
+                    <button 
+                      onClick={() => i18n.changeLanguage('hi')}
+                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                    >
+                      हिंदी
+                    </button>
+                  </div>
+                </div>
                 <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all">
                   Read Whitepaper
                 </button>
@@ -1129,7 +1172,29 @@ export default function App() {
     }
 
     return (
-      <div className="min-h-screen bg-[#0A0A0B] text-white flex items-center justify-center p-4 font-sans">
+      <div className="min-h-screen bg-[#0A0A0B] text-white flex items-center justify-center p-4 font-sans relative">
+        <div className="absolute top-6 right-6 z-50">
+          <div className="relative group">
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium bg-[#0A0A0B]/80 backdrop-blur-md">
+              <Globe size={16} />
+              {i18n.language === 'en' ? 'EN' : 'HI'}
+            </button>
+            <div className="absolute right-0 mt-2 w-32 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
+              <button 
+                onClick={() => i18n.changeLanguage('en')}
+                className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+              >
+                English
+              </button>
+              <button 
+                onClick={() => i18n.changeLanguage('hi')}
+                className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+              >
+                हिंदी
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full" />
@@ -1473,14 +1538,25 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
-              <button 
-                onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'hi' : 'en')}
-                className="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white/10 hover:bg-white/20 text-white flex items-center gap-2"
-              >
+            <div className="relative group">
+              <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold transition-all hover:bg-white/10 text-white">
                 <Globe size={14} />
-                {i18n.language === 'en' ? 'हिंदी' : 'English'}
+                {i18n.language === 'en' ? 'English' : 'हिंदी'}
               </button>
+              <div className="absolute right-0 mt-2 w-32 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
+                <button 
+                  onClick={() => i18n.changeLanguage('en')}
+                  className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                >
+                  English
+                </button>
+                <button 
+                  onClick={() => i18n.changeLanguage('hi')}
+                  className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                >
+                  हिंदी
+                </button>
+              </div>
             </div>
             <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
               <button 
@@ -1860,6 +1936,21 @@ export default function App() {
                         </div>
                       </div>
                       <div>
+                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Acreage (acres)</label>
+                        <div className="relative">
+                          <input 
+                            type="number" 
+                            step="0.1"
+                            required
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                            placeholder="0.0"
+                            value={uploadData.acreage}
+                            onChange={e => setUploadData({...uploadData, acreage: e.target.value})}
+                          />
+                          <Map className="absolute right-4 top-3.5 text-white/20" size={18} />
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
                         <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Waste Type</label>
                         <select 
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 appearance-none text-white"

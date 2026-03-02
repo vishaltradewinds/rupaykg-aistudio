@@ -223,13 +223,51 @@ async function startServer() {
   });
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), (req: any, res) => {
-    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context } = req.body;
+    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage } = req.body;
     
     const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
     const base_value = weight_kg * wasteConfig.value;
     const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
     const potential_carbon_value = carbon_reduction_kg * 10;
     const total_value = base_value + potential_carbon_value;
+    
+    // AI Risk Score Calculation
+    let risk_score = 0;
+    
+    // 1. Geolocation accuracy (mock: if missing, high risk)
+    if (!geo_lat || !geo_long) {
+      risk_score += 0.3;
+    } else {
+      // Mock: check if coordinates are within expected bounds (e.g., India)
+      if (geo_lat < 8 || geo_lat > 37 || geo_long < 68 || geo_long > 97) {
+        risk_score += 0.2;
+      }
+    }
+
+    // 2. Image quality (mock: if missing, high risk)
+    if (!image_url) {
+      risk_score += 0.2;
+    }
+
+    // 3. Weight/Acreage ratio
+    if (acreage && acreage > 0) {
+      const expected_kg = acreage * 2500; // 2.5 tonnes per acre
+      const deviation = Math.abs(expected_kg - weight_kg) / expected_kg;
+      risk_score += Math.min(deviation * 0.5, 0.4); // Max 0.4 penalty for deviation
+    } else {
+      // If no acreage provided, use weight thresholds
+      if (weight_kg > 5000) {
+        risk_score += 0.3;
+      } else if (weight_kg > 1000) {
+        risk_score += 0.1;
+      }
+    }
+
+    // 4. Waste type consistency (mock: random factor for demo)
+    risk_score += Math.random() * 0.1;
+
+    // Cap at 1.0
+    risk_score = Math.min(risk_score, 1.0);
     
     const record = {
       id: "REC" + Date.now(),
@@ -240,6 +278,8 @@ async function startServer() {
       geo_lat,
       geo_long,
       image_url,
+      acreage: acreage || 0,
+      risk_score,
       context: context || "rural", // Default to rural if not provided
       status: "pending_pickup",
       mrv_status: "pending", // MRV Status: pending, verified, rejected
