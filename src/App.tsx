@@ -269,7 +269,7 @@ const FraudMap = ({ alerts, subLabel }: { alerts: any[], subLabel: string }) => 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer'>('dashboard');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
   
@@ -284,6 +284,7 @@ export default function App() {
     state: ''
   });
   const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '' });
+  const [farmerData, setFarmerData] = useState({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
   const [availableRecords, setAvailableRecords] = useState<BiomassRecord[]>([]);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'fetching' | 'success' | 'error'>('idle');
   
@@ -1681,7 +1682,7 @@ export default function App() {
                       <div className="flex flex-col gap-3 mt-6">
                         {user?.role === 'aggregator' && (
                           <button 
-                            onClick={() => alert('Farmer Registration Modal - Coming Soon')}
+                            onClick={() => setView('register_farmer')}
                             className="w-full bg-emerald-500/10 text-emerald-400 font-bold py-3 rounded-xl flex items-center justify-center gap-2 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
                           >
                             <Users size={18} />
@@ -1976,6 +1977,155 @@ export default function App() {
                     </button>
                   </form>
                 </Card>
+            </motion.div>
+          )}
+
+          {view === 'register_farmer' && user?.role === 'aggregator' && (
+            <motion.div 
+              key="register_farmer"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-4xl mx-auto"
+            >
+              <Card className="max-w-2xl mx-auto">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <Users className="text-emerald-400" size={20} />
+                  Register New Farmer
+                </h3>
+                
+                {message && (
+                  <div className={`p-4 mb-6 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                    {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                    {message.text}
+                  </div>
+                )}
+
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setLoading(true);
+                  try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    setMessage({ type: 'success', text: 'Farmer registered successfully' });
+                    setFarmerData({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
+                    setTimeout(() => setMessage(null), 3000);
+                  } catch (err) {
+                    setMessage({ type: 'error', text: 'Failed to register farmer' });
+                  } finally {
+                    setLoading(false);
+                  }
+                }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Full Name</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={farmerData.name}
+                        onChange={e => setFarmerData({...farmerData, name: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                        placeholder="Farmer Name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Mobile Number</label>
+                      <input 
+                        type="tel" 
+                        required
+                        value={farmerData.phone}
+                        onChange={e => setFarmerData({...farmerData, phone: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                        placeholder="+91 98765 43210"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Land Area (Acres)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        required
+                        value={farmerData.land_area}
+                        onChange={e => setFarmerData({...farmerData, land_area: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                        placeholder="0.0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Crop Type</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={farmerData.crop_type}
+                        onChange={e => setFarmerData({...farmerData, crop_type: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                        placeholder="e.g., Paddy, Wheat"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Farm Location</label>
+                    <div className="flex gap-4 mb-2">
+                      <div className="flex-1 relative">
+                        <input 
+                          type="number" 
+                          step="any"
+                          required
+                          value={farmerData.geo_lat || ''}
+                          onChange={e => setFarmerData({...farmerData, geo_lat: parseFloat(e.target.value)})}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                          placeholder="Latitude"
+                        />
+                      </div>
+                      <div className="flex-1 relative">
+                        <input 
+                          type="number" 
+                          step="any"
+                          required
+                          value={farmerData.geo_long || ''}
+                          onChange={e => setFarmerData({...farmerData, geo_long: parseFloat(e.target.value)})}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                          placeholder="Longitude"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                              setFarmerData({
+                                ...farmerData,
+                                geo_lat: position.coords.latitude,
+                                geo_long: position.coords.longitude
+                              });
+                            },
+                            (error) => {
+                              console.error("Error getting location:", error);
+                              alert("Failed to get location. Please enter manually.");
+                            }
+                          );
+                        } else {
+                          alert("Geolocation is not supported by this browser.");
+                        }
+                      }}
+                      className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                    >
+                      <MapPin size={12} /> Get Current Location
+                    </button>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50"
+                  >
+                    {loading ? 'Registering...' : 'Register Farmer'}
+                  </button>
+                </form>
+              </Card>
             </motion.div>
           )}
 
