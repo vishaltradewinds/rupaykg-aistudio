@@ -269,7 +269,7 @@ const FraudMap = ({ alerts, subLabel }: { alerts: any[], subLabel: string }) => 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings'>('dashboard');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
   
@@ -1303,7 +1303,8 @@ export default function App() {
                       { label: labels.anchor, role: 'municipal_admin', phone: '9000000004' },
                       { label: 'State Admin', role: 'state_admin', phone: '9000000005' },
                       { label: 'Carbon Buyer', role: 'carbon_buyer', phone: '9000000006' },
-                      { label: 'National Regulator', role: 'regulator', phone: '9000000007' }
+                      { label: 'National Regulator', role: 'regulator', phone: '9000000007' },
+                      { label: 'Super Admin', role: 'super_admin', phone: '9000000000' }
                     ].map((demo) => (
                       <button
                         key={demo.role}
@@ -1427,6 +1428,13 @@ export default function App() {
             <BookOpen size={20} />
             <span className="hidden md:block font-medium">Genesis</span>
           </button>
+          <button 
+            onClick={() => setView('settings')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'settings' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <User size={20} />
+            <span className="hidden md:block font-medium">Settings</span>
+          </button>
         </div>
 
         <button 
@@ -1450,6 +1458,7 @@ export default function App() {
               {view === 'admin' && 'National Dashboard'}
               {view === 'municipal' && labels.viewTitle}
               {view === 'genesis' && 'Foundational Doctrine'}
+              {view === 'settings' && 'Account Settings'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               Welcome back, {user?.name || 'Citizen'}
@@ -2333,20 +2342,31 @@ export default function App() {
                             </div>
                             <div>
                               <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">AI Risk Score</p>
-                              <div className="flex items-center gap-2">
-                                <p className={`text-sm font-bold ${
-                                  (record.risk_score || 0) < 0.2 ? 'text-emerald-400' :
-                                  (record.risk_score || 0) < 0.5 ? 'text-amber-400' : 'text-red-400'
-                                }`}>
-                                  {((record.risk_score || 0) * 100).toFixed(0)}%
-                                </p>
-                                <span className={`text-[8px] px-1 rounded uppercase font-bold border ${
-                                  (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                  (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                  'bg-red-500/10 text-red-400 border-red-500/20'
-                                }`}>
-                                  {(record.risk_score || 0) < 0.2 ? 'Low' : (record.risk_score || 0) < 0.5 ? 'Med' : 'High'}
-                                </span>
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <p className={`text-sm font-bold ${
+                                    (record.risk_score || 0) < 0.2 ? 'text-emerald-400' :
+                                    (record.risk_score || 0) < 0.5 ? 'text-amber-400' : 'text-red-400'
+                                  }`}>
+                                    {((record.risk_score || 0) * 100).toFixed(0)}%
+                                  </p>
+                                  <span className={`text-[8px] px-1 rounded uppercase font-bold border ${
+                                    (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                    (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                    'bg-red-500/10 text-red-400 border-red-500/20'
+                                  }`}>
+                                    {(record.risk_score || 0) < 0.2 ? 'Low' : (record.risk_score || 0) < 0.5 ? 'Med' : 'High'}
+                                  </span>
+                                </div>
+                                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full ${
+                                      (record.risk_score || 0) < 0.2 ? 'bg-emerald-500' :
+                                      (record.risk_score || 0) < 0.5 ? 'bg-amber-500' : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${Math.min(100, (record.risk_score || 0) * 100)}%` }}
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -2398,6 +2418,7 @@ export default function App() {
                         <tr>
                           <th className="p-4 font-medium">Record ID</th>
                           <th className="p-4 font-medium">Details</th>
+                          <th className="p-4 font-medium">AI Risk</th>
                           <th className="p-4 font-medium">Status</th>
                           <th className="p-4 font-medium">Verified By</th>
                           <th className="p-4 font-medium">Date</th>
@@ -2410,6 +2431,17 @@ export default function App() {
                             <td className="p-4">
                               <p className="font-medium">{record.weight_kg}kg {record.waste_type}</p>
                               <p className="text-xs text-white/40">{labels.sub}: {record.village}</p>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border ${
+                                  (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                  'bg-red-500/10 text-red-400 border-red-500/20'
+                                }`}>
+                                  {((record.risk_score || 0) * 100).toFixed(0)}%
+                                </span>
+                              </div>
                             </td>
                             <td className="p-4">
                               <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
@@ -2427,7 +2459,7 @@ export default function App() {
                         ))}
                         {mrvHistory.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="p-8 text-center text-white/40">No MRV history found</td>
+                            <td colSpan={6} className="p-8 text-center text-white/40">No MRV history found</td>
                           </tr>
                         )}
                       </tbody>
@@ -2460,27 +2492,45 @@ export default function App() {
                   >
                     User Management
                   </button>
+                  <button 
+                    onClick={() => setAdminSubView('audit')}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'audit' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    Audit Logs
+                  </button>
                 </div>
               )}
 
               {adminSubView === 'dashboard' ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="p-6 border-white/5 bg-white/5">
-                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Waste Events</h4>
-                      <p className="text-3xl font-bold">{adminKpi.total_waste_events || 0}</p>
+                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Activity size={80} className="text-white" />
+                      </div>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Total Waste Events</h4>
+                      <p className="text-4xl font-black tracking-tighter">{adminKpi.total_waste_events || 0}</p>
                     </Card>
-                    <Card className="p-6 border-white/5 bg-white/5">
-                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Processed Events</h4>
-                      <p className="text-3xl font-bold">{adminKpi.processed_events || 0}</p>
+                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <CheckCircle2 size={80} className="text-emerald-400" />
+                      </div>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Processed Events</h4>
+                      <p className="text-4xl font-black tracking-tighter text-emerald-400">{adminKpi.processed_events || 0}</p>
                     </Card>
-                    <Card className="p-6 border-white/5 bg-white/5">
-                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Users</h4>
-                      <p className="text-3xl font-bold">{adminKpi.total_users || 0}</p>
+                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Users size={80} className="text-blue-400" />
+                      </div>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Total Users</h4>
+                      <p className="text-4xl font-black tracking-tighter text-blue-400">{adminKpi.total_users || 0}</p>
                     </Card>
-                    <Card className="p-6 border-white/5 bg-white/5">
-                      <h4 className="text-white/40 text-sm uppercase tracking-widest mb-2">Wallet Disbursed</h4>
-                      <p className="text-3xl font-bold text-emerald-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
+                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Wallet size={80} className="text-amber-400" />
+                      </div>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Wallet Disbursed</h4>
+                      <p className="text-4xl font-black tracking-tighter text-amber-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
                     </Card>
                   </div>
 
@@ -2513,12 +2563,15 @@ export default function App() {
                         </div>
                       </Card>
 
-                      <Card className="p-6 border-white/5 bg-white/5">
-                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <Sprout size={80} className="text-emerald-400" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
                           <Sprout className="text-emerald-400" size={20} />
                           Environmental Impact
                         </h3>
-                        <div className="space-y-6">
+                        <div className="space-y-6 relative z-10">
                           <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
                             <div>
                               <p className="text-white/40 text-xs uppercase tracking-widest">Methane Avoided</p>
@@ -2547,12 +2600,15 @@ export default function App() {
 
                   {comprehensiveMetrics && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                      <Card className="p-6 border-white/5 bg-white/5">
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <Scale size={80} className="text-amber-400" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
                           <Scale className="text-amber-400" size={18} />
                           Economic Efficiency
                         </h3>
-                        <div className="space-y-4">
+                        <div className="space-y-4 relative z-10">
                           <div className="flex justify-between text-sm">
                             <span className="text-white/40">Avg Price / kg</span>
                             <span className="font-mono">₹{comprehensiveMetrics.economic.avg_price_per_kg}</span>
@@ -2569,12 +2625,15 @@ export default function App() {
                         </div>
                       </Card>
 
-                      <Card className="p-6 border-white/5 bg-white/5">
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <Activity size={80} className="text-cyan-400" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
                           <Activity className="text-cyan-400" size={18} />
                           Operational Health
                         </h3>
-                        <div className="space-y-4">
+                        <div className="space-y-4 relative z-10">
                           <div className="flex justify-between text-sm">
                             <span className="text-white/40">Processing Efficiency</span>
                             <span className="font-mono">{comprehensiveMetrics.operational.processing_efficiency}%</span>
@@ -2594,12 +2653,15 @@ export default function App() {
                         </div>
                       </Card>
 
-                      <Card className="p-6 border-white/5 bg-white/5">
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <BarChart3 size={80} className="text-indigo-400" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
                           <BarChart3 className="text-indigo-400" size={18} />
                           Waste Composition
                         </h3>
-                        <div className="h-[150px]">
+                        <div className="h-[150px] relative z-10">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -2669,7 +2731,7 @@ export default function App() {
                     </Card>
                   </div>
                 </>
-              ) : (
+              ) : adminSubView === 'users' ? (
                 <Card className="p-6 border-white/5 bg-white/5">
                   <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                     <Users className="text-emerald-400" size={20} />
@@ -2737,7 +2799,58 @@ export default function App() {
                     )}
                   </div>
                 </Card>
-              )}
+              ) : adminSubView === 'audit' ? (
+                <Card className="p-0 overflow-hidden">
+                  <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <BookOpen className="text-emerald-400" size={20} />
+                      System Audit Logs
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-white/5 text-white/60 border-b border-white/10">
+                        <tr>
+                          <th className="p-4 font-medium">Timestamp</th>
+                          <th className="p-4 font-medium">Action</th>
+                          <th className="p-4 font-medium">User ID</th>
+                          <th className="p-4 font-medium">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {auditLogs.map((log, i) => (
+                          <tr key={i} className="hover:bg-white/5 transition-colors">
+                            <td className="p-4 font-mono text-xs text-white/60">
+                              {new Date(log.timestamp).toLocaleString()}
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                                log.action.includes('CREATE') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                log.action.includes('UPDATE') ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                log.action.includes('DELETE') ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                'bg-white/10 text-white/60 border border-white/20'
+                              }`}>
+                                {log.action}
+                              </span>
+                            </td>
+                            <td className="p-4 font-mono text-xs text-white/60">{log.user_id}</td>
+                            <td className="p-4 text-xs text-white/80 max-w-md truncate">
+                              {JSON.stringify(log.details)}
+                            </td>
+                          </tr>
+                        ))}
+                        {auditLogs.length === 0 && (
+                          <tr>
+                            <td colSpan={4} className="p-8 text-center text-white/40">
+                              No audit logs available.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              ) : null}
             </motion.div>
           )}
 
@@ -2865,6 +2978,137 @@ export default function App() {
                   ))}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {view === 'settings' && (
+            <motion.div 
+              key="settings"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-4xl mx-auto space-y-6"
+            >
+              <Card className="p-8 border-white/5 bg-white/5">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <User className="text-emerald-400" size={20} />
+                  Profile Settings
+                </h3>
+                
+                {message && (
+                  <div className={`p-4 mb-6 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                    {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                    {message.text}
+                  </div>
+                )}
+
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setLoading(true);
+                  try {
+                    const res = await fetch('/api/citizen/profile/update', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                      body: JSON.stringify({ name: formData.name, district: formData.district, state: formData.state })
+                    });
+                    if (res.ok) {
+                      setMessage({ type: 'success', text: 'Profile updated successfully' });
+                      fetchUserData();
+                    } else {
+                      setMessage({ type: 'error', text: 'Failed to update profile' });
+                    }
+                  } catch (err) {
+                    setMessage({ type: 'error', text: 'An error occurred' });
+                  } finally {
+                    setLoading(false);
+                  }
+                }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Full Name</label>
+                      <input 
+                        type="text" 
+                        value={formData.name || user?.name || ''}
+                        onChange={e => setFormData({...formData, name: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Phone Number</label>
+                      <input 
+                        type="text" 
+                        value={user?.phone || ''}
+                        disabled
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/40 cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">District</label>
+                      <input 
+                        type="text" 
+                        value={formData.district || user?.district || ''}
+                        onChange={e => setFormData({...formData, district: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">State</label>
+                      <input 
+                        type="text" 
+                        value={formData.state || user?.state || ''}
+                        onChange={e => setFormData({...formData, state: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full md:w-auto px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all disabled:opacity-50"
+                  >
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </form>
+              </Card>
+
+              <Card className="p-8 border-white/5 bg-white/5">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <AlertCircle className="text-blue-400" size={20} />
+                  Notification Preferences
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
+                    <div>
+                      <p className="font-medium">Email Notifications</p>
+                      <p className="text-xs text-white/40">Receive updates about your transactions via email.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
+                    <div>
+                      <p className="font-medium">SMS Alerts</p>
+                      <p className="text-xs text-white/40">Get instant SMS alerts for critical updates.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
+                    <div>
+                      <p className="font-medium">Push Notifications</p>
+                      <p className="text-xs text-white/40">Enable browser push notifications.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                  </div>
+                </div>
+              </Card>
             </motion.div>
           )}
 
