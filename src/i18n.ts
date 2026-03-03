@@ -357,7 +357,17 @@ const resources = {
       "Network Active": "नेटवर्क सक्रिय",
       "National Dashboard": "राष्ट्रीय डैशबोर्ड"
     }
-  }
+  },
+  mr: { translation: { "Language": "भाषा", "English": "English", "Hindi": "हिंदी", "Marathi": "मराठी" } },
+  gu: { translation: { "Language": "ભાષા", "English": "English", "Hindi": "हिंदी", "Gujarati": "ગુજરાતી" } },
+  ta: { translation: { "Language": "மொழி", "English": "English", "Hindi": "हिंदी", "Tamil": "தமிழ்" } },
+  te: { translation: { "Language": "భాష", "English": "English", "Hindi": "हिंदी", "Telugu": "తెలుగు" } },
+  kn: { translation: { "Language": "ಭಾಷೆ", "English": "English", "Hindi": "हिंदी", "Kannada": "ಕನ್ನಡ" } },
+  ml: { translation: { "Language": "ഭാഷ", "English": "English", "Hindi": "हिंदी", "Malayalam": "മലയാളം" } },
+  bn: { translation: { "Language": "ভাষা", "English": "English", "Hindi": "हिंदी", "Bengali": "বাংলা" } },
+  pa: { translation: { "Language": "ਭਾਸ਼ા", "English": "English", "Hindi": "हिंदी", "Punjabi": "ਪੰਜਾਬੀ" } },
+  or: { translation: { "Language": "ଭାଷା", "English": "English", "Hindi": "हिंदी", "Odia": "ଓଡ଼ିଆ" } },
+  as: { translation: { "Language": "ভাষা", "English": "English", "Hindi": "हिंदी", "Assamese": "অসমীয়া" } }
 };
 
 i18n

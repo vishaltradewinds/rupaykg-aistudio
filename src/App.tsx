@@ -1560,21 +1560,46 @@ export default function App() {
             <div className="relative group">
               <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold transition-all hover:bg-white/10 text-white">
                 <Globe size={14} />
-                {i18n.language === 'en' ? 'English' : 'हिंदी'}
+                {(() => {
+                  switch(i18n.language) {
+                    case 'hi': return 'हिंदी';
+                    case 'mr': return 'मराठी';
+                    case 'gu': return 'ગુજરાતી';
+                    case 'ta': return 'தமிழ்';
+                    case 'te': return 'తెలుగు';
+                    case 'kn': return 'ಕನ್ನಡ';
+                    case 'ml': return 'മലയാളം';
+                    case 'bn': return 'বাংলা';
+                    case 'pa': return 'ਪੰਜਾਬੀ';
+                    case 'or': return 'ଓଡ଼ିଆ';
+                    case 'as': return 'অসমীয়া';
+                    default: return 'English';
+                  }
+                })()}
               </button>
-              <div className="absolute right-0 mt-2 w-32 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
-                <button 
-                  onClick={() => i18n.changeLanguage('en')}
-                  className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                >
-                  English
-                </button>
-                <button 
-                  onClick={() => i18n.changeLanguage('hi')}
-                  className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                >
-                  हिंदी
-                </button>
+              <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+                {[
+                  { code: 'en', label: 'English' },
+                  { code: 'hi', label: 'हिंदी' },
+                  { code: 'mr', label: 'मराठी' },
+                  { code: 'gu', label: 'ગુજરાતી' },
+                  { code: 'ta', label: 'தமிழ்' },
+                  { code: 'te', label: 'తెలుగు' },
+                  { code: 'kn', label: 'ಕನ್ನಡ' },
+                  { code: 'ml', label: 'മലയാളം' },
+                  { code: 'bn', label: 'বাংলা' },
+                  { code: 'pa', label: 'ਪੰਜਾਬੀ' },
+                  { code: 'or', label: 'ଓଡ଼ିଆ' },
+                  { code: 'as', label: 'অসমীয়া' }
+                ].map((lang) => (
+                  <button 
+                    key={lang.code}
+                    onClick={() => i18n.changeLanguage(lang.code)}
+                    className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
               </div>
             </div>
             <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
