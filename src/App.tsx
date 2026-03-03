@@ -28,7 +28,8 @@ import {
   Cpu,
   AlertTriangle,
   Map,
-  BookOpen
+  BookOpen,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -376,6 +377,24 @@ export default function App() {
       });
       if (res.ok) {
         setMessage({ type: 'success', text: 'Demo data seeded successfully' });
+        fetchUserData();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetDemoData = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/reset', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'Demo data reset successfully' });
         fetchUserData();
       }
     } catch (err) {
@@ -842,9 +861,9 @@ export default function App() {
               <span className="text-xl font-bold tracking-tighter">RUPAYKG</span>
             </div>
             <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
-              <a href="#features" className="hover:text-white transition-colors">Features</a>
-              <a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a>
-              <a href="#roles" className="hover:text-white transition-colors">Ecosystem Roles</a>
+              <a href="#features" className="hover:text-white transition-colors">{t('Features')}</a>
+              <a href="#how-it-works" className="hover:text-white transition-colors">{t('How it Works')}</a>
+              <a href="#roles" className="hover:text-white transition-colors">{t('Ecosystem Roles')}</a>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative group">
@@ -887,20 +906,20 @@ export default function App() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-8">
                 <Globe size={16} />
-                Sovereign-Grade Circular Economy Engine
+                {t('Sovereign-Grade Circular Economy Engine')}
               </div>
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 leading-[1.1]">
-                Convert Every Kilogram of Waste into <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">Global Circular Value</span>
+                {t('Convert Every Kilogram of Waste into')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">{t('Global Circular Value')}</span>
               </h1>
               <p className="text-xl text-white/60 mb-12 max-w-2xl mx-auto leading-relaxed">
-                RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.
+                {t('RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
                   onClick={() => setShowAuth(true)}
                   className="w-full sm:w-auto bg-emerald-500 text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
                 >
-                  Access the OS <ArrowRight size={20} />
+                  {t('Access the OS')} <ArrowRight size={20} />
                 </button>
                 <div className="relative group w-full sm:w-auto">
                   <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2">
@@ -940,27 +959,27 @@ export default function App() {
                 <div className="p-3 bg-blue-500/20 text-blue-400 rounded-xl w-fit mb-6">
                   <Activity size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">Multi-Rail Value Engine</h3>
+                <h3 className="text-xl font-bold mb-3">{t('Multi-Rail Value Engine')}</h3>
                 <p className="text-white/50 leading-relaxed">
-                  Simultaneously extract value from Recycler, CSR, Municipal, Carbon, and EPR rails for every kilogram of biomass processed.
+                  {t('Simultaneously extract value from Recycler, CSR, Municipal, Carbon, and EPR rails for every kilogram of biomass processed.')}
                 </p>
               </Card>
               <Card className="bg-black/40">
                 <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl w-fit mb-6">
                   <ShieldCheck size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">AI-Verified Intake</h3>
+                <h3 className="text-xl font-bold mb-3">{t('AI-Verified Intake')}</h3>
                 <p className="text-white/50 leading-relaxed">
-                  Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.
+                  {t('Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.')}
                 </p>
               </Card>
               <Card className="bg-black/40">
                 <div className="p-3 bg-purple-500/20 text-purple-400 rounded-xl w-fit mb-6">
                   <TrendingUp size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">Rural Wealth Creation</h3>
+                <h3 className="text-xl font-bold mb-3">{t('Rural Wealth Creation')}</h3>
                 <p className="text-white/50 leading-relaxed">
-                  Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.
+                  {t('Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.')}
                 </p>
               </Card>
             </motion.div>
@@ -1066,16 +1085,16 @@ export default function App() {
               className="mt-40 relative z-10 scroll-mt-32"
             >
               <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">How the Engine Works</h2>
-                <p className="text-white/50 max-w-2xl mx-auto">A seamless pipeline from waste generation to value realization.</p>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">{t('How the Engine Works')}</h2>
+                <p className="text-white/50 max-w-2xl mx-auto">{t('A seamless pipeline from waste generation to value realization.')}</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {[
-                  { step: "01", title: "Generate", desc: "Citizens collect agricultural, municipal, or industrial waste." },
-                  { step: "02", title: "Aggregate", desc: "Aggregators verify, weigh, and transport waste to facilities." },
-                  { step: "03", title: "Process", desc: "Recyclers convert waste into usable materials or energy." },
-                  { step: "04", title: "Mint Value", desc: "Smart contracts distribute funds across all 5 value rails." }
+                  { step: "01", title: t("Generate"), desc: t("Citizens collect agricultural, municipal, or industrial waste.") },
+                  { step: "02", title: t("Aggregate"), desc: t("Aggregators verify, weigh, and transport waste to facilities.") },
+                  { step: "03", title: t("Process"), desc: t("Recyclers convert waste into usable materials or energy.") },
+                  { step: "04", title: t("Mint Value"), desc: t("Smart contracts distribute funds across all 5 value rails.") }
                 ].map((item, i) => (
                   <div key={i} className="relative p-6 border border-white/10 rounded-2xl bg-white/5">
                     <div className="text-5xl font-bold text-white/10 mb-4 font-mono">{item.step}</div>
@@ -1095,8 +1114,8 @@ export default function App() {
               className="mt-40 relative z-10 scroll-mt-32"
             >
               <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">Ecosystem Roles</h2>
-                <p className="text-white/50 max-w-2xl mx-auto">Choose your part in the circular economy.</p>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">{t('Ecosystem Roles')}</h2>
+                <p className="text-white/50 max-w-2xl mx-auto">{t('Choose your part in the circular economy.')}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1104,15 +1123,15 @@ export default function App() {
                   <div className="p-4 bg-emerald-500/20 text-emerald-400 rounded-2xl w-fit mb-6">
                     <Sprout size={32} />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Citizen</h3>
-                  <p className="text-emerald-400/80 text-sm font-medium mb-4">Waste Generator</p>
+                  <h3 className="text-2xl font-bold mb-2">{t('Citizen')}</h3>
+                  <p className="text-emerald-400/80 text-sm font-medium mb-4">{t('Waste Generator')}</p>
                   <p className="text-white/60 mb-6">
-                    Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.
+                    {t('Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.')}
                   </p>
                   <ul className="space-y-2 text-sm text-white/50">
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-500" /> Upload waste records</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> Instant wallet funding</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> Track environmental impact</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-500" /> {t('Upload waste records')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> {t('Instant wallet funding')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> {t('Track environmental impact')}</li>
                   </ul>
                 </Card>
 
@@ -1120,15 +1139,15 @@ export default function App() {
                   <div className="p-4 bg-blue-500/20 text-blue-400 rounded-2xl w-fit mb-6">
                     <Truck size={32} />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Aggregator</h3>
-                  <p className="text-blue-400/80 text-sm font-medium mb-4">Collection & Transport</p>
+                  <h3 className="text-2xl font-bold mb-2">{t('Aggregator')}</h3>
+                  <p className="text-blue-400/80 text-sm font-medium mb-4">{t('Collection & Transport')}</p>
                   <p className="text-white/60 mb-6">
-                    Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.
+                    {t('Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.')}
                   </p>
                   <ul className="space-y-2 text-sm text-white/50">
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-blue-500" /> Log collection batches</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-blue-400" /> Earn logistics margins</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-blue-400" /> Route optimization data</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-blue-500" /> {t('Log collection batches')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-blue-400" /> {t('Earn logistics margins')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-blue-400" /> {t('Route optimization data')}</li>
                   </ul>
                 </Card>
 
@@ -1136,15 +1155,15 @@ export default function App() {
                   <div className="p-4 bg-purple-500/20 text-purple-400 rounded-2xl w-fit mb-6">
                     <Factory size={32} />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Recycler</h3>
-                  <p className="text-purple-400/80 text-sm font-medium mb-4">Processor</p>
+                  <h3 className="text-2xl font-bold mb-2">{t('Recycler')}</h3>
+                  <p className="text-purple-400/80 text-sm font-medium mb-4">{t('Processor')}</p>
                   <p className="text-white/60 mb-6">
-                    Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.
+                    {t('Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.')}
                   </p>
                   <ul className="space-y-2 text-sm text-white/50">
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-500" /> Log processing yields</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-400" /> Access CSR/EPR funds</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-400" /> Generate carbon credits</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-500" /> {t('Log processing yields')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-400" /> {t('Access CSR/EPR funds')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-400" /> {t('Generate carbon credits')}</li>
                   </ul>
                 </Card>
               </div>
@@ -1230,7 +1249,7 @@ export default function App() {
                 </button>
               </div>
               <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold">
-                Context: {operatingContext}
+                {t('Context:')} {operatingContext}
               </div>
             </div>
 
@@ -1239,13 +1258,13 @@ export default function App() {
                 onClick={() => setAuthMode('login')}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${authMode === 'login' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
               >
-                Login
+                {t('Login')}
               </button>
               <button 
                 onClick={() => setAuthMode('register')}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${authMode === 'register' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
               >
-                Register
+                {t('Register')}
               </button>
             </div>
 
@@ -1253,7 +1272,7 @@ export default function App() {
               {authMode === 'register' && (
                 <>
                   <div>
-                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">Full Name</label>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Full Name')}</label>
                     <input 
                       type="text" 
                       required
@@ -1264,7 +1283,7 @@ export default function App() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">Account Type</label>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Account Type')}</label>
                     <select 
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 appearance-none text-white"
                       value={formData.role}
@@ -1285,7 +1304,7 @@ export default function App() {
                   
                   {formData.role !== 'citizen' && formData.role !== 'fpo' && (
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">Organization Name</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Organization Name')}</label>
                       <input 
                         type="text" 
                         required
@@ -1299,7 +1318,7 @@ export default function App() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">District</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('District')}</label>
                       <input 
                         type="text" 
                         required
@@ -1310,7 +1329,7 @@ export default function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">State</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('State')}</label>
                       <input 
                         type="text" 
                         required
@@ -1324,7 +1343,7 @@ export default function App() {
                 </>
               )}
               <div>
-                <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">Phone Number</label>
+                <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Phone Number')}</label>
                 <input 
                   type="tel" 
                   required
@@ -1335,7 +1354,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">Password</label>
+                <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Password')}</label>
                 <input 
                   type="password" 
                   required
@@ -1357,22 +1376,22 @@ export default function App() {
                 disabled={loading}
                 className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
               >
-                {loading ? 'Processing...' : authMode === 'login' ? 'Access OS' : 'Create Account'}
+                {loading ? t('Processing...') : authMode === 'login' ? t('Access OS') : t('Create Account')}
               </button>
 
               {authMode === 'login' && (
                 <div className="mt-8 pt-6 border-t border-white/10">
-                  <p className="text-xs uppercase tracking-widest text-white/40 mb-4 text-center font-bold">Quick Demo Access</p>
+                  <p className="text-xs uppercase tracking-widest text-white/40 mb-4 text-center font-bold">{t('Quick Demo Access')}</p>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { label: operatingContext === 'urban' ? 'Citizen' : 'Farmer', role: 'citizen', phone: '9000000001' },
-                      { label: 'Aggregator', role: 'aggregator', phone: '9000000002' },
-                      { label: 'Processor', role: 'processor', phone: '9000000003' },
+                      { label: operatingContext === 'urban' ? t('Citizen') : t('Farmer'), role: 'citizen', phone: '9000000001' },
+                      { label: t('Aggregator'), role: 'aggregator', phone: '9000000002' },
+                      { label: t('Processor'), role: 'processor', phone: '9000000003' },
                       { label: labels.anchor, role: 'municipal_admin', phone: '9000000004' },
-                      { label: 'State Admin', role: 'state_admin', phone: '9000000005' },
-                      { label: 'Carbon Buyer', role: 'carbon_buyer', phone: '9000000006' },
-                      { label: 'National Regulator', role: 'regulator', phone: '9000000007' },
-                      { label: 'Super Admin', role: 'super_admin', phone: '9000000000' }
+                      { label: t('State Admin'), role: 'state_admin', phone: '9000000005' },
+                      { label: t('Carbon Buyer'), role: 'carbon_buyer', phone: '9000000006' },
+                      { label: t('National Regulator'), role: 'regulator', phone: '9000000007' },
+                      { label: t('Super Admin'), role: 'super_admin', phone: '9000000000' }
                     ].map((demo) => (
                       <button
                         key={demo.role}
@@ -1400,7 +1419,7 @@ export default function App() {
                 onClick={() => setShowAuth(false)}
                 className="w-full text-white/40 hover:text-white text-sm mt-4 transition-colors"
               >
-                ← Back to Home
+                ← {t('Back to Home')}
               </button>
             </form>
           </Card>
@@ -1520,13 +1539,13 @@ export default function App() {
           <div>
             <h2 className="text-3xl font-bold tracking-tight">
               {view === 'dashboard' && t('System Overview')}
-              {view === 'upload' && `${labels.waste} Intake`}
-              {view === 'tasks' && 'Operations Management'}
-              {view === 'history' && 'Transaction Ledger'}
-              {view === 'admin' && 'National Dashboard'}
+              {view === 'upload' && `${labels.waste} ${t('Intake')}`}
+              {view === 'tasks' && t('Operations Management')}
+              {view === 'history' && t('Transaction Ledger')}
+              {view === 'admin' && t('National Dashboard')}
               {view === 'municipal' && labels.viewTitle}
-              {view === 'genesis' && 'Foundational Doctrine'}
-              {view === 'settings' && 'Account Settings'}
+              {view === 'genesis' && t('Foundational Doctrine')}
+              {view === 'settings' && t('Account Settings')}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -1667,6 +1686,14 @@ export default function App() {
                       >
                         <PlusCircle size={14} />
                         {t('Seed Demo Data')}
+                      </button>
+                      <button 
+                        onClick={resetDemoData}
+                        disabled={loading}
+                        className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-xl border border-red-500/20 transition-all flex items-center gap-2"
+                      >
+                        <RefreshCw size={14} />
+                        {t('Reset Demo Data')}
                       </button>
                       <select 
                         value={adminRoleFilter}
