@@ -205,6 +205,7 @@ const Stat = ({ label, value, icon: Icon, color = "emerald" }: { label: string, 
 );
 
 const BiomassMap = ({ records }: { records: BiomassRecord[] }) => {
+  const { t } = useTranslation();
   const recordsWithCoords = records.filter(r => r.geo_lat && r.geo_long);
   
   // Default center (India)
@@ -224,9 +225,9 @@ const BiomassMap = ({ records }: { records: BiomassRecord[] }) => {
             <Popup>
               <div className="text-black p-1">
                 <h4 className="font-bold border-b mb-1">{record.waste_type}</h4>
-                <p className="text-xs">Weight: <b>{record.weight_kg}kg</b></p>
-                <p className="text-xs">Village: <b>{record.village}</b></p>
-                <p className="text-xs">Value: <b>₹{record.total_value.toFixed(2)}</b></p>
+                <p className="text-xs">{t('Weight: ')}<b>{record.weight_kg}kg</b></p>
+                <p className="text-xs">{t('Village: ')}<b>{record.village}</b></p>
+                <p className="text-xs">{t('Value: ')}<b>₹{record.total_value.toFixed(2)}</b></p>
                 <p className="text-[10px] text-gray-500 mt-1 uppercase">{record.status}</p>
               </div>
             </Popup>
@@ -238,6 +239,7 @@ const BiomassMap = ({ records }: { records: BiomassRecord[] }) => {
 };
 
 const FraudMap = ({ alerts, subLabel }: { alerts: any[], subLabel: string }) => {
+  const { t } = useTranslation();
   const alertsWithCoords = alerts.filter(a => a.geo_lat && a.geo_long);
   const center: [number, number] = alertsWithCoords.length > 0 
     ? [alertsWithCoords[0].geo_lat, alertsWithCoords[0].geo_long]
@@ -254,9 +256,9 @@ const FraudMap = ({ alerts, subLabel }: { alerts: any[], subLabel: string }) => 
           <Marker key={i} position={[alert.geo_lat, alert.geo_long]}>
             <Popup>
               <div className="text-black p-1">
-                <h4 className="font-bold border-b mb-1 text-red-600">FRAUD ALERT</h4>
-                <p className="text-xs">Type: <b>{alert.waste_type}</b></p>
-                <p className="text-xs">Weight: <b>{alert.weight_kg}kg</b></p>
+                <h4 className="font-bold border-b mb-1 text-red-600">{t('FRAUD ALERT')}</h4>
+                <p className="text-xs">{t('Type: ')}<b>{alert.waste_type}</b></p>
+                <p className="text-xs">{t('Weight: ')}<b>{alert.weight_kg}kg</b></p>
                 <p className="text-xs">{subLabel}: <b>{alert.village}</b></p>
                 <p className="text-[10px] text-gray-500 mt-1 uppercase">ID: {alert.id}</p>
               </div>
@@ -314,24 +316,26 @@ export default function App() {
   const [processorInventory, setProcessorInventory] = useState<any>(null);
   const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
 
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+
   const labels = {
     urban: {
-      anchor: 'Municipal Corporation',
-      sub: 'Ward',
-      waste: 'MSW',
-      analytics: 'Ward Analytics',
-      viewTitle: 'Ward-Level Analytics',
-      citizenLabel: 'Citizen (MSW Generator)',
+      anchor: t('Municipal Corporation'),
+      sub: t('Ward'),
+      waste: t('MSW'),
+      analytics: t('Ward Analytics'),
+      viewTitle: t('Ward-Level Analytics'),
+      citizenLabel: t('Citizen (MSW Generator)'),
       allowedCategories: ["Municipal", "Plastics", "Metals", "E-Waste", "Textiles", "Hazardous", "Construction", "Industrial"],
       allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin']
     },
     rural: {
-      anchor: 'Gram Panchayat',
-      sub: 'Village',
-      waste: 'Biomass',
-      analytics: 'Village Analytics',
-      viewTitle: 'Village-Level Analytics',
-      citizenLabel: 'Farmer / FPO (Biomass Generator)',
+      anchor: t('Gram Panchayat'),
+      sub: t('Village'),
+      waste: t('Biomass'),
+      analytics: t('Village Analytics'),
+      viewTitle: t('Village-Level Analytics'),
+      citizenLabel: t('Farmer / FPO (Biomass Generator)'),
       allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"],
       allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin']
     }
@@ -997,8 +1001,8 @@ export default function App() {
                   <Card className="h-full bg-black/40 border-emerald-500/10">
                     <div className="flex items-center justify-between mb-8">
                       <div>
-                        <h3 className="text-2xl font-bold mb-1">Live Network Impact</h3>
-                        <p className="text-white/40 text-sm">Real-time waste throughput across the RupayKg OS</p>
+                        <h3 className="text-2xl font-bold mb-1">{t('Live Network Impact')}</h3>
+                        <p className="text-white/40 text-sm">{t('Real-time waste throughput across the RupayKg OS')}</p>
                       </div>
                       <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-widest animate-pulse">
                         <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
@@ -1029,8 +1033,8 @@ export default function App() {
                 <div className="lg:col-span-5">
                   <Card className="h-full bg-black/40 border-blue-500/10 relative overflow-hidden group">
                     <div className="relative z-10">
-                      <h3 className="text-2xl font-bold mb-1">Network Topology</h3>
-                      <p className="text-white/40 text-sm mb-8">Distributed biomass collection nodes</p>
+                      <h3 className="text-2xl font-bold mb-1">{t('Network Topology')}</h3>
+                      <p className="text-white/40 text-sm mb-8">{t('Distributed biomass collection nodes')}</p>
                       
                       <div className="space-y-6">
                         {[
@@ -1179,10 +1183,10 @@ export default function App() {
                 </div>
                 <span className="text-lg font-bold tracking-tighter">RUPAYKG</span>
               </div>
-              <p className="text-white/40 text-sm">© 2026 RupayKg Circular Economy OS. All rights reserved.</p>
+              <p className="text-white/40 text-sm">{t('© 2026 RupayKg Circular Economy OS. All rights reserved.')}</p>
               <div className="flex gap-4 text-sm text-white/40">
-                <a href="#" className="hover:text-white transition-colors">Privacy</a>
-                <a href="#" className="hover:text-white transition-colors">Terms</a>
+                <a href="#" className="hover:text-white transition-colors">{t('Privacy')}</a>
+                <a href="#" className="hover:text-white transition-colors">{t('Terms')}</a>
               </div>
             </div>
           </footer>
@@ -1228,8 +1232,8 @@ export default function App() {
             <div className="inline-flex items-center justify-center p-3 bg-emerald-500/20 rounded-2xl text-emerald-400 mb-4">
               <Leaf size={40} />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">RUPAYKG</h1>
-            <p className="text-white/50 italic font-serif">Circular Economy Operating System</p>
+            <h1 className="text-4xl font-bold tracking-tight mb-2">{t('RUPAYKG')}</h1>
+            <p className="text-white/50 italic font-serif">{t('Circular Economy Operating System')}</p>
           </div>
 
           <Card>
@@ -1290,15 +1294,15 @@ export default function App() {
                       onChange={e => setFormData({...formData, role: e.target.value})}
                     >
                       {labels.allowedRoles.includes('citizen') && <option value="citizen" className="bg-[#0A0A0B]">{labels.citizenLabel}</option>}
-                      {labels.allowedRoles.includes('aggregator') && <option value="aggregator" className="bg-[#0A0A0B]">Aggregator (Collection & Transport)</option>}
-                      {labels.allowedRoles.includes('processor') && <option value="processor" className="bg-[#0A0A0B]">Processor (Recycler)</option>}
-                      {labels.allowedRoles.includes('csr_partner') && <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partner</option>}
-                      {labels.allowedRoles.includes('epr_partner') && <option value="epr_partner" className="bg-[#0A0A0B]">EPR Partner</option>}
-                      {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[#0A0A0B]">{labels.anchor} Admin</option>}
-                      {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[#0A0A0B]">State Admin</option>}
-                      {labels.allowedRoles.includes('carbon_buyer') && <option value="carbon_buyer" className="bg-[#0A0A0B]">Carbon Buyer</option>}
-                      {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[#0A0A0B]">National Regulator</option>}
-                      {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[#0A0A0B]">Super Admin</option>}
+                      {labels.allowedRoles.includes('aggregator') && <option value="aggregator" className="bg-[#0A0A0B]">{t('Aggregator (Collection & Transport)')}</option>}
+                      {labels.allowedRoles.includes('processor') && <option value="processor" className="bg-[#0A0A0B]">{t('Processor (Recycler)')}</option>}
+                      {labels.allowedRoles.includes('csr_partner') && <option value="csr_partner" className="bg-[#0A0A0B]">{t('CSR Partner')}</option>}
+                      {labels.allowedRoles.includes('epr_partner') && <option value="epr_partner" className="bg-[#0A0A0B]">{t('EPR Partner')}</option>}
+                      {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[#0A0A0B]">{labels.anchor} {t('Admin')}</option>}
+                      {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[#0A0A0B]">{t('State Admin')}</option>}
+                      {labels.allowedRoles.includes('carbon_buyer') && <option value="carbon_buyer" className="bg-[#0A0A0B]">{t('Carbon Buyer')}</option>}
+                      {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[#0A0A0B]">{t('National Regulator')}</option>}
+                      {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[#0A0A0B]">{t('Super Admin')}</option>}
                     </select>
                   </div>
                   
@@ -1557,8 +1561,11 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="relative group">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold transition-all hover:bg-white/10 text-white">
+            <div className="relative">
+              <button 
+                onClick={() => setShowLangDropdown(!showLangDropdown)}
+                className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold transition-all hover:bg-white/10 text-white"
+              >
                 <Globe size={14} />
                 {(() => {
                   switch(i18n.language) {
@@ -1577,30 +1584,38 @@ export default function App() {
                   }
                 })()}
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-                {[
-                  { code: 'en', label: 'English' },
-                  { code: 'hi', label: 'हिंदी' },
-                  { code: 'mr', label: 'मराठी' },
-                  { code: 'gu', label: 'ગુજરાતી' },
-                  { code: 'ta', label: 'தமிழ்' },
-                  { code: 'te', label: 'తెలుగు' },
-                  { code: 'kn', label: 'ಕನ್ನಡ' },
-                  { code: 'ml', label: 'മലയാളം' },
-                  { code: 'bn', label: 'বাংলা' },
-                  { code: 'pa', label: 'ਪੰਜਾਬੀ' },
-                  { code: 'or', label: 'ଓଡ଼ିଆ' },
-                  { code: 'as', label: 'অসমীয়া' }
-                ].map((lang) => (
-                  <button 
-                    key={lang.code}
-                    onClick={() => i18n.changeLanguage(lang.code)}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
+              {showLangDropdown && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowLangDropdown(false)} />
+                  <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+                    {[
+                      { code: 'en', label: 'English' },
+                      { code: 'hi', label: 'हिंदी' },
+                      { code: 'mr', label: 'मराठी' },
+                      { code: 'gu', label: 'ગુજરાતી' },
+                      { code: 'ta', label: 'தமிழ்' },
+                      { code: 'te', label: 'తెలుగు' },
+                      { code: 'kn', label: 'ಕನ್ನಡ' },
+                      { code: 'ml', label: 'മലയാളം' },
+                      { code: 'bn', label: 'বাংলা' },
+                      { code: 'pa', label: 'ਪੰਜਾਬੀ' },
+                      { code: 'or', label: 'ଓଡ଼ିଆ' },
+                      { code: 'as', label: 'অসমীয়া' }
+                    ].map((lang) => (
+                      <button 
+                        key={lang.code}
+                        onClick={() => {
+                          i18n.changeLanguage(lang.code);
+                          setShowLangDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
             <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
               <button 
@@ -1620,7 +1635,7 @@ export default function App() {
               <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
                 <Wallet className="text-emerald-400" size={20} />
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-white/40">Wallet Balance</p>
+                  <p className="text-[10px] uppercase tracking-widest text-white/40">{t('Wallet Balance')}</p>
                   <p className="text-xl font-bold">₹{walletBalance.toFixed(2)}</p>
                 </div>
               </div>
@@ -1644,7 +1659,7 @@ export default function App() {
                       <AlertTriangle size={20} />
                     </div>
                     <div>
-                      <h3 className="text-red-400 font-semibold">Database Connection Failed</h3>
+                      <h3 className="text-red-400 font-semibold">{t('Database Connection Failed')}</h3>
                       <p className="text-sm text-red-400/80 mt-1">
                         {dbStatus.error || "Could not connect to MongoDB. Using in-memory fallback for demo purposes."}
                       </p>
@@ -1691,7 +1706,7 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label={t('Total Investment')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
                   <Stat label={t('Carbon Credits')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
-                  <Stat label={`${labels.waste} Diverted`} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="blue" />
+                  <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="blue" />
                   <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" />
                 </div>
               )}
@@ -1725,13 +1740,13 @@ export default function App() {
                         onChange={(e) => setAdminRoleFilter(e.target.value)}
                         className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
                       >
-                        <option value="all" className="bg-[#0A0A0B]">All Roles</option>
-                        <option value="citizen" className="bg-[#0A0A0B]">{operatingContext === 'urban' ? 'Citizens' : 'Farmers / FPOs'}</option>
-                        <option value="aggregator" className="bg-[#0A0A0B]">Aggregators</option>
-                        <option value="processor" className="bg-[#0A0A0B]">Processors</option>
-                        <option value="csr_partner" className="bg-[#0A0A0B]">CSR Partners</option>
-                        <option value="epr_partner" className="bg-[#0A0A0B]">EPR Partners</option>
-                        <option value="carbon_buyer" className="bg-[#0A0A0B]">Carbon Buyers</option>
+                        <option value="all" className="bg-[#0A0A0B]">{t('All Roles')}</option>
+                        <option value="citizen" className="bg-[#0A0A0B]">{operatingContext === 'urban' ? t('Citizens') : t('Farmers / FPOs')}</option>
+                        <option value="aggregator" className="bg-[#0A0A0B]">{t('Aggregators')}</option>
+                        <option value="processor" className="bg-[#0A0A0B]">{t('Processors')}</option>
+                        <option value="csr_partner" className="bg-[#0A0A0B]">{t('CSR Partners')}</option>
+                        <option value="epr_partner" className="bg-[#0A0A0B]">{t('EPR Partners')}</option>
+                        <option value="carbon_buyer" className="bg-[#0A0A0B]">{t('Carbon Buyers')}</option>
                       </select>
                     </div>
                   </div>
@@ -1806,7 +1821,7 @@ export default function App() {
                             </div>
                           </div>
                         ))}
-                        {history.length === 0 && <p className="text-center text-white/20 py-8">No records found</p>}
+                        {history.length === 0 && <p className="text-center text-white/20 py-8">{t('No records found')}</p>}
                       </div>
                     </Card>
 
@@ -1842,7 +1857,7 @@ export default function App() {
                   <div className="mt-6">
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <MapPin size={18} className="text-blue-400" />
-                      Submission Heatmap
+                      {t('Submission Heatmap')}
                     </h3>
                     <BiomassMap records={history} />
                   </div>
@@ -1854,19 +1869,19 @@ export default function App() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="p-6 border-white/5 bg-white/5">
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">Total Offset</h4>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">{t('Total Offset')}</h4>
                       <p className="text-3xl font-bold text-cyan-400">
                         {history.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0).toFixed(2)} kg
                       </p>
                     </Card>
                     <Card className="p-6 border-white/5 bg-white/5">
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">Farmers Supported</h4>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">{t('Farmers Supported')}</h4>
                       <p className="text-3xl font-bold text-emerald-400">
                         {new Set(history.map(r => r.citizen_id)).size}
                       </p>
                     </Card>
                     <Card className="p-6 border-white/5 bg-white/5">
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">Waste Diverted</h4>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">{t('Waste Diverted')}</h4>
                       <p className="text-3xl font-bold text-blue-400">
                         {history.reduce((sum, r) => sum + (r.weight_kg || 0), 0).toFixed(2)} kg
                       </p>
@@ -1877,7 +1892,7 @@ export default function App() {
                     <Card>
                       <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
                         <BarChart3 size={18} className="text-indigo-400" />
-                        Portfolio Composition
+                        {t('Portfolio Composition')}
                       </h3>
                       <div className="h-[250px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -1911,7 +1926,7 @@ export default function App() {
                     <Card>
                       <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
                         <Globe size={18} className="text-cyan-400" />
-                        Impact Distribution
+                        {t('Impact Distribution')}
                       </h3>
                       <div className="h-[250px] rounded-xl overflow-hidden">
                         <BiomassMap records={history} />
@@ -1941,7 +1956,7 @@ export default function App() {
                             <span className="text-white/40 truncate max-w-[200px]">{log.details}</span>
                           </div>
                         ))}
-                        {auditLogs.length === 0 && <p className="text-center text-white/20 py-8">No audit logs found</p>}
+                        {auditLogs.length === 0 && <p className="text-center text-white/20 py-8">{t('No audit logs found')}</p>}
                       </div>
                     </Card>
 
@@ -1969,11 +1984,11 @@ export default function App() {
               className="max-w-4xl mx-auto"
             >
               <Card className="max-w-2xl mx-auto">
-                <h3 className="text-xl font-bold mb-6">Circular Economy Intake Form</h3>
+                <h3 className="text-xl font-bold mb-6">{t('Circular Economy Intake Form')}</h3>
                 <form onSubmit={handleUpload} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Weight (kg)</label>
+                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Weight (kg)')}</label>
                         <div className="relative">
                           <input 
                             type="number" 
@@ -1988,7 +2003,7 @@ export default function App() {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Acreage (acres)</label>
+                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Acreage (acres)')}</label>
                         <div className="relative">
                           <input 
                             type="number" 
@@ -2003,7 +2018,7 @@ export default function App() {
                         </div>
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Waste Type</label>
+                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Waste Type')}</label>
                         <select 
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 appearance-none text-white"
                           value={uploadData.waste_type}
@@ -2021,13 +2036,13 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{labels.sub} / Location</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{labels.sub} / {t('Location')}</label>
                       <div className="relative">
                         <input 
                           type="text" 
                           required
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                          placeholder={`${labels.sub} Name`}
+                          placeholder={`${labels.sub} ${t('Name')}`}
                           value={uploadData.village}
                           onChange={e => setUploadData({...uploadData, village: e.target.value})}
                         />
@@ -2040,9 +2055,9 @@ export default function App() {
                           locationStatus === 'error' ? 'bg-red-500' : 'bg-white/10'
                         }`} />
                         <span className="text-[10px] uppercase tracking-widest text-white/40">
-                          {locationStatus === 'success' ? `GPS Captured: ${uploadData.geo_lat.toFixed(4)}, ${uploadData.geo_long.toFixed(4)}` : 
-                           locationStatus === 'fetching' ? 'Capturing GPS Coordinates...' : 
-                           locationStatus === 'error' ? 'GPS Capture Failed' : 'GPS Required'}
+                          {locationStatus === 'success' ? `${t('GPS Captured: ')}${uploadData.geo_lat.toFixed(4)}, ${uploadData.geo_long.toFixed(4)}` : 
+                           locationStatus === 'fetching' ? t('Capturing GPS Coordinates...') : 
+                           locationStatus === 'error' ? t('GPS Capture Failed') : t('GPS Required')}
                         </span>
                         {locationStatus === 'error' && (
                           <button 
@@ -2050,14 +2065,14 @@ export default function App() {
                             onClick={captureLocation}
                             className="text-[10px] text-emerald-400 hover:underline ml-auto"
                           >
-                            Retry GPS
+                            {t('Retry GPS')}
                           </button>
                         )}
                       </div>
                       
                       {locationStatus === 'success' && (
                         <div className="mt-4">
-                          <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Location Confirmation (Google Maps)</label>
+                          <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Location Confirmation (Google Maps)')}</label>
                           <iframe 
                             width="100%" 
                             height="200" 
@@ -2074,20 +2089,20 @@ export default function App() {
 
                     <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium text-emerald-400">Estimated Value Breakdown</span>
+                        <span className="text-sm font-medium text-emerald-400">{t('Estimated Value Breakdown')}</span>
                         <TrendingUp size={16} className="text-emerald-400" />
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-xs text-white/40">
-                          <span>Base Value (Recycler)</span>
+                          <span>{t('Base Value (Recycler)')}</span>
                           <span>₹{(parseFloat(uploadData.weight_kg || '0') * (WASTE_TYPES.find(w => w.type === uploadData.waste_type)?.value || 0)).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-white/40">
-                          <span>Carbon Credit Value</span>
+                          <span>{t('Carbon Credit Value')}</span>
                           <span>₹{(parseFloat(uploadData.weight_kg || '0') * (WASTE_TYPES.find(w => w.type === uploadData.waste_type)?.carbon || 0) * 10).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/5">
-                          <span>Total Sovereign Value</span>
+                          <span>{t('Total Sovereign Value')}</span>
                           <span className="text-emerald-400">
                             ₹{(
                               parseFloat(uploadData.weight_kg || '0') * 
@@ -2100,7 +2115,7 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Verification Image</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Verification Image')}</label>
                       <div className="relative">
                         <input 
                           type="file" 
@@ -2127,7 +2142,7 @@ export default function App() {
                       disabled={loading}
                       className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50"
                     >
-                      {loading ? 'Processing...' : 'Confirm Intake & Mint Value'}
+                      {loading ? t('Processing...') : t('Confirm Intake & Mint Value')}
                     </button>
                   </form>
                 </Card>
@@ -2176,9 +2191,9 @@ export default function App() {
                     });
 
                     const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Failed to register farmer');
+                    if (!response.ok) throw new Error(data.error || t('Failed to register farmer'));
 
-                    setMessage({ type: 'success', text: 'Farmer registered successfully! ID: ' + data.farmer_id });
+                    setMessage({ type: 'success', text: t('Farmer registered successfully! ID: ') + data.farmer_id });
                     setFarmerData({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
                     setTimeout(() => setMessage(null), 5000);
                   } catch (err: any) {
@@ -2230,7 +2245,7 @@ export default function App() {
                         value={farmerData.crop_type}
                         onChange={e => setFarmerData({...farmerData, crop_type: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
-                        placeholder="e.g., Paddy, Wheat"
+                        placeholder={t('e.g., Paddy, Wheat')}
                       />
                     </div>
                   </div>
@@ -2314,7 +2329,7 @@ export default function App() {
                     onClick={() => setAvailableRecords(availableRecords)} // Just to trigger re-render if needed, but we'll use a local filter
                     className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500 text-black transition-all"
                   >
-                    Active Queue
+                    {t('Active Queue')}
                   </button>
                 </div>
               </div>
@@ -2322,23 +2337,23 @@ export default function App() {
               {user?.role === 'aggregator' && aggregatorFleet && (
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <Card className="p-4 border-white/5 bg-white/5">
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Active Fleet</p>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Active Fleet')}</p>
                     <p className="text-xl font-bold">{aggregatorFleet.active_vehicles}</p>
                   </Card>
                   <Card className="p-4 border-white/5 bg-white/5">
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Drivers Online</p>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Drivers Online')}</p>
                     <p className="text-xl font-bold">{aggregatorFleet.drivers_online}</p>
                   </Card>
                   <Card className="p-4 border-white/5 bg-white/5">
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Current Load</p>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Current Load')}</p>
                     <p className="text-xl font-bold text-blue-400">{aggregatorFleet.current_load_kg} kg</p>
                   </Card>
                   <Card className="p-4 border-white/5 bg-white/5">
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Total Capacity</p>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Total Capacity')}</p>
                     <p className="text-xl font-bold">{aggregatorFleet.total_capacity_kg} kg</p>
                   </Card>
                   <Card className="p-4 border-white/5 bg-white/5">
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Utilization</p>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Utilization')}</p>
                     <p className="text-xl font-bold text-emerald-400">
                       {Math.round((aggregatorFleet.current_load_kg / aggregatorFleet.total_capacity_kg) * 100)}%
                     </p>
@@ -2353,7 +2368,7 @@ export default function App() {
                       <Layers size={24} />
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Biomass in Stock</p>
+                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Biomass in Stock')}</p>
                       <p className="text-xl font-bold">{processorInventory.biomass_in_stock_kg} kg</p>
                     </div>
                   </Card>
@@ -2362,7 +2377,7 @@ export default function App() {
                       <Zap size={24} />
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Output Material</p>
+                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Output Material')}</p>
                       <p className="text-xl font-bold">{processorInventory.output_material_ready_kg.toFixed(0)} kg</p>
                     </div>
                   </Card>
@@ -2371,7 +2386,7 @@ export default function App() {
                       <Activity size={24} />
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Storage Utilization</p>
+                      <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Storage Utilization')}</p>
                       <p className="text-xl font-bold">{processorInventory.storage_utilization}</p>
                     </div>
                   </Card>
@@ -2383,11 +2398,11 @@ export default function App() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold flex items-center gap-2 text-emerald-400">
                     <PlusCircle size={18} />
-                    {user?.role === 'aggregator' ? 'Available for Pickup' : 'Incoming for Processing'}
+                    {user?.role === 'aggregator' ? t('Available for Pickup') : t('Incoming for Processing')}
                   </h3>
                   {availableRecords.length === 0 ? (
                     <Card className="py-12 text-center border-dashed">
-                      <p className="text-white/40 text-sm">No new tasks available.</p>
+                      <p className="text-white/40 text-sm">{t('No new tasks available.')}</p>
                     </Card>
                   ) : (
                     availableRecords.map(record => (
@@ -2426,7 +2441,7 @@ export default function App() {
                           className="w-full py-2 bg-white text-black font-bold rounded-lg text-sm hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
                         >
                           {user?.role === 'aggregator' ? <Truck size={16} /> : <Factory size={16} />}
-                          {user?.role === 'aggregator' ? 'Accept Pickup' : 'Accept Receipt'}
+                          {user?.role === 'aggregator' ? t('Accept Pickup') : t('Accept Receipt')}
                         </button>
                       </Card>
                     ))
@@ -2437,14 +2452,14 @@ export default function App() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold flex items-center gap-2 text-blue-400">
                     <Activity size={18} />
-                    {user?.role === 'aggregator' ? 'In Transit' : 'Recently Processed'}
+                    {user?.role === 'aggregator' ? t('In Transit') : t('Recently Processed')}
                   </h3>
                   {history.filter(r => 
                     (user?.role === 'aggregator' && r.status === 'in_transit') || 
                     (user?.role === 'processor' && r.status === 'processed')
                   ).length === 0 ? (
                     <Card className="py-12 text-center border-dashed">
-                      <p className="text-white/40 text-sm">No active tasks in your possession.</p>
+                      <p className="text-white/40 text-sm">{t('No active tasks in your possession.')}</p>
                     </Card>
                   ) : (
                     history.filter(r => 
@@ -2482,31 +2497,31 @@ export default function App() {
               className="space-y-6"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h3 className="text-xl font-bold">Transaction Ledger</h3>
+                <h3 className="text-xl font-bold">{t('Transaction Ledger')}</h3>
                 <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10 w-fit">
                   <button 
                     onClick={() => setHistoryFilter('all')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'all' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
                   >
-                    All
+                    {t('All')}
                   </button>
                   <button 
                     onClick={() => setHistoryFilter('pending_pickup')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'pending_pickup' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
                   >
-                    Pending Pickup
+                    {t('Pending Pickup')}
                   </button>
                   <button 
                     onClick={() => setHistoryFilter('in_transit')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'in_transit' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
                   >
-                    In Transit
+                    {t('In Transit')}
                   </button>
                   <button 
                     onClick={() => setHistoryFilter('processed')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${historyFilter === 'processed' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
                   >
-                    Processed
+                    {t('Processed')}
                   </button>
                 </div>
               </div>
@@ -2516,15 +2531,15 @@ export default function App() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-white/5 border-bottom border-white/10">
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Timestamp</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Type</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Weight</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Timestamp')}</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Type')}</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Weight')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{labels.sub}</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Value</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Carbon Reduction</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">Status</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Value')}</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Carbon Reduction')}</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Status')}</th>
                         {['citizen', 'fpo', 'regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
-                          <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">MRV Status</th>
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('MRV Status')}</th>
                         )}
                       </tr>
                     </thead>
@@ -2570,7 +2585,7 @@ export default function App() {
                       {history.filter(record => historyFilter === 'all' || record.status === historyFilter).length === 0 && (
                         <tr>
                           <td colSpan={8} className="p-8 text-center text-white/40">
-                            No records found for the selected filter.
+                            {t('No records found for the selected filter.')}
                           </td>
                         </tr>
                       )}
@@ -2591,21 +2606,21 @@ export default function App() {
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold">MRV Verification Dashboard</h2>
-                  <p className="text-white/40 text-sm">Verify processed waste records to issue carbon credits.</p>
+                  <h2 className="text-2xl font-bold">{t('MRV Verification Dashboard')}</h2>
+                  <p className="text-white/40 text-sm">{t('Verify processed waste records to issue carbon credits.')}</p>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
                   <button
                     onClick={() => setMrvTab('pending')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mrvTab === 'pending' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
                   >
-                    Pending ({mrvRecords.length})
+                    {t('Pending')} ({mrvRecords.length})
                   </button>
                   <button
                     onClick={() => setMrvTab('history')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mrvTab === 'history' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
                   >
-                    History
+                    {t('History')}
                   </button>
                 </div>
               </div>
@@ -2621,8 +2636,8 @@ export default function App() {
                 mrvRecords.length === 0 ? (
                   <Card className="py-12 text-center border-dashed">
                     <ShieldCheck size={48} className="mx-auto text-white/20 mb-4" />
-                    <p className="text-white/60 text-lg font-medium">No pending MRV records</p>
-                    <p className="text-white/40 text-sm mt-2">All processed waste has been verified.</p>
+                    <p className="text-white/60 text-lg font-medium">{t('No pending MRV records')}</p>
+                    <p className="text-white/40 text-sm mt-2">{t('All processed waste has been verified.')}</p>
                   </Card>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2641,28 +2656,28 @@ export default function App() {
                               </p>
                             </div>
                             <span className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded uppercase font-bold border border-cyan-500/20">
-                              Pending MRV
+                              {t('Pending MRV')}
                             </span>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
                             <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Carbon Reduction</p>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Carbon Reduction')}</p>
                               <p className="text-lg font-mono text-cyan-400">{record.carbon_reduction_kg?.toFixed(2)} kg</p>
                             </div>
                             <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Credit Value</p>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Credit Value')}</p>
                               <p className="text-lg font-bold text-emerald-400">₹{record.potential_carbon_value?.toFixed(2)}</p>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-white/5 rounded-xl border border-white/5">
                             <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Acreage</p>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Acreage')}</p>
                               <p className="text-sm font-mono text-white/80">{record.acreage?.toFixed(2)} acres</p>
                             </div>
                             <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">AI Risk Score</p>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('AI Risk Score')}</p>
                               <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
                                   <p className={`text-sm font-bold ${
@@ -2676,7 +2691,7 @@ export default function App() {
                                     (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                                     'bg-red-500/10 text-red-400 border-red-500/20'
                                   }`}>
-                                    {(record.risk_score || 0) < 0.2 ? 'Low' : (record.risk_score || 0) < 0.5 ? 'Med' : 'High'}
+                                    {(record.risk_score || 0) < 0.2 ? t('Low') : (record.risk_score || 0) < 0.5 ? t('Med') : t('High')}
                                   </span>
                                 </div>
                                 <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -2694,7 +2709,7 @@ export default function App() {
 
                           {record.geo_lat && record.geo_long && (
                             <div className="mb-6">
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Location Verification</p>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">{t('Location Verification')}</p>
                               <iframe 
                                 width="100%" 
                                 height="120" 
@@ -2737,12 +2752,12 @@ export default function App() {
                     <table className="w-full text-left text-sm">
                       <thead className="bg-white/5 text-white/60 border-b border-white/10">
                         <tr>
-                          <th className="p-4 font-medium">Record ID</th>
-                          <th className="p-4 font-medium">Details</th>
-                          <th className="p-4 font-medium">AI Risk</th>
-                          <th className="p-4 font-medium">Status</th>
-                          <th className="p-4 font-medium">Verified By</th>
-                          <th className="p-4 font-medium">Date</th>
+                          <th className="p-4 font-medium">{t('Record ID')}</th>
+                          <th className="p-4 font-medium">{t('Details')}</th>
+                          <th className="p-4 font-medium">{t('AI Risk')}</th>
+                          <th className="p-4 font-medium">{t('Status')}</th>
+                          <th className="p-4 font-medium">{t('Verified By')}</th>
+                          <th className="p-4 font-medium">{t('Date')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
@@ -2780,7 +2795,7 @@ export default function App() {
                         ))}
                         {mrvHistory.length === 0 && (
                           <tr>
-                            <td colSpan={6} className="p-8 text-center text-white/40">No MRV history found</td>
+                            <td colSpan={6} className="p-8 text-center text-white/40">{t('No MRV history found')}</td>
                           </tr>
                         )}
                       </tbody>
@@ -2805,19 +2820,19 @@ export default function App() {
                     onClick={() => setAdminSubView('dashboard')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'dashboard' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                   >
-                    National Dashboard
+                    {t('National Dashboard')}
                   </button>
                   <button 
                     onClick={() => setAdminSubView('users')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'users' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                   >
-                    User Management
+                    {t('User Management')}
                   </button>
                   <button 
                     onClick={() => setAdminSubView('audit')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'audit' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                   >
-                    Audit Logs
+                    {t('Audit Logs')}
                   </button>
                 </div>
               )}
@@ -2829,28 +2844,28 @@ export default function App() {
                       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
                         <Activity size={80} className="text-white" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Total Waste Events</h4>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Total Waste Events')}</h4>
                       <p className="text-4xl font-black tracking-tighter">{adminKpi.total_waste_events || 0}</p>
                     </Card>
                     <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
                         <CheckCircle2 size={80} className="text-emerald-400" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Processed Events</h4>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Processed Events')}</h4>
                       <p className="text-4xl font-black tracking-tighter text-emerald-400">{adminKpi.processed_events || 0}</p>
                     </Card>
                     <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
                         <Users size={80} className="text-blue-400" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Total Users</h4>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Total Users')}</h4>
                       <p className="text-4xl font-black tracking-tighter text-blue-400">{adminKpi.total_users || 0}</p>
                     </Card>
                     <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
                         <Wallet size={80} className="text-amber-400" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">Wallet Disbursed</h4>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Wallet Disbursed')}</h4>
                       <p className="text-4xl font-black tracking-tighter text-amber-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
                     </Card>
                   </div>
@@ -2860,7 +2875,7 @@ export default function App() {
                       <Card className="p-6 border-white/5 bg-white/5 col-span-2">
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                           <TrendingUp className="text-emerald-400" size={20} />
-                          Growth & Impact Trends
+                          {t('Growth & Impact Trends')}
                         </h3>
                         <div className="h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
@@ -2890,27 +2905,27 @@ export default function App() {
                         </div>
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
                           <Sprout className="text-emerald-400" size={20} />
-                          Environmental Impact
+                          {t('Environmental Impact')}
                         </h3>
                         <div className="space-y-6 relative z-10">
                           <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
                             <div>
-                              <p className="text-white/40 text-xs uppercase tracking-widest">Methane Avoided</p>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Methane Avoided')}</p>
                               <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.methane_avoided_kg} kg</p>
                             </div>
                             <Zap className="text-yellow-400/40" size={24} />
                           </div>
                           <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
                             <div>
-                              <p className="text-white/40 text-xs uppercase tracking-widest">Water Saved</p>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Water Saved')}</p>
                               <p className="text-2xl font-bold text-blue-400">{comprehensiveMetrics.environmental.water_saved_liters} L</p>
                             </div>
                             <Globe className="text-blue-400/40" size={24} />
                           </div>
                           <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
                             <div>
-                              <p className="text-white/40 text-xs uppercase tracking-widest">Trees Equivalent</p>
-                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.trees_equivalent} Trees</p>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Trees Equivalent')}</p>
+                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.trees_equivalent} {t('Trees')}</p>
                             </div>
                             <Leaf className="text-emerald-400/40" size={24} />
                           </div>
@@ -2927,20 +2942,20 @@ export default function App() {
                         </div>
                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
                           <Scale className="text-amber-400" size={18} />
-                          Economic Efficiency
+                          {t('Economic Efficiency')}
                         </h3>
                         <div className="space-y-4 relative z-10">
                           <div className="flex justify-between text-sm">
-                            <span className="text-white/40">Avg Price / kg</span>
+                            <span className="text-white/40">{t('Avg Price / kg')}</span>
                             <span className="font-mono">₹{comprehensiveMetrics.economic.avg_price_per_kg}</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-white/40">Govt Cost Savings</span>
+                            <span className="text-white/40">{t('Govt Cost Savings')}</span>
                             <span className="font-mono text-emerald-400">₹{comprehensiveMetrics.economic.govt_cost_savings}</span>
                           </div>
                           <div className="pt-4 border-t border-white/5">
                             <p className="text-xs text-white/40 leading-relaxed italic">
-                              * Government savings calculated based on avoided landfill management and environmental remediation costs.
+                              {t('* Government savings calculated based on avoided landfill management and environmental remediation costs.')}
                             </p>
                           </div>
                         </div>
@@ -2952,15 +2967,15 @@ export default function App() {
                         </div>
                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
                           <Activity className="text-cyan-400" size={18} />
-                          Operational Health
+                          {t('Operational Health')}
                         </h3>
                         <div className="space-y-4 relative z-10">
                           <div className="flex justify-between text-sm">
-                            <span className="text-white/40">Processing Efficiency</span>
+                            <span className="text-white/40">{t('Processing Efficiency')}</span>
                             <span className="font-mono">{comprehensiveMetrics.operational.processing_efficiency}%</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-white/40">MRV Rejection Rate</span>
+                            <span className="text-white/40">{t('MRV Rejection Rate')}</span>
                             <span className={`font-mono ${comprehensiveMetrics.operational.rejection_rate > 10 ? 'text-red-400' : 'text-emerald-400'}`}>
                               {comprehensiveMetrics.operational.rejection_rate}%
                             </span>
@@ -2980,7 +2995,7 @@ export default function App() {
                         </div>
                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
                           <BarChart3 className="text-indigo-400" size={18} />
-                          Waste Composition
+                          {t('Waste Composition')}
                         </h3>
                         <div className="h-[150px] relative z-10">
                           <ResponsiveContainer width="100%" height="100%">
@@ -3012,11 +3027,11 @@ export default function App() {
                     <Card className="p-6 border-white/5 bg-white/5">
                       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                         <AlertTriangle className="text-red-400" size={20} />
-                        Fraud Alerts & Flagged Events
+                        {t('Fraud Alerts & Flagged Events')}
                       </h3>
                       <div className="space-y-6">
                         {fraudMap.length === 0 ? (
-                          <p className="text-white/40 text-sm">No flagged events detected.</p>
+                          <p className="text-white/40 text-sm">{t('No flagged events detected.')}</p>
                         ) : (
                           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                             {fraudMap.map((f, i) => (
@@ -3034,7 +3049,7 @@ export default function App() {
                         )}
                         
                         <div className="mt-4">
-                          <p className="text-xs uppercase tracking-widest text-white/40 mb-3">Geospatial Fraud Distribution</p>
+                          <p className="text-xs uppercase tracking-widest text-white/40 mb-3">{t('Geospatial Fraud Distribution')}</p>
                           <FraudMap alerts={fraudMap} subLabel={labels.sub} />
                         </div>
                       </div>
@@ -3043,10 +3058,10 @@ export default function App() {
                     <Card className="p-6 border-white/5 bg-white/5">
                       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                         <Globe className="text-cyan-400" size={20} />
-                        Carbon Pool Status
+                        {t('Carbon Pool Status')}
                       </h3>
                       <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5">
-                        <p className="text-white/40 text-sm uppercase tracking-widest mb-2">Total Minted Carbon Units</p>
+                        <p className="text-white/40 text-sm uppercase tracking-widest mb-2">{t('Total Minted Carbon Units')}</p>
                         <p className="text-5xl font-mono text-cyan-400">{carbonPool.total_carbon_units_minted?.toFixed(2) || 0} kg</p>
                       </div>
                     </Card>
@@ -3056,17 +3071,17 @@ export default function App() {
                 <Card className="p-6 border-white/5 bg-white/5">
                   <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                     <Users className="text-emerald-400" size={20} />
-                    User Management
+                    {t('User Management')}
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead>
                         <tr className="text-white/40 text-xs uppercase tracking-widest border-b border-white/5">
-                          <th className="pb-4 font-medium">User</th>
-                          <th className="pb-4 font-medium">Role</th>
-                          <th className="pb-4 font-medium">Location</th>
-                          <th className="pb-4 font-medium">Wallet</th>
-                          <th className="pb-4 font-medium text-right">Actions</th>
+                          <th className="pb-4 font-medium">{t('User')}</th>
+                          <th className="pb-4 font-medium">{t('Role')}</th>
+                          <th className="pb-4 font-medium">{t('Location')}</th>
+                          <th className="pb-4 font-medium">{t('Wallet')}</th>
+                          <th className="pb-4 font-medium text-right">{t('Actions')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
@@ -3082,16 +3097,16 @@ export default function App() {
                                 onChange={(e) => handleUpdateUserRole(u.id, e.target.value)}
                                 className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-emerald-500/50"
                               >
-                                <option value="citizen">Citizen</option>
-                                <option value="aggregator">Aggregator</option>
-                                <option value="processor">Processor</option>
-                                <option value="regulator">Regulator</option>
-                                <option value="municipal_admin">Municipal Admin</option>
-                                <option value="state_admin">State Admin</option>
-                                <option value="super_admin">Super Admin</option>
-                                <option value="csr_partner">CSR Partner</option>
-                                <option value="epr_partner">EPR Partner</option>
-                                <option value="carbon_buyer">Carbon Buyer</option>
+                                <option value="citizen">{t('Citizen')}</option>
+                                <option value="aggregator">{t('Aggregator')}</option>
+                                <option value="processor">{t('Processor')}</option>
+                                <option value="regulator">{t('Regulator')}</option>
+                                <option value="municipal_admin">{t('Municipal Admin')}</option>
+                                <option value="state_admin">{t('State Admin')}</option>
+                                <option value="super_admin">{t('Super Admin')}</option>
+                                <option value="csr_partner">{t('CSR Partner')}</option>
+                                <option value="epr_partner">{t('EPR Partner')}</option>
+                                <option value="carbon_buyer">{t('Carbon Buyer')}</option>
                               </select>
                             </td>
                             <td className="py-4">
@@ -3104,7 +3119,7 @@ export default function App() {
                               <button 
                                 onClick={() => handleDeleteUser(u.id)}
                                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                title="Delete User"
+                                title={t('Delete User')}
                               >
                                 <LogOut size={16} />
                               </button>
@@ -3115,7 +3130,7 @@ export default function App() {
                     </table>
                     {usersList.length === 0 && (
                       <div className="py-12 text-center text-white/20">
-                        No users found.
+                        {t('No users found.')}
                       </div>
                     )}
                   </div>
@@ -3125,17 +3140,17 @@ export default function App() {
                   <div className="p-6 border-b border-white/10 flex justify-between items-center">
                     <h3 className="text-xl font-bold flex items-center gap-2">
                       <BookOpen className="text-emerald-400" size={20} />
-                      System Audit Logs
+                      {t('System Audit Logs')}
                     </h3>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                       <thead className="bg-white/5 text-white/60 border-b border-white/10">
                         <tr>
-                          <th className="p-4 font-medium">Timestamp</th>
-                          <th className="p-4 font-medium">Action</th>
-                          <th className="p-4 font-medium">User ID</th>
-                          <th className="p-4 font-medium">Details</th>
+                          <th className="p-4 font-medium">{t('Timestamp')}</th>
+                          <th className="p-4 font-medium">{t('Action')}</th>
+                          <th className="p-4 font-medium">{t('User ID')}</th>
+                          <th className="p-4 font-medium">{t('Details')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
@@ -3163,7 +3178,7 @@ export default function App() {
                         {auditLogs.length === 0 && (
                           <tr>
                             <td colSpan={4} className="p-8 text-center text-white/40">
-                              No audit logs available.
+                              {t('No audit logs available.')}
                             </td>
                           </tr>
                         )}
@@ -3197,11 +3212,11 @@ export default function App() {
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 bg-black/40 rounded-lg">
-                        <span className="text-sm text-white/60">Total Waste</span>
+                        <span className="text-sm text-white/60">{t('Total Waste')}</span>
                         <span className="font-mono font-bold">{w.total_weight.toFixed(2)} kg</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-black/40 rounded-lg">
-                        <span className="text-sm text-white/60">Total Events</span>
+                        <span className="text-sm text-white/60">{t('Total Events')}</span>
                         <span className="font-mono font-bold">{w.count}</span>
                       </div>
                     </div>
@@ -3209,7 +3224,7 @@ export default function App() {
                 ))}
                 {wardAnalytics.length === 0 && (
                   <div className="col-span-full py-12 text-center">
-                    <p className="text-white/40">No ward data available.</p>
+                    <p className="text-white/40">{t('No ward data available.')}</p>
                   </div>
                 )}
               </div>
@@ -3226,8 +3241,8 @@ export default function App() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">Carbon Credit Market</h2>
-                  <p className="text-white/40 text-sm">Purchase verified carbon credits to offset your footprint.</p>
+                  <h2 className="text-2xl font-bold">{t('Carbon Credit Market')}</h2>
+                  <p className="text-white/40 text-sm">{t('Purchase verified carbon credits to offset your footprint.')}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <button 
@@ -3236,7 +3251,7 @@ export default function App() {
                     className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl border border-white/20 transition-all disabled:opacity-50"
                   >
                     <PlusCircle size={18} />
-                    <span className="font-bold">Add ₹10,000</span>
+                    <span className="font-bold">{t('Add ₹10,000')}</span>
                   </button>
                 </div>
               </div>
@@ -3251,8 +3266,8 @@ export default function App() {
               {availableCredits.length === 0 ? (
                 <Card className="py-12 text-center border-dashed">
                   <Globe size={48} className="mx-auto text-white/20 mb-4" />
-                  <p className="text-white/60 text-lg font-medium">No credits available</p>
-                  <p className="text-white/40 text-sm mt-2">Check back later for newly verified carbon credits.</p>
+                  <p className="text-white/60 text-lg font-medium">{t('No credits available')}</p>
+                  <p className="text-white/40 text-sm mt-2">{t('Check back later for newly verified carbon credits.')}</p>
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -3271,17 +3286,17 @@ export default function App() {
                             </p>
                           </div>
                           <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded uppercase font-bold border border-emerald-500/20">
-                            Verified
+                            {t('Verified')}
                           </span>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
                           <div>
-                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Offset</p>
+                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Offset')}</p>
                             <p className="text-lg font-mono text-emerald-400">{credit.carbon_reduction_kg?.toFixed(2)} kg</p>
                           </div>
                           <div>
-                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Price</p>
+                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Price')}</p>
                             <p className="text-lg font-bold text-white">₹{credit.price?.toFixed(2)}</p>
                           </div>
                         </div>
@@ -3292,7 +3307,7 @@ export default function App() {
                           className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Wallet size={16} />
-                          {walletBalance < (credit.price || 0) ? 'Insufficient Funds' : 'Purchase Credit'}
+                          {walletBalance < (credit.price || 0) ? t('Insufficient Funds') : t('Purchase Credit')}
                         </button>
                       </div>
                     </Card>
@@ -3313,7 +3328,7 @@ export default function App() {
               <Card className="p-8 border-white/5 bg-white/5">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <User className="text-emerald-400" size={20} />
-                  Profile Settings
+                  {t('Profile Settings')}
                 </h3>
                 
                 {message && (
@@ -3333,20 +3348,20 @@ export default function App() {
                       body: JSON.stringify({ name: formData.name, district: formData.district, state: formData.state })
                     });
                     if (res.ok) {
-                      setMessage({ type: 'success', text: 'Profile updated successfully' });
+                      setMessage({ type: 'success', text: t('Profile updated successfully') });
                       fetchUserData();
                     } else {
-                      setMessage({ type: 'error', text: 'Failed to update profile' });
+                      setMessage({ type: 'error', text: t('Failed to update profile') });
                     }
                   } catch (err) {
-                    setMessage({ type: 'error', text: 'An error occurred' });
+                    setMessage({ type: 'error', text: t('An error occurred') });
                   } finally {
                     setLoading(false);
                   }
                 }} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Full Name</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Full Name')}</label>
                       <input 
                         type="text" 
                         value={formData.name || user?.name || ''}
@@ -3355,7 +3370,7 @@ export default function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">Phone Number</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Phone Number')}</label>
                       <input 
                         type="text" 
                         value={user?.phone || ''}
@@ -3364,7 +3379,7 @@ export default function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">District</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('District')}</label>
                       <input 
                         type="text" 
                         value={formData.district || user?.district || ''}
@@ -3373,7 +3388,7 @@ export default function App() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">State</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('State')}</label>
                       <input 
                         type="text" 
                         value={formData.state || user?.state || ''}
@@ -3387,7 +3402,7 @@ export default function App() {
                     disabled={loading}
                     className="w-full md:w-auto px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all disabled:opacity-50"
                   >
-                    {loading ? 'Saving...' : 'Save Changes'}
+                    {loading ? t('Saving...') : t('Save Changes')}
                   </button>
                 </form>
               </Card>
@@ -3395,13 +3410,13 @@ export default function App() {
               <Card className="p-8 border-white/5 bg-white/5">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <AlertCircle className="text-blue-400" size={20} />
-                  Notification Preferences
+                  {t('Notification Preferences')}
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
                     <div>
-                      <p className="font-medium">Email Notifications</p>
-                      <p className="text-xs text-white/40">Receive updates about your transactions via email.</p>
+                      <p className="font-medium">{t('Email Notifications')}</p>
+                      <p className="text-xs text-white/40">{t('Receive updates about your transactions via email.')}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
@@ -3410,8 +3425,8 @@ export default function App() {
                   </div>
                   <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
                     <div>
-                      <p className="font-medium">SMS Alerts</p>
-                      <p className="text-xs text-white/40">Get instant SMS alerts for critical updates.</p>
+                      <p className="font-medium">{t('SMS Alerts')}</p>
+                      <p className="text-xs text-white/40">{t('Get instant SMS alerts for critical updates.')}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
@@ -3420,8 +3435,8 @@ export default function App() {
                   </div>
                   <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
                     <div>
-                      <p className="font-medium">Push Notifications</p>
-                      <p className="text-xs text-white/40">Enable browser push notifications.</p>
+                      <p className="font-medium">{t('Push Notifications')}</p>
+                      <p className="text-xs text-white/40">{t('Enable browser push notifications.')}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
@@ -3444,28 +3459,28 @@ export default function App() {
               {/* Hero Section */}
               <section className="text-center space-y-4 py-12">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">
-                  <Activity size={12} /> Currently Active: {operatingContext} Context ({labels.anchor})
+                  <Activity size={12} /> {t('Currently Active: ')}{operatingContext}{t(' Context (')}{labels.anchor})
                 </div>
-                <h1 className="text-6xl font-black tracking-tighter text-emerald-500">GENESIS</h1>
+                <h1 className="text-6xl font-black tracking-tighter text-emerald-500">{t('GENESIS')}</h1>
                 <p className="text-xl text-white/60 max-w-2xl mx-auto">
-                  The Foundational Structure and Operating Doctrine of RupayKg
+                  {t('The Foundational Structure and Operating Doctrine of RupayKg')}
                 </p>
               </section>
 
               {/* I. Introduction */}
               <Card className="p-8 border-white/10 bg-white/5">
                 <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Shield className="text-emerald-400" /> I. Introduction
+                  <Shield className="text-emerald-400" /> {t('I. Introduction')}
                 </h2>
                 <div className="space-y-4 text-white/70 leading-relaxed">
                   <p>
-                    RupayKg has been established as a <strong>Unified Waste-to-Carbon Digital Operating System</strong> designed to support India’s transition toward a compliance-based carbon market.
+                    {t('RupayKg has been established as a Unified Waste-to-Carbon Digital Operating System designed to support India’s transition toward a compliance-based carbon market.')}
                   </p>
                   <p>
-                    The platform addresses a structural gap in India’s carbon ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade carbon supply.
+                    {t('The platform addresses a structural gap in India’s carbon ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade carbon supply.')}
                   </p>
                   <p>
-                    RupayKg is not structured as a project developer, carbon trader, or recycling entity. It is an <strong>infrastructure layer</strong> designed to operate across urban and rural administrative frameworks without architectural duplication.
+                    {t('RupayKg is not structured as a project developer, carbon trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.')}
                   </p>
                 </div>
               </Card>
@@ -3474,45 +3489,45 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="p-8 border-white/10 bg-white/5">
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <Layers className="text-emerald-400" /> II. Unified Operating System Model
+                    <Layers className="text-emerald-400" /> {t('II. Unified Operating System Model')}
                   </h2>
                   <div className="overflow-hidden rounded-xl border border-white/10">
                     <table className="w-full text-left">
                       <thead className="bg-white/10">
                         <tr>
-                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">Context</th>
-                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">Anchor</th>
-                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">Category</th>
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">{t('Context')}</th>
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">{t('Anchor')}</th>
+                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">{t('Category')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
                         <tr>
-                          <td className="p-4 font-bold">Urban</td>
-                          <td className="p-4 text-white/60">Municipal Corp + Ward</td>
-                          <td className="p-4 text-emerald-400">MSW</td>
+                          <td className="p-4 font-bold">{t('Urban')}</td>
+                          <td className="p-4 text-white/60">{t('Municipal Corp + Ward')}</td>
+                          <td className="p-4 text-emerald-400">{t('MSW')}</td>
                         </tr>
                         <tr>
-                          <td className="p-4 font-bold">Rural</td>
-                          <td className="p-4 text-white/60">Gram Panchayat + Village</td>
-                          <td className="p-4 text-emerald-400">Biomass</td>
+                          <td className="p-4 font-bold">{t('Rural')}</td>
+                          <td className="p-4 text-white/60">{t('Gram Panchayat + Village')}</td>
+                          <td className="p-4 text-emerald-400">{t('Biomass')}</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
                   <p className="mt-4 text-sm text-white/40 italic">
-                    * All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.
+                    {t('* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.')}
                   </p>
                 </Card>
 
                 <Card className="p-8 border-white/10 bg-white/5">
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <User className="text-emerald-400" /> III. Unified Stakeholder Architecture
+                    <User className="text-emerald-400" /> {t('III. Unified Stakeholder Architecture')}
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {[
-                      "Waste Generator", "Aggregator", "Processor", 
-                      "Administrative Authority", "Producers (EPR)", 
-                      "CSR Contributors", "Carbon Buyers", "Regulator"
+                      t("Waste Generator"), t("Aggregator"), t("Processor"), 
+                      t("Administrative Authority"), t("Producers (EPR)"), 
+                      t("CSR Contributors"), t("Carbon Buyers"), t("Regulator")
                     ].map((s, i) => (
                       <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-sm border border-white/10">
                         {s}
@@ -3520,7 +3535,7 @@ export default function App() {
                     ))}
                   </div>
                   <p className="mt-6 text-sm text-white/60">
-                    The <strong>Aggregator</strong> is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.
+                    {t('The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.')}
                   </p>
                 </Card>
               </div>
@@ -3529,21 +3544,21 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="p-8 border-white/10 bg-white/5">
                   <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <Zap className="text-emerald-400" /> IV. Carbon Origination
+                    <Zap className="text-emerald-400" /> {t('IV. Carbon Origination')}
                   </h2>
                   <ul className="space-y-3 text-white/70">
-                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Methane avoidance through diversion</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Biomass-based fossil substitution</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Recycling substitution</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> {t('Methane avoidance through diversion')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> {t('Biomass-based fossil substitution')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> {t('Recycling substitution')}</li>
                   </ul>
                 </Card>
 
                 <Card className="p-8 border-white/10 bg-white/5">
                   <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <TrendingUp className="text-emerald-400" /> V. Multi-Rail Architecture
+                    <TrendingUp className="text-emerald-400" /> {t('V. Multi-Rail Architecture')}
                   </h2>
                   <div className="grid grid-cols-2 gap-2">
-                    {["Recycler Rail", "CSR Rail", "EPR Rail", "Governance Layer", "Carbon Rail"].map((r, i) => (
+                    {[t("Recycler Rail"), t("CSR Rail"), t("EPR Rail"), t("Governance Layer"), t("Carbon Rail")].map((r, i) => (
                       <div key={i} className="p-2 bg-white/5 rounded border border-white/5 text-xs text-center">
                         {r}
                       </div>
@@ -3556,19 +3571,19 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="p-8 border-white/10 bg-white/5 border-l-4 border-l-emerald-500">
                   <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <Scale className="text-emerald-400" /> VI. Regulator Sovereignty
+                    <Scale className="text-emerald-400" /> {t('VI. Regulator Sovereignty')}
                   </h2>
                   <p className="text-white/70 text-sm leading-relaxed">
-                    Carbon issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national carbon governance frameworks.
+                    {t('Carbon issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national carbon governance frameworks.')}
                   </p>
                 </Card>
 
                 <Card className="p-8 border-emerald-500/20 bg-emerald-500/5">
                   <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <Activity className="text-emerald-400" /> VII. Strategic Position
+                    <Activity className="text-emerald-400" /> {t('VII. Strategic Position')}
                   </h2>
                   <p className="text-lg font-medium text-emerald-400 italic">
-                    "India’s Unified Waste-to-Carbon Infrastructure Layer for the Compliance Carbon Era."
+                    {t('"India’s Unified Waste-to-Carbon Infrastructure Layer for the Compliance Carbon Era."')}
                   </p>
                 </Card>
               </div>
@@ -3579,60 +3594,60 @@ export default function App() {
                   <Leaf size={200} />
                 </div>
                 <div className="relative z-10 max-w-3xl">
-                  <h2 className="text-3xl font-black mb-8 italic">Founder's Note</h2>
+                  <h2 className="text-3xl font-black mb-8 italic">{t("Founder's Note")}</h2>
                   <div className="space-y-6 text-xl text-white/80 font-light leading-relaxed">
-                    <p>When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated carbon value?</p>
-                    <p>India is entering a compliance carbon era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.</p>
-                    <p>RupayKg was built to unify them. Not as a carbon trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.</p>
-                    <p className="text-emerald-400 font-bold">Waste is no longer disposal. It is governance-linked climate infrastructure.</p>
+                    <p>{t('When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated carbon value?')}</p>
+                    <p>{t('India is entering a compliance carbon era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.')}</p>
+                    <p>{t('RupayKg was built to unify them. Not as a carbon trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.')}</p>
+                    <p className="text-emerald-400 font-bold">{t('Waste is no longer disposal. It is governance-linked climate infrastructure.')}</p>
                   </div>
-                  <p className="mt-12 font-bold text-white/40 uppercase tracking-widest">— Founder, RupayKg</p>
+                  <p className="mt-12 font-bold text-white/40 uppercase tracking-widest">{t('— Founder, RupayKg')}</p>
                 </div>
               </section>
 
               {/* Constitutional Declaration */}
               <section className="border-2 border-white/10 rounded-3xl p-12 bg-white/[0.02] font-serif">
                 <div className="text-center mb-12">
-                  <h2 className="text-sm uppercase tracking-[0.5em] text-white/40 mb-4">Legally Styled</h2>
-                  <h3 className="text-4xl font-bold">DECLARATION OF FOUNDATIONAL STRUCTURE</h3>
+                  <h2 className="text-sm uppercase tracking-[0.5em] text-white/40 mb-4">{t('Legally Styled')}</h2>
+                  <h3 className="text-4xl font-bold">{t('DECLARATION OF FOUNDATIONAL STRUCTURE')}</h3>
                   <div className="w-24 h-1 bg-emerald-500 mx-auto mt-6"></div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-sm text-white/60">
                   <div className="space-y-6">
                     <div>
-                      <h4 className="font-bold text-white mb-2">Article I — Unified Operating System</h4>
-                      <p>RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.</p>
+                      <h4 className="font-bold text-white mb-2">{t('Article I — Unified Operating System')}</h4>
+                      <p>{t('RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.')}</p>
                     </div>
                     <div>
-                      <h4 className="font-bold text-white mb-2">Article II — Unified Stakeholder Doctrine</h4>
-                      <p>The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, Carbon Buyers, Regulator.</p>
+                      <h4 className="font-bold text-white mb-2">{t('Article II — Unified Stakeholder Doctrine')}</h4>
+                      <p>{t('The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, Carbon Buyers, Regulator.')}</p>
                     </div>
                     <div>
-                      <h4 className="font-bold text-white mb-2">Article III — Waste Classification</h4>
-                      <p>Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.</p>
+                      <h4 className="font-bold text-white mb-2">{t('Article III — Waste Classification')}</h4>
+                      <p>{t('Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.')}</p>
                     </div>
                   </div>
                   <div className="space-y-6">
                     <div>
-                      <h4 className="font-bold text-white mb-2">Article IV — Carbon Engine</h4>
-                      <p>All emission reductions shall be processed through a single carbon calculation engine with event-level MRV validation.</p>
+                      <h4 className="font-bold text-white mb-2">{t('Article IV — Carbon Engine')}</h4>
+                      <p>{t('All emission reductions shall be processed through a single carbon calculation engine with event-level MRV validation.')}</p>
                     </div>
                     <div>
-                      <h4 className="font-bold text-white mb-2">Article V — Rail Separation</h4>
-                      <p>RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, Carbon issuance. Double counting is prohibited.</p>
+                      <h4 className="font-bold text-white mb-2">{t('Article V — Rail Separation')}</h4>
+                      <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, Carbon issuance. Double counting is prohibited.')}</p>
                     </div>
                     <div>
-                      <h4 className="font-bold text-white mb-2">Article VI — Regulator Sovereignty</h4>
-                      <p>Carbon mint authority shall remain under regulator control. RupayKg shall not independently issue carbon credits.</p>
+                      <h4 className="font-bold text-white mb-2">{t('Article VI — Regulator Sovereignty')}</h4>
+                      <p>{t('Carbon mint authority shall remain under regulator control. RupayKg shall not independently issue carbon credits.')}</p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="mt-12 pt-12 border-t border-white/10 text-center">
-                  <p className="text-emerald-400 font-bold text-xl">Institutional Identity</p>
+                  <p className="text-emerald-400 font-bold text-xl">{t('Institutional Identity')}</p>
                   <p className="text-white/40 mt-2 max-w-2xl mx-auto">
-                    RupayKg is hereby defined as: A Unified Waste-to-Carbon Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned carbon origination capability.
+                    {t('RupayKg is hereby defined as: A Unified Waste-to-Carbon Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned carbon origination capability.')}
                   </p>
                 </div>
               </section>
