@@ -37,6 +37,32 @@ import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
 import { WASTE_TYPES, WASTE_CATEGORIES } from './constants';
 
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'hi', label: 'हिंदी' },
+  { code: 'bn', label: 'বাংলা' },
+  { code: 'te', label: 'తెలుగు' },
+  { code: 'mr', label: 'मराठी' },
+  { code: 'ta', label: 'தமிழ்' },
+  { code: 'ur', label: 'اردو' },
+  { code: 'gu', label: 'ગુજરાતી' },
+  { code: 'kn', label: 'ಕನ್ನಡ' },
+  { code: 'ml', label: 'മലയാളം' },
+  { code: 'or', label: 'ଓଡ଼ିଆ' },
+  { code: 'pa', label: 'ਪੰਜਾਬੀ' },
+  { code: 'as', label: 'অসমীয়া' },
+  { code: 'mai', label: 'मैथिली' },
+  { code: 'sat', label: 'ᱥᱟᱱᱛᱟᱲᱤ' },
+  { code: 'ks', label: 'कॉशुर' },
+  { code: 'ne', label: 'नेपाली' },
+  { code: 'kok', label: 'कोंकणी' },
+  { code: 'sd', label: 'سنڌي' },
+  { code: 'doi', label: 'डोगरी' },
+  { code: 'mni', label: 'মৈতৈলোন্' },
+  { code: 'brx', label: 'बड़ो' },
+  { code: 'sa', label: 'संस्कृतम्' }
+];
+
 // Fix Leaflet marker icon issue
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
@@ -873,21 +899,18 @@ export default function App() {
               <div className="relative group">
                 <button className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium">
                   <Globe size={16} />
-                  {i18n.language === 'en' ? 'EN' : 'HI'}
+                  {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
                 </button>
-                <div className="absolute right-0 mt-2 w-32 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
-                  <button 
-                    onClick={() => i18n.changeLanguage('en')}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                  >
-                    English
-                  </button>
-                  <button 
-                    onClick={() => i18n.changeLanguage('hi')}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                  >
-                    हिंदी
-                  </button>
+                <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+                  {LANGUAGES.map((lang) => (
+                    <button 
+                      key={lang.code}
+                      onClick={() => i18n.changeLanguage(lang.code)}
+                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
                 </div>
               </div>
               <button 
@@ -928,21 +951,18 @@ export default function App() {
                 <div className="relative group w-full sm:w-auto">
                   <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2">
                     <Globe size={20} />
-                    {i18n.language === 'en' ? 'English' : 'हिंदी'}
+                    {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
                   </button>
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
-                    <button 
-                      onClick={() => i18n.changeLanguage('en')}
-                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                    >
-                      English
-                    </button>
-                    <button 
-                      onClick={() => i18n.changeLanguage('hi')}
-                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                    >
-                      हिंदी
-                    </button>
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[300px] overflow-y-auto">
+                    {LANGUAGES.map((lang) => (
+                      <button 
+                        key={lang.code}
+                        onClick={() => i18n.changeLanguage(lang.code)}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all">
@@ -1200,21 +1220,18 @@ export default function App() {
           <div className="relative group">
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium bg-[#0A0A0B]/80 backdrop-blur-md">
               <Globe size={16} />
-              {i18n.language === 'en' ? 'EN' : 'HI'}
+              {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
             </button>
-            <div className="absolute right-0 mt-2 w-32 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50">
-              <button 
-                onClick={() => i18n.changeLanguage('en')}
-                className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'en' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-              >
-                English
-              </button>
-              <button 
-                onClick={() => i18n.changeLanguage('hi')}
-                className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === 'hi' ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-              >
-                हिंदी
-              </button>
+            <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+              {LANGUAGES.map((lang) => (
+                <button 
+                  key={lang.code}
+                  onClick={() => i18n.changeLanguage(lang.code)}
+                  className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                >
+                  {lang.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -1567,41 +1584,13 @@ export default function App() {
                 className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold transition-all hover:bg-white/10 text-white"
               >
                 <Globe size={14} />
-                {(() => {
-                  switch(i18n.language) {
-                    case 'hi': return 'हिंदी';
-                    case 'mr': return 'मराठी';
-                    case 'gu': return 'ગુજરાતી';
-                    case 'ta': return 'தமிழ்';
-                    case 'te': return 'తెలుగు';
-                    case 'kn': return 'ಕನ್ನಡ';
-                    case 'ml': return 'മലയാളം';
-                    case 'bn': return 'বাংলা';
-                    case 'pa': return 'ਪੰਜਾਬੀ';
-                    case 'or': return 'ଓଡ଼ିଆ';
-                    case 'as': return 'অসমীয়া';
-                    default: return 'English';
-                  }
-                })()}
+                {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
               </button>
               {showLangDropdown && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowLangDropdown(false)} />
                   <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-                    {[
-                      { code: 'en', label: 'English' },
-                      { code: 'hi', label: 'हिंदी' },
-                      { code: 'mr', label: 'मराठी' },
-                      { code: 'gu', label: 'ગુજરાતી' },
-                      { code: 'ta', label: 'தமிழ்' },
-                      { code: 'te', label: 'తెలుగు' },
-                      { code: 'kn', label: 'ಕನ್ನಡ' },
-                      { code: 'ml', label: 'മലയാളം' },
-                      { code: 'bn', label: 'বাংলা' },
-                      { code: 'pa', label: 'ਪੰਜਾਬੀ' },
-                      { code: 'or', label: 'ଓଡ଼ିଆ' },
-                      { code: 'as', label: 'অসমীয়া' }
-                    ].map((lang) => (
+                    {LANGUAGES.map((lang) => (
                       <button 
                         key={lang.code}
                         onClick={() => {
