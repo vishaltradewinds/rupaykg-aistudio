@@ -62,8 +62,11 @@ async function run() {
       const textToTranslate = batch.join(' _|||_ ');
       
       try {
-        const res = await translate(textToTranslate, { to: lang.code });
-        const translatedBatch = res.text.split(/\s*_\|\|\|_\s*/);
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|${lang.code}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        const translatedText = data.responseData.translatedText;
+        const translatedBatch = translatedText.split(/\s*_\|\|\|_\s*/);
         
         for (let j = 0; j < batch.length; j++) {
           translatedObj[batch[j]] = translatedBatch[j] || batch[j];

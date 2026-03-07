@@ -896,22 +896,33 @@ export default function App() {
               <a href="#roles" className="hover:text-white transition-colors">{t('Ecosystem Roles')}</a>
             </div>
             <div className="flex items-center gap-3">
-              <div className="relative group">
-                <button className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium">
+              <div className="relative">
+                <button 
+                  onClick={() => setShowLangDropdown(!showLangDropdown)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium"
+                >
                   <Globe size={16} />
                   {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-                  {LANGUAGES.map((lang) => (
-                    <button 
-                      key={lang.code}
-                      onClick={() => i18n.changeLanguage(lang.code)}
-                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                    >
-                      {lang.label}
-                    </button>
-                  ))}
-                </div>
+                {showLangDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowLangDropdown(false)} />
+                    <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+                      {LANGUAGES.map((lang) => (
+                        <button 
+                          key={lang.code}
+                          onClick={() => {
+                            i18n.changeLanguage(lang.code);
+                            setShowLangDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                        >
+                          {lang.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
               <button 
                 onClick={() => setShowAuth(true)}
@@ -948,22 +959,33 @@ export default function App() {
                 >
                   {t('Access the OS')} <ArrowRight size={20} />
                 </button>
-                <div className="relative group w-full sm:w-auto">
-                  <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2">
+                <div className="relative w-full sm:w-auto">
+                  <button 
+                    onClick={() => setShowLangDropdown(!showLangDropdown)}
+                    className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+                  >
                     <Globe size={20} />
                     {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
                   </button>
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[300px] overflow-y-auto">
-                    {LANGUAGES.map((lang) => (
-                      <button 
-                        key={lang.code}
-                        onClick={() => i18n.changeLanguage(lang.code)}
-                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                      >
-                        {lang.label}
-                      </button>
-                    ))}
-                  </div>
+                  {showLangDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowLangDropdown(false)} />
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl transition-all overflow-hidden z-50 max-h-[300px] overflow-y-auto">
+                        {LANGUAGES.map((lang) => (
+                          <button 
+                            key={lang.code}
+                            onClick={() => {
+                              i18n.changeLanguage(lang.code);
+                              setShowLangDropdown(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                          >
+                            {lang.label}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
                 <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all">
                   Read Whitepaper
@@ -1217,22 +1239,33 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#0A0A0B] text-white flex items-center justify-center p-4 font-sans relative">
         <div className="absolute top-6 right-6 z-50">
-          <div className="relative group">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium bg-[#0A0A0B]/80 backdrop-blur-md">
+          <div className="relative">
+            <button 
+              onClick={() => setShowLangDropdown(!showLangDropdown)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium bg-[#0A0A0B]/80 backdrop-blur-md"
+            >
               <Globe size={16} />
               {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
             </button>
-            <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-              {LANGUAGES.map((lang) => (
-                <button 
-                  key={lang.code}
-                  onClick={() => i18n.changeLanguage(lang.code)}
-                  className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                >
-                  {lang.label}
-                </button>
-              ))}
-            </div>
+            {showLangDropdown && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowLangDropdown(false)} />
+                <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+                  {LANGUAGES.map((lang) => (
+                    <button 
+                      key={lang.code}
+                      onClick={() => {
+                        i18n.changeLanguage(lang.code);
+                        setShowLangDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
