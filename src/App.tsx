@@ -987,9 +987,6 @@ export default function App() {
                     </>
                   )}
                 </div>
-                <button className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-white/20 hover:bg-white/5 transition-all">
-                  Read Whitepaper
-                </button>
               </div>
             </motion.div>
 
