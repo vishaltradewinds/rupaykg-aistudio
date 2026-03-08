@@ -612,7 +612,7 @@ export default function App() {
         const kpiRes = await fetch('/api/dashboard/kpi', { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) {
           const kpiData = await kpiRes.json();
-          setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : null);
+          setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_carbon_reduction_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
         }
       }
 
@@ -647,7 +647,7 @@ export default function App() {
       }
 
       // 8. Fetch Series A / Admin KPI data
-      if (['super_admin', 'state_admin', 'regulator'].includes(currentUser?.role || '')) {
+      if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
         const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) setAdminKpi(await kpiRes.json());
 
@@ -674,7 +674,7 @@ export default function App() {
       }
 
       // 10. Fetch Carbon Pool
-      if (['carbon_buyer', 'regulator', 'super_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
+      if (['carbon_buyer', 'regulator', 'super_admin', 'state_admin', 'municipal_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
         const poolRes = await fetch(`/api/carbon/pool?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (poolRes.ok) setCarbonPool(await poolRes.json());
       }
@@ -1532,7 +1532,7 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('MRV Dashboard')}</span>
             </button>
           )}
-          {['super_admin', 'state_admin', 'regulator'].includes(user?.role || '') && (
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('admin')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'admin' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -1705,27 +1705,27 @@ export default function App() {
 
               {user?.role === 'aggregator' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Total Collected')} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
+                  <Stat label={t('Total Collected')} value={`${history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
                   <Stat label={t('Farmers Registered')} value={adminStats?.total_farmers || 0} icon={Users} color="emerald" />
-                  <Stat label={t('Logistics Margin')} value={`₹${(history.reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" />
+                  <Stat label={t('Logistics Margin')} value={`₹${(history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" />
                   <Stat label={t('Fleet Efficiency')} value="94%" icon={Truck} color="cyan" />
                 </div>
               )}
 
               {user?.role === 'processor' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Total Processed')} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" />
-                  <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" />
-                  <Stat label={t('Value Generated')} value={`₹${history.reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" />
+                  <Stat label={t('Total Processed')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" />
+                  <Stat label={t('Carbon Credits')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" />
+                  <Stat label={t('Value Generated')} value={`₹${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" />
                   <Stat label={t('Processing Yield')} value="98.2%" icon={Zap} color="cyan" />
                 </div>
               )}
 
-              {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && adminStats && (
+              {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Total Investment')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
-                  <Stat label={t('Carbon Credits')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
-                  <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="blue" />
+                  <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" />
+                  <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" />
+                  <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
                   <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" />
                 </div>
               )}
@@ -2825,7 +2825,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'admin' && ['super_admin', 'state_admin', 'regulator'].includes(user?.role || '') && (
+          {view === 'admin' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
             <motion.div 
               key="admin"
               initial={{ opacity: 0, x: 20 }}

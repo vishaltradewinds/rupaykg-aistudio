@@ -510,6 +510,8 @@ async function startServer() {
       userRecords = userRecords.filter(r => r.aggregator_id === req.user.id || r.status === "pending_pickup");
     } else if (req.user.role === "processor") {
       userRecords = userRecords.filter(r => r.processor_id === req.user.id || r.status === "in_transit");
+    } else if (["csr_partner", "epr_partner", "carbon_buyer"].includes(req.user.role)) {
+      userRecords = userRecords.filter(r => r.purchased_by === req.user.id);
     }
 
     // Hide MRV status from non-citizens and non-admins
@@ -715,7 +717,7 @@ async function startServer() {
   // ================================
   // SERIES A KPI ENDPOINT
   // ================================
-  app.get("/api/admin/kpi", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
+  app.get("/api/admin/kpi", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
     const { context } = req.query;
     let filteredRecords = records;
     if (context && context !== 'all') {
@@ -764,7 +766,7 @@ async function startServer() {
   // ================================
   // FRAUD HEATMAP DATA
   // ================================
-  app.get("/api/admin/fraud-map", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
+  app.get("/api/admin/fraud-map", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
     const { context } = req.query;
     let filteredRecords = records.filter(r => r.mrv_status === "rejected" || r.status === "flagged");
     
@@ -778,7 +780,7 @@ async function startServer() {
   // ================================
   // CARBON POOL STATUS
   // ================================
-  app.get("/api/carbon/pool", auth(["carbon_buyer", "regulator", "super_admin", "csr_partner", "epr_partner"]), (req: any, res) => {
+  app.get("/api/carbon/pool", auth(["carbon_buyer", "regulator", "super_admin", "state_admin", "municipal_admin", "csr_partner", "epr_partner"]), (req: any, res) => {
     const { context } = req.query;
     let filteredRecords = records.filter(r => r.mrv_status === "verified");
     
@@ -910,7 +912,7 @@ async function startServer() {
   });
 
   // ---------------- ANALYTICS & METRICS ----------------
-  app.get("/api/analytics/comprehensive", auth(["super_admin", "state_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/analytics/comprehensive", auth(["super_admin", "state_admin", "municipal_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
     const { context } = req.query;
     let filteredRecords = records;
     if (context && context !== 'all') {
@@ -959,7 +961,7 @@ async function startServer() {
     });
   });
 
-  app.get("/api/analytics/trends", auth(["super_admin", "state_admin", "regulator"]), (req: any, res) => {
+  app.get("/api/analytics/trends", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
     // Group records by month for the last 6 months
     const now = new Date();
     const trends = [];
