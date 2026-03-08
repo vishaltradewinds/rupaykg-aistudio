@@ -29,7 +29,8 @@ import {
   AlertTriangle,
   Map,
   BookOpen,
-  RefreshCw
+  RefreshCw,
+  Camera
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -2135,17 +2136,40 @@ export default function App() {
 
                     <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Verification Image')}</label>
-                      <div className="relative">
-                        <input 
-                          type="file" 
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-500/10 file:text-emerald-400 hover:file:bg-emerald-500/20"
-                        />
-                      </div>
-                      {uploadData.image_url && (
-                        <div className="mt-4">
-                          <img src={uploadData.image_url} alt="Waste Verification" className="w-full h-48 object-cover rounded-xl border border-white/10" />
+                      
+                      {!uploadData.image_url ? (
+                        <div className="relative">
+                          <label className="w-full flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/20 rounded-xl hover:bg-white/5 hover:border-emerald-500/50 transition-all cursor-pointer group">
+                            <div className="bg-emerald-500/10 p-4 rounded-full mb-4 group-hover:bg-emerald-500/20 transition-colors">
+                              <Camera size={32} className="text-emerald-400" />
+                            </div>
+                            <span className="text-sm font-medium text-white/80 group-hover:text-white mb-1">{t('Tap to Capture Image')}</span>
+                            <span className="text-xs text-white/40">{t('Uses mobile camera if available')}</span>
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              capture="environment"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="relative group">
+                          <img src={uploadData.image_url} alt="Waste Verification" className="w-full h-64 object-cover rounded-xl border border-white/10" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                            <label className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg backdrop-blur-sm cursor-pointer font-medium flex items-center gap-2">
+                              <RefreshCw size={16} />
+                              {t('Retake Photo')}
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                capture="environment"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
                         </div>
                       )}
                     </div>
