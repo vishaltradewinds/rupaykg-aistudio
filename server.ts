@@ -65,24 +65,11 @@ async function startServer() {
 
   // --- IN-MEMORY FALLBACK DB ---
   const users: any[] = [
-    { id: "demo_citizen", phone: "9000000001", password: "password", role: "citizen", name: "Ramesh Kumar", district: "Pune", state: "Maharashtra", wallet_balance: 1250.50 },
-    { id: "demo_aggregator", phone: "9000000002", password: "password", role: "aggregator", name: "Logistics Pro", organization_name: "Green Logistics Ltd", district: "Pune", state: "Maharashtra", wallet_balance: 5400.00 },
-    { id: "demo_processor", phone: "9000000003", password: "password", role: "processor", name: "Recycle Master", organization_name: "EcoProcessors Inc", district: "Pune", state: "Maharashtra", wallet_balance: 12000.00 },
-    { id: "demo_municipal", phone: "9000000004", password: "password", role: "municipal_admin", name: "Municipal Officer", organization_name: "Pune Municipal Corp", district: "Pune", state: "Maharashtra", wallet_balance: 0 },
-    { id: "demo_state", phone: "9000000005", password: "password", role: "state_admin", name: "State Secretary", organization_name: "Maharashtra Environment Dept", district: "Mumbai", state: "Maharashtra", wallet_balance: 0 },
-    { id: "demo_buyer", phone: "9000000006", password: "password", role: "carbon_buyer", name: "ESG Manager", organization_name: "Global Corp ESG", district: "Delhi", state: "Delhi", wallet_balance: 50000.00 },
-    { id: "demo_regulator", phone: "9000000007", password: "password", role: "regulator", name: "National Auditor", organization_name: "Central Pollution Control Board", district: "Delhi", state: "Delhi", wallet_balance: 0 },
-    { id: "demo_super", phone: "9000000000", password: "password", role: "super_admin", name: "Super Admin", organization_name: "System", district: "Delhi", state: "Delhi", wallet_balance: 0 }
+    { id: "admin_1", phone: "9999999999", password: "admin_password", role: "super_admin", name: "System Administrator", organization_name: "Alliance Ventures", district: "Delhi", state: "Delhi", wallet_balance: 0 }
   ];
-  const records: any[] = [
-    { id: "REC1", citizen_id: "demo_citizen", weight_kg: 50, waste_type: "Agricultural", village: "Ambegaon", status: "processed", carbon_reduction_kg: 25, total_value: 750, context: "rural", timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 86400000).toISOString(), acreage: 0.2, risk_score: 0.1 },
-    { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 43200000).toISOString(), acreage: 0.1, risk_score: 0.2 }
-  ];
+  const records: any[] = [];
   const logs: any[] = [];
-  const farmers: any[] = [
-    { farmer_id: "FARMER_1", name: "Suresh Patil", mobile: "9876543210", land_area: 5.5, crop_type: "Sugarcane", geo_location: { lat: 18.5204, lng: 73.8567 }, created_at: new Date().toISOString() },
-    { farmer_id: "FARMER_2", name: "Anil Deshmukh", mobile: "9876543211", land_area: 3.2, crop_type: "Cotton", geo_location: { lat: 18.5304, lng: 73.8667 }, created_at: new Date().toISOString() }
-  ];
+  const farmers: any[] = [];
   const notifications: any[] = [];
   const blockchain: any[] = [];
 
@@ -611,118 +598,7 @@ async function startServer() {
     res.json({ success: true });
   });
 
-  app.post("/api/admin/reset", auth(["super_admin"]), (req, res) => {
-    users.length = 0;
-    users.push(
-      { id: "demo_citizen", phone: "9000000001", password: "password", role: "citizen", name: "Ramesh Kumar", district: "Pune", state: "Maharashtra", wallet_balance: 1250.50 },
-      { id: "demo_aggregator", phone: "9000000002", password: "password", role: "aggregator", name: "Logistics Pro", organization_name: "Green Logistics Ltd", district: "Pune", state: "Maharashtra", wallet_balance: 5400.00 },
-      { id: "demo_processor", phone: "9000000003", password: "password", role: "processor", name: "Recycle Master", organization_name: "EcoProcessors Inc", district: "Pune", state: "Maharashtra", wallet_balance: 12000.00 },
-      { id: "demo_municipal", phone: "9000000004", password: "password", role: "municipal_admin", name: "Municipal Officer", organization_name: "Pune Municipal Corp", district: "Pune", state: "Maharashtra", wallet_balance: 0 },
-      { id: "demo_state", phone: "9000000005", password: "password", role: "state_admin", name: "State Secretary", organization_name: "Maharashtra Environment Dept", district: "Mumbai", state: "Maharashtra", wallet_balance: 0 },
-      { id: "demo_buyer", phone: "9000000006", password: "password", role: "carbon_buyer", name: "ESG Manager", organization_name: "Global Corp ESG", district: "Delhi", state: "Delhi", wallet_balance: 50000.00 },
-      { id: "demo_regulator", phone: "9000000007", password: "password", role: "regulator", name: "National Auditor", organization_name: "Central Pollution Control Board", district: "Delhi", state: "Delhi", wallet_balance: 0 },
-      { id: "demo_super", phone: "9000000000", password: "password", role: "super_admin", name: "Super Admin", organization_name: "System", district: "Delhi", state: "Delhi", wallet_balance: 0 }
-    );
-
-    records.length = 0;
-    records.push(
-      { id: "REC1", citizen_id: "demo_citizen", weight_kg: 50, waste_type: "Agricultural", village: "Ambegaon", status: "processed", carbon_reduction_kg: 25, total_value: 750, context: "rural", timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 86400000).toISOString(), acreage: 0.2, risk_score: 0.1 },
-      { id: "REC2", citizen_id: "demo_citizen", weight_kg: 30, waste_type: "Municipal", village: "Ward 12", status: "processed", carbon_reduction_kg: 15, total_value: 450, context: "urban", timestamp: new Date(Date.now() - 86400000).toISOString(), mrv_status: "verified", mrv_verified_by: "demo_regulator", mrv_verified_at: new Date(Date.now() - 43200000).toISOString(), acreage: 0.1, risk_score: 0.2 }
-    );
-
-    logs.length = 0;
-    farmers.length = 0;
-    farmers.push(
-      { farmer_id: "FARMER_1", name: "Suresh Patil", mobile: "9876543210", land_area: 5.5, crop_type: "Sugarcane", geo_location: { lat: 18.5204, lng: 73.8567 }, created_at: new Date().toISOString() },
-      { farmer_id: "FARMER_2", name: "Anil Deshmukh", mobile: "9876543211", land_area: 3.2, crop_type: "Cotton", geo_location: { lat: 18.5304, lng: 73.8667 }, created_at: new Date().toISOString() }
-    );
-    notifications.length = 0;
-
-    res.json({ message: "Demo data reset successfully" });
-  });
-
-  app.post("/api/admin/seed", auth(["super_admin", "state_admin", "municipal_admin"]), (req, res) => {
-    // Add some random records to make dashboards look good
-    const contexts = ["urban", "rural"];
-    const statuses = ["pending_pickup", "in_transit", "processed"];
-    const wasteTypes = WASTE_TYPES.map(w => w.type);
-    
-    for (let i = 0; i < 20; i++) {
-      const context = contexts[Math.floor(Math.random() * contexts.length)];
-      const waste_type = wasteTypes[Math.floor(Math.random() * wasteTypes.length)];
-      const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
-      const weight_kg = Math.floor(Math.random() * 100) + 10;
-      const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
-      const total_value = (weight_kg * wasteConfig.value) + (carbon_reduction_kg * 10);
-      
-      const acreage = Math.random() * 0.5 + 0.05;
-      const expected_kg = acreage * 2500; // 2.5 tonnes per acre
-      const risk_score = Math.abs(expected_kg - weight_kg) / expected_kg;
-
-      const isVerified = Math.random() > 0.3;
-      const recordId = "SEED" + i + Date.now();
-      
-      let blockchain_hash = undefined;
-      let blockchain_index = undefined;
-
-      if (isVerified) {
-        const block = mintBlock({
-          record_id: recordId,
-          user_id: "demo_citizen",
-          waste_type,
-          weight_kg,
-          carbon_reduction_kg,
-          verified_by: "demo_regulator",
-          event_type: "CARBON_CREDIT_MINTING_SEED"
-        });
-        blockchain_hash = block.hash;
-        blockchain_index = block.index;
-      }
-
-      records.push({
-        id: recordId,
-        citizen_id: "demo_citizen",
-        aggregator_id: "demo_aggregator",
-        processor_id: "demo_processor",
-        weight_kg,
-        waste_type,
-        village: context === "urban" ? "Ward " + (Math.floor(Math.random() * 20) + 1) : "Village " + String.fromCharCode(65 + Math.floor(Math.random() * 10)),
-        geo_lat: 18.5204 + (Math.random() * 0.1),
-        geo_long: 73.8567 + (Math.random() * 0.1),
-        status: isVerified ? "processed" : statuses[Math.floor(Math.random() * statuses.length)],
-        timestamp: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString(),
-        carbon_reduction_kg,
-        total_value,
-        context,
-        acreage,
-        risk_score,
-        mrv_status: isVerified ? "verified" : "pending",
-        blockchain_hash,
-        blockchain_index,
-        ...(isVerified && {
-          mrv_verified_by: "demo_regulator",
-          mrv_verified_at: new Date(Date.now() - Math.floor(Math.random() * 500000000)).toISOString()
-        })
-      });
-    }
-    
-    for (let i = 0; i < 10; i++) {
-      farmers.push({
-        farmer_id: "SEED_FARMER_" + i + Date.now(),
-        name: ["Rajesh", "Amit", "Vijay", "Sanjay", "Sunil"][Math.floor(Math.random() * 5)] + " " + ["Patil", "Deshmukh", "Pawar", "Shinde"][Math.floor(Math.random() * 4)],
-        mobile: "9" + Math.floor(Math.random() * 1000000000),
-        land_area: Number((Math.random() * 10 + 1).toFixed(1)),
-        crop_type: ["Sugarcane", "Cotton", "Wheat", "Rice"][Math.floor(Math.random() * 4)],
-        geo_location: {
-          lat: 18.5204 + (Math.random() * 0.2),
-          lng: 73.8567 + (Math.random() * 0.2)
-        },
-        created_at: new Date().toISOString()
-      });
-    }
-    
-    res.json({ message: "Seeded 20 records and 10 farmers" });
-  });
+  // Removed demo reset and seed routes for live production environment
 
   // ---------------- PARTNER ROUTES ----------------
   app.get("/api/partner/wallet", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {

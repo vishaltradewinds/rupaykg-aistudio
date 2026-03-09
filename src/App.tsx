@@ -30,7 +30,8 @@ import {
   Map,
   BookOpen,
   RefreshCw,
-  Camera
+  Camera,
+  Database
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -410,41 +411,7 @@ export default function App() {
     checkDbStatus();
   }, []);
 
-  const seedDemoData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/admin/seed', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Demo data seeded successfully' });
-        fetchUserData();
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetDemoData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/admin/reset', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Demo data reset successfully' });
-        fetchUserData();
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Removed demo functions for live production environment
 
   const handleRetryDb = async () => {
     try {
@@ -1090,8 +1057,8 @@ export default function App() {
                         { label: 'Carbon Offset', value: '89.4t', icon: Globe, color: 'cyan' },
                         { label: 'Active Nodes', value: '1,242', icon: Activity, color: 'blue' },
                         { label: 'Value Minted', value: '₹4.2M', icon: Wallet, color: 'purple' }
-                      ].map((stat, i) => (
-                        <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      ].map((stat) => (
+                        <div key={stat.label} className="p-4 rounded-2xl bg-white/5 border border-white/5">
                           <stat.icon size={16} className={`text-${stat.color}-400 mb-2`} />
                           <p className="text-[10px] uppercase tracking-wider text-white/30 mb-1">{stat.label}</p>
                           <p className="text-lg font-bold">{stat.value}</p>
@@ -1117,7 +1084,7 @@ export default function App() {
                           { name: 'Karnataka Bio-Hub', nodes: 156, load: '67%', color: 'purple' },
                           { name: 'Gujarat Municipal Rail', nodes: 390, load: '78%', color: 'cyan' }
                         ].map((cluster, i) => (
-                          <div key={i} className="space-y-2">
+                          <div key={cluster.name} className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="font-medium">{cluster.name}</span>
                               <span className="text-white/40">{cluster.nodes} nodes</span>
@@ -1173,8 +1140,8 @@ export default function App() {
                   { step: "02", title: t("Aggregate"), desc: t("Aggregators verify, weigh, and transport waste to facilities.") },
                   { step: "03", title: t("Process"), desc: t("Recyclers convert waste into usable materials or energy.") },
                   { step: "04", title: t("Mint Value"), desc: t("Smart contracts distribute funds across all 5 value rails.") }
-                ].map((item, i) => (
-                  <div key={i} className="relative p-6 border border-white/10 rounded-2xl bg-white/5">
+                ].map((item) => (
+                  <div key={item.step} className="relative p-6 border border-white/10 rounded-2xl bg-white/5">
                     <div className="text-5xl font-bold text-white/10 mb-4 font-mono">{item.step}</div>
                     <h4 className="text-lg font-bold mb-2">{item.title}</h4>
                     <p className="text-sm text-white/50">{item.desc}</p>
@@ -1465,40 +1432,7 @@ export default function App() {
                 {loading ? t('Processing...') : authMode === 'login' ? t('Access OS') : t('Create Account')}
               </button>
 
-              {authMode === 'login' && (
-                <div className="mt-8 pt-6 border-t border-white/10">
-                  <p className="text-xs uppercase tracking-widest text-white/40 mb-4 text-center font-bold">{t('Quick Demo Access')}</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { label: operatingContext === 'urban' ? t('Citizen') : t('Farmer'), role: 'citizen', phone: '9000000001' },
-                      { label: t('Aggregator'), role: 'aggregator', phone: '9000000002' },
-                      { label: t('Processor'), role: 'processor', phone: '9000000003' },
-                      { label: labels.anchor, role: 'municipal_admin', phone: '9000000004' },
-                      { label: t('State Admin'), role: 'state_admin', phone: '9000000005' },
-                      { label: t('Carbon Buyer'), role: 'carbon_buyer', phone: '9000000006' },
-                      { label: t('National Regulator'), role: 'regulator', phone: '9000000007' },
-                      { label: t('Super Admin'), role: 'super_admin', phone: '9000000000' }
-                    ].map((demo) => (
-                      <button
-                        key={demo.role}
-                        type="button"
-                        onClick={() => {
-                          setFormData({ ...formData, phone: demo.phone, password: 'password' });
-                          // Small delay to ensure state update before form submission
-                          setTimeout(() => {
-                            const form = document.querySelector('form');
-                            if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                          }, 100);
-                        }}
-                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold text-white/60 hover:text-white transition-all text-left flex items-center justify-between"
-                      >
-                        {demo.label}
-                        <ArrowRight size={10} className="opacity-40" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Remove Quick Demo Access section */}
               
               <button 
                 type="button"
@@ -1725,7 +1659,7 @@ export default function App() {
                     <div>
                       <h3 className="text-red-400 font-semibold">{t('Database Connection Failed')}</h3>
                       <p className="text-sm text-red-400/80 mt-1">
-                        {dbStatus.error || "Could not connect to MongoDB. Using in-memory fallback for demo purposes."}
+                        {dbStatus.error || t("Database connection is not configured. System is running in local mode.")}
                       </p>
                     </div>
                   </div>
@@ -1782,23 +1716,11 @@ export default function App() {
                       <Activity size={18} className="text-emerald-400" />
                       {t('Platform Statistics')}
                     </h3>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={seedDemoData}
-                        disabled={loading}
-                        className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/20 transition-all flex items-center gap-2"
-                      >
-                        <PlusCircle size={14} />
-                        {t('Seed Demo Data')}
-                      </button>
-                      <button 
-                        onClick={resetDemoData}
-                        disabled={loading}
-                        className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-xl border border-red-500/20 transition-all flex items-center gap-2"
-                      >
-                        <RefreshCw size={14} />
-                        {t('Reset Demo Data')}
-                      </button>
+                    <div className="flex gap-2 items-center">
+                      <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold ${dbStatus.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                        <Database size={16} />
+                        {dbStatus.status === 'connected' ? t('Live Database Connected') : t('In-Memory Mode')}
+                      </div>
                       <select 
                         value={adminRoleFilter}
                         onChange={(e) => setAdminRoleFilter(e.target.value)}
@@ -2021,14 +1943,16 @@ export default function App() {
                         System Audit Logs
                       </h3>
                       <div className="space-y-3">
-                        {auditLogs.slice(0, 5).map(log => (
-                          <div key={log.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-sm">
+                        {auditLogs.slice(0, 5).map((log, i) => (
+                          <div key={log.id || `audit-${i}`} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-sm">
                             <div className="flex items-center gap-3">
                               <div className={`w-2 h-2 rounded-full ${log.event === 'BIOMASS_UPLOADED' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                               <span className="font-mono text-white/40">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-                              <span className="font-medium">{log.event}</span>
+                              <span className="font-medium">{log.event || log.action}</span>
                             </div>
-                            <span className="text-white/40 truncate max-w-[200px]">{log.details}</span>
+                            <span className="text-white/40 truncate max-w-[200px]">
+                              {typeof log.details === 'object' ? JSON.stringify(log.details) : log.details}
+                            </span>
                           </div>
                         ))}
                         {auditLogs.length === 0 && <p className="text-center text-white/20 py-8">{t('No audit logs found')}</p>}
@@ -3164,8 +3088,8 @@ export default function App() {
                           <p className="text-white/40 text-sm">{t('No flagged events detected.')}</p>
                         ) : (
                           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                            {fraudMap.map((f, i) => (
-                              <div key={i} className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex justify-between items-center">
+                            {fraudMap.map((f) => (
+                              <div key={f.id} className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex justify-between items-center">
                                 <div>
                                   <p className="font-medium text-red-400">{f.waste_type} - {f.weight_kg}kg</p>
                                   <p className="text-xs text-red-400/60 flex items-center gap-1 mt-1">
@@ -3292,7 +3216,7 @@ export default function App() {
                       </thead>
                       <tbody className="divide-y divide-white/5">
                         {auditLogs.map((log, i) => (
-                          <tr key={i} className="hover:bg-white/5 transition-colors">
+                          <tr key={log.id || `audit-full-${i}`} className="hover:bg-white/5 transition-colors">
                             <td className="p-4 font-mono text-xs text-white/60">
                               {new Date(log.timestamp).toLocaleString()}
                             </td>
@@ -3337,8 +3261,8 @@ export default function App() {
               className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {wardAnalytics.map((w, i) => (
-                  <Card key={i} className="p-6 border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
+                {wardAnalytics.map((w) => (
+                  <Card key={w._id} className="p-6 border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
                         <MapPin size={24} />
@@ -3685,8 +3609,8 @@ export default function App() {
                       t("Waste Generator"), t("Aggregator"), t("Processor"), 
                       t("Administrative Authority"), t("Producers (EPR)"), 
                       t("CSR Contributors"), t("Carbon Buyers"), t("Regulator")
-                    ].map((s, i) => (
-                      <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-sm border border-white/10">
+                    ].map((s) => (
+                      <span key={s} className="px-3 py-1 bg-white/10 rounded-full text-sm border border-white/10">
                         {s}
                       </span>
                     ))}
@@ -3715,8 +3639,8 @@ export default function App() {
                     <TrendingUp className="text-emerald-400" /> {t('V. Multi-Rail Architecture')}
                   </h2>
                   <div className="grid grid-cols-2 gap-2">
-                    {[t("Recycler Rail"), t("CSR Rail"), t("EPR Rail"), t("Governance Layer"), t("Carbon Rail")].map((r, i) => (
-                      <div key={i} className="p-2 bg-white/5 rounded border border-white/5 text-xs text-center">
+                    {[t("Recycler Rail"), t("CSR Rail"), t("EPR Rail"), t("Governance Layer"), t("Carbon Rail")].map((r) => (
+                      <div key={r} className="p-2 bg-white/5 rounded border border-white/5 text-xs text-center">
                         {r}
                       </div>
                     ))}
@@ -3842,8 +3766,8 @@ export default function App() {
                     <p className="text-white/40">{t('No blockchain records found.')}</p>
                   </Card>
                 ) : (
-                  blockchainLedger.slice().reverse().map((block, i) => (
-                    <Card key={i} className="p-6 border-white/5 bg-white/5 relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+                  blockchainLedger.slice().reverse().map((block) => (
+                    <Card key={block.hash} className="p-6 border-white/5 bg-white/5 relative overflow-hidden group hover:border-emerald-500/30 transition-all">
                       <div className="absolute top-0 right-0 p-4 text-[60px] font-black text-white/5 pointer-events-none group-hover:text-emerald-500/10 transition-colors">
                         #{block.index}
                       </div>
