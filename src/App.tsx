@@ -1659,16 +1659,16 @@ export default function App() {
                     <div>
                       <h3 className="text-red-400 font-semibold">{t('Database Connection Failed')}</h3>
                       <p className="text-sm text-red-400/80 mt-1">
-                        {dbStatus.error || t("Database connection is not configured. System is running in local mode.")}
+                        {dbStatus?.error || t("Database connection is not configured. System is running in local mode.")}
                       </p>
                     </div>
                   </div>
                   <button 
                     onClick={handleRetryDb}
-                    disabled={dbStatus.status === 'connecting'}
+                    disabled={dbStatus?.status === 'connecting'}
                     className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   >
-                    {dbStatus.status === 'connecting' ? 'Connecting...' : 'Retry Connection'}
+                    {dbStatus?.status === 'connecting' ? 'Connecting...' : 'Retry Connection'}
                   </button>
                 </div>
               )}
@@ -1717,9 +1717,9 @@ export default function App() {
                       {t('Platform Statistics')}
                     </h3>
                     <div className="flex gap-2 items-center">
-                      <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold ${dbStatus.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                      <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold ${dbStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
                         <Database size={16} />
-                        {dbStatus.status === 'connected' ? t('Live Database Connected') : t('In-Memory Mode')}
+                        {dbStatus?.status === 'connected' ? t('Live Database Connected') : t('In-Memory Mode')}
                       </div>
                       <select 
                         value={adminRoleFilter}
