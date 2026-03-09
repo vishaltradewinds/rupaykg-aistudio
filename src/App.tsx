@@ -122,7 +122,17 @@ const ImpactChart = ({ data }: { data?: any[] }) => {
     { name: 'Jul', value: 2800 },
   ];
 
-  const chartData = data && data.length > 0 ? data.map(d => ({ name: d.month, value: d.weight })) : defaultData;
+  const chartData = data !== undefined 
+    ? data.map(d => ({ name: d.month, value: d.weight })) 
+    : defaultData;
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center text-white/30 text-sm">
+        No impact data recorded yet.
+      </div>
+    );
+  }
 
   return (
     <div className="h-[300px] w-full">
@@ -172,7 +182,15 @@ const RailDistributionChart = ({ data }: { data?: any[] }) => {
     { name: 'EPR', value: 10, color: '#8b5cf6' },
   ];
 
-  const chartData = data && data.length > 0 ? data : defaultData;
+  const chartData = data !== undefined ? data : defaultData;
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-[200px] w-full mt-8 flex items-center justify-center text-white/30 text-sm">
+        No distribution data available yet.
+      </div>
+    );
+  }
 
   return (
     <div className="h-[200px] w-full mt-8">
@@ -372,7 +390,13 @@ export default function App() {
         console.error('Failed to fetch public impact data:', err);
       }
     };
+    
+    // Initial fetch
     fetchPublicImpact();
+    
+    // Poll every 5 seconds for real-time updates
+    const interval = setInterval(fetchPublicImpact, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const labels = {
@@ -411,6 +435,10 @@ export default function App() {
   useEffect(() => {
     if (token) {
       fetchUserData();
+      
+      // Poll every 5 seconds for real-time dashboard updates
+      const interval = setInterval(fetchUserData, 5000);
+      return () => clearInterval(interval);
     }
   }, [token, adminRoleFilter, operatingContext, adminSubView]);
 
@@ -1096,7 +1124,9 @@ export default function App() {
                       <p className="text-white/40 text-sm mb-8">{t('Distributed biomass collection nodes')}</p>
                       
                       <div className="space-y-6">
-                        {(publicImpact?.networkTopology || [
+                        {publicImpact?.networkTopology?.length === 0 ? (
+                          <div className="text-white/30 text-sm text-center py-4">No network nodes active yet.</div>
+                        ) : (publicImpact?.networkTopology || [
                           { name: 'Maharashtra Cluster', nodes: 412, load: '84%', color: 'emerald' },
                           { name: 'Punjab Agricultural Rail', nodes: 284, load: '92%', color: 'blue' },
                           { name: 'Karnataka Bio-Hub', nodes: 156, load: '67%', color: 'purple' },
@@ -1910,31 +1940,37 @@ export default function App() {
                         {t('Portfolio Composition')}
                       </h3>
                       <div className="h-[250px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={Object.values(history.reduce((acc: any, r) => {
-                                acc[r.waste_type] = acc[r.waste_type] || { name: r.waste_type, value: 0 };
-                                acc[r.waste_type].value += r.weight_kg;
-                                return acc;
-                              }, {}))}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={60}
-                              outerRadius={80}
-                              paddingAngle={5}
-                              dataKey="value"
-                            >
-                              {history.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
-                              ))}
-                            </Pie>
-                            <RechartsTooltip 
-                              contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
-                            />
-                            <Legend />
-                          </PieChart>
-                        </ResponsiveContainer>
+                        {history.length === 0 ? (
+                          <div className="h-full w-full flex items-center justify-center text-white/30 text-sm">
+                            {t('No portfolio data available yet.')}
+                          </div>
+                        ) : (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={Object.values(history.reduce((acc: any, r) => {
+                                  acc[r.waste_type] = acc[r.waste_type] || { name: r.waste_type, value: 0 };
+                                  acc[r.waste_type].value += r.weight_kg;
+                                  return acc;
+                                }, {}))}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                              >
+                                {history.map((_, index) => (
+                                  <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
+                                ))}
+                              </Pie>
+                              <RechartsTooltip 
+                                contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                              />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        )}
                       </div>
                     </Card>
 

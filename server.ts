@@ -960,10 +960,22 @@ async function startServer() {
       monthlyData[month] = (monthlyData[month] || 0) + (r.weight_kg || 0);
     });
 
-    const chartData = Object.keys(monthlyData).map(month => ({
+    let chartData = Object.keys(monthlyData).map(month => ({
       month,
       weight: monthlyData[month]
     }));
+
+    if (chartData.length === 0 && users.length === 0) {
+      chartData = [
+        { month: 'Jan', weight: 400 },
+        { month: 'Feb', weight: 700 },
+        { month: 'Mar', weight: 600 },
+        { month: 'Apr', weight: 1200 },
+        { month: 'May', weight: 1500 },
+        { month: 'Jun', weight: 2100 },
+        { month: 'Jul', weight: 2800 },
+      ];
+    }
 
     // Network Topology (Users grouped by state)
     const stateCounts: Record<string, number> = {};
@@ -984,7 +996,7 @@ async function startServer() {
       .sort((a, b) => b.nodes - a.nodes)
       .slice(0, 4);
 
-    if (networkTopology.length === 0) {
+    if (networkTopology.length === 0 && users.length === 0) {
       networkTopology = [
         { name: 'Maharashtra Cluster', nodes: 412, load: '84%', color: 'emerald' },
         { name: 'Punjab Agricultural Rail', nodes: 284, load: '92%', color: 'blue' },
@@ -1008,7 +1020,7 @@ async function startServer() {
       color: hexColors[index % hexColors.length]
     }));
 
-    if (railDistribution.length === 0) {
+    if (railDistribution.length === 0 && users.length === 0) {
       railDistribution = [
         { name: 'Recycler', value: 35, color: '#3b82f6' },
         { name: 'CSR', value: 20, color: '#10b981' },
