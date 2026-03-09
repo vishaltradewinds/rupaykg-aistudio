@@ -84,6 +84,37 @@ async function startServer() {
     { farmer_id: "FARMER_2", name: "Anil Deshmukh", mobile: "9876543211", land_area: 3.2, crop_type: "Cotton", geo_location: { lat: 18.5304, lng: 73.8667 }, created_at: new Date().toISOString() }
   ];
   const notifications: any[] = [];
+  const blockchain: any[] = [];
+
+  // ---------------- BLOCKCHAIN LOGIC ----------------
+  function calculateHash(index: number, timestamp: string, data: any, previousHash: string) {
+    return crypto
+      .createHash("sha256")
+      .update(index + timestamp + JSON.stringify(data) + previousHash)
+      .digest("hex");
+  }
+
+  function mintBlock(data: any) {
+    const previousBlock = blockchain[blockchain.length - 1];
+    const index = blockchain.length;
+    const timestamp = new Date().toISOString();
+    const previousHash = previousBlock ? previousBlock.hash : "0";
+    const hash = calculateHash(index, timestamp, data, previousHash);
+    
+    const newBlock = {
+      index,
+      timestamp,
+      data,
+      previousHash,
+      hash
+    };
+    
+    blockchain.push(newBlock);
+    return newBlock;
+  }
+
+  // Initialize Genesis Block
+  mintBlock({ message: "Genesis Block - RupayKG Carbon Ledger Initialized" });
 
   // ---------------- AUTH MIDDLEWARE ----------------
   function auth(roles: string[] = []) {
@@ -362,10 +393,25 @@ async function startServer() {
       if (user) {
         user.wallet_balance += record.potential_carbon_value;
       }
+
+      // Record on Blockchain
+      const blockchainTx = {
+        record_id: record.id,
+        user_id: record.citizen_id,
+        waste_type: record.waste_type,
+        weight_kg: record.weight_kg,
+        carbon_reduction_kg: record.carbon_reduction_kg,
+        verified_by: req.user.id,
+        event_type: "CARBON_CREDIT_MINTING"
+      };
+      const block = mintBlock(blockchainTx);
+      record.blockchain_hash = block.hash;
+      record.blockchain_index = block.index;
+
       logs.push({ 
         id: Date.now(), 
         event: "MRV_VERIFIED", 
-        details: `Carbon credits issued for ${record.id} by ${req.user.id}`, 
+        details: `Carbon credits issued for ${record.id} by ${req.user.id}. Recorded on Blockchain Block #${block.index}`, 
         timestamp: new Date().toISOString() 
       });
     } else {
@@ -993,6 +1039,31 @@ async function startServer() {
 
   app.get("/api/carbon", auth(["super_admin", "state_admin", "regulator", "carbon_buyer"]), (req: any, res: any) => {
     res.json({ message: "Carbon Credit Secure Data", user: req.user });
+  });
+
+  app.get("/api/blockchain/ledger", auth(["super_admin", "state_admin", "municipal_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+    res.json(blockchain);
+  });
+
+  app.get("/api/blockchain/verify", (req, res) => {
+    let isValid = true;
+    for (let i = 1; i < blockchain.length; i++) {
+      const currentBlock = blockchain[i];
+      const previousBlock = blockchain[i - 1];
+      
+      const recalculatedHash = calculateHash(
+        currentBlock.index, 
+        currentBlock.timestamp, 
+        currentBlock.data, 
+        currentBlock.previousHash
+      );
+      
+      if (currentBlock.hash !== recalculatedHash || currentBlock.previousHash !== previousBlock.hash) {
+        isValid = false;
+        break;
+      }
+    }
+    res.json({ isValid });
   });
 
   app.get("/internal/metrics", async (req, res) => {

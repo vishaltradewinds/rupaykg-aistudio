@@ -301,7 +301,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain'>('dashboard');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
   
@@ -323,6 +323,8 @@ export default function App() {
   // Data States
   const [walletBalance, setWalletBalance] = useState(0);
   const [history, setHistory] = useState<BiomassRecord[]>([]);
+  const [blockchainLedger, setBlockchainLedger] = useState<any[]>([]);
+  const [isChainValid, setIsChainValid] = useState<boolean | null>(null);
   const [historyFilter, setHistoryFilter] = useState<string>('all');
   const [adminRoleFilter, setAdminRoleFilter] = useState<string>('all');
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
@@ -505,7 +507,30 @@ export default function App() {
     if (view === 'upload' && (user?.role === 'citizen' || user?.role === 'fpo')) {
       captureLocation();
     }
+    if (view === 'blockchain') {
+      fetchBlockchainLedger();
+    }
   }, [view, user?.role]);
+
+  const fetchBlockchainLedger = async () => {
+    try {
+      const res = await fetch('/api/blockchain/ledger', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBlockchainLedger(data);
+      }
+      
+      const verifyRes = await fetch('/api/blockchain/verify');
+      if (verifyRes.ok) {
+        const verifyData = await verifyRes.json();
+        setIsChainValid(verifyData.isValid);
+      }
+    } catch (err) {
+      console.error("Failed to fetch blockchain ledger", err);
+    }
+  };
 
   const captureLocation = () => {
     if (!navigator.geolocation) {
@@ -1560,6 +1585,15 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('Carbon Market')}</span>
             </button>
           )}
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('blockchain')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <Cpu size={20} />
+              <span className="hidden md:block font-medium">{t('Blockchain Ledger')}</span>
+            </button>
+          )}
           <button 
             onClick={() => setView('genesis')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -1596,6 +1630,7 @@ export default function App() {
               {view === 'history' && t('Transaction Ledger')}
               {view === 'admin' && t('National Dashboard')}
               {view === 'municipal' && labels.viewTitle}
+              {view === 'blockchain' && t('Immutable Carbon Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
             </h2>
@@ -3694,6 +3729,91 @@ export default function App() {
                   </p>
                 </div>
               </section>
+            </motion.div>
+          )}
+
+          {view === 'blockchain' && (
+            <motion.div 
+              key="blockchain"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div>
+                  <h3 className="text-2xl font-bold flex items-center gap-2">
+                    <Cpu className="text-emerald-400" />
+                    {t('Immutable Carbon Ledger')}
+                  </h3>
+                  <p className="text-white/40 text-sm mt-1">{t('Verifiable blockchain record of all carbon credit minting events')}</p>
+                </div>
+                {isChainValid !== null && (
+                  <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold self-start ${isChainValid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                    {isChainValid ? <ShieldCheck size={16} /> : <AlertTriangle size={16} />}
+                    {isChainValid ? t('Chain Integrity Verified') : t('Chain Integrity Compromised')}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {blockchainLedger.length === 0 ? (
+                  <Card className="p-12 text-center border-white/5 bg-white/5">
+                    <Cpu size={48} className="text-white/10 mx-auto mb-4" />
+                    <p className="text-white/40">{t('No blockchain records found.')}</p>
+                  </Card>
+                ) : (
+                  blockchainLedger.slice().reverse().map((block, i) => (
+                    <Card key={i} className="p-6 border-white/5 bg-white/5 relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+                      <div className="absolute top-0 right-0 p-4 text-[60px] font-black text-white/5 pointer-events-none group-hover:text-emerald-500/10 transition-colors">
+                        #{block.index}
+                      </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-white/40">{t('Block Hash')}</label>
+                            <p className="font-mono text-[10px] text-emerald-400 break-all bg-black/20 p-2 rounded mt-1 border border-emerald-500/10">{block.hash}</p>
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-white/40">{t('Previous Hash')}</label>
+                            <p className="font-mono text-[10px] text-white/40 break-all bg-black/10 p-2 rounded mt-1">{block.previousHash}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="lg:col-span-2 bg-white/5 rounded-xl p-4 border border-white/5">
+                          <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
+                            <span className="text-xs font-bold text-white/60 uppercase tracking-widest">{t('Transaction Data')}</span>
+                            <span className="text-[10px] text-white/40">{new Date(block.timestamp).toLocaleString()}</span>
+                          </div>
+                          
+                          {block.index === 0 ? (
+                            <p className="text-emerald-400 italic text-sm">{block.data.message}</p>
+                          ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Record ID')}</label>
+                                <span className="text-sm font-bold font-mono">{block.data.record_id}</span>
+                              </div>
+                              <div>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('User ID')}</label>
+                                <span className="text-sm font-bold font-mono">{block.data.user_id}</span>
+                              </div>
+                              <div>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Waste Type')}</label>
+                                <span className="text-sm font-bold text-emerald-400">{block.data.waste_type}</span>
+                              </div>
+                              <div>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Carbon (kg)')}</label>
+                                <span className="text-sm font-bold text-cyan-400">{block.data.carbon_reduction_kg}kg</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </div>
             </motion.div>
           )}
 
