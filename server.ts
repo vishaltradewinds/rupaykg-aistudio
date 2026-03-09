@@ -647,8 +647,27 @@ async function startServer() {
       const risk_score = Math.abs(expected_kg - weight_kg) / expected_kg;
 
       const isVerified = Math.random() > 0.3;
+      const recordId = "SEED" + i + Date.now();
+      
+      let blockchain_hash = undefined;
+      let blockchain_index = undefined;
+
+      if (isVerified) {
+        const block = mintBlock({
+          record_id: recordId,
+          user_id: "demo_citizen",
+          waste_type,
+          weight_kg,
+          carbon_reduction_kg,
+          verified_by: "demo_regulator",
+          event_type: "CARBON_CREDIT_MINTING_SEED"
+        });
+        blockchain_hash = block.hash;
+        blockchain_index = block.index;
+      }
+
       records.push({
-        id: "SEED" + i + Date.now(),
+        id: recordId,
         citizen_id: "demo_citizen",
         aggregator_id: "demo_aggregator",
         processor_id: "demo_processor",
@@ -657,7 +676,7 @@ async function startServer() {
         village: context === "urban" ? "Ward " + (Math.floor(Math.random() * 20) + 1) : "Village " + String.fromCharCode(65 + Math.floor(Math.random() * 10)),
         geo_lat: 18.5204 + (Math.random() * 0.1),
         geo_long: 73.8567 + (Math.random() * 0.1),
-        status: statuses[Math.floor(Math.random() * statuses.length)],
+        status: isVerified ? "processed" : statuses[Math.floor(Math.random() * statuses.length)],
         timestamp: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString(),
         carbon_reduction_kg,
         total_value,
@@ -665,6 +684,8 @@ async function startServer() {
         acreage,
         risk_score,
         mrv_status: isVerified ? "verified" : "pending",
+        blockchain_hash,
+        blockchain_index,
         ...(isVerified && {
           mrv_verified_by: "demo_regulator",
           mrv_verified_at: new Date(Date.now() - Math.floor(Math.random() * 500000000)).toISOString()
