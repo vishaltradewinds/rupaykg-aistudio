@@ -219,14 +219,23 @@ const Card = ({ children, className = "", ...props }: { children: React.ReactNod
   </div>
 );
 
-const Stat = ({ label, value, icon: Icon, color = "emerald" }: { label: string, value: string | number, icon: any, color?: string }) => (
-  <Card className="flex items-center gap-4">
+const Stat = ({ label, value, icon: Icon, color = "emerald", blockchainLink = false, setView }: { label: string, value: string | number, icon: any, color?: string, blockchainLink?: boolean, setView?: (v: string) => void }) => (
+  <Card className="flex items-center gap-4 relative group">
     <div className={`p-3 rounded-xl bg-${color}-500/20 text-${color}-400`}>
       <Icon size={24} />
     </div>
     <div>
       <p className="text-xs uppercase tracking-wider text-white/40 font-mono">{label}</p>
       <p className="text-2xl font-semibold text-white">{value}</p>
+      {blockchainLink && setView && (
+        <button 
+          onClick={() => setView('blockchain')}
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
+          title="Verify on Blockchain"
+        >
+          <Cpu size={12} />
+        </button>
+      )}
     </div>
   </Card>
 );
@@ -1732,37 +1741,37 @@ export default function App() {
 
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Carbon Offset')} value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" />
-                  <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" />
-                  <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" />
-                  <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" />
+                  <Stat label={t('Carbon Offset')} value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                  <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" setView={setView} />
+                  <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" setView={setView} />
+                  <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" setView={setView} />
                 </div>
               )}
 
               {user?.role === 'aggregator' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Total Collected')} value={`${history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
-                  <Stat label={t('Farmers Registered')} value={adminStats?.total_farmers || 0} icon={Users} color="emerald" />
-                  <Stat label={t('Logistics Margin')} value={`₹${(history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" />
-                  <Stat label={t('Fleet Efficiency')} value="94%" icon={Truck} color="cyan" />
+                  <Stat label={t('Total Collected')} value={`${history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" setView={setView} />
+                  <Stat label={t('Farmers Registered')} value={adminStats?.total_farmers || 0} icon={Users} color="emerald" setView={setView} />
+                  <Stat label={t('Logistics Margin')} value={`₹${(history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" setView={setView} />
+                  <Stat label={t('Fleet Efficiency')} value="94%" icon={Truck} color="cyan" setView={setView} />
                 </div>
               )}
 
               {user?.role === 'processor' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Total Processed')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" />
-                  <Stat label={t('Carbon Credits')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" />
-                  <Stat label={t('Value Generated')} value={`₹${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" />
-                  <Stat label={t('Processing Yield')} value="98.2%" icon={Zap} color="cyan" />
+                  <Stat label={t('Total Processed')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" setView={setView} />
+                  <Stat label={t('Carbon Credits')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" blockchainLink setView={setView} />
+                  <Stat label={t('Value Generated')} value={`₹${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" setView={setView} />
+                  <Stat label={t('Processing Yield')} value="98.2%" icon={Zap} color="cyan" setView={setView} />
                 </div>
               )}
 
               {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" />
-                  <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" />
-                  <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" />
-                  <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" />
+                  <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
+                  <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                  <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" setView={setView} />
+                  <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" setView={setView} />
                 </div>
               )}
 
@@ -1806,10 +1815,10 @@ export default function App() {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Stat label={t('Total Users')} value={adminStats.total_users} icon={User} color="blue" />
-                    <Stat label={t('Total Weight')} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" />
-                    <Stat label={t('Carbon Reduced')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" />
-                    <Stat label={t('Total Value')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" />
+                    <Stat label={t('Total Users')} value={adminStats.total_users} icon={User} color="blue" setView={setView} />
+                    <Stat label={t('Total Weight')} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" setView={setView} />
+                    <Stat label={t('Carbon Reduced')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={t('Total Value')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
                   </div>
                 </div>
               )}
@@ -1872,7 +1881,18 @@ export default function App() {
                             </div>
                             <div className="text-right">
                               <p className="text-emerald-400 font-bold">+₹{record.total_value.toFixed(2)}</p>
-                              <p className="text-[10px] text-white/40 uppercase tracking-tighter">Verified</p>
+                              <div className="flex flex-col items-end">
+                                <p className="text-[10px] text-white/40 uppercase tracking-tighter">{record.mrv_status || t('Verified')}</p>
+                                {record.blockchain_hash && (
+                                  <button 
+                                    onClick={() => setView('blockchain')}
+                                    className="flex items-center gap-1 text-[8px] text-emerald-400/60 hover:text-emerald-400 font-mono mt-0.5"
+                                  >
+                                    <Cpu size={8} />
+                                    {record.blockchain_hash.substring(0, 6)}
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -2654,6 +2674,15 @@ export default function App() {
                                       <span className="block capitalize">{record.mrv_verified_by_role?.replace('_', ' ')}</span>
                                     </div>
                                   )}
+                                  {record.blockchain_hash && (
+                                    <button 
+                                      onClick={() => setView('blockchain')}
+                                      className="flex items-center gap-1 text-[9px] text-emerald-400 hover:text-emerald-300 mt-1 font-mono"
+                                    >
+                                      <Cpu size={10} />
+                                      {record.blockchain_hash.substring(0, 8)}...
+                                    </button>
+                                  )}
                                 </div>
                               )}
                             </td>
@@ -2865,6 +2894,15 @@ export default function App() {
                             <td className="p-4">
                               <p className="font-medium">{record.mrv_verified_by_name}</p>
                               <p className="text-xs text-white/40 capitalize">{record.mrv_verified_by_role?.replace('_', ' ')}</p>
+                              {record.blockchain_hash && (
+                                <button 
+                                  onClick={() => setView('blockchain')}
+                                  className="flex items-center gap-1 text-[9px] text-emerald-400 hover:text-emerald-300 mt-1 font-mono"
+                                >
+                                  <Cpu size={10} />
+                                  {record.blockchain_hash.substring(0, 8)}...
+                                </button>
+                              )}
                             </td>
                             <td className="p-4 text-white/60">
                               {record.mrv_verified_at ? new Date(record.mrv_verified_at).toLocaleString() : 'N/A'}
@@ -2931,6 +2969,13 @@ export default function App() {
                       </div>
                       <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Processed Events')}</h4>
                       <p className="text-4xl font-black tracking-tighter text-emerald-400">{adminKpi.processed_events || 0}</p>
+                      <button 
+                        onClick={() => setView('blockchain')}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
+                        title="Verify on Blockchain"
+                      >
+                        <Cpu size={12} />
+                      </button>
                     </Card>
                     <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
@@ -2986,12 +3031,19 @@ export default function App() {
                           {t('Environmental Impact')}
                         </h3>
                         <div className="space-y-6 relative z-10">
-                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
+                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5 relative group">
                             <div>
                               <p className="text-white/40 text-xs uppercase tracking-widest">{t('Methane Avoided')}</p>
                               <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.methane_avoided_kg} kg</p>
                             </div>
                             <Zap className="text-yellow-400/40" size={24} />
+                            <button 
+                              onClick={() => setView('blockchain')}
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
+                              title="Verify on Blockchain"
+                            >
+                              <Cpu size={12} />
+                            </button>
                           </div>
                           <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
                             <div>
@@ -3138,9 +3190,16 @@ export default function App() {
                         <Globe className="text-cyan-400" size={20} />
                         {t('Carbon Pool Status')}
                       </h3>
-                      <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5">
+                      <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5 relative group">
                         <p className="text-white/40 text-sm uppercase tracking-widest mb-2">{t('Total Minted Carbon Units')}</p>
                         <p className="text-5xl font-mono text-cyan-400">{carbonPool.total_carbon_units_minted?.toFixed(2) || 0} kg</p>
+                        <button 
+                          onClick={() => setView('blockchain')}
+                          className="absolute bottom-4 flex items-center gap-1 text-[10px] text-emerald-400/40 group-hover:text-emerald-400 transition-colors uppercase tracking-widest font-bold"
+                        >
+                          <Cpu size={12} />
+                          {t('View Blockchain Proof')}
+                        </button>
                       </div>
                     </Card>
                   </div>
@@ -3242,6 +3301,7 @@ export default function App() {
                                 log.action.includes('CREATE') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                                 log.action.includes('UPDATE') ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                                 log.action.includes('DELETE') ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                log.action.includes('BLOCKCHAIN') ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
                                 'bg-white/10 text-white/60 border border-white/20'
                               }`}>
                                 {log.action}
@@ -3288,7 +3348,7 @@ export default function App() {
                         <p className="text-xs text-white/40 uppercase tracking-widest">{labels.sub}</p>
                       </div>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-3 relative group">
                       <div className="flex justify-between items-center p-3 bg-black/40 rounded-lg">
                         <span className="text-sm text-white/60">{t('Total Waste')}</span>
                         <span className="font-mono font-bold">{w.total_weight.toFixed(2)} kg</span>
@@ -3297,6 +3357,13 @@ export default function App() {
                         <span className="text-sm text-white/60">{t('Total Events')}</span>
                         <span className="font-mono font-bold">{w.count}</span>
                       </div>
+                      <button 
+                        onClick={() => setView('blockchain')}
+                        className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
+                        title="Verify on Blockchain"
+                      >
+                        <Cpu size={12} />
+                      </button>
                     </div>
                   </Card>
                 ))}
@@ -3367,6 +3434,18 @@ export default function App() {
                             {t('Verified')}
                           </span>
                         </div>
+
+                        {credit.blockchain_hash && (
+                          <div className="mb-4">
+                            <button 
+                              onClick={() => setView('blockchain')}
+                              className="flex items-center gap-1 text-[10px] text-emerald-400/60 hover:text-emerald-400 font-mono transition-colors"
+                            >
+                              <Cpu size={12} />
+                              {credit.blockchain_hash.substring(0, 12)}...
+                            </button>
+                          </div>
+                        )}
                         
                         <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
                           <div>

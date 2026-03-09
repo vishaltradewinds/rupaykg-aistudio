@@ -110,6 +110,19 @@ async function startServer() {
     };
     
     blockchain.push(newBlock);
+    
+    // Log to audit logs
+    logs.push({
+      timestamp: new Date().toISOString(),
+      action: "BLOCKCHAIN_MINT",
+      user_id: "SYSTEM",
+      details: {
+        block_index: index,
+        block_hash: hash,
+        transaction_type: data.type || "System"
+      }
+    });
+
     return newBlock;
   }
 
@@ -743,7 +756,8 @@ async function startServer() {
         carbon_reduction_kg: r.carbon_reduction_kg,
         price: r.potential_carbon_value,
         waste_type: r.waste_type,
-        village: r.village
+        village: r.village,
+        blockchain_hash: r.blockchain_hash
       }));
     res.json(availableCredits);
   });
