@@ -163,8 +163,8 @@ const ImpactChart = ({ data }: { data?: any[] }) => {
   );
 };
 
-const RailDistributionChart = () => {
-  const data = [
+const RailDistributionChart = ({ data }: { data?: any[] }) => {
+  const defaultData = [
     { name: 'Recycler', value: 35, color: '#3b82f6' },
     { name: 'CSR', value: 20, color: '#10b981' },
     { name: 'Municipal', value: 15, color: '#f59e0b' },
@@ -172,10 +172,12 @@ const RailDistributionChart = () => {
     { name: 'EPR', value: 10, color: '#8b5cf6' },
   ];
 
+  const chartData = data && data.length > 0 ? data : defaultData;
+
   return (
     <div className="h-[200px] w-full mt-8">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ left: -20, right: 20 }}>
+        <BarChart data={chartData} layout="vertical" margin={{ left: -20, right: 20 }}>
           <XAxis type="number" hide />
           <YAxis 
             dataKey="name" 
@@ -190,7 +192,7 @@ const RailDistributionChart = () => {
             contentStyle={{ backgroundColor: '#1A1A1B', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
           />
           <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={12}>
-            {data.map((entry, index) => (
+            {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Bar>
@@ -354,8 +356,24 @@ export default function App() {
   const [aggregatorFleet, setAggregatorFleet] = useState<any>(null);
   const [processorInventory, setProcessorInventory] = useState<any>(null);
   const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
+  const [publicImpact, setPublicImpact] = useState<any>(null);
 
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+
+  useEffect(() => {
+    const fetchPublicImpact = async () => {
+      try {
+        const res = await fetch('/api/public/impact');
+        if (res.ok) {
+          const data = await res.json();
+          setPublicImpact(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch public impact data:', err);
+      }
+    };
+    fetchPublicImpact();
+  }, []);
 
   const labels = {
     urban: {
@@ -1053,10 +1071,10 @@ export default function App() {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                       {[
-                        { label: 'Total Weight', value: '142.8t', icon: Scale, color: 'emerald' },
-                        { label: 'Carbon Offset', value: '89.4t', icon: Globe, color: 'cyan' },
-                        { label: 'Active Nodes', value: '1,242', icon: Activity, color: 'blue' },
-                        { label: 'Value Minted', value: '₹4.2M', icon: Wallet, color: 'purple' }
+                        { label: 'Total Weight', value: publicImpact ? `${(publicImpact.total_weight_kg / 1000).toFixed(1)}t` : '0t', icon: Scale, color: 'emerald' },
+                        { label: 'Carbon Offset', value: publicImpact ? `${(publicImpact.total_carbon_kg / 1000).toFixed(1)}t` : '0t', icon: Globe, color: 'cyan' },
+                        { label: 'Active Nodes', value: publicImpact ? publicImpact.active_nodes.toLocaleString() : '0', icon: Activity, color: 'blue' },
+                        { label: 'Value Minted', value: publicImpact ? `₹${(publicImpact.total_value / 1000000).toFixed(1)}M` : '₹0', icon: Wallet, color: 'purple' }
                       ].map((stat) => (
                         <div key={stat.label} className="p-4 rounded-2xl bg-white/5 border border-white/5">
                           <stat.icon size={16} className={`text-${stat.color}-400 mb-2`} />
@@ -1066,7 +1084,7 @@ export default function App() {
                       ))}
                     </div>
 
-                    <ImpactChart />
+                    <ImpactChart data={publicImpact?.chartData} />
                   </Card>
                 </div>
 
@@ -1078,12 +1096,12 @@ export default function App() {
                       <p className="text-white/40 text-sm mb-8">{t('Distributed biomass collection nodes')}</p>
                       
                       <div className="space-y-6">
-                        {[
+                        {(publicImpact?.networkTopology || [
                           { name: 'Maharashtra Cluster', nodes: 412, load: '84%', color: 'emerald' },
                           { name: 'Punjab Agricultural Rail', nodes: 284, load: '92%', color: 'blue' },
                           { name: 'Karnataka Bio-Hub', nodes: 156, load: '67%', color: 'purple' },
                           { name: 'Gujarat Municipal Rail', nodes: 390, load: '78%', color: 'cyan' }
-                        ].map((cluster, i) => (
+                        ]).map((cluster: any, i: number) => (
                           <div key={cluster.name} className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="font-medium">{cluster.name}</span>
@@ -1102,7 +1120,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <RailDistributionChart />
+                    <RailDistributionChart data={publicImpact?.railDistribution} />
 
                     {/* Abstract Network Graphic */}
                     <div className="absolute inset-0 opacity-20 pointer-events-none">
