@@ -96,6 +96,7 @@ interface BiomassRecord {
   mrv_verified_at?: string;
   acreage?: number;
   risk_score?: number;
+  ai_verification_details?: string;
   potential_carbon_value?: number;
   geo_lat: number;
   geo_long: number;
@@ -2944,6 +2945,18 @@ export default function App() {
                             </div>
                           </div>
 
+                          {record.ai_verification_details && (
+                            <div className="mb-6 p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                              <p className="text-[10px] uppercase tracking-widest text-blue-400 mb-2 flex items-center gap-1">
+                                <Activity size={12} />
+                                {t('AI Verification Assessment')}
+                              </p>
+                              <p className="text-sm text-white/80 leading-relaxed">
+                                {record.ai_verification_details}
+                              </p>
+                            </div>
+                          )}
+
                           {record.geo_lat && record.geo_long && (
                             <div className="mb-6">
                               <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">{t('Location Verification')}</p>
@@ -3007,11 +3020,14 @@ export default function App() {
                             </td>
                             <td className="p-4">
                               <div className="flex items-center gap-2">
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border ${
-                                  (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                  (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                  'bg-red-500/10 text-red-400 border-red-500/20'
-                                }`}>
+                                <span 
+                                  className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border cursor-help ${
+                                    (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                    (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                    'bg-red-500/10 text-red-400 border-red-500/20'
+                                  }`}
+                                  title={record.ai_verification_details || "No AI verification details available"}
+                                >
                                   {((record.risk_score || 0) * 100).toFixed(0)}%
                                 </span>
                               </div>

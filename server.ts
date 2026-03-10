@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import fs from "fs";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
+import { GoogleGenAI, Type } from "@google/genai";
 import { WASTE_TYPES } from "./src/constants";
 
 async function startServer() {
@@ -259,7 +260,7 @@ async function startServer() {
     res.json({ message: "Profile updated successfully", user: { id: user.id, name: user.name, role: user.role } });
   });
 
-  app.post("/api/citizen/upload", auth(["citizen", "fpo"]), (req: any, res) => {
+  app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
     const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage } = req.body;
     
     const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
@@ -270,6 +271,60 @@ async function startServer() {
     
     // AI Risk Score Calculation
     let risk_score = 0;
+    let ai_verification_details = "AI Verification Skipped";
+    
+    if (image_url && process.env.GEMINI_API_KEY) {
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const [mimeInfo, base64Data] = image_url.split(';base64,');
+        const mimeType = mimeInfo.split(':')[1];
+        
+        const response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-preview",
+          contents: {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Data
+                }
+              },
+              {
+                text: `Analyze this image of waste. The user claims it is ${weight_kg} kg of ${waste_type}. 
+                1. Does the image appear to contain ${waste_type}? 
+                2. Does the volume look plausible for ${weight_kg} kg?
+                Provide a brief assessment and a risk score between 0.0 (perfect match) and 1.0 (completely fake/mismatched).
+                Return JSON in this format: {"risk_score": number, "assessment": "string"}`
+              }
+            ]
+          },
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                risk_score: { type: Type.NUMBER },
+                assessment: { type: Type.STRING }
+              },
+              required: ["risk_score", "assessment"]
+            }
+          }
+        });
+        
+        const aiResult = JSON.parse(response.text || "{}");
+        if (typeof aiResult.risk_score === 'number') {
+          risk_score += aiResult.risk_score;
+          ai_verification_details = aiResult.assessment;
+        }
+      } catch (err) {
+        console.error("AI Verification failed:", err);
+        risk_score += 0.2;
+        ai_verification_details = "AI Verification Failed due to an error.";
+      }
+    } else {
+      risk_score += 0.2;
+      ai_verification_details = "No image provided for AI verification.";
+    }
     
     // 1. Geolocation accuracy (mock: if missing, high risk)
     if (!geo_lat || !geo_long) {
@@ -280,28 +335,6 @@ async function startServer() {
         risk_score += 0.2;
       }
     }
-
-    // 2. Image quality (mock: if missing, high risk)
-    if (!image_url) {
-      risk_score += 0.2;
-    }
-
-    // 3. Weight/Acreage ratio
-    if (acreage && acreage > 0) {
-      const expected_kg = acreage * 2500; // 2.5 tonnes per acre
-      const deviation = Math.abs(expected_kg - weight_kg) / expected_kg;
-      risk_score += Math.min(deviation * 0.5, 0.4); // Max 0.4 penalty for deviation
-    } else {
-      // If no acreage provided, use weight thresholds
-      if (weight_kg > 5000) {
-        risk_score += 0.3;
-      } else if (weight_kg > 1000) {
-        risk_score += 0.1;
-      }
-    }
-
-    // 4. Waste type consistency (mock: random factor for demo)
-    risk_score += Math.random() * 0.1;
 
     // Cap at 1.0
     risk_score = Math.min(risk_score, 1.0);
@@ -317,6 +350,7 @@ async function startServer() {
       image_url,
       acreage: acreage || 0,
       risk_score,
+      ai_verification_details,
       context: context || "rural", // Default to rural if not provided
       status: "pending_pickup",
       mrv_status: "pending", // MRV Status: pending, verified, rejected
