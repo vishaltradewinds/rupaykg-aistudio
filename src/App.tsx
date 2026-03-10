@@ -2641,9 +2641,23 @@ export default function App() {
                             <p className="text-[10px] font-mono text-white/40">{record.id}</p>
                             <h4 className="font-bold">{record.weight_kg}kg {record.waste_type}</h4>
                           </div>
-                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded uppercase">
-                            {record.status.replace('_', ' ')}
-                          </span>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded uppercase">
+                              {record.status.replace('_', ' ')}
+                            </span>
+                            {record.risk_score !== undefined && (
+                              <span 
+                                className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold border cursor-help ${
+                                  record.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  record.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                  'bg-red-500/10 text-red-400 border-red-500/20'
+                                }`}
+                                title={record.ai_verification_details || "AI Risk Score"}
+                              >
+                                {t('AI Risk')}: {(record.risk_score * 100).toFixed(0)}%
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="space-y-2 mb-6 text-sm text-white/60">
                           <div className="flex items-center gap-2">
@@ -2701,9 +2715,23 @@ export default function App() {
                             <p className="text-[10px] font-mono text-white/40">{record.id}</p>
                             <h4 className="font-bold">{record.weight_kg}kg {record.waste_type}</h4>
                           </div>
-                          <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded uppercase">
-                            {record.status.replace('_', ' ')}
-                          </span>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded uppercase">
+                              {record.status.replace('_', ' ')}
+                            </span>
+                            {record.risk_score !== undefined && (
+                              <span 
+                                className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold border cursor-help ${
+                                  record.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  record.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                  'bg-red-500/10 text-red-400 border-red-500/20'
+                                }`}
+                                title={record.ai_verification_details || "AI Risk Score"}
+                              >
+                                {t('AI Risk')}: {(record.risk_score * 100).toFixed(0)}%
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-white/60">
                           <MapPin size={14} />
@@ -2766,6 +2794,7 @@ export default function App() {
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{labels.sub}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Value')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Carbon Reduction')}</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('AI Risk')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Status')}</th>
                         {['citizen', 'fpo', 'regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
                           <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('MRV Status')}</th>
@@ -2783,6 +2812,22 @@ export default function App() {
                           <td className="p-4 text-sm text-white/60">{record.village}</td>
                           <td className="p-4 text-sm font-bold text-emerald-400">₹{record.total_value.toFixed(2)}</td>
                           <td className="p-4 text-sm font-mono text-blue-400">{record.carbon_reduction_kg.toFixed(2)} kg</td>
+                          <td className="p-4">
+                            {record.risk_score !== undefined ? (
+                              <span 
+                                className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border cursor-help ${
+                                  record.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  record.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                  'bg-red-500/10 text-red-400 border-red-500/20'
+                                }`}
+                                title={record.ai_verification_details || "AI Risk Score"}
+                              >
+                                {(record.risk_score * 100).toFixed(0)}%
+                              </span>
+                            ) : (
+                              <span className="text-white/40 text-xs">-</span>
+                            )}
+                          </td>
                           <td className="p-4">
                             <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded uppercase tracking-tighter border border-emerald-500/20">
                               {record.status}
@@ -3583,9 +3628,23 @@ export default function App() {
                               <MapPin size={12} /> {credit.village}
                             </p>
                           </div>
-                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded uppercase font-bold border border-emerald-500/20">
-                            {t('Verified')}
-                          </span>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded uppercase font-bold border border-emerald-500/20">
+                              {t('Verified')}
+                            </span>
+                            {credit.risk_score !== undefined && (
+                              <span 
+                                className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold border cursor-help ${
+                                  credit.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  credit.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                  'bg-red-500/10 text-red-400 border-red-500/20'
+                                }`}
+                                title={credit.ai_verification_details || "AI Risk Score"}
+                              >
+                                {t('AI Risk')}: {(credit.risk_score * 100).toFixed(0)}%
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {credit.blockchain_hash && (
