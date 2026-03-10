@@ -379,24 +379,40 @@ export default function App() {
   const [showLangDropdown, setShowLangDropdown] = useState(false);
 
   useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 5;
+
     const fetchPublicImpact = async () => {
       try {
         const res = await fetch('/api/public/impact');
         if (res.ok) {
           const data = await res.json();
           setPublicImpact(data);
+          retryCount = 0; // Reset on success
+        } else {
+          console.warn(`Public impact fetch returned status: ${res.status}`);
         }
       } catch (err) {
-        console.error('Failed to fetch public impact data:', err);
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying public impact fetch (${retryCount}/${maxRetries})...`);
+          setTimeout(fetchPublicImpact, 2000 * retryCount);
+        } else {
+          console.error('Failed to fetch public impact data after retries:', err);
+        }
       }
     };
     
-    // Initial fetch
-    fetchPublicImpact();
+    // Initial fetch with a small delay to ensure server is ready
+    const initialTimeout = setTimeout(fetchPublicImpact, 1000);
     
-    // Poll every 5 seconds for real-time updates
-    const interval = setInterval(fetchPublicImpact, 5000);
-    return () => clearInterval(interval);
+    // Poll every 10 seconds for real-time updates (increased from 5s to reduce load)
+    const interval = setInterval(fetchPublicImpact, 10000);
+    
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, []);
 
   const labels = {
@@ -593,6 +609,34 @@ export default function App() {
     }));
   }, [history]);
 
+  const personalTrendsData = React.useMemo(() => {
+    if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '')) {
+      return trendsData;
+    }
+    
+    const now = new Date();
+    const trends = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = monthDate.toLocaleString('default', { month: 'short' });
+      
+      const monthRecords = history.filter(r => {
+        const d = new Date(r.timestamp);
+        return d.getMonth() === monthDate.getMonth() && d.getFullYear() === monthDate.getFullYear();
+      });
+      
+      trends.push({
+        month: monthName,
+        weight: monthRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0),
+        events: monthRecords.length,
+        carbon: monthRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0)
+      });
+    }
+    
+    return trends;
+  }, [history, trendsData, user?.role]);
+
   const PIE_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6'];
 
   const fetchUserData = async () => {
@@ -634,15 +678,17 @@ export default function App() {
       }
 
       // 4. Fetch admin stats
-      const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}&context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        setAdminStats(statsData);
-        
-        const logsRes = await fetch('/api/audit-logs', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (logsRes.ok) {
-          const logsData = await logsRes.json();
-          setAuditLogs(logsData);
+      if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
+        const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}&context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          setAdminStats(statsData);
+          
+          const logsRes = await fetch('/api/audit-logs', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (logsRes.ok) {
+            const logsData = await logsRes.json();
+            setAuditLogs(logsData);
+          }
         }
       }
 
@@ -695,6 +741,11 @@ export default function App() {
       }
 
       // 8. Fetch Series A / Admin KPI data
+      if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
+        const compRes = await fetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (compRes.ok) setComprehensiveMetrics(await compRes.json());
+      }
+
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
         const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) setAdminKpi(await kpiRes.json());
@@ -704,9 +755,6 @@ export default function App() {
           const fraudData = await fraudRes.json();
           setFraudMap(fraudData.flagged_events);
         }
-
-        const compRes = await fetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (compRes.ok) setComprehensiveMetrics(await compRes.json());
 
         const trendsRes = await fetch('/api/analytics/trends', { headers: { 'Authorization': `Bearer ${token}` } });
         if (trendsRes.ok) setTrendsData(await trendsRes.json());
@@ -1749,11 +1797,110 @@ export default function App() {
               )}
 
               {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
-                  <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
-                  <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" setView={setView} />
-                  <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" setView={setView} />
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
+                    <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" setView={setView} />
+                    <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" setView={setView} />
+                  </div>
+
+                  {comprehensiveMetrics && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <Sprout size={80} className="text-emerald-400" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
+                          <Sprout className="text-emerald-400" size={20} />
+                          {t('Environmental Impact')}
+                        </h3>
+                        <div className="space-y-6 relative z-10">
+                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5 relative group">
+                            <div>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Methane Avoided')}</p>
+                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.methane_avoided_kg} kg</p>
+                            </div>
+                            <Zap className="text-yellow-400/40" size={24} />
+                            <button 
+                              onClick={() => setView('blockchain')}
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
+                              title="Verify on Blockchain"
+                            >
+                              <Cpu size={12} />
+                            </button>
+                          </div>
+                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
+                            <div>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Water Saved')}</p>
+                              <p className="text-2xl font-bold text-blue-400">{comprehensiveMetrics.environmental.water_saved_liters} L</p>
+                            </div>
+                            <Globe className="text-blue-400/40" size={24} />
+                          </div>
+                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
+                            <div>
+                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Trees Equivalent')}</p>
+                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.trees_equivalent} {t('Trees')}</p>
+                            </div>
+                            <Leaf className="text-emerald-400/40" size={24} />
+                          </div>
+                        </div>
+                      </Card>
+
+                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <Scale size={80} className="text-amber-400" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
+                          <Scale className="text-amber-400" size={18} />
+                          {t('Economic Efficiency')}
+                        </h3>
+                        <div className="space-y-4 relative z-10">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">{t('Avg Price / kg')}</span>
+                            <span className="font-mono">₹{comprehensiveMetrics.economic.avg_price_per_kg}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">{t('Govt Cost Savings')}</span>
+                            <span className="font-mono text-emerald-400">₹{comprehensiveMetrics.economic.govt_cost_savings}</span>
+                          </div>
+                          <div className="pt-4 border-t border-white/5">
+                            <p className="text-xs text-white/40 leading-relaxed italic">
+                              {t('* Government savings calculated based on avoided landfill management and environmental remediation costs.')}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+
+                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <Activity size={80} className="text-cyan-400" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
+                          <Activity className="text-cyan-400" size={18} />
+                          {t('Operational Health')}
+                        </h3>
+                        <div className="space-y-4 relative z-10">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">{t('Processing Efficiency')}</span>
+                            <span className="font-mono">{comprehensiveMetrics.operational.processing_efficiency}%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/40">{t('MRV Rejection Rate')}</span>
+                            <span className={`font-mono ${comprehensiveMetrics.operational.rejection_rate > 10 ? 'text-red-400' : 'text-emerald-400'}`}>
+                              {comprehensiveMetrics.operational.rejection_rate}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-white/5 rounded-full h-2 mt-4">
+                            <div 
+                              className="bg-cyan-500 h-2 rounded-full transition-all duration-1000" 
+                              style={{ width: `${comprehensiveMetrics.operational.processing_efficiency}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1794,13 +1941,18 @@ export default function App() {
               )}
 
               {/* Waste Distribution Chart */}
-              {wasteDistributionData.length > 0 && (
-                <Card>
-                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                    <Leaf size={18} className="text-emerald-400" />
-                    Waste Distribution
-                  </h3>
-                  <div className="h-[300px] w-full">
+              <Card>
+                <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <Leaf size={18} className="text-emerald-400" />
+                  Waste Distribution
+                </h3>
+                <div className="h-[300px] w-full">
+                  {wasteDistributionData.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-white/40">
+                      <BarChart3 size={48} className="mb-4 opacity-50" />
+                      <p>{t('No waste data available yet.')}</p>
+                    </div>
+                  ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -1824,9 +1976,9 @@ export default function App() {
                         <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
                       </PieChart>
                     </ResponsiveContainer>
-                  </div>
-                </Card>
-              )}
+                  )}
+                </div>
+              </Card>
 
               {/* Shared Recent Activity & Climate Impact for Citizen, FPO, Aggregator, Processor */}
               {!['csr_partner', 'epr_partner', 'carbon_buyer', 'state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
@@ -1876,7 +2028,7 @@ export default function App() {
                         <p className="text-white/40 text-sm mb-6">
                           {user?.role === 'citizen' ? 'Your personal contribution trend.' : 'System-wide throughput and efficiency.'}
                         </p>
-                        <ImpactChart data={trendsData} />
+                        <ImpactChart data={personalTrendsData} />
                       </div>
                       <div className="flex flex-col gap-3 mt-6">
                         {user?.role === 'aggregator' && (
@@ -2979,24 +3131,31 @@ export default function App() {
                           {t('Growth & Impact Trends')}
                         </h3>
                         <div className="h-[300px] w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={trendsData}>
-                              <defs>
-                                <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                              <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                              <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                              <Tooltip 
-                                contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
-                                itemStyle={{ color: '#10b981' }}
-                              />
-                              <Area type="monotone" dataKey="weight" stroke="#10b981" fillOpacity={1} fill="url(#colorWeight)" strokeWidth={3} />
-                            </AreaChart>
-                          </ResponsiveContainer>
+                          {trendsData.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-white/40">
+                              <TrendingUp size={48} className="mb-4 opacity-50" />
+                              <p>{t('No trend data available yet.')}</p>
+                            </div>
+                          ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                              <AreaChart data={trendsData}>
+                                <defs>
+                                  <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                  </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                                <Tooltip 
+                                  contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                                  itemStyle={{ color: '#10b981' }}
+                                />
+                                <Area type="monotone" dataKey="weight" stroke="#10b981" fillOpacity={1} fill="url(#colorWeight)" strokeWidth={3} />
+                              </AreaChart>
+                            </ResponsiveContainer>
+                          )}
                         </div>
                       </Card>
 

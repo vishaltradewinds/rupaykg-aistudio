@@ -52,7 +52,12 @@ async function startServer() {
     }
   }
 
-  await connectDB();
+  // Start DB connection in background
+  connectDB().catch(err => console.error("Background DB connection failed:", err));
+
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
 
   app.get("/api/db-status", auth(["super_admin", "state_admin"]), (req, res) => {
     res.json({ status: dbStatus, error: dbError });
@@ -945,6 +950,7 @@ async function startServer() {
 
   // ---------------- PUBLIC API ----------------
   app.get("/api/public/impact", (req, res) => {
+    res.setHeader("X-Server-Status", "alive");
     const verifiedRecords = records.filter(r => r.mrv_status === "verified");
     
     const total_weight_kg = verifiedRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
