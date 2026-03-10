@@ -381,7 +381,7 @@ export default function App() {
 
   useEffect(() => {
     let retryCount = 0;
-    const maxRetries = 5;
+    const maxRetries = 10;
 
     const fetchPublicImpact = async () => {
       try {
@@ -392,20 +392,25 @@ export default function App() {
           retryCount = 0; // Reset on success
         } else {
           console.warn(`Public impact fetch returned status: ${res.status}`);
+          // Retry even on non-ok status if it's likely a startup issue
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(fetchPublicImpact, 3000 * retryCount);
+          }
         }
       } catch (err) {
         if (retryCount < maxRetries) {
           retryCount++;
           console.log(`Retrying public impact fetch (${retryCount}/${maxRetries})...`);
-          setTimeout(fetchPublicImpact, 2000 * retryCount);
+          setTimeout(fetchPublicImpact, 3000 * retryCount);
         } else {
           console.error('Failed to fetch public impact data after retries:', err);
         }
       }
     };
     
-    // Initial fetch with a small delay to ensure server is ready
-    const initialTimeout = setTimeout(fetchPublicImpact, 1000);
+    // Initial fetch with a larger delay to ensure server is ready
+    const initialTimeout = setTimeout(fetchPublicImpact, 3000);
     
     // Poll every 10 seconds for real-time updates (increased from 5s to reduce load)
     const interval = setInterval(fetchPublicImpact, 10000);
