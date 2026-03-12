@@ -381,42 +381,55 @@ export default function App() {
 
   useEffect(() => {
     let retryCount = 0;
-    const maxRetries = 10;
+    const maxRetries = 15; // Increased retries
+    let isMounted = true;
+    let retryTimeout: any = null;
 
     const fetchPublicImpact = async () => {
+      if (!isMounted) return;
+      
       try {
-        const res = await fetch('/api/public/impact');
+        console.log(`Fetching public impact data (Attempt ${retryCount + 1})...`);
+        const res = await fetch('/api/public/impact', {
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          }
+        });
+        
         if (res.ok) {
           const data = await res.json();
-          setPublicImpact(data);
-          retryCount = 0; // Reset on success
-        } else {
-          console.warn(`Public impact fetch returned status: ${res.status}`);
-          // Retry even on non-ok status if it's likely a startup issue
-          if (retryCount < maxRetries) {
-            retryCount++;
-            setTimeout(fetchPublicImpact, 3000 * retryCount);
+          if (isMounted) {
+            setPublicImpact(data);
+            retryCount = 0; // Reset on success
           }
+        } else {
+          throw new Error(`Server responded with status: ${res.status}`);
         }
       } catch (err) {
+        if (!isMounted) return;
+        
         if (retryCount < maxRetries) {
           retryCount++;
-          console.log(`Retrying public impact fetch (${retryCount}/${maxRetries})...`);
-          setTimeout(fetchPublicImpact, 3000 * retryCount);
+          const delay = Math.min(10000, 2000 * retryCount); // Exponential backoff capped at 10s
+          console.warn(`Public impact fetch failed. Retrying in ${delay}ms...`, err);
+          retryTimeout = setTimeout(fetchPublicImpact, delay);
         } else {
-          console.error('Failed to fetch public impact data after retries:', err);
+          console.error('Failed to fetch public impact data after maximum retries:', err);
         }
       }
     };
     
-    // Initial fetch with a larger delay to ensure server is ready
-    const initialTimeout = setTimeout(fetchPublicImpact, 3000);
+    fetchPublicImpact();
     
-    // Poll every 10 seconds for real-time updates (increased from 5s to reduce load)
-    const interval = setInterval(fetchPublicImpact, 10000);
+    // Poll every 15 seconds for real-time updates
+    const interval = setInterval(() => {
+      if (retryCount === 0) fetchPublicImpact();
+    }, 15000);
     
     return () => {
-      clearTimeout(initialTimeout);
+      isMounted = false;
+      if (retryTimeout) clearTimeout(retryTimeout);
       clearInterval(interval);
     };
   }, []);
@@ -548,13 +561,22 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (view === 'settings' && user) {
+      setFormData({
+        ...formData,
+        name: user.name || '',
+        district: user.district || '',
+        state: user.state || '',
+        organization_name: user.organization_name || ''
+      });
+    }
     if (view === 'upload' && (user?.role === 'citizen' || user?.role === 'fpo')) {
       captureLocation();
     }
     if (view === 'blockchain') {
       fetchBlockchainLedger();
     }
-  }, [view, user?.role]);
+  }, [view, user]);
 
   const fetchBlockchainLedger = async () => {
     try {
@@ -3716,10 +3738,15 @@ export default function App() {
                   e.preventDefault();
                   setLoading(true);
                   try {
-                    const res = await fetch('/api/citizen/profile/update', {
+                    const res = await fetch('/api/profile/update', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                      body: JSON.stringify({ name: formData.name, district: formData.district, state: formData.state })
+                      body: JSON.stringify({ 
+                        name: formData.name, 
+                        district: formData.district, 
+                        state: formData.state,
+                        organization_name: formData.organization_name
+                      })
                     });
                     if (res.ok) {
                       setMessage({ type: 'success', text: t('Profile updated successfully') });
@@ -3738,9 +3765,10 @@ export default function App() {
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Full Name')}</label>
                       <input 
                         type="text" 
-                        value={formData.name || user?.name || ''}
+                        value={formData.name}
                         onChange={e => setFormData({...formData, name: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                        placeholder={t('Enter your full name')}
                       />
                     </div>
                     <div>
@@ -3752,22 +3780,36 @@ export default function App() {
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/40 cursor-not-allowed"
                       />
                     </div>
+                    {['fpo', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin'].includes(user?.role || '') && (
+                      <div className="md:col-span-2">
+                        <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Organization Name')}</label>
+                        <input 
+                          type="text" 
+                          value={formData.organization_name}
+                          onChange={e => setFormData({...formData, organization_name: e.target.value})}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                          placeholder={t('Enter organization name')}
+                        />
+                      </div>
+                    )}
                     <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('District')}</label>
                       <input 
                         type="text" 
-                        value={formData.district || user?.district || ''}
+                        value={formData.district}
                         onChange={e => setFormData({...formData, district: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                        placeholder={t('Enter district')}
                       />
                     </div>
                     <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('State')}</label>
                       <input 
                         type="text" 
-                        value={formData.state || user?.state || ''}
+                        value={formData.state}
                         onChange={e => setFormData({...formData, state: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50"
+                        placeholder={t('Enter state')}
                       />
                     </div>
                   </div>

@@ -60,6 +60,96 @@ async function startServer() {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // ---------------- PUBLIC API ----------------
+  app.get("/api/public/impact", (req, res) => {
+    try {
+      res.setHeader("X-Server-Status", "alive");
+      const verifiedRecords = records.filter(r => r.mrv_status === "verified");
+      
+      const total_weight_kg = verifiedRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
+      const total_carbon_kg = verifiedRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+      const total_value = verifiedRecords.reduce((sum, r) => sum + (r.total_value || 0), 0);
+      const active_nodes = users.length;
+
+      // Group by month for chart
+      const monthlyData: Record<string, number> = {};
+      verifiedRecords.forEach(r => {
+        const date = new Date(r.timestamp);
+        const month = date.toLocaleString('default', { month: 'short' });
+        monthlyData[month] = (monthlyData[month] || 0) + (r.weight_kg || 0);
+      });
+
+      let chartData = Object.keys(monthlyData).map(month => ({
+        month,
+        weight: monthlyData[month]
+      }));
+
+      if (chartData.length === 0 && users.length === 0) {
+        chartData = [
+          { month: 'Jan', weight: 400 },
+          { month: 'Feb', weight: 700 },
+          { month: 'Mar', weight: 600 },
+          { month: 'Apr', weight: 1200 },
+          { month: 'May', weight: 1500 },
+          { month: 'Jun', weight: 2100 },
+          { month: 'Jul', weight: 2800 },
+        ];
+      }
+
+      // Network Topology (Users grouped by state)
+      const stateCounts: Record<string, number> = {};
+      users.forEach(u => {
+        if (u.state) {
+          stateCounts[u.state] = (stateCounts[u.state] || 0) + 1;
+        }
+      });
+      
+      const colors = ['emerald', 'blue', 'purple', 'cyan', 'amber', 'rose'];
+      let networkTopology = Object.keys(stateCounts)
+        .map((state, index) => ({
+          name: state + ' Cluster',
+          nodes: stateCounts[state],
+          load: Math.min(100, 40 + (stateCounts[state] * 5)) + '%',
+          color: colors[index % colors.length]
+        }))
+        .sort((a, b) => b.nodes - a.nodes)
+        .slice(0, 4);
+
+      if (networkTopology.length === 0 && users.length === 0) {
+        networkTopology = [
+          { name: 'Maharashtra Cluster', nodes: 412, load: '84%', color: 'emerald' },
+          { name: 'Punjab Agricultural Rail', nodes: 284, load: '92%', color: 'blue' },
+          { name: 'Karnataka Bio-Hub', nodes: 156, load: '67%', color: 'purple' },
+          { name: 'Gujarat Municipal Rail', nodes: 390, load: '78%', color: 'cyan' }
+        ];
+      }
+
+      // Rail Distribution (Records grouped by context or user role)
+      const roleCounts: Record<string, number> = {};
+      users.forEach(u => {
+        roleCounts[u.role] = (roleCounts[u.role] || 0) + 1;
+      });
+
+      const railDistribution = Object.keys(roleCounts).map(role => ({
+        name: role.replace('_', ' ').toUpperCase(),
+        value: roleCounts[role]
+      }));
+
+      res.json({
+        total_weight_kg,
+        total_carbon_kg,
+        total_value,
+        active_nodes,
+        chartData,
+        networkTopology,
+        railDistribution
+      });
+    } catch (err) {
+      console.error("Public impact API error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
   app.get("/api/db-status", auth(["super_admin", "state_admin"]), (req, res) => {
     res.json({ status: dbStatus, error: dbError });
   });
@@ -248,16 +338,27 @@ async function startServer() {
     res.json(safeUser);
   });
 
-  app.post("/api/citizen/profile/update", auth(["citizen", "fpo"]), (req: any, res) => {
-    const { name, district, state } = req.body;
+  app.post("/api/profile/update", auth(), (req: any, res) => {
+    const { name, district, state, organization_name } = req.body;
     const user = users.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     
-    if (name) user.name = name;
-    if (district) user.district = district;
-    if (state) user.state = state;
+    if (name !== undefined) user.name = name;
+    if (district !== undefined) user.district = district;
+    if (state !== undefined) user.state = state;
+    if (organization_name !== undefined) user.organization_name = organization_name;
 
-    res.json({ message: "Profile updated successfully", user: { id: user.id, name: user.name, role: user.role } });
+    res.json({ 
+      message: "Profile updated successfully", 
+      user: { 
+        id: user.id, 
+        name: user.name, 
+        role: user.role,
+        district: user.district,
+        state: user.state,
+        organization_name: user.organization_name
+      } 
+    });
   });
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
@@ -980,105 +1081,6 @@ async function startServer() {
     }
     
     res.json(trends);
-  });
-
-  // ---------------- PUBLIC API ----------------
-  app.get("/api/public/impact", (req, res) => {
-    res.setHeader("X-Server-Status", "alive");
-    const verifiedRecords = records.filter(r => r.mrv_status === "verified");
-    
-    const total_weight_kg = verifiedRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
-    const total_carbon_kg = verifiedRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
-    const total_value = verifiedRecords.reduce((sum, r) => sum + (r.total_value || 0), 0);
-    const active_nodes = users.length;
-
-    // Group by month for chart
-    const monthlyData: Record<string, number> = {};
-    verifiedRecords.forEach(r => {
-      const date = new Date(r.timestamp);
-      const month = date.toLocaleString('default', { month: 'short' });
-      monthlyData[month] = (monthlyData[month] || 0) + (r.weight_kg || 0);
-    });
-
-    let chartData = Object.keys(monthlyData).map(month => ({
-      month,
-      weight: monthlyData[month]
-    }));
-
-    if (chartData.length === 0 && users.length === 0) {
-      chartData = [
-        { month: 'Jan', weight: 400 },
-        { month: 'Feb', weight: 700 },
-        { month: 'Mar', weight: 600 },
-        { month: 'Apr', weight: 1200 },
-        { month: 'May', weight: 1500 },
-        { month: 'Jun', weight: 2100 },
-        { month: 'Jul', weight: 2800 },
-      ];
-    }
-
-    // Network Topology (Users grouped by state)
-    const stateCounts: Record<string, number> = {};
-    users.forEach(u => {
-      if (u.state) {
-        stateCounts[u.state] = (stateCounts[u.state] || 0) + 1;
-      }
-    });
-    
-    const colors = ['emerald', 'blue', 'purple', 'cyan', 'amber', 'rose'];
-    let networkTopology = Object.keys(stateCounts)
-      .map((state, index) => ({
-        name: state + ' Cluster',
-        nodes: stateCounts[state],
-        load: Math.min(100, 40 + (stateCounts[state] * 5)) + '%',
-        color: colors[index % colors.length]
-      }))
-      .sort((a, b) => b.nodes - a.nodes)
-      .slice(0, 4);
-
-    if (networkTopology.length === 0 && users.length === 0) {
-      networkTopology = [
-        { name: 'Maharashtra Cluster', nodes: 412, load: '84%', color: 'emerald' },
-        { name: 'Punjab Agricultural Rail', nodes: 284, load: '92%', color: 'blue' },
-        { name: 'Karnataka Bio-Hub', nodes: 156, load: '67%', color: 'purple' },
-        { name: 'Gujarat Municipal Rail', nodes: 390, load: '78%', color: 'cyan' }
-      ];
-    }
-
-    // Rail Distribution (Records grouped by context or user role)
-    const roleCounts: Record<string, number> = {};
-    users.forEach(u => {
-      if (['processor', 'csr_partner', 'municipal_admin', 'carbon_buyer', 'epr_partner'].includes(u.role)) {
-        roleCounts[u.role] = (roleCounts[u.role] || 0) + 1;
-      }
-    });
-
-    const hexColors = ['#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6'];
-    let railDistribution = Object.keys(roleCounts).map((role, index) => ({
-      name: role.replace('_', ' ').toUpperCase(),
-      value: roleCounts[role],
-      color: hexColors[index % hexColors.length]
-    }));
-
-    if (railDistribution.length === 0 && users.length === 0) {
-      railDistribution = [
-        { name: 'Recycler', value: 35, color: '#3b82f6' },
-        { name: 'CSR', value: 20, color: '#10b981' },
-        { name: 'Municipal', value: 15, color: '#f59e0b' },
-        { name: 'Carbon', value: 20, color: '#06b6d4' },
-        { name: 'EPR', value: 10, color: '#8b5cf6' },
-      ];
-    }
-
-    res.json({
-      total_weight_kg,
-      total_carbon_kg,
-      total_value,
-      active_nodes,
-      chartData,
-      networkTopology,
-      railDistribution
-    });
   });
 
   // ---------------- STATUS & INTERNAL ----------------
