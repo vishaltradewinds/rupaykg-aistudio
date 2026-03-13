@@ -5,7 +5,13 @@ import fs from "fs";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
-import { WASTE_TYPES } from "./src/constants";
+import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
+
+let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
+let paymentConfig = {
+  carbon_price_per_kg: 10,
+  logistics_margin_percent: 15
+};
 
 async function startServer() {
   const app = express();
@@ -364,10 +370,10 @@ async function startServer() {
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
     const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage } = req.body;
     
-    const wasteConfig = WASTE_TYPES.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
+    const wasteConfig = dynamicWasteTypes.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
     const base_value = weight_kg * wasteConfig.value;
     const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
-    const potential_carbon_value = carbon_reduction_kg * 10;
+    const potential_carbon_value = carbon_reduction_kg * paymentConfig.carbon_price_per_kg;
     const total_value = base_value + potential_carbon_value;
     
     // AI Risk Score Calculation
@@ -1081,6 +1087,47 @@ async function startServer() {
     }
     
     res.json(trends);
+  });
+
+  // ---------------- WASTE CONFIGURATION ----------------
+  app.get("/api/waste-types", (req, res) => {
+    res.json(dynamicWasteTypes);
+  });
+
+  app.post("/api/waste-types", auth(["super_admin"]), (req: any, res) => {
+    const { wasteTypes } = req.body;
+    if (!Array.isArray(wasteTypes)) {
+      return res.status(400).json({ error: "Invalid payload format" });
+    }
+    dynamicWasteTypes = wasteTypes;
+    
+    logs.push({ 
+      id: Date.now(), 
+      event: "WASTE_CONFIG_UPDATED", 
+      details: `Waste types configuration updated by ${req.user.id}`, 
+      timestamp: new Date().toISOString() 
+    });
+    
+    res.json({ message: "Waste configuration updated successfully", wasteTypes: dynamicWasteTypes });
+  });
+
+  app.get("/api/payment-config", (req, res) => {
+    res.json(paymentConfig);
+  });
+
+  app.post("/api/payment-config", auth(["super_admin"]), (req: any, res) => {
+    const { carbon_price_per_kg, logistics_margin_percent } = req.body;
+    if (typeof carbon_price_per_kg === 'number') paymentConfig.carbon_price_per_kg = carbon_price_per_kg;
+    if (typeof logistics_margin_percent === 'number') paymentConfig.logistics_margin_percent = logistics_margin_percent;
+    
+    logs.push({ 
+      id: Date.now(), 
+      event: "PAYMENT_CONFIG_UPDATED", 
+      details: `Payment configuration updated by ${req.user.id}`, 
+      timestamp: new Date().toISOString() 
+    });
+    
+    res.json({ message: "Payment configuration updated successfully", paymentConfig });
   });
 
   // ---------------- STATUS & INTERNAL ----------------

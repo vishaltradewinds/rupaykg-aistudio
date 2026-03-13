@@ -31,7 +31,9 @@ import {
   BookOpen,
   RefreshCw,
   Camera,
-  Database
+  Database,
+  Settings,
+  Save
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -365,7 +367,9 @@ export default function App() {
   const [wardAnalytics, setWardAnalytics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
-  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users'>('dashboard');
+  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config'>('dashboard');
+  const [wasteTypes, setWasteTypes] = useState<WasteType[]>(WASTE_TYPES);
+  const [paymentConfig, setPaymentConfig] = useState({ carbon_price_per_kg: 10, logistics_margin_percent: 15 });
   const [comprehensiveMetrics, setComprehensiveMetrics] = useState<any>(null);
   const [trendsData, setTrendsData] = useState<any[]>([]);
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
@@ -466,6 +470,31 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [dbStatus, setDbStatus] = useState<{ status: string, error: string } | null>(null);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const [wasteRes, paymentRes] = await Promise.all([
+          fetch('/api/waste-types'),
+          fetch('/api/payment-config')
+        ]);
+        
+        if (wasteRes.ok) {
+          const data = await wasteRes.json();
+          setWasteTypes(data);
+          setUploadData(prev => ({ ...prev, waste_type: data[0]?.type || prev.waste_type }));
+        }
+        
+        if (paymentRes.ok) {
+          const data = await paymentRes.json();
+          setPaymentConfig(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch configuration", err);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -889,7 +918,7 @@ export default function App() {
       if (!res.ok) throw new Error(data.error || 'Operation failed');
 
       setMessage({ type: 'success', text: data.message });
-      setUploadData({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '' });
+      setUploadData({ weight_kg: '', waste_type: wasteTypes[0]?.type || '', village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '' });
       fetchUserData();
       setTimeout(() => setView('dashboard'), 2000);
     } catch (err: any) {
@@ -1810,7 +1839,7 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label={t('Total Collected')} value={`${history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" setView={setView} />
                   <Stat label={t('Farmers Registered')} value={adminStats?.total_farmers || 0} icon={Users} color="emerald" setView={setView} />
-                  <Stat label={t('Logistics Margin')} value={`₹${(history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.total_value, 0) * 0.15).toFixed(2)}`} icon={TrendingUp} color="purple" setView={setView} />
+                  <Stat label={t('Logistics Margin')} value={`₹${(history.filter(r => r.aggregator_id === user.id).reduce((sum, r) => sum + r.total_value, 0) * (paymentConfig.logistics_margin_percent / 100)).toFixed(2)}`} icon={TrendingUp} color="purple" setView={setView} />
                   <Stat label={t('Fleet Efficiency')} value="94%" icon={Truck} color="cyan" setView={setView} />
                 </div>
               )}
@@ -2259,7 +2288,7 @@ export default function App() {
                         >
                           {WASTE_CATEGORIES.filter(c => labels.allowedCategories.includes(c)).map(category => (
                             <optgroup key={category} label={category} className="bg-[#0A0A0B] text-emerald-400">
-                              {WASTE_TYPES.filter(w => w.category === category).map(item => (
+                              {wasteTypes.filter(w => w.category === category).map(item => (
                                 <option key={item.type} value={item.type} className="bg-[#0A0A0B] text-white">{item.type}</option>
                               ))}
                             </optgroup>
@@ -2328,19 +2357,19 @@ export default function App() {
                       <div className="space-y-2">
                         <div className="flex justify-between text-xs text-white/40">
                           <span>{t('Base Value (Recycler)')}</span>
-                          <span>₹{(parseFloat(uploadData.weight_kg || '0') * (WASTE_TYPES.find(w => w.type === uploadData.waste_type)?.value || 0)).toFixed(2)}</span>
+                          <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0)).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-white/40">
                           <span>{t('Carbon Credit Value')}</span>
-                          <span>₹{(parseFloat(uploadData.weight_kg || '0') * (WASTE_TYPES.find(w => w.type === uploadData.waste_type)?.carbon || 0) * 10).toFixed(2)}</span>
+                          <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.carbon || 0) * paymentConfig.carbon_price_per_kg).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/5">
                           <span>{t('Total Sovereign Value')}</span>
                           <span className="text-emerald-400">
                             ₹{(
                               parseFloat(uploadData.weight_kg || '0') * 
-                              ((WASTE_TYPES.find(w => w.type === uploadData.waste_type)?.value || 0) + 
-                               (WASTE_TYPES.find(w => w.type === uploadData.waste_type)?.carbon || 0) * 10)
+                              ((wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0) + 
+                               (wasteTypes.find(w => w.type === uploadData.waste_type)?.carbon || 0) * paymentConfig.carbon_price_per_kg)
                             ).toFixed(2)}
                           </span>
                         </div>
@@ -3168,6 +3197,12 @@ export default function App() {
                   >
                     {t('Audit Logs')}
                   </button>
+                  <button 
+                    onClick={() => setAdminSubView('waste_config')}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'waste_config' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    {t('Waste & Payment Config')}
+                  </button>
                 </div>
               )}
 
@@ -3356,7 +3391,7 @@ export default function App() {
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
-                                data={WASTE_TYPES}
+                                data={wasteTypes}
                                 cx="50%"
                                 cy="50%"
                                 innerRadius={40}
@@ -3364,7 +3399,7 @@ export default function App() {
                                 paddingAngle={5}
                                 dataKey="value"
                               >
-                                {WASTE_TYPES.map((entry, index) => (
+                                {wasteTypes.map((entry, index) => (
                                   <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} stroke="none" />
                                 ))}
                               </Pie>
@@ -3547,6 +3582,131 @@ export default function App() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </Card>
+              ) : adminSubView === 'waste_config' ? (
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <Settings className="text-emerald-400" size={20} />
+                      {t('Waste & Payment Configuration')}
+                    </h3>
+                    <button 
+                      onClick={async () => {
+                        setLoading(true);
+                        try {
+                          const [wasteRes, paymentRes] = await Promise.all([
+                            fetch('/api/waste-types', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                              body: JSON.stringify({ wasteTypes })
+                            }),
+                            fetch('/api/payment-config', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                              body: JSON.stringify(paymentConfig)
+                            })
+                          ]);
+                          if (wasteRes.ok && paymentRes.ok) {
+                            setMessage({ type: 'success', text: 'Configuration saved successfully' });
+                          } else {
+                            setMessage({ type: 'error', text: 'Failed to save configuration' });
+                          }
+                        } catch (err) {
+                          setMessage({ type: 'error', text: 'An error occurred' });
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                      disabled={loading}
+                    >
+                      {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
+                      {t('Save Configuration')}
+                    </button>
+                  </div>
+                  
+                  <div className="bg-black/20 rounded-xl p-4 border border-white/5 mb-6">
+                    <h4 className="font-bold text-emerald-400 mb-4">{t('Global Payment Settings')}</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                        <label className="text-sm font-medium text-white block mb-2">{t('Carbon Price (₹ per kg CO2)')}</label>
+                        <input 
+                          type="number" 
+                          step="0.1"
+                          value={paymentConfig.carbon_price_per_kg} 
+                          onChange={(e) => setPaymentConfig(prev => ({ ...prev, carbon_price_per_kg: parseFloat(e.target.value) || 0 }))}
+                          className="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                        />
+                        <p className="text-xs text-white/40 mt-2">{t('Global multiplier for carbon offset value.')}</p>
+                      </div>
+                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                        <label className="text-sm font-medium text-white block mb-2">{t('Logistics Margin (%)')}</label>
+                        <input 
+                          type="number" 
+                          step="1"
+                          value={paymentConfig.logistics_margin_percent} 
+                          onChange={(e) => setPaymentConfig(prev => ({ ...prev, logistics_margin_percent: parseFloat(e.target.value) || 0 }))}
+                          className="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                        />
+                        <p className="text-xs text-white/40 mt-2">{t('Percentage of total value allocated to aggregators.')}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    {WASTE_CATEGORIES.map(category => {
+                      const categoryTypes = wasteTypes.filter(w => w.category === category);
+                      if (categoryTypes.length === 0) return null;
+                      return (
+                        <div key={category} className="bg-black/20 rounded-xl p-4 border border-white/5">
+                          <h4 className="font-bold text-emerald-400 mb-4">{category}</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {categoryTypes.map(wt => (
+                              <div key={wt.type} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                <div className="font-medium mb-3 text-sm">{wt.type}</div>
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="text-xs text-white/40 block mb-1">{t('Base Value (₹/kg)')}</label>
+                                    <input 
+                                      type="number" 
+                                      step="0.01"
+                                      value={wt.value} 
+                                      onChange={(e) => {
+                                        const newTypes = [...wasteTypes];
+                                        const index = newTypes.findIndex(w => w.type === wt.type);
+                                        if (index !== -1) {
+                                          newTypes[index].value = parseFloat(e.target.value) || 0;
+                                          setWasteTypes(newTypes);
+                                        }
+                                      }}
+                                      className="w-full bg-black/50 border border-white/10 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs text-white/40 block mb-1">{t('Carbon Offset (kg CO2/kg)')}</label>
+                                    <input 
+                                      type="number" 
+                                      step="0.01"
+                                      value={wt.carbon} 
+                                      onChange={(e) => {
+                                        const newTypes = [...wasteTypes];
+                                        const index = newTypes.findIndex(w => w.type === wt.type);
+                                        if (index !== -1) {
+                                          newTypes[index].carbon = parseFloat(e.target.value) || 0;
+                                          setWasteTypes(newTypes);
+                                        }
+                                      }}
+                                      className="w-full bg-black/50 border border-white/10 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </Card>
               ) : null}
