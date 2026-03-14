@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rupaykg-api
+  labels:
+    app: rupaykg-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rupaykg-api
+  template:
+    metadata:
+      labels:
+        app: rupaykg-api
+    spec:
+      containers:
+      - name: rupaykg-api
+        image: rupaykg/api:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: rupaykg-secrets
+              key: mongo-uri
+        - name: REDIS_URL
+          value: "redis://rupaykg-redis:6379/0"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "rupaykg-kafka:9092"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rupaykg-api-service
+spec:
+  selector:
+    app: rupaykg-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer

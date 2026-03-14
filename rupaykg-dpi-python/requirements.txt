@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pymongo
+motor
+redis
+confluent-kafka
+pyjwt
+pydantic
+python-dotenv
+geopy

@@ -348,7 +348,7 @@ export default function App() {
     district: '',
     state: ''
   });
-  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '' });
+  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: 'Rice' });
   const [farmerData, setFarmerData] = useState({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
   const [availableRecords, setAvailableRecords] = useState<BiomassRecord[]>([]);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'fetching' | 'success' | 'error'>('idle');
@@ -885,6 +885,29 @@ export default function App() {
         setUploadData(prev => ({ ...prev, image_url: reader.result as string }));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const calculateBiomass = async () => {
+    if (!uploadData.acreage || !uploadData.crop_type) {
+      setMessage({ type: 'error', text: 'Please enter acreage and select crop type first.' });
+      return;
+    }
+    try {
+      const res = await fetch('/api/biomass/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ crop_type: uploadData.crop_type, hectares: parseFloat(uploadData.acreage) * 0.404686 }) // convert acres to hectares
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUploadData(prev => ({ ...prev, weight_kg: data.estimated_kg.toFixed(1) }));
+        setMessage({ type: 'success', text: `Estimated ${data.estimated_kg.toFixed(1)} kg of biomass for ${uploadData.acreage} acres of ${uploadData.crop_type}.` });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to estimate biomass' });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Network error during estimation' });
     }
   };
 
@@ -2289,6 +2312,28 @@ export default function App() {
                           />
                           <Map className="absolute right-4 top-3.5 text-white/20" size={18} />
                         </div>
+                      </div>
+                      <div className="md:col-span-2 flex flex-col md:flex-row gap-4 items-end">
+                        <div className="flex-1 w-full">
+                          <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Crop Type (For Biomass)')}</label>
+                          <select 
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 appearance-none text-white"
+                            value={uploadData.crop_type}
+                            onChange={e => setUploadData({...uploadData, crop_type: e.target.value})}
+                          >
+                            <option value="Rice" className="bg-[#0A0A0B] text-white">Rice</option>
+                            <option value="Wheat" className="bg-[#0A0A0B] text-white">Wheat</option>
+                            <option value="Maize" className="bg-[#0A0A0B] text-white">Maize</option>
+                          </select>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={calculateBiomass}
+                          className="w-full md:w-auto px-6 py-3 bg-blue-500/20 text-blue-400 border border-blue-500/50 rounded-xl font-bold hover:bg-blue-500/30 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Zap size={18} />
+                          {t('Estimate Biomass')}
+                        </button>
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Waste Type')}</label>

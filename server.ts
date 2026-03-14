@@ -380,6 +380,18 @@ async function startServer() {
     });
   });
 
+  app.post("/api/biomass/estimate", auth(["citizen", "fpo", "aggregator"]), (req: any, res) => {
+    const { crop_type, hectares } = req.body;
+    const factors: Record<string, number> = {
+      'Rice': 2.5,
+      'Wheat': 1.8,
+      'Maize': 2.0
+    };
+    const factor = factors[crop_type] || 1.0;
+    const estimated_tons = hectares * factor;
+    res.json({ crop_type, hectares, estimated_tons, estimated_kg: estimated_tons * 1000 });
+  });
+
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
     const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage } = req.body;
     
@@ -977,7 +989,7 @@ async function startServer() {
     const totalRecords = filteredRecords.length;
     const totalWallet = filteredUsers.reduce((sum, u) => sum + (u.wallet_balance || 0), 0);
     const totalWeight = filteredRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
-    const totalCarbon = totalWeight * 0.5; // Dummy calculation
+    const totalCarbon = filteredRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
 
     res.json({
       total_users: totalUsers,
