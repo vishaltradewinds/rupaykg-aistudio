@@ -39,7 +39,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
-import { WASTE_TYPES, WASTE_CATEGORIES } from './constants';
+import { WASTE_TYPES, WASTE_CATEGORIES, WasteType } from './constants';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
