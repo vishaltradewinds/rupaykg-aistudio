@@ -63,7 +63,7 @@ The platform integrates the following 12 strategic APIs to power its geospatial 
 
 ## Deployment Instructions
 
-### Single-File Prototype (Fastest Setup)
+### Single-File Prototype (Fastest Setup - Recommended)
 We have generated a complete production-grade platform in a single file (`rupaykg_core.py`) with an embedded React frontend and all 12 API connectors.
 1. Install dependencies: `pip install -r requirements_single.txt`
 2. Run the server: `uvicorn rupaykg_core:app --reload`
