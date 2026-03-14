@@ -63,7 +63,13 @@ The platform integrates the following 12 strategic APIs to power its geospatial 
 
 ## Deployment Instructions
 
-### Local Development (Python Backend)
+### Single-File Prototype (Fastest Setup)
+We have generated a complete production-grade platform in a single file (`rupaykg_core.py`) with an embedded React frontend and all 12 API connectors.
+1. Install dependencies: `pip install -r requirements_single.txt`
+2. Run the server: `uvicorn rupaykg_core:app --reload`
+3. View the dashboard at `http://localhost:8000`
+
+### Local Development (Full Python Backend)
 1.  Navigate to the Python backend directory: `cd rupaykg-dpi-python`
 2.  Install dependencies: `pip install -r requirements.txt`
 3.  Run the server: `uvicorn main:app --reload`
