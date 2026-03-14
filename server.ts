@@ -1229,6 +1229,18 @@ async function startServer() {
     res.json({ wasteProcessedMT: 1320, carbonCreditsIssued: 56000, totalRevenue: 14000000 });
   });
 
+  app.get("/api/map/environmental-activity", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
+    // Stub for geospatial map data (combining Mapbox, OpenStreetMap, Earth Engine)
+    const mapData = {
+      waste_points: records.map(r => ({ lat: r.geo_lat, lng: r.geo_long, type: r.waste_type, weight: r.weight_kg })),
+      biomass_zones: farmers.map(f => ({ lat: f.geo_lat, lng: f.geo_long, crop: f.crop_type, area: f.land_area })),
+      heatmaps: {
+        carbon_reduction: records.filter(r => r.mrv_status === 'verified').map(r => ({ lat: r.geo_lat, lng: r.geo_long, intensity: r.carbon_reduction_kg }))
+      }
+    };
+    res.json(mapData);
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
