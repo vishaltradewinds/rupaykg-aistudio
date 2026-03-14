@@ -367,12 +367,14 @@ export default function App() {
   const [wardAnalytics, setWardAnalytics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
-  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config'>('dashboard');
+  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config' | 'fraud' | 'integrations'>('dashboard');
   const [wasteTypes, setWasteTypes] = useState<WasteType[]>(WASTE_TYPES);
   const [paymentConfig, setPaymentConfig] = useState({ carbon_price_per_kg: 10, logistics_margin_percent: 15 });
   const [comprehensiveMetrics, setComprehensiveMetrics] = useState<any>(null);
   const [trendsData, setTrendsData] = useState<any[]>([]);
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
+  const [agristackData, setAgristackData] = useState<any[]>([]);
+  const [ondcData, setOndcData] = useState<any[]>([]);
   const [mrvHistory, setMrvHistory] = useState<BiomassRecord[]>([]);
   const [mrvTab, setMrvTab] = useState<'pending' | 'history'>('pending');
   const [availableCredits, setAvailableCredits] = useState<any[]>([]);
@@ -824,6 +826,15 @@ export default function App() {
           const wardData = await wardRes.json();
           setWardAnalytics(wardData.ward_data);
         }
+      }
+
+      // 10. Fetch Integrations Data
+      if (adminSubView === 'integrations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
+        const agristackRes = await fetch('/api/integrations/agristack', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (agristackRes.ok) setAgristackData(await agristackRes.json());
+        
+        const ondcRes = await fetch('/api/integrations/ondc', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (ondcRes.ok) setOndcData(await ondcRes.json());
       }
 
       // 10. Fetch Carbon Pool
@@ -3203,6 +3214,18 @@ export default function App() {
                   >
                     {t('Waste & Payment Config')}
                   </button>
+                  <button 
+                    onClick={() => setAdminSubView('fraud')}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'fraud' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    {t('Fraud Alerts')}
+                  </button>
+                  <button 
+                    onClick={() => setAdminSubView('integrations')}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'integrations' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    {t('DPI Integrations')}
+                  </button>
                 </div>
               )}
 
@@ -3709,6 +3732,155 @@ export default function App() {
                     })}
                   </div>
                 </Card>
+              ) : adminSubView === 'fraud' ? (
+                <Card className="p-6 border-white/5 bg-white/5">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <AlertTriangle className="text-red-400" size={20} />
+                    {t('Fraud Detection Dashboard')}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                      <p className="text-xs text-red-400 uppercase tracking-widest font-bold mb-1">{t('Total Flagged')}</p>
+                      <p className="text-3xl font-black text-red-500">{fraudMap.length}</p>
+                    </div>
+                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4">
+                      <p className="text-xs text-orange-400 uppercase tracking-widest font-bold mb-1">{t('GPS Mismatches')}</p>
+                      <p className="text-3xl font-black text-orange-500">{fraudMap.filter(f => f.flag_reason?.includes('GPS')).length || 0}</p>
+                    </div>
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+                      <p className="text-xs text-yellow-400 uppercase tracking-widest font-bold mb-1">{t('AI Rejected')}</p>
+                      <p className="text-3xl font-black text-yellow-500">{fraudMap.filter(f => f.mrv_status === 'rejected').length || 0}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-black/40 rounded-xl border border-white/5 overflow-hidden">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-white/5 text-white/40 uppercase text-[10px] tracking-wider">
+                        <tr>
+                          <th className="p-4 font-medium">{t('Date')}</th>
+                          <th className="p-4 font-medium">{t('User ID')}</th>
+                          <th className="p-4 font-medium">{t('Waste Type')}</th>
+                          <th className="p-4 font-medium">{t('Reason')}</th>
+                          <th className="p-4 font-medium">{t('Status')}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {fraudMap.map((alert: any) => (
+                          <tr key={alert.id} className="hover:bg-white/5 transition-colors">
+                            <td className="p-4 text-white/60">{new Date(alert.timestamp).toLocaleDateString()}</td>
+                            <td className="p-4 font-mono text-xs">{alert.citizen_id || alert.aggregator_id}</td>
+                            <td className="p-4">{alert.waste_type}</td>
+                            <td className="p-4 text-red-400">{alert.flag_reason || 'MRV Rejected'}</td>
+                            <td className="p-4">
+                              <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-bold">
+                                {alert.status === 'flagged' ? 'FLAGGED' : 'REJECTED'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        {fraudMap.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="p-8 text-center text-white/40">
+                              {t('No fraud alerts detected.')}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              ) : adminSubView === 'integrations' ? (
+                <div className="space-y-6">
+                  <Card className="p-6 border-white/5 bg-white/5">
+                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                      <Database className="text-emerald-400" size={20} />
+                      {t('AgriStack Verifications')}
+                    </h3>
+                    <p className="text-sm text-white/60 mb-6">
+                      {t('Live synchronization with the national AgriStack database for farmer identity and land parcel verification.')}
+                    </p>
+                    <div className="bg-black/40 rounded-xl border border-white/5 overflow-hidden">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-white/5 text-white/40 uppercase text-[10px] tracking-wider">
+                          <tr>
+                            <th className="p-4 font-medium">{t('Verification ID')}</th>
+                            <th className="p-4 font-medium">{t('Farmer Name')}</th>
+                            <th className="p-4 font-medium">{t('Land Parcel')}</th>
+                            <th className="p-4 font-medium">{t('Crop Type')}</th>
+                            <th className="p-4 font-medium">{t('Status')}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {agristackData.map((record: any) => (
+                            <tr key={record.id} className="hover:bg-white/5 transition-colors">
+                              <td className="p-4 font-mono text-xs text-white/60">{record.id}</td>
+                              <td className="p-4">{record.name}</td>
+                              <td className="p-4 text-white/80">{record.land_parcel}</td>
+                              <td className="p-4 text-white/80">{record.crop}</td>
+                              <td className="p-4">
+                                <span className={`px-2 py-1 rounded text-xs font-bold ${record.status === 'Verified' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                                  {record.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                          {agristackData.length === 0 && (
+                            <tr>
+                              <td colSpan={5} className="p-8 text-center text-white/40">
+                                {t('No AgriStack data available.')}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6 border-white/5 bg-white/5">
+                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                      <Globe className="text-blue-400" size={20} />
+                      {t('ONDC Marketplace Listings')}
+                    </h3>
+                    <p className="text-sm text-white/60 mb-6">
+                      {t('Verified carbon credits and processed materials pushed to the Open Network for Digital Commerce (ONDC).')}
+                    </p>
+                    <div className="bg-black/40 rounded-xl border border-white/5 overflow-hidden">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-white/5 text-white/40 uppercase text-[10px] tracking-wider">
+                          <tr>
+                            <th className="p-4 font-medium">{t('Listing ID')}</th>
+                            <th className="p-4 font-medium">{t('Material')}</th>
+                            <th className="p-4 font-medium">{t('Quantity')}</th>
+                            <th className="p-4 font-medium">{t('Price')}</th>
+                            <th className="p-4 font-medium">{t('Status')}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {ondcData.map((listing: any) => (
+                            <tr key={listing.id} className="hover:bg-white/5 transition-colors">
+                              <td className="p-4 font-mono text-xs text-white/60">{listing.id}</td>
+                              <td className="p-4">{listing.material}</td>
+                              <td className="p-4 text-white/80">{listing.quantity}</td>
+                              <td className="p-4 font-mono text-emerald-400">{listing.price}</td>
+                              <td className="p-4">
+                                <span className={`px-2 py-1 rounded text-xs font-bold ${listing.status === 'Active' ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-white/40'}`}>
+                                  {listing.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                          {ondcData.length === 0 && (
+                            <tr>
+                              <td colSpan={5} className="p-8 text-center text-white/40">
+                                {t('No ONDC listings available.')}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                </div>
               ) : null}
             </motion.div>
           )}

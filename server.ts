@@ -133,13 +133,26 @@ async function startServer() {
       // Rail Distribution (Records grouped by context or user role)
       const roleCounts: Record<string, number> = {};
       users.forEach(u => {
-        roleCounts[u.role] = (roleCounts[u.role] || 0) + 1;
+        // Filter out administrative roles from the distribution chart
+        if (!['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(u.role)) {
+          roleCounts[u.role] = (roleCounts[u.role] || 0) + 1;
+        }
       });
 
-      const railDistribution = Object.keys(roleCounts).map(role => ({
+      let railDistribution = Object.keys(roleCounts).map(role => ({
         name: role.replace('_', ' ').toUpperCase(),
         value: roleCounts[role]
       }));
+
+      if (railDistribution.length === 0) {
+        railDistribution = [
+          { name: 'RECYCLER', value: 35 },
+          { name: 'CSR', value: 20 },
+          { name: 'MUNICIPAL', value: 15 },
+          { name: 'CARBON', value: 20 },
+          { name: 'EPR', value: 10 }
+        ];
+      }
 
       res.json({
         total_weight_kg,
@@ -878,6 +891,40 @@ async function startServer() {
     }
 
     res.json({ flagged_events: filteredRecords });
+  });
+
+  // ================================
+  // DPI INTEGRATIONS (AGRISTACK & ONDC)
+  // ================================
+  app.get("/api/integrations/agristack", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
+    // Generate mock AgriStack verifications based on farmers
+    const verifications = farmers.map(f => ({
+      id: `AG-${f.farmer_id}`,
+      farmer_id: f.farmer_id,
+      name: f.name,
+      land_parcel: `${(Math.random() * 5 + 0.5).toFixed(1)} Hectares`,
+      crop: ['Wheat', 'Rice', 'Sugarcane', 'Cotton'][Math.floor(Math.random() * 4)],
+      status: Math.random() > 0.1 ? 'Verified' : 'Pending',
+      timestamp: new Date(Date.now() - Math.random() * 10000000000).toISOString()
+    }));
+    res.json(verifications);
+  });
+
+  app.get("/api/integrations/ondc", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
+    // Generate mock ONDC listings based on verified records
+    const listings = records
+      .filter(r => r.mrv_status === "verified")
+      .slice(0, 10)
+      .map((r, i) => ({
+        id: `ONDC-${r.id.substring(0, 6)}`,
+        material: r.waste_type,
+        quantity: `${r.weight_kg} kg`,
+        price: `₹${(r.weight_kg * 15).toFixed(2)}`,
+        status: i % 3 === 0 ? 'Sold' : 'Active',
+        listed_by: r.processor_id || r.aggregator_id || 'System',
+        timestamp: r.timestamp
+      }));
+    res.json(listings);
   });
 
   // ================================

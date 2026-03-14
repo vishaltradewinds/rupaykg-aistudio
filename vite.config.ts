@@ -14,9 +14,9 @@ export default defineConfig(({mode}) => {
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg'],
         manifest: {
-          name: 'Circular OS',
-          short_name: 'CircularOS',
-          description: 'Waste Management and Carbon Offset Platform',
+          name: 'RupayKg',
+          short_name: 'RupayKg',
+          description: 'National-scale Digital Public Infrastructure for Waste Management',
           theme_color: '#10b981',
           background_color: '#000000',
           display: 'standalone',
