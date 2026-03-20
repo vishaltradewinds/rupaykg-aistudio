@@ -918,6 +918,34 @@ export default function App() {
     }
   };
 
+  const handleFastCategorize = async (description: string) => {
+    if (!description.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/ai/fast-categorize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUploadData(prev => ({
+          ...prev,
+          waste_type: data.waste_type || prev.waste_type,
+          weight_kg: data.weight_kg ? data.weight_kg.toString() : prev.weight_kg
+        }));
+        setMessage({ type: 'success', text: 'AI auto-filled the form successfully.' });
+      } else {
+        setMessage({ type: 'error', text: 'Failed to auto-fill form using AI.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'Error calling AI service.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -2288,6 +2316,39 @@ export default function App() {
             >
               <Card className="max-w-2xl mx-auto">
                 <h3 className="text-xl font-bold mb-6">{t('Circular Economy Intake Form')}</h3>
+                
+                <div className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                  <label className="block text-xs uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1">
+                    <Zap size={12} />
+                    {t('Fast AI Auto-fill')}
+                  </label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text"
+                      placeholder="e.g., I have 50kg of plastic bottles"
+                      className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
+                      id="ai-fast-input"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleFastCategorize((e.target as HTMLInputElement).value);
+                        }
+                      }}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const input = document.getElementById('ai-fast-input') as HTMLInputElement;
+                        if (input) handleFastCategorize(input.value);
+                      }}
+                      className="px-4 py-2 bg-emerald-500 text-black font-bold rounded-xl text-sm hover:bg-emerald-400 transition-colors whitespace-nowrap"
+                    >
+                      {t('Auto-fill')}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-white/40 mt-2">Powered by Gemini Flash-Lite</p>
+                </div>
+
                 <form onSubmit={handleUpload} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>

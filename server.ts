@@ -413,7 +413,7 @@ async function startServer() {
         const mimeType = mimeInfo.split(':')[1];
         
         const response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-preview",
+          model: "gemini-3.1-pro-preview",
           contents: {
             parts: [
               {
@@ -1253,6 +1253,118 @@ async function startServer() {
       }
     };
     res.json(mapData);
+  });
+
+  // ================================
+  // AI CAPABILITIES
+  // ================================
+  app.post("/api/ai/chat", async (req, res) => {
+    const { message, useMaps, lat, lng } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+      if (useMaps && lat && lng) {
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: message,
+          config: {
+            tools: [{ googleMaps: {} }],
+            toolConfig: {
+              retrievalConfig: { latLng: { latitude: lat, longitude: lng } }
+            }
+          }
+        });
+        res.json({ text: response.text, chunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks });
+      } else {
+        const response = await ai.models.generateContent({
+          model: "gemini-3.1-pro-preview",
+          contents: message,
+          config: { systemInstruction: "You are RupayKg AI, an expert in waste management, carbon credits, and environmental sustainability. Provide concise and helpful answers." }
+        });
+        res.json({ text: response.text });
+      }
+    } catch (err) {
+      console.error("AI Chat Error:", err);
+      res.status(500).json({ error: "Failed to generate AI response" });
+    }
+  });
+
+  app.post("/api/ai/tts", async (req, res) => {
+    const { text } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
+        contents: [{ parts: [{ text }] }],
+        config: {
+          responseModalities: ["AUDIO"],
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
+        }
+      });
+      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      res.json({ audio: base64Audio });
+    } catch (err) {
+      console.error("AI TTS Error:", err);
+      res.status(500).json({ error: "Failed to generate speech" });
+    }
+  });
+
+  app.post("/api/ai/transcribe", async (req, res) => {
+    const { audioBase64, mimeType } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          {
+            parts: [
+              { inlineData: { data: audioBase64, mimeType } },
+              { text: "Transcribe the following audio accurately." }
+            ]
+          }
+        ]
+      });
+      res.json({ text: response.text });
+    } catch (err) {
+      console.error("AI Transcription Error:", err);
+      res.status(500).json({ error: "Failed to transcribe audio" });
+    }
+  });
+
+  app.post("/api/ai/fast-categorize", async (req, res) => {
+    const { description } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite-preview",
+        contents: `Categorize this waste description into one of our types (Plastics, Organic, E-Waste, Metals, Paper, Glass, Biomass, Textile, Hazardous, Construction, Industrial) and estimate weight in kg if mentioned. Description: "${description}"`,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              waste_type: { type: Type.STRING },
+              weight_kg: { type: Type.NUMBER }
+            }
+          }
+        }
+      });
+      res.json(JSON.parse(response.text || "{}"));
+    } catch (err) {
+      console.error("AI Categorize Error:", err);
+      res.status(500).json({ error: "Failed to categorize waste" });
+    }
   });
 
   // Vite middleware for development
