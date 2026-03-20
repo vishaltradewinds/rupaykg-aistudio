@@ -41,6 +41,8 @@ import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
 import { WASTE_TYPES, WASTE_CATEGORIES, WasteType } from './constants';
 
+import { Chatbot } from './components/Chatbot';
+
 const LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'hi', label: 'हिंदी' },
@@ -81,6 +83,10 @@ interface User {
   id: string;
   name: string;
   role: string;
+  district?: string;
+  state?: string;
+  organization_name?: string;
+  phone?: string;
 }
 
 interface BiomassRecord {
@@ -103,6 +109,10 @@ interface BiomassRecord {
   geo_lat: number;
   geo_long: number;
   image_url?: string;
+  aggregator_id?: string;
+  processor_id?: string;
+  blockchain_hash?: string;
+  citizen_id?: string;
   satellite_verification?: {
     is_verified: boolean;
     land_cover_type: string;
@@ -250,7 +260,7 @@ const Card = ({ children, className = "", ...props }: { children: React.ReactNod
   </div>
 );
 
-const Stat = ({ label, value, icon: Icon, color = "emerald", blockchainLink = false, setView }: { label: string, value: string | number, icon: any, color?: string, blockchainLink?: boolean, setView?: (v: string) => void }) => (
+const Stat = ({ label, value, icon: Icon, color = "emerald", blockchainLink = false, setView }: { label: string, value: string | number, icon: any, color?: string, blockchainLink?: boolean, setView?: (v: any) => void }) => (
   <Card className="flex items-center gap-4 relative group">
     <div className={`p-3 rounded-xl bg-${color}-500/20 text-${color}-400`}>
       <Icon size={24} />
@@ -987,7 +997,7 @@ export default function App() {
       if (!res.ok) throw new Error(data.error || 'Operation failed');
 
       setMessage({ type: 'success', text: data.message });
-      setUploadData({ weight_kg: '', waste_type: wasteTypes[0]?.type || '', village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '' });
+      setUploadData({ weight_kg: '', waste_type: wasteTypes[0]?.type || '', village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: '' });
       fetchUserData();
       setTimeout(() => setView('dashboard'), 2000);
     } catch (err: any) {
@@ -1872,7 +1882,7 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              {dbStatus?.status === 'failed' && (
+              {(dbStatus?.status === 'failed' || dbStatus?.status === 'connecting') && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-red-500/20 text-red-400 rounded-xl">
@@ -4654,6 +4664,7 @@ export default function App() {
 
         </AnimatePresence>
       </main>
+      <Chatbot />
     </div>
   );
 }

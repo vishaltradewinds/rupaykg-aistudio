@@ -13,6 +13,9 @@ export default defineConfig(({mode}) => {
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg'],
+        workbox: {
+          maximumFileSizeToCacheInBytes: 4000000,
+        },
         manifest: {
           name: 'RupayKg',
           short_name: 'RupayKg',
