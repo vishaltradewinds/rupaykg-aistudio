@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
+import { SatelliteVerificationService } from "./src/services/satelliteService";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -471,6 +472,8 @@ async function startServer() {
     // Cap at 1.0
     risk_score = Math.min(risk_score, 1.0);
     
+    const satellite_verification = await SatelliteVerificationService.verifyActivity(geo_lat, geo_long, waste_type);
+    
     const record = {
       id: "REC" + Date.now(),
       citizen_id: req.user.id,
@@ -483,6 +486,7 @@ async function startServer() {
       acreage: acreage || 0,
       risk_score,
       ai_verification_details,
+      satellite_verification,
       context: context || "rural", // Default to rural if not provided
       status: "pending_pickup",
       mrv_status: "pending", // MRV Status: pending, verified, rejected
@@ -505,6 +509,16 @@ async function startServer() {
     });
     
     res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon value pending MRV.`, wallet_balance: user?.wallet_balance });
+  });
+
+  app.post("/api/satellite/verify", auth(["regulator", "super_admin"]), async (req: any, res) => {
+    const { lat, lng, activity_type } = req.body;
+    try {
+      const result = await SatelliteVerificationService.verifyActivity(lat, lng, activity_type);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: "Satellite verification failed" });
+    }
   });
 
   app.get("/api/citizen/records", auth(["citizen", "fpo"]), (req: any, res) => {

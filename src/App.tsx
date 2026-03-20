@@ -103,6 +103,13 @@ interface BiomassRecord {
   geo_lat: number;
   geo_long: number;
   image_url?: string;
+  satellite_verification?: {
+    is_verified: boolean;
+    land_cover_type: string;
+    confidence: number;
+    anomalies_detected: boolean;
+    verification_date: string;
+  };
 }
 
 interface AdminStats {
@@ -2907,6 +2914,7 @@ export default function App() {
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Value')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Carbon Reduction')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('AI Risk')}</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Satellite')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Status')}</th>
                         {['citizen', 'fpo', 'regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
                           <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('MRV Status')}</th>
@@ -2936,6 +2944,27 @@ export default function App() {
                               >
                                 {(record.risk_score * 100).toFixed(0)}%
                               </span>
+                            ) : (
+                              <span className="text-white/40 text-xs">-</span>
+                            )}
+                          </td>
+                          <td className="p-4">
+                            {record.satellite_verification ? (
+                              <div className="flex flex-col gap-1">
+                                <span 
+                                  className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border cursor-help ${
+                                    record.satellite_verification.is_verified ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
+                                  }`}
+                                  title={`Land Cover: ${record.satellite_verification.land_cover_type} | Confidence: ${(record.satellite_verification.confidence * 100).toFixed(0)}%`}
+                                >
+                                  {record.satellite_verification.is_verified ? t('Verified') : t('Unverified')}
+                                </span>
+                                {record.satellite_verification.anomalies_detected && (
+                                  <span className="text-[8px] text-red-400 font-bold uppercase flex items-center gap-0.5">
+                                    <AlertTriangle size={8} /> {t('Anomaly')}
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span className="text-white/40 text-xs">-</span>
                             )}
@@ -3111,6 +3140,36 @@ export default function App() {
                               <p className="text-sm text-white/80 leading-relaxed">
                                 {record.ai_verification_details}
                               </p>
+                            </div>
+                          )}
+
+                          {record.satellite_verification && (
+                            <div className="mb-6 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                              <p className="text-[10px] uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1">
+                                <Globe size={12} />
+                                {t('Satellite Verification')}
+                                {record.satellite_verification.is_verified ? (
+                                  <CheckCircle2 size={10} className="text-emerald-400" />
+                                ) : (
+                                  <AlertCircle size={10} className="text-red-400" />
+                                )}
+                              </p>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                  <span className="text-white/40">{t('Land Cover')}: </span>
+                                  <span className="text-white/80 font-medium">{record.satellite_verification.land_cover_type}</span>
+                                </div>
+                                <div>
+                                  <span className="text-white/40">{t('Confidence')}: </span>
+                                  <span className="text-white/80 font-mono">{(record.satellite_verification.confidence * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                              {record.satellite_verification.anomalies_detected && (
+                                <div className="mt-2 flex items-center gap-1 text-[10px] text-red-400 font-bold uppercase">
+                                  <AlertTriangle size={12} />
+                                  {t('Anomalies detected in this area')}
+                                </div>
+                              )}
                             </div>
                           )}
 
