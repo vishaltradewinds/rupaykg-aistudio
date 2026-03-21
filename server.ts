@@ -1367,6 +1367,80 @@ async function startServer() {
     }
   });
 
+  app.post("/api/ai/eco-tips", async (req, res) => {
+    const { history } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+      const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history)}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING }
+          }
+        }
+      });
+      res.json({ tips: JSON.parse(response.text || "[]") });
+    } catch (err) {
+      console.error("AI Eco-Tips Error:", err);
+      res.status(500).json({ error: "Failed to generate tips" });
+    }
+  });
+
+  app.post("/api/ai/mrv-risk", async (req, res) => {
+    const { record } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+      const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              risk_score: { type: Type.NUMBER },
+              explanation: { type: Type.STRING }
+            }
+          }
+        }
+      });
+      res.json(JSON.parse(response.text || "{}"));
+    } catch (err) {
+      console.error("AI MRV Risk Error:", err);
+      res.status(500).json({ error: "Failed to assess risk" });
+    }
+  });
+
+  app.post("/api/ai/forecast", async (req, res) => {
+    const { stats } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+      const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(stats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-pro-preview",
+        contents: prompt
+      });
+      res.json({ forecast: response.text });
+    } catch (err) {
+      console.error("AI Forecast Error:", err);
+      res.status(500).json({ error: "Failed to generate forecast" });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

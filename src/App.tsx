@@ -33,12 +33,14 @@ import {
   Camera,
   Database,
   Settings,
-  Save
+  Save,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import ReactMarkdown from 'react-markdown';
 import { WASTE_TYPES, WASTE_CATEGORIES, WasteType } from './constants';
 
 import { Chatbot } from './components/Chatbot';
@@ -489,6 +491,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [dbStatus, setDbStatus] = useState<{ status: string, error: string } | null>(null);
+  const [ecoTips, setEcoTips] = useState<string[]>([]);
+  const [forecast, setForecast] = useState<string>('');
+  const [mrvRiskAssessments, setMrvRiskAssessments] = useState<Record<string, { risk_score: number, explanation: string }>>({});
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -541,6 +546,38 @@ export default function App() {
   }, []);
 
   // Removed demo functions for live production environment
+
+  useEffect(() => {
+    if (view === 'dashboard' && user && history.length > 0) {
+      if (['citizen', 'fpo'].includes(user.role)) {
+        fetch('/api/ai/eco-tips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ history: history.slice(0, 5) })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.tips) setEcoTips(data.tips);
+        })
+        .catch(console.error);
+      }
+    }
+  }, [view, user, history]);
+
+  useEffect(() => {
+    if (view === 'dashboard' && user && ['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user.role) && adminStats) {
+      fetch('/api/ai/forecast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stats: adminStats })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.forecast) setForecast(data.forecast);
+      })
+      .catch(console.error);
+    }
+  }, [view, user, adminStats]);
 
   const handleRetryDb = async () => {
     try {
@@ -1053,6 +1090,24 @@ export default function App() {
       setMessage({ type: 'error', text: err.message });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAssessRisk = async (record: BiomassRecord) => {
+    try {
+      setMrvRiskAssessments(prev => ({ ...prev, [record.id]: { risk_score: -1, explanation: 'Analyzing...' } }));
+      const res = await fetch('/api/ai/mrv-risk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ record })
+      });
+      const data = await res.json();
+      if (data.risk_score !== undefined) {
+        setMrvRiskAssessments(prev => ({ ...prev, [record.id]: data }));
+      }
+    } catch (err) {
+      console.error(err);
+      setMrvRiskAssessments(prev => ({ ...prev, [record.id]: { risk_score: -1, explanation: 'Failed to assess risk' } }));
     }
   };
 
@@ -1906,11 +1961,30 @@ export default function App() {
               )}
 
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Stat label={t('Carbon Offset')} value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
-                  <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" setView={setView} />
-                  <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" setView={setView} />
-                  <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" setView={setView} />
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <Stat label={t('Carbon Offset')} value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" setView={setView} />
+                    <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" setView={setView} />
+                    <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" setView={setView} />
+                  </div>
+                  
+                  {ecoTips.length > 0 && (
+                    <Card className="bg-emerald-500/5 border-emerald-500/20">
+                      <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-emerald-400">
+                        <Zap size={18} />
+                        AI Eco-Tips
+                      </h3>
+                      <ul className="space-y-3">
+                        {ecoTips.map((tip, idx) => (
+                          <li key={idx} className="flex items-start gap-3 text-sm text-white/80">
+                            <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  )}
                 </div>
               )}
 
@@ -2073,6 +2147,18 @@ export default function App() {
                     <Stat label={t('Carbon Reduced')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
                     <Stat label={t('Total Value')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
                   </div>
+                  
+                  {forecast && (
+                    <Card className="bg-blue-500/5 border-blue-500/20">
+                      <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-400">
+                        <TrendingUp size={18} />
+                        AI Predictive Forecast
+                      </h3>
+                      <div className="text-sm text-white/80 leading-relaxed prose prose-invert max-w-none">
+                        <ReactMarkdown>{forecast}</ReactMarkdown>
+                      </div>
+                    </Card>
+                  )}
                 </div>
               )}
 
@@ -3260,7 +3346,27 @@ export default function App() {
                             </div>
                           )}
 
+                          {mrvRiskAssessments[record.id] && mrvRiskAssessments[record.id].risk_score !== -1 && (
+                            <div className={`mb-6 p-4 rounded-xl border ${mrvRiskAssessments[record.id].risk_score > 50 ? 'bg-red-500/10 border-red-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
+                              <p className={`text-[10px] uppercase tracking-widest mb-2 flex items-center gap-1 ${mrvRiskAssessments[record.id].risk_score > 50 ? 'text-red-400' : 'text-emerald-400'}`}>
+                                <ShieldCheck size={12} />
+                                {t('AI Risk Assessment')} (Score: {mrvRiskAssessments[record.id].risk_score})
+                              </p>
+                              <p className="text-sm text-white/80 leading-relaxed">
+                                {mrvRiskAssessments[record.id].explanation}
+                              </p>
+                            </div>
+                          )}
+
                           <div className="flex gap-3">
+                            <button 
+                              onClick={() => handleAssessRisk(record)}
+                              disabled={mrvRiskAssessments[record.id]?.risk_score === -1}
+                              className="px-4 py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold rounded-xl text-sm transition-all flex items-center justify-center disabled:opacity-50"
+                              title="Assess Risk with AI"
+                            >
+                              {mrvRiskAssessments[record.id]?.risk_score === -1 ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
+                            </button>
                             <button 
                               onClick={() => handleMRVAction(record.id, 'verified')}
                               disabled={loading}
