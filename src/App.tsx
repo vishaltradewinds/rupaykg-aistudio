@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import { 
   Leaf, 
   Wallet, 
@@ -354,6 +355,10 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
   const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain'>('dashboard');
+  
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
   
@@ -1737,6 +1742,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-white font-sans">
+      <Helmet>
+        <title>{view.charAt(0).toUpperCase() + view.slice(1)} | RupayKg - National Digital Public Infrastructure</title>
+        <meta name="description" content={`RupayKg ${view} - National Digital Public Infrastructure for Waste Management and Carbon Credits.`} />
+      </Helmet>
       {/* Sidebar Navigation */}
       <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
         <div className="flex items-center gap-3 mb-12 px-2">
@@ -1749,6 +1758,7 @@ export default function App() {
         <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
           <button 
             onClick={() => setView('dashboard')}
+            aria-label={t('Go to Dashboard')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
             <Activity size={20} />
@@ -1757,6 +1767,7 @@ export default function App() {
           {(user?.role === 'citizen' || user?.role === 'fpo') && (
             <button 
               onClick={() => setView('upload')}
+              aria-label={t('Upload Waste Data')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'upload' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <PlusCircle size={20} />
@@ -1766,6 +1777,7 @@ export default function App() {
           {(user?.role === 'aggregator' || user?.role === 'processor') && (
             <button 
               onClick={() => setView('tasks')}
+              aria-label={t('View Task Board')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'tasks' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Activity size={20} />
@@ -1774,6 +1786,7 @@ export default function App() {
           )}
           <button 
             onClick={() => setView('history')}
+            aria-label={t('View History')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'history' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
             <History size={20} />

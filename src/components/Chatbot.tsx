@@ -201,10 +201,10 @@ export const Chatbot = () => {
                         <span className="text-[10px] uppercase text-white/40 font-bold">Sources:</span>
                         {msg.chunks.map((chunk, i) => {
                           if (chunk.web?.uri) {
-                            return <a key={i} href={chunk.web.uri} target="_blank" rel="noreferrer" className="text-[10px] text-emerald-400 hover:underline truncate block">{chunk.web.title || chunk.web.uri}</a>;
+                            return <a key={i} href={chunk.web.uri} target="_blank" rel="noopener noreferrer" className="text-[10px] text-emerald-400 hover:underline truncate block">{chunk.web.title || chunk.web.uri}</a>;
                           }
                           if (chunk.maps?.uri) {
-                            return <a key={i} href={chunk.maps.uri} target="_blank" rel="noreferrer" className="text-[10px] text-blue-400 hover:underline truncate block flex items-center gap-1"><MapPin size={10}/> {chunk.maps.title || 'Map Location'}</a>;
+                            return <a key={i} href={chunk.maps.uri} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400 hover:underline truncate block flex items-center gap-1"><MapPin size={10}/> {chunk.maps.title || 'Map Location'}</a>;
                           }
                           return null;
                         })}
