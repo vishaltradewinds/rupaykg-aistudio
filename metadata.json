@@ -1,7 +1,8 @@
 {
-  "name": "RupayKg Circular Economy OS",
-  "description": "Unified Circular Economy Operating System for Urban MSW and Rural Biomass, converting waste into climate value through context-aware analytics and MRV.",
+  "name": "RupayKg Carbon OS - Pilot Engine",
+  "description": "Sovereign-grade waste-to-carbon execution system for Jabalpur pilot, featuring MRV Light, AI-assisted validation, and carbon estimation for informal economies.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "camera"
   ]
 }

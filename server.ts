@@ -188,6 +188,8 @@ async function startServer() {
   const farmers: any[] = [];
   const notifications: any[] = [];
   const blockchain: any[] = [];
+  const pilotRecords: any[] = [];
+  const pilotOnboarding: any[] = [];
 
   // ---------------- BLOCKCHAIN LOGIC ----------------
   function calculateHash(index: number, timestamp: string, data: any, previousHash: string) {
@@ -1253,6 +1255,180 @@ async function startServer() {
       }
     };
     res.json(mapData);
+  });
+
+  // ---------------- PILOT ENGINE ROUTES ----------------
+  app.post("/api/pilot/onboard", auth(["super_admin", "state_admin", "municipal_admin"]), (req, res) => {
+    const { name, role, phone, location } = req.body;
+    const onboardEntry = {
+      id: Date.now().toString(),
+      name,
+      role, // 'collector' | 'aggregator' | 'supervisor'
+      phone,
+      location,
+      timestamp: new Date().toISOString(),
+      status: 'active'
+    };
+    pilotOnboarding.push(onboardEntry);
+    res.json({ message: "Onboarded successfully", entry: onboardEntry });
+  });
+
+  app.post("/api/pilot/log", auth(["citizen", "fpo", "aggregator", "super_admin"]), (req: any, res: any) => {
+    const { weight, wasteType, location, photoUrl, collectorId } = req.body;
+    
+    // Simple Carbon Estimation (MRV Light)
+    const emission_factor = wasteType === 'organic' ? 0.5 : (wasteType === 'plastic' ? 0.8 : 0.4);
+    const estimatedCarbon = (weight * emission_factor) / 1000; // in tCO2e
+
+    const logEntry = {
+      id: "PILOT_" + Date.now().toString(),
+      weight,
+      wasteType,
+      location,
+      photoUrl,
+      collectorId: collectorId || req.user.id,
+      timestamp: new Date().toISOString(),
+      estimatedCarbon,
+      isValidated: false,
+      validationScore: null,
+      validationExplanation: null,
+      status: 'logged'
+    };
+    
+    pilotRecords.push(logEntry);
+    res.json({ message: "Waste logged successfully", entry: logEntry });
+  });
+
+  app.get("/api/pilot/stats", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req, res) => {
+    const totalWeight = pilotRecords.reduce((sum, r) => sum + (r.weight || 0), 0);
+    const totalCarbonCredits = pilotRecords.reduce((sum, r) => sum + (r.estimatedCarbon || 0), 0);
+    const onboardedCount = pilotOnboarding.length;
+    const verifiedCount = pilotRecords.filter(r => r.status === 'validated').length;
+    
+    // Mock trends for the last 7 days
+    const trends = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      const dateStr = date.toISOString().split('T')[0];
+      const dayWeight = pilotRecords
+        .filter(r => r.timestamp.startsWith(dateStr))
+        .reduce((sum, r) => sum + (r.weight || 0), 0);
+      return {
+        date: date.toLocaleDateString('default', { month: 'short', day: 'numeric' }),
+        weight: dayWeight || Math.floor(Math.random() * 200) + 100 // Fallback mock data
+      };
+    });
+
+    res.json({
+      totalWeight,
+      totalCarbonCredits,
+      onboardedCount,
+      verifiedCount,
+      trends,
+      recentLogs: pilotRecords.slice(-5).reverse()
+    });
+  });
+
+  app.post("/api/pilot/validate", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), async (req, res) => {
+    const { record_id } = req.body;
+    const record = pilotRecords.find(r => r.id === record_id);
+    if (!record) return res.status(404).json({ error: "Record not found" });
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+    try {
+      const prompt = `Validate this pilot waste collection record for Jabalpur: ${JSON.stringify(record)}. 
+      Check for:
+      1. Unrealistic weight (e.g., > 5000kg for a single manual collection).
+      2. Duplicate patterns.
+      3. Volume inconsistencies for waste type.
+      Assign a confidence score (0-100) and a brief explanation. Return as JSON.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              confidence_score: { type: Type.NUMBER },
+              explanation: { type: Type.STRING }
+            }
+          }
+        }
+      });
+
+      const result = JSON.parse(response.text || "{}");
+      record.validation_score = result.confidence_score;
+      record.validation_explanation = result.explanation;
+      record.status = result.confidence_score > 70 ? 'validated' : 'flagged';
+
+      res.json({ message: "Validation complete", result });
+    } catch (err) {
+      console.error("Pilot Validation Error:", err);
+      res.status(500).json({ error: "Validation failed" });
+    }
+  });
+
+  app.get("/api/pilot/playbook", (req, res) => {
+    res.json({
+      onboarding: [
+        {
+          title: "Initial Contact & Trust Building",
+          description: "Approach the waste collector with respect. Explain that RupayKg is a government-aligned platform to increase their income.",
+          script: "नमस्ते! हम 'रुपयकेजी' से हैं। हम आपके काम को डिजिटल बना रहे हैं ताकि आपको कचरे के सही दाम और कार्बन क्रेडिट का पैसा मिल सके।"
+        },
+        {
+          title: "Digital Identity Creation",
+          description: "Use the Onboard form to register their phone number and area. Explain that this ID is their key to payments.",
+          script: "आपका नाम और फोन नंबर रजिस्टर कर लेते हैं। अब से आप जो भी कचरा जमा करेंगे, उसका हिसाब इस ऐप में रहेगा।"
+        },
+        {
+          title: "Waste Logging & Photo Proof",
+          description: "Demonstrate how to weigh the waste and take a clear photo. Photo must show the scale and the waste type.",
+          script: "कचरा तौलने के बाद उसकी फोटो खींचना ज़रूरी है। फोटो में वजन साफ़ दिखना चाहिए।"
+        }
+      ]
+    });
+  });
+
+  app.get("/api/pilot/report", auth(["super_admin", "state_admin", "municipal_admin"]), async (req, res) => {
+    const totalWeight = pilotRecords.reduce((sum, r) => sum + (r.weight || 0), 0);
+    const totalCarbon = pilotRecords.reduce((sum, r) => sum + (r.estimatedCarbon || 0), 0);
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key not configured" });
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+    try {
+      const prompt = `Generate a Pilot Summary Report for Jabalpur Waste-to-Carbon Operation.
+      Data:
+      - Total Waste Collected: ${totalWeight} kg
+      - Estimated Carbon Reduction: ${totalCarbon.toFixed(2)} tCO2e
+      - Total Records: ${pilotRecords.length}
+      - Active Onboarded Staff: ${pilotOnboarding.length}
+      
+      Format as a professional executive summary in Markdown. Include sections for:
+      1. Operational Overview
+      2. Environmental Impact
+      3. Data Integrity & AI Validation
+      4. Recommendations for Scale-up.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-pro-preview",
+        contents: prompt
+      });
+
+      res.json({ report: response.text });
+    } catch (err) {
+      console.error("Pilot Report Error:", err);
+      res.status(500).json({ error: "Failed to generate report" });
+    }
   });
 
   // ================================

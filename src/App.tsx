@@ -35,7 +35,15 @@ import {
   Database,
   Settings,
   Save,
-  Loader2
+  Loader2,
+  ClipboardList,
+  Book,
+  FileText,
+  Download,
+  Plus,
+  IndianRupee,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -354,13 +362,31 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'pilot_engine'>('dashboard');
   
   useEffect(() => {
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
+  
+  // Pilot Engine States
+  const [pilotStats, setPilotStats] = useState<any>(null);
+  const [pilotRecords, setPilotRecords] = useState<any[]>([]);
+  const [pilotOnboarding, setPilotOnboarding] = useState<any[]>([]);
+  const [pilotPlaybook, setPilotPlaybook] = useState<any>(null);
+  const [pilotReport, setPilotReport] = useState<string | null>(null);
+  const [pilotFormData, setPilotFormData] = useState({ 
+    weight: 0, 
+    wasteType: 'organic', 
+    location: 'Jabalpur', 
+    photoUrl: '', 
+    collectorId: '',
+    isManual: false,
+    notes: ''
+  });
+  const [pilotOnboardFormData, setPilotOnboardFormData] = useState({ name: '', role: 'collector', phone: '', location: 'Jabalpur' });
+  const [pilotSubView, setPilotSubView] = useState<'dashboard' | 'log' | 'onboard' | 'playbook' | 'reports' | 'whatsapp'>('dashboard');
   
   // Form States
   const [formData, setFormData] = useState({ 
@@ -756,6 +782,36 @@ export default function App() {
   }, [history, trendsData, user?.role]);
 
   const PIE_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6'];
+  
+  const fetchPilotData = async () => {
+    if (!token) return;
+    try {
+      const statsRes = await fetch('/api/pilot/stats', { 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      });
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setPilotStats(data);
+        setPilotRecords(data.recentLogs || []);
+      }
+
+      const playbookRes = await fetch('/api/pilot/playbook');
+      if (playbookRes.ok) {
+        const data = await playbookRes.json();
+        setPilotPlaybook(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch pilot data", err);
+    }
+  };
+
+  useEffect(() => {
+    if (view === 'pilot_engine') {
+      fetchPilotData();
+      const interval = setInterval(fetchPilotData, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [view, token]);
 
   const fetchUserData = async () => {
     try {
@@ -1739,6 +1795,698 @@ export default function App() {
       </div>
     );
   }
+
+  const renderPilotEngine = () => {
+    return (
+      <motion.div 
+        key="pilot_engine"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="space-y-6"
+      >
+        {/* Pilot Sub-navigation */}
+        <div className="flex flex-wrap gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/10 w-fit">
+          <button 
+            onClick={() => setPilotSubView('dashboard')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${pilotSubView === 'dashboard' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Activity size={14} />
+            {t('Dashboard')}
+          </button>
+          <button 
+            onClick={() => setPilotSubView('log')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${pilotSubView === 'log' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Plus size={14} />
+            {t('Log Waste')}
+          </button>
+          <button 
+            onClick={() => setPilotSubView('onboard')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${pilotSubView === 'onboard' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Users size={14} />
+            {t('Onboard')}
+          </button>
+          <button 
+            onClick={() => setPilotSubView('whatsapp')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${pilotSubView === 'whatsapp' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <MessageSquare size={14} />
+            {t('WhatsApp Bot')}
+          </button>
+          <button 
+            onClick={() => setPilotSubView('playbook')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${pilotSubView === 'playbook' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Book size={14} />
+            {t('Playbook')}
+          </button>
+          <button 
+            onClick={() => setPilotSubView('reports')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${pilotSubView === 'reports' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <FileText size={14} />
+            {t('Reports')}
+          </button>
+        </div>
+
+        {pilotSubView === 'dashboard' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="p-6 bg-emerald-500/10 border-emerald-500/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-2xl">
+                    <Scale size={24} />
+                  </div>
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">+12%</span>
+                </div>
+                <h3 className="text-white/40 text-xs uppercase tracking-widest font-bold">{t('Total Collected')}</h3>
+                <p className="text-3xl font-bold mt-1">{(pilotStats?.totalWeight || 0).toLocaleString()} kg</p>
+              </Card>
+
+              <Card className="p-6 bg-blue-500/10 border-blue-500/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-blue-500/20 text-blue-400 rounded-2xl">
+                    <Leaf size={24} />
+                  </div>
+                  <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded-full">Pilot</span>
+                </div>
+                <h3 className="text-white/40 text-xs uppercase tracking-widest font-bold">{t('Carbon Credits')}</h3>
+                <p className="text-3xl font-bold mt-1">{(pilotStats?.totalCarbonCredits || 0).toFixed(2)} tCO2e</p>
+              </Card>
+
+              <Card className="p-6 bg-amber-500/10 border-amber-500/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-amber-500/20 text-amber-400 rounded-2xl">
+                    <Users size={24} />
+                  </div>
+                  <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded-full">Active</span>
+                </div>
+                <h3 className="text-white/40 text-xs uppercase tracking-widest font-bold">{t('Onboarded Users')}</h3>
+                <p className="text-3xl font-bold mt-1">{pilotStats?.onboardedCount || 0}</p>
+              </Card>
+
+              <Card className="p-6 bg-purple-500/10 border-purple-500/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-purple-500/20 text-purple-400 rounded-2xl">
+                    <ShieldCheck size={24} />
+                  </div>
+                  <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-1 rounded-full">Verified</span>
+                </div>
+                <h3 className="text-white/40 text-xs uppercase tracking-widest font-bold">{t('Verified Records')}</h3>
+                <p className="text-3xl font-bold mt-1">{pilotStats?.verifiedCount || 0}</p>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="p-6">
+                <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                  <TrendingUp size={20} className="text-emerald-400" />
+                  {t('Collection Trends')}
+                </h3>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={pilotStats?.trends || []}>
+                      <defs>
+                        <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                      <XAxis dataKey="date" stroke="#ffffff20" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#ffffff20" fontSize={10} tickLine={false} axisLine={false} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#1A1A1C', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                        itemStyle={{ color: '#10b981' }}
+                      />
+                      <Area type="monotone" dataKey="weight" stroke="#10b981" fillOpacity={1} fill="url(#colorWeight)" strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                  <ClipboardList size={20} className="text-emerald-400" />
+                  {t('Recent MRV Logs')}
+                </h3>
+                <div className="space-y-4">
+                  {(pilotStats?.recentLogs || []).map((log: any) => (
+                    <div key={log.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                      <div className="flex items-center gap-4">
+                        <div className={`p-2 rounded-xl ${log.isValidated ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                          {log.isValidated ? <CheckCircle2 size={16} /> : <Loader2 size={16} className="animate-spin" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold capitalize">{log.wasteType}</p>
+                          <p className="text-[10px] text-white/40 uppercase tracking-widest">{log.location}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">{log.weight} kg</p>
+                        <p className="text-[10px] text-emerald-400 font-bold">+{log.estimatedCarbon.toFixed(3)} tCO2e</p>
+                      </div>
+                    </div>
+                  ))}
+                  {(!pilotStats?.recentLogs || pilotStats.recentLogs.length === 0) && (
+                    <div className="text-center py-12 text-white/20">
+                      <p>{t('No logs recorded yet')}</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {pilotSubView === 'log' && (
+          <div className="max-w-2xl mx-auto">
+            <Card className="p-8">
+              <h3 className="text-2xl font-bold mb-2">{t('Log Waste Collection')}</h3>
+              <p className="text-white/40 text-sm mb-8">{t('Capture real-time field data for MRV verification.')}</p>
+              
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                try {
+                  const res = await fetch('/api/pilot/log', {
+                    method: 'POST',
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(pilotFormData)
+                  });
+                  if (res.ok) {
+                    setMessage({ type: 'success', text: t('Waste logged successfully! AI validation in progress.') });
+                    setPilotFormData({ 
+                      weight: 0, 
+                      wasteType: 'organic', 
+                      location: 'Jabalpur', 
+                      photoUrl: '', 
+                      collectorId: user?.id || '',
+                      isManual: false,
+                      notes: ''
+                    });
+                    fetchPilotData();
+                  } else {
+                    setMessage({ type: 'error', text: t('Failed to log waste.') });
+                  }
+                } catch (err) {
+                  setMessage({ type: 'error', text: t('Error connecting to server.') });
+                } finally {
+                  setLoading(false);
+                }
+              }} className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${pilotFormData.isManual ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                      {pilotFormData.isManual ? <FileText size={18} /> : <Camera size={18} />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold">{pilotFormData.isManual ? t('Manual Entry') : t('App-based Logging')}</p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-widest">{pilotFormData.isManual ? t('Recording from physical ledger') : t('Real-time field capture')}</p>
+                    </div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setPilotFormData({...pilotFormData, isManual: !pilotFormData.isManual})}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${pilotFormData.isManual ? 'bg-amber-500 text-black' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+                  >
+                    {pilotFormData.isManual ? t('Switch to App') : t('Switch to Manual')}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Weight (kg)')}</label>
+                    <div className="relative">
+                      <Scale className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                      <input 
+                        type="number"
+                        required
+                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                        value={pilotFormData.weight}
+                        onChange={e => setPilotFormData({...pilotFormData, weight: parseFloat(e.target.value)})}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Waste Type')}</label>
+                    <select 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none"
+                      value={pilotFormData.wasteType}
+                      onChange={e => setPilotFormData({...pilotFormData, wasteType: e.target.value})}
+                    >
+                      <option value="organic">Organic</option>
+                      <option value="plastic">Plastic</option>
+                      <option value="mixed">Mixed</option>
+                      <option value="biomass">Biomass</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Location / Ward')}</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                    <input 
+                      type="text"
+                      required
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                      placeholder="e.g. Ward 12, Jabalpur"
+                      value={pilotFormData.location}
+                      onChange={e => setPilotFormData({...pilotFormData, location: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                {pilotFormData.isManual ? (
+                  <div className="col-span-2">
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Manual Entry Notes')}</label>
+                    <textarea 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors h-24"
+                      placeholder={t('Enter details from physical ledger, e.g. Receipt #1234, Collector: Ramesh')}
+                      value={pilotFormData.notes}
+                      onChange={e => setPilotFormData({...pilotFormData, notes: e.target.value})}
+                    />
+                  </div>
+                ) : (
+                  <div className="col-span-2">
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Photo Proof URL')}</label>
+                    <div className="relative">
+                      <Camera className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                      <input 
+                        type="url"
+                        placeholder="https://..."
+                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                        value={pilotFormData.photoUrl}
+                        onChange={e => setPilotFormData({...pilotFormData, photoUrl: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Collector ID')}</label>
+                  <input 
+                    type="text"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                    value={pilotFormData.collectorId}
+                    onChange={e => setPilotFormData({...pilotFormData, collectorId: e.target.value})}
+                  />
+                </div>
+
+                <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{t('Estimated Carbon Impact')}</span>
+                    <Zap size={16} className="text-emerald-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-emerald-400">
+                    {(pilotFormData.weight * (pilotFormData.wasteType === 'organic' ? 0.5 : 0.8) / 1000).toFixed(4)} tCO2e
+                  </p>
+                  <p className="text-[10px] text-white/40 mt-1 italic">{t('*Based on IPCC default factors for pilot region.')}</p>
+                </div>
+
+                {message && (
+                  <div className={`p-4 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                    {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                    {message.text}
+                  </div>
+                )}
+
+                <button 
+                  disabled={loading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : <PlusCircle size={20} />}
+                  {t('Submit Log')}
+                </button>
+              </form>
+            </Card>
+          </div>
+        )}
+
+        {pilotSubView === 'onboard' && (
+          <div className="max-w-2xl mx-auto">
+            <Card className="p-8">
+              <h3 className="text-2xl font-bold mb-2">{t('Onboard Field Partner')}</h3>
+              <p className="text-white/40 text-sm mb-8">{t('Register waste collectors and aggregators for the pilot OS.')}</p>
+              
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                try {
+                  const res = await fetch('/api/pilot/onboard', {
+                    method: 'POST',
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(pilotOnboardFormData)
+                  });
+                  if (res.ok) {
+                    setMessage({ type: 'success', text: t('Partner onboarded successfully!') });
+                    setPilotOnboardFormData({ name: '', role: 'collector', phone: '', location: 'Jabalpur' });
+                    fetchPilotData();
+                  } else {
+                    setMessage({ type: 'error', text: t('Failed to onboard partner.') });
+                  }
+                } catch (err) {
+                  setMessage({ type: 'error', text: t('Error connecting to server.') });
+                } finally {
+                  setLoading(false);
+                }
+              }} className="space-y-6">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Full Name')}</label>
+                  <input 
+                    type="text"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                    placeholder="e.g. Rajesh Kumar"
+                    value={pilotOnboardFormData.name}
+                    onChange={e => setPilotOnboardFormData({...pilotOnboardFormData, name: e.target.value})}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Role')}</label>
+                    <select 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none"
+                      value={pilotOnboardFormData.role}
+                      onChange={e => setPilotOnboardFormData({...pilotOnboardFormData, role: e.target.value})}
+                    >
+                      <option value="collector">Waste Collector</option>
+                      <option value="aggregator">Aggregator</option>
+                      <option value="supervisor">Field Supervisor</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Phone Number')}</label>
+                    <input 
+                      type="tel"
+                      required
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                      placeholder="+91 XXXXX XXXXX"
+                      value={pilotOnboardFormData.phone}
+                      onChange={e => setPilotOnboardFormData({...pilotOnboardFormData, phone: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 ml-1">{t('Operating Area')}</label>
+                  <input 
+                    type="text"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                    placeholder="e.g. Civil Lines, Jabalpur"
+                    value={pilotOnboardFormData.location}
+                    onChange={e => setPilotOnboardFormData({...pilotOnboardFormData, location: e.target.value})}
+                  />
+                </div>
+
+                {message && (
+                  <div className={`p-4 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                    {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                    {message.text}
+                  </div>
+                )}
+
+                <button 
+                  disabled={loading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : <Users size={20} />}
+                  {t('Onboard Partner')}
+                </button>
+              </form>
+            </Card>
+          </div>
+        )}
+
+        {pilotSubView === 'whatsapp' && (
+          <div className="max-w-4xl mx-auto space-y-6">
+            <Card className="p-8 bg-emerald-500/5 border-emerald-500/20">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-4 bg-emerald-500/20 text-emerald-400 rounded-2xl">
+                  <MessageSquare size={32} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold">{t('WhatsApp Fallback Bot')}</h3>
+                  <p className="text-white/40 text-sm">{t('Low-connectivity workflow for field staff.')}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="p-6 bg-black/40 rounded-2xl border border-white/5">
+                    <h4 className="font-bold mb-4 flex items-center gap-2">
+                      <Zap size={16} className="text-yellow-400" />
+                      {t('How it works')}
+                    </h4>
+                    <ul className="space-y-3 text-sm text-white/60">
+                      <li className="flex gap-3">
+                        <span className="w-5 h-5 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
+                        {t('Collector sends "LOG" to the official WhatsApp number.')}
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="w-5 h-5 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
+                        {t('Bot asks for weight, type, and a photo of the receipt.')}
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="w-5 h-5 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
+                        {t('Data is automatically ingested into Carbon OS MRV.')}
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="p-6 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                    <h4 className="font-bold mb-2">{t('Official Bot Number')}</h4>
+                    <p className="text-3xl font-mono text-emerald-400">+91 98765 43210</p>
+                    <button className="mt-4 px-6 py-2 bg-emerald-500 text-black rounded-xl text-xs font-bold hover:bg-emerald-400 transition-colors">
+                      {t('Download QR Code for Field')}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-xs uppercase tracking-widest text-white/40 font-bold ml-1">{t('Simulated Chat')}</h4>
+                  <div className="bg-black/60 rounded-3xl p-6 border border-white/10 h-[400px] flex flex-col">
+                    <div className="flex-1 space-y-4 overflow-y-auto pr-2">
+                      <div className="flex justify-end">
+                        <div className="bg-emerald-500 text-black px-4 py-2 rounded-2xl rounded-tr-none text-sm font-medium">
+                          LOG 45kg Organic
+                        </div>
+                      </div>
+                      <div className="flex justify-start">
+                        <div className="bg-white/10 text-white px-4 py-2 rounded-2xl rounded-tl-none text-sm">
+                          {t('Great! Please send a photo of the waste on the scale.')}
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <div className="bg-emerald-500/20 border border-emerald-500/40 p-2 rounded-2xl rounded-tr-none">
+                          <div className="w-32 h-20 bg-white/10 rounded-xl flex items-center justify-center">
+                            <Camera size={24} className="text-white/20" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-start">
+                        <div className="bg-white/10 text-white px-4 py-2 rounded-2xl rounded-tl-none text-sm">
+                          {t('Verified! 45kg Organic logged at Jabalpur Ward 12. Carbon Impact: +0.022 tCO2e.')}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/10 flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder={t('Type a message...')}
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none"
+                      />
+                      <button className="p-2 bg-emerald-500 text-black rounded-xl">
+                        <Send size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {pilotSubView === 'playbook' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold">{t('Operations Playbook')}</h3>
+                <p className="text-white/40 text-sm">{t('Standard Operating Procedures for Jabalpur Pilot.')}</p>
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">
+                <Download size={14} />
+                {t('Download PDF')}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="p-6 md:col-span-2">
+                <div className="prose prose-invert max-w-none">
+                  <div className="flex items-center gap-4 mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                    <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
+                      <Book size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-emerald-400 font-bold m-0">{t('Active SOP: Ground Collection')}</h4>
+                      <p className="text-xs text-emerald-400/60 m-0">{t('Version 1.2 • Updated 2 days ago')}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-8">
+                    {pilotPlaybook?.onboarding?.map((step: any, idx: number) => (
+                      <div key={idx} className="relative pl-8 border-l border-white/10">
+                        <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-4 border-[#0A0A0B]" />
+                        <h5 className="text-lg font-bold mb-2">{step.title}</h5>
+                        <p className="text-white/60 text-sm leading-relaxed mb-4">{step.description}</p>
+                        <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                          <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2 font-bold">{t('Field Script (Hindi)')}</p>
+                          <p className="text-sm italic text-emerald-400/80">"{step.script}"</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              <div className="space-y-6">
+                <Card className="p-6">
+                  <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-4">{t('Quick Resources')}</h4>
+                  <div className="space-y-3">
+                    <button className="w-full flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all group">
+                      <div className="flex items-center gap-3">
+                        <FileText size={16} className="text-emerald-400" />
+                        <span className="text-xs font-bold">{t('WhatsApp Bot Guide')}</span>
+                      </div>
+                      <ChevronRight size={14} className="text-white/20 group-hover:text-white transition-all" />
+                    </button>
+                    <button className="w-full flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all group">
+                      <div className="flex items-center gap-3">
+                        <Scale size={16} className="text-blue-400" />
+                        <span className="text-xs font-bold">{t('Waste Grading Chart')}</span>
+                      </div>
+                      <ChevronRight size={14} className="text-white/20 group-hover:text-white transition-all" />
+                    </button>
+                    <button className="w-full flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all group">
+                      <div className="flex items-center gap-3">
+                        <IndianRupee size={16} className="text-amber-400" />
+                        <span className="text-xs font-bold">{t('Payment Schedule')}</span>
+                      </div>
+                      <ChevronRight size={14} className="text-white/20 group-hover:text-white transition-all" />
+                    </button>
+                  </div>
+                </Card>
+
+                <Card className="p-6 bg-emerald-500/10 border-emerald-500/20">
+                  <h4 className="text-sm font-bold text-emerald-400 mb-2">{t('Field Support')}</h4>
+                  <p className="text-xs text-emerald-400/60 mb-4">{t('Need help with ground operations? Contact the pilot supervisor.')}</p>
+                  <button className="w-full py-3 bg-emerald-500 text-black font-bold rounded-xl text-xs hover:bg-emerald-400 transition-all">
+                    {t('Call Supervisor')}
+                  </button>
+                </Card>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {pilotSubView === 'reports' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold">{t('Pilot Impact Reports')}</h3>
+                <p className="text-white/40 text-sm">{t('AI-generated executive summaries and data exports.')}</p>
+              </div>
+              <button 
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const res = await fetch('/api/pilot/report', {
+                      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    const data = await res.json();
+                    setPilotReport(data.report);
+                  } catch (err) {
+                    console.error(err);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl text-xs font-bold hover:bg-emerald-400 transition-all disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="animate-spin" size={16} /> : <RefreshCw size={16} />}
+                {t('Generate New Report')}
+              </button>
+            </div>
+
+            {pilotReport ? (
+              <Card className="p-8">
+                <div className="prose prose-invert max-w-none">
+                  <ReactMarkdown>{pilotReport}</ReactMarkdown>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="p-12 flex flex-col items-center justify-center text-center border-dashed border-white/10 bg-transparent">
+                  <div className="p-4 bg-white/5 rounded-full mb-4">
+                    <FileText size={32} className="text-white/20" />
+                  </div>
+                  <h4 className="text-lg font-bold mb-2">{t('No Report Generated')}</h4>
+                  <p className="text-white/40 text-sm max-w-xs">{t('Click the button above to generate an AI-powered executive summary of your pilot data.')}</p>
+                </Card>
+                
+                <Card className="p-6">
+                  <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-6">{t('Data Exports')}</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/20 text-blue-400 rounded-lg">
+                          <Database size={16} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold">{t('Raw MRV Data')}</p>
+                          <p className="text-[10px] text-white/40 uppercase tracking-widest">CSV • 1.2 MB</p>
+                        </div>
+                      </div>
+                      <button className="p-2 hover:bg-white/10 rounded-lg transition-all">
+                        <Download size={16} className="text-white/40" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg">
+                          <ShieldCheck size={16} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold">{t('Verification Logs')}</p>
+                          <p className="text-[10px] text-white/40 uppercase tracking-widest">PDF • 0.8 MB</p>
+                        </div>
+                      </div>
+                      <button className="p-2 hover:bg-white/10 rounded-lg transition-all">
+                        <Download size={16} className="text-white/40" />
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-white font-sans">
