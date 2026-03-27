@@ -8,6 +8,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
+import { CarbonRegistryService } from "./src/services/carbonRegistryService";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -634,7 +635,7 @@ async function startServer() {
     res.json(historyMRV);
   });
 
-  app.post("/api/mrv/verify", auth(["regulator", "state_admin", "super_admin"]), (req: any, res) => {
+  app.post("/api/mrv/verify", auth(["regulator", "state_admin", "super_admin"]), async (req: any, res) => {
     const { record_id, status } = req.body; // status: 'verified' or 'rejected'
     const record = records.find(r => r.id === record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
@@ -651,6 +652,10 @@ async function startServer() {
         user.wallet_balance += record.potential_carbon_value;
       }
 
+      // Register with External Carbon Registry
+      const registrySerialNumber = await CarbonRegistryService.registerVerifiedActivity(record, req.user.id);
+      record.registry_serial_number = registrySerialNumber;
+
       // Record on Blockchain
       const blockchainTx = {
         record_id: record.id,
@@ -659,6 +664,7 @@ async function startServer() {
         weight_kg: record.weight_kg,
         carbon_reduction_kg: record.carbon_reduction_kg,
         verified_by: req.user.id,
+        registry_serial_number: registrySerialNumber,
         event_type: "CARBON_CREDIT_MINTING"
       };
       const block = mintBlock(blockchainTx);
@@ -668,7 +674,7 @@ async function startServer() {
       logs.push({ 
         id: Date.now(), 
         event: "MRV_VERIFIED", 
-        details: `Carbon credits issued for ${record.id} by ${req.user.id}. Recorded on Blockchain Block #${block.index}`, 
+        details: `Carbon credits issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Recorded on Blockchain Block #${block.index}`, 
         timestamp: new Date().toISOString() 
       });
     } else {

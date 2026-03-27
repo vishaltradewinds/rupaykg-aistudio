@@ -123,6 +123,7 @@ interface BiomassRecord {
   aggregator_id?: string;
   processor_id?: string;
   blockchain_hash?: string;
+  registry_serial_number?: string;
   citizen_id?: string;
   satellite_verification?: {
     is_verified: boolean;
@@ -2997,6 +2998,11 @@ export default function App() {
                                     {record.blockchain_hash.substring(0, 6)}
                                   </button>
                                 )}
+                                {record.registry_serial_number && (
+                                  <p className="text-[8px] text-blue-400 font-mono mt-0.5">
+                                    Reg: {record.registry_serial_number}
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -3918,6 +3924,11 @@ export default function App() {
                                       {record.blockchain_hash.substring(0, 8)}...
                                     </button>
                                   )}
+                                  {record.registry_serial_number && (
+                                    <div className="text-[9px] text-blue-400 mt-1 font-mono">
+                                      Reg: {record.registry_serial_number}
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </td>
@@ -4202,6 +4213,11 @@ export default function App() {
                                   <Cpu size={10} />
                                   {record.blockchain_hash.substring(0, 8)}...
                                 </button>
+                              )}
+                              {record.registry_serial_number && (
+                                <div className="text-[9px] text-blue-400 mt-1 font-mono">
+                                  Reg: {record.registry_serial_number}
+                                </div>
                               )}
                             </td>
                             <td className="p-4 text-white/60">
@@ -5057,6 +5073,11 @@ export default function App() {
                               <Cpu size={12} />
                               {credit.blockchain_hash.substring(0, 12)}...
                             </button>
+                            {credit.registry_serial_number && (
+                              <div className="mt-1 text-[10px] text-blue-400 font-mono">
+                                Reg: {credit.registry_serial_number}
+                              </div>
+                            )}
                           </div>
                         )}
                         
@@ -5518,6 +5539,12 @@ export default function App() {
                                 <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Carbon (kg)')}</label>
                                 <span className="text-sm font-bold text-cyan-400">{block.data.carbon_reduction_kg}kg</span>
                               </div>
+                              {block.data.registry_serial_number && (
+                                <div className="col-span-2 md:col-span-4 mt-2">
+                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Registry Serial Number')}</label>
+                                  <span className="text-sm font-bold text-blue-400 font-mono">{block.data.registry_serial_number}</span>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
