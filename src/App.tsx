@@ -1558,7 +1558,7 @@ export default function App() {
                   <ul className="space-y-2 text-sm text-white/50">
                     <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-500" /> {t('Log processing yields')}</li>
                     <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-400" /> {t('Access CSR/EPR funds')}</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-400" /> {t('Generate carbon credits')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-purple-400" /> {t('Generate CCCs')}</li>
                   </ul>
                 </Card>
               </div>
@@ -3976,7 +3976,7 @@ export default function App() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold">{t('MRV Verification Dashboard')}</h2>
-                  <p className="text-white/40 text-sm">{t('Verify processed waste records to issue carbon credits.')}</p>
+                  <p className="text-white/40 text-sm">{t('Verify processed waste records to issue CCCs.')}</p>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
                   <button
@@ -4035,7 +4035,7 @@ export default function App() {
                               <p className="text-lg font-mono text-cyan-400">{record.carbon_reduction_kg?.toFixed(2)} kg</p>
                             </div>
                             <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Credit Value')}</p>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('CCC Value')}</p>
                               <p className="text-lg font-bold text-emerald-400">₹{record.potential_carbon_value?.toFixed(2)}</p>
                             </div>
                           </div>
@@ -4928,7 +4928,7 @@ export default function App() {
                       {t('ONDC Marketplace Listings')}
                     </h3>
                     <p className="text-sm text-white/60 mb-6">
-                      {t('Verified carbon credits and processed materials pushed to the Open Network for Digital Commerce (ONDC).')}
+                      {t('Verified CCCs and processed materials pushed to the Open Network for Digital Commerce (ONDC).')}
                     </p>
                     <div className="bg-black/40 rounded-xl border border-white/5 overflow-hidden">
                       <table className="w-full text-left text-sm">
@@ -5055,8 +5055,8 @@ export default function App() {
               {availableCredits.length === 0 ? (
                 <Card className="py-12 text-center border-dashed">
                   <Globe size={48} className="mx-auto text-white/20 mb-4" />
-                  <p className="text-white/60 text-lg font-medium">{t('No credits available')}</p>
-                  <p className="text-white/40 text-sm mt-2">{t('Check back later for newly verified carbon credits.')}</p>
+                  <p className="text-white/60 text-lg font-medium">{t('No CCCs available')}</p>
+                  <p className="text-white/40 text-sm mt-2">{t('Check back later for newly verified Carbon Credit Certificates.')}</p>
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -5414,7 +5414,7 @@ export default function App() {
                     <Scale className="text-emerald-400" /> {t('VI. Regulator Sovereignty')}
                   </h2>
                   <p className="text-white/70 text-sm leading-relaxed">
-                    {t('Carbon issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national carbon governance frameworks.')}
+                    {t('CCC issuance authority remains regulator-controlled. RupayKg does not independently mint CCCs. All CCCs must be event-traceable, registry-compatible, and align with national carbon governance frameworks.')}
                   </p>
                 </Card>
 
@@ -5479,7 +5479,7 @@ export default function App() {
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article VI — Regulator Sovereignty')}</h4>
-                      <p>{t('Carbon mint authority shall remain under regulator control. RupayKg shall not independently issue carbon credits.')}</p>
+                      <p>{t('CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.')}</p>
                     </div>
                   </div>
                 </div>

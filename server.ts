@@ -1288,7 +1288,7 @@ async function startServer() {
   });
 
   app.get("/api/carbon", auth(["super_admin", "state_admin", "regulator", "carbon_buyer"]), (req: any, res: any) => {
-    res.json({ message: "Carbon Credit Secure Data", user: req.user });
+    res.json({ message: "CCC Secure Data", user: req.user });
   });
 
   app.get("/api/blockchain/ledger", auth(["super_admin", "state_admin", "municipal_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
@@ -1679,7 +1679,7 @@ async function startServer() {
         const response = await ai.models.generateContent({
           model: "gemini-3.1-pro-preview",
           contents: message,
-          config: { systemInstruction: "You are RupayKg AI, an expert in waste management, carbon credits, and environmental sustainability. Provide concise and helpful answers." }
+          config: { systemInstruction: "You are RupayKg AI, an expert in waste management, Carbon Credit Certificates (CCCs), and environmental sustainability. Provide concise and helpful answers." }
         });
         res.json({ text: response.text });
       }
