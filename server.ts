@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
@@ -179,6 +180,48 @@ async function startServer() {
     res.json({ status: dbStatus, error: dbError });
   });
 
+  // ---------------- MONGOOSE SCHEMAS (PRODUCTION) ----------------
+  const userSchema = new mongoose.Schema({
+    id: String,
+    phone: { type: String, unique: true },
+    password: { type: String },
+    role: String,
+    name: String,
+    district: String,
+    state: String,
+    organization_name: String,
+    wallet_balance: { type: Number, default: 0 }
+  });
+  const User = mongoose.model('User', userSchema);
+
+  const pilotRecordSchema = new mongoose.Schema({
+    id: String,
+    weight: Number,
+    wasteType: String,
+    location: String,
+    photoUrl: String,
+    collectorId: String,
+    timestamp: String,
+    estimatedCarbon: Number,
+    isValidated: Boolean,
+    validationScore: Number,
+    validationExplanation: String,
+    status: String,
+    source: String
+  });
+  const PilotRecord = mongoose.model('PilotRecord', pilotRecordSchema);
+
+  const pilotOnboardingSchema = new mongoose.Schema({
+    id: String,
+    name: String,
+    role: String,
+    phone: String,
+    location: String,
+    timestamp: String,
+    status: String
+  });
+  const PilotOnboarding = mongoose.model('PilotOnboarding', pilotOnboardingSchema);
+
   // --- IN-MEMORY FALLBACK DB ---
   const users: any[] = [
     { id: "admin_1", phone: "9999999999", password: "admin_password", role: "super_admin", name: "System Administrator", organization_name: "Alliance Ventures", district: "Delhi", state: "Delhi", wallet_balance: 0 }
@@ -254,15 +297,23 @@ async function startServer() {
   }
 
   // ---------------- AUTH ROUTES ----------------
-  app.post("/api/register", (req, res) => {
+  app.post("/api/register", async (req, res) => {
     const { phone, password, role, name, district, state, organization_name } = req.body;
-    if (users.find(u => u.phone === phone)) {
-      return res.status(400).json({ error: "User already exists" });
+    
+    if (dbStatus === "connected") {
+      const existingUser = await User.findOne({ phone });
+      if (existingUser) return res.status(400).json({ error: "User already exists" });
+    } else {
+      if (users.find(u => u.phone === phone)) return res.status(400).json({ error: "User already exists" });
     }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const newUser = { 
       id: Date.now().toString(), 
       phone, 
-      password, 
+      password: hashedPassword, 
       role, 
       name, 
       district, 
@@ -270,14 +321,32 @@ async function startServer() {
       organization_name: organization_name || null,
       wallet_balance: 0 
     };
-    users.push(newUser);
+
+    if (dbStatus === "connected") {
+      await User.create(newUser);
+    } else {
+      users.push(newUser);
+    }
+
     res.json({ message: "Registered successfully" });
   });
 
-  app.post("/api/login", (req, res) => {
+  app.post("/api/login", async (req, res) => {
     const { phone, password } = req.body;
-    const user = users.find(u => u.phone === phone && u.password === password);
+    
+    let user;
+    if (dbStatus === "connected") {
+      user = await User.findOne({ phone });
+    } else {
+      user = users.find(u => u.phone === phone);
+    }
+    
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    // Handle legacy plain text passwords for mock data, and bcrypt for new users
+    const isMatch = user.password === password || await bcrypt.compare(password, user.password).catch(() => false);
+    
+    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
     const tokenPayload = { 
       id: user.id, 
@@ -291,12 +360,13 @@ async function startServer() {
     res.json({ token, user: tokenPayload });
   });
 
-  app.post("/api/auth/reset-password", (req, res) => {
+  app.post("/api/auth/reset-password", async (req, res) => {
     const { phone, new_password } = req.body;
     const user = users.find(u => u.phone === phone);
     if (!user) return res.status(404).json({ error: "User not found" });
     
-    user.password = new_password;
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(new_password, salt);
     res.json({ message: "Password reset successfully" });
   });
 
@@ -1257,8 +1327,101 @@ async function startServer() {
     res.json(mapData);
   });
 
+  // ---------------- WHATSAPP WEBHOOK ----------------
+  app.post("/api/whatsapp/webhook", async (req: any, res: any) => {
+    // This endpoint simulates a Twilio/Meta WhatsApp webhook
+    // In production, this receives a payload from the WhatsApp Business API
+    const { Body, From, MediaUrl0 } = req.body;
+    
+    // Extract phone number (e.g., "whatsapp:+919876543210" -> "9876543210")
+    const phone = From ? From.replace("whatsapp:+91", "").replace("whatsapp:", "") : "unknown";
+    
+    // Find if the user is onboarded in the pilot
+    let user;
+    if (dbStatus === "connected") {
+      user = await PilotOnboarding.findOne({ phone }) || await User.findOne({ phone });
+    } else {
+      user = pilotOnboarding.find(u => u.phone === phone) || users.find(u => u.phone === phone);
+    }
+    
+    if (!user) {
+      // Send a response back to Twilio/Meta using TwiML or Meta Graph API
+      // For now, we return a mock response
+      return res.status(200).send(`
+        <Response>
+          <Message>Welcome to RupayKg Carbon OS! You are not registered. Please contact your supervisor to onboard.</Message>
+        </Response>
+      `);
+    }
+
+    const messageText = Body ? Body.toLowerCase().trim() : "";
+    let responseMessage = "";
+
+    if (messageText.includes("log") || MediaUrl0) {
+      // Very basic parsing for demo: "Log 50kg plastic"
+      let weight = 0;
+      let wasteType = "mixed";
+      
+      const weightMatch = messageText.match(/(\d+)\s*(kg|kilos)/i);
+      if (weightMatch) weight = parseInt(weightMatch[1]);
+      
+      if (messageText.includes("plastic")) wasteType = "plastic";
+      else if (messageText.includes("organic")) wasteType = "organic";
+
+      // If they just sent a photo without text, we assume a default or ask for details
+      if (MediaUrl0 && weight === 0) {
+        responseMessage = "Photo received! Please reply with the weight and type (e.g., '50kg plastic').";
+      } else {
+        const emission_factor = wasteType === 'organic' ? 0.5 : (wasteType === 'plastic' ? 0.8 : 0.4);
+        const estimatedCarbon = (weight * emission_factor) / 1000;
+
+        const logEntry = {
+          id: "PILOT_WA_" + Date.now().toString(),
+          weight: weight || 10, // Default to 10 if parsing failed but they sent a photo
+          wasteType,
+          location: user.location || user.district || "Unknown",
+          photoUrl: MediaUrl0 || null,
+          collectorId: user.id,
+          timestamp: new Date().toISOString(),
+          estimatedCarbon,
+          isValidated: false,
+          validationScore: null,
+          validationExplanation: null,
+          status: 'logged',
+          source: 'whatsapp'
+        };
+        
+        if (dbStatus === "connected") {
+          await PilotRecord.create(logEntry);
+        } else {
+          pilotRecords.push(logEntry);
+        }
+        responseMessage = `✅ Successfully logged ${logEntry.weight}kg of ${wasteType} waste! Estimated Carbon Impact: ${estimatedCarbon.toFixed(3)} tCO2e.`;
+      }
+    } else if (messageText === "stats") {
+      let userLogs;
+      if (dbStatus === "connected") {
+        userLogs = await PilotRecord.find({ collectorId: user.id });
+      } else {
+        userLogs = pilotRecords.filter(r => r.collectorId === user.id);
+      }
+      const totalWeight = userLogs.reduce((sum: any, r: any) => sum + Number(r.weight), 0);
+      responseMessage = `📊 Your Stats:\nTotal Logs: ${userLogs.length}\nTotal Weight: ${totalWeight}kg`;
+    } else {
+      responseMessage = `Hi ${user.name}! 🌍\nSend a photo of waste or type 'log [weight]kg [type]' to record collection.\nType 'stats' to see your impact.`;
+    }
+
+    // Return TwiML response for Twilio
+    res.set('Content-Type', 'text/xml');
+    res.status(200).send(`
+      <Response>
+        <Message>${responseMessage}</Message>
+      </Response>
+    `);
+  });
+
   // ---------------- PILOT ENGINE ROUTES ----------------
-  app.post("/api/pilot/onboard", auth(["super_admin", "state_admin", "municipal_admin"]), (req, res) => {
+  app.post("/api/pilot/onboard", auth(["super_admin", "state_admin", "municipal_admin"]), async (req, res) => {
     const { name, role, phone, location } = req.body;
     const onboardEntry = {
       id: Date.now().toString(),
@@ -1269,11 +1432,17 @@ async function startServer() {
       timestamp: new Date().toISOString(),
       status: 'active'
     };
-    pilotOnboarding.push(onboardEntry);
+    
+    if (dbStatus === "connected") {
+      await PilotOnboarding.create(onboardEntry);
+    } else {
+      pilotOnboarding.push(onboardEntry);
+    }
+    
     res.json({ message: "Onboarded successfully", entry: onboardEntry });
   });
 
-  app.post("/api/pilot/log", auth(["citizen", "fpo", "aggregator", "super_admin"]), (req: any, res: any) => {
+  app.post("/api/pilot/log", auth(["citizen", "fpo", "aggregator", "super_admin"]), async (req: any, res: any) => {
     const { weight, wasteType, location, photoUrl, collectorId } = req.body;
     
     // Simple Carbon Estimation (MRV Light)
@@ -1295,24 +1464,40 @@ async function startServer() {
       status: 'logged'
     };
     
-    pilotRecords.push(logEntry);
+    if (dbStatus === "connected") {
+      await PilotRecord.create(logEntry);
+    } else {
+      pilotRecords.push(logEntry);
+    }
+    
     res.json({ message: "Waste logged successfully", entry: logEntry });
   });
 
-  app.get("/api/pilot/stats", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req, res) => {
-    const totalWeight = pilotRecords.reduce((sum, r) => sum + (r.weight || 0), 0);
-    const totalCarbonCredits = pilotRecords.reduce((sum, r) => sum + (r.estimatedCarbon || 0), 0);
-    const onboardedCount = pilotOnboarding.length;
-    const verifiedCount = pilotRecords.filter(r => r.status === 'validated').length;
+  app.get("/api/pilot/stats", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), async (req, res) => {
+    let currentPilotRecords;
+    let currentPilotOnboarding;
+    
+    if (dbStatus === "connected") {
+      currentPilotRecords = await PilotRecord.find();
+      currentPilotOnboarding = await PilotOnboarding.find();
+    } else {
+      currentPilotRecords = pilotRecords;
+      currentPilotOnboarding = pilotOnboarding;
+    }
+
+    const totalWeight = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
+    const totalCarbonCredits = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCarbon || 0), 0);
+    const onboardedCount = currentPilotOnboarding.length;
+    const verifiedCount = currentPilotRecords.filter((r: any) => r.status === 'validated').length;
     
     // Mock trends for the last 7 days
     const trends = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
       const dateStr = date.toISOString().split('T')[0];
-      const dayWeight = pilotRecords
-        .filter(r => r.timestamp.startsWith(dateStr))
-        .reduce((sum, r) => sum + (r.weight || 0), 0);
+      const dayWeight = currentPilotRecords
+        .filter((r: any) => r.timestamp.startsWith(dateStr))
+        .reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
       return {
         date: date.toLocaleDateString('default', { month: 'short', day: 'numeric' }),
         weight: dayWeight || Math.floor(Math.random() * 200) + 100 // Fallback mock data
@@ -1325,13 +1510,20 @@ async function startServer() {
       onboardedCount,
       verifiedCount,
       trends,
-      recentLogs: pilotRecords.slice(-5).reverse()
+      recentLogs: currentPilotRecords.slice(-5).reverse()
     });
   });
 
   app.post("/api/pilot/validate", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), async (req, res) => {
     const { record_id } = req.body;
-    const record = pilotRecords.find(r => r.id === record_id);
+    
+    let record;
+    if (dbStatus === "connected") {
+      record = await PilotRecord.findOne({ id: record_id });
+    } else {
+      record = pilotRecords.find(r => r.id === record_id);
+    }
+    
     if (!record) return res.status(404).json({ error: "Record not found" });
 
     if (!process.env.GEMINI_API_KEY) {
@@ -1363,9 +1555,21 @@ async function startServer() {
       });
 
       const result = JSON.parse(response.text || "{}");
-      record.validation_score = result.confidence_score;
-      record.validation_explanation = result.explanation;
-      record.status = result.confidence_score > 70 ? 'validated' : 'flagged';
+      
+      if (dbStatus === "connected") {
+        await PilotRecord.updateOne(
+          { id: record_id },
+          { 
+            validationScore: result.confidence_score,
+            validationExplanation: result.explanation,
+            status: result.confidence_score > 70 ? 'validated' : 'flagged'
+          }
+        );
+      } else {
+        record.validationScore = result.confidence_score;
+        record.validationExplanation = result.explanation;
+        record.status = result.confidence_score > 70 ? 'validated' : 'flagged';
+      }
 
       res.json({ message: "Validation complete", result });
     } catch (err) {
@@ -1397,8 +1601,19 @@ async function startServer() {
   });
 
   app.get("/api/pilot/report", auth(["super_admin", "state_admin", "municipal_admin"]), async (req, res) => {
-    const totalWeight = pilotRecords.reduce((sum, r) => sum + (r.weight || 0), 0);
-    const totalCarbon = pilotRecords.reduce((sum, r) => sum + (r.estimatedCarbon || 0), 0);
+    let currentPilotRecords;
+    let currentPilotOnboarding;
+    
+    if (dbStatus === "connected") {
+      currentPilotRecords = await PilotRecord.find();
+      currentPilotOnboarding = await PilotOnboarding.find();
+    } else {
+      currentPilotRecords = pilotRecords;
+      currentPilotOnboarding = pilotOnboarding;
+    }
+
+    const totalWeight = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
+    const totalCarbon = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCarbon || 0), 0);
     
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "Gemini API key not configured" });
@@ -1410,8 +1625,8 @@ async function startServer() {
       Data:
       - Total Waste Collected: ${totalWeight} kg
       - Estimated Carbon Reduction: ${totalCarbon.toFixed(2)} tCO2e
-      - Total Records: ${pilotRecords.length}
-      - Active Onboarded Staff: ${pilotOnboarding.length}
+      - Total Records: ${currentPilotRecords.length}
+      - Active Onboarded Staff: ${currentPilotOnboarding.length}
       
       Format as a professional executive summary in Markdown. Include sections for:
       1. Operational Overview
