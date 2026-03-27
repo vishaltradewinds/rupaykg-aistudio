@@ -1,8 +1,9 @@
 export class CarbonRegistryService {
   /**
-   * Simulates registering a verified carbon mitigation activity with an external Carbon Registry API.
+   * Simulates registering a verified carbon mitigation activity with the GRID-INDIA Registry API.
+   * This aligns with the Carbon Credit Certificates (CCC) Regulations, 2026.
    * If a real API URL is provided in the environment, it attempts to call it.
-   * Otherwise, it generates a simulated registry serial number.
+   * Otherwise, it generates a simulated registry serial number compliant with BEE standards.
    */
   static async registerVerifiedActivity(record: any, verifierId: string): Promise<string> {
     const registryUrl = process.env.CARBON_REGISTRY_API_URL;
@@ -12,6 +13,8 @@ export class CarbonRegistryService {
       waste_type: record.waste_type,
       weight_kg: record.weight_kg,
       carbon_reduction_kg: record.carbon_reduction_kg,
+      double_counting_safeguard: record.double_counting_declaration,
+      market_type: "OFFSET_MARKET",
       location: {
         lat: record.geo_lat,
         lng: record.geo_long,
@@ -23,7 +26,7 @@ export class CarbonRegistryService {
 
     if (registryUrl) {
       try {
-        const response = await fetch(`${registryUrl}/mint`, {
+        const response = await fetch(`${registryUrl}/mint-ccc`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -33,7 +36,7 @@ export class CarbonRegistryService {
         });
         
         if (!response.ok) {
-          throw new Error(`Registry API failed with status: ${response.status}`);
+          throw new Error(`GRID-INDIA Registry API failed with status: ${response.status}`);
         }
         
         const data = await response.json();
@@ -43,9 +46,9 @@ export class CarbonRegistryService {
       }
     }
     
-    // Simulated response for demonstration and fallback
+    // Simulated response for demonstration and fallback (GRID-INDIA CCC Format)
     const randomHex = Math.random().toString(16).substring(2, 10).toUpperCase();
     const year = new Date().getFullYear();
-    return `IND-VER-${year}-${randomHex}`;
+    return `GRID-INDIA-CCC-OFFSET-${year}-${randomHex}`;
   }
 }

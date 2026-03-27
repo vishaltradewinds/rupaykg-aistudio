@@ -120,6 +120,7 @@ interface BiomassRecord {
   geo_lat: number;
   geo_long: number;
   image_url?: string;
+  double_counting_declaration?: boolean;
   aggregator_id?: string;
   processor_id?: string;
   blockchain_hash?: string;
@@ -399,7 +400,7 @@ export default function App() {
     district: '',
     state: ''
   });
-  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: 'Rice' });
+  const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: 'Rice', double_counting_declaration: false });
   const [farmerData, setFarmerData] = useState({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
   const [availableRecords, setAvailableRecords] = useState<BiomassRecord[]>([]);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'fetching' | 'success' | 'error'>('idle');
@@ -1873,7 +1874,7 @@ export default function App() {
                   </div>
                   <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded-full">Pilot</span>
                 </div>
-                <h3 className="text-white/40 text-xs uppercase tracking-widest font-bold">{t('Carbon Credits')}</h3>
+                <h3 className="text-white/40 text-xs uppercase tracking-widest font-bold">{t('CCCs')}</h3>
                 <p className="text-3xl font-bold mt-1">{(pilotStats?.totalCarbonCredits || 0).toFixed(2)} tCO2e</p>
               </Card>
 
@@ -2493,7 +2494,7 @@ export default function App() {
     <div className="min-h-screen bg-[#0A0A0B] text-white font-sans">
       <Helmet>
         <title>{view.charAt(0).toUpperCase() + view.slice(1)} | RupayKg - National Digital Public Infrastructure</title>
-        <meta name="description" content={`RupayKg ${view} - National Digital Public Infrastructure for Waste Management and Carbon Credits.`} />
+        <meta name="description" content={`RupayKg ${view} - National Digital Public Infrastructure for Waste Management and Carbon Credit Certificates (CCCs).`} />
       </Helmet>
       {/* Sidebar Navigation */}
       <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
@@ -2574,7 +2575,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'partner' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Globe size={20} />
-              <span className="hidden md:block font-medium">{t('Carbon Market')}</span>
+              <span className="hidden md:block font-medium">{t('CCC Offset Market')}</span>
             </button>
           )}
           {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
@@ -2583,7 +2584,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Cpu size={20} />
-              <span className="hidden md:block font-medium">{t('Blockchain Ledger')}</span>
+              <span className="hidden md:block font-medium">{t('GRID-INDIA CCC Ledger')}</span>
             </button>
           )}
           <button 
@@ -2622,7 +2623,7 @@ export default function App() {
               {view === 'history' && t('Transaction Ledger')}
               {view === 'admin' && t('National Dashboard')}
               {view === 'municipal' && labels.viewTitle}
-              {view === 'blockchain' && t('Immutable Carbon Ledger')}
+              {view === 'blockchain' && t('GRID-INDIA CCC Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
             </h2>
@@ -2762,7 +2763,7 @@ export default function App() {
               {user?.role === 'processor' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label={t('Total Processed')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" setView={setView} />
-                  <Stat label={t('Carbon Credits')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" blockchainLink setView={setView} />
+                  <Stat label={t('CCCs')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" blockchainLink setView={setView} />
                   <Stat label={t('Value Generated')} value={`₹${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" setView={setView} />
                   <Stat label={t('Processing Yield')} value="98.2%" icon={Zap} color="cyan" setView={setView} />
                 </div>
@@ -2772,7 +2773,7 @@ export default function App() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
-                    <Stat label={t('Carbon Credits')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={t('CCCs')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
                     <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" setView={setView} />
                     <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" setView={setView} />
                   </div>
@@ -3347,7 +3348,7 @@ export default function App() {
                           <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0)).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-white/40">
-                          <span>{t('Carbon Credit Value')}</span>
+                          <span>{t('CCC Value (Offset Market)')}</span>
                           <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.carbon || 0) * paymentConfig.carbon_price_per_kg).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/5">
@@ -3410,8 +3411,23 @@ export default function App() {
                       </div>
                     )}
 
+                    <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
+                      <input 
+                        type="checkbox" 
+                        id="double_counting"
+                        required
+                        checked={uploadData.double_counting_declaration}
+                        onChange={(e) => setUploadData({...uploadData, double_counting_declaration: e.target.checked})}
+                        className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-gray-900"
+                      />
+                      <label htmlFor="double_counting" className="text-xs text-white/80 leading-relaxed cursor-pointer">
+                        <strong className="text-blue-400 block mb-1">Double-Counting Safeguard Declaration</strong>
+                        I declare that this emission reduction is not claimed under Renewable Energy Certificates (RECs), International RECs (I-RECs), or any other mechanism. I understand this is required for Offset Market CCCs under the Carbon Credit Certificates Regulations, 2026.
+                      </label>
+                    </div>
+
                     <button 
-                      disabled={loading}
+                      disabled={loading || !uploadData.double_counting_declaration}
                       className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50"
                     >
                       {loading ? t('Processing...') : t('Confirm Intake & Mint Value')}
@@ -4118,6 +4134,18 @@ export default function App() {
                             </div>
                           )}
 
+                          <div className={`mb-6 p-4 rounded-xl border ${record.double_counting_declaration ? 'bg-blue-500/10 border-blue-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                            <p className={`text-[10px] uppercase tracking-widest mb-2 flex items-center gap-1 ${record.double_counting_declaration ? 'text-blue-400' : 'text-red-400'}`}>
+                              {record.double_counting_declaration ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
+                              Double-Counting Safeguard (CCC Regulations, 2026)
+                            </p>
+                            <p className="text-sm text-white/80 leading-relaxed">
+                              {record.double_counting_declaration 
+                                ? "Citizen declared this emission reduction is not claimed under RECs, I-RECs, or any other mechanism." 
+                                : "WARNING: Citizen did not sign the double-counting declaration. This record may be ineligible for CCCs."}
+                            </p>
+                          </div>
+
                           {mrvRiskAssessments[record.id] && mrvRiskAssessments[record.id].risk_score !== -1 && (
                             <div className={`mb-6 p-4 rounded-xl border ${mrvRiskAssessments[record.id].risk_score > 50 ? 'bg-red-500/10 border-red-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
                               <p className={`text-[10px] uppercase tracking-widest mb-2 flex items-center gap-1 ${mrvRiskAssessments[record.id].risk_score > 50 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -4141,11 +4169,11 @@ export default function App() {
                             </button>
                             <button 
                               onClick={() => handleMRVAction(record.id, 'verified')}
-                              disabled={loading}
+                              disabled={loading || !record.double_counting_declaration}
                               className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                               <CheckCircle2 size={16} />
-                              Verify & Issue Credits
+                              Verify & Issue CCCs
                             </button>
                             <button 
                               onClick={() => handleMRVAction(record.id, 'rejected')}
@@ -5001,8 +5029,9 @@ export default function App() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">{t('Carbon Credit Market')}</h2>
-                  <p className="text-white/40 text-sm">{t('Purchase verified carbon credits to offset your footprint.')}</p>
+                  <h2 className="text-2xl font-bold">{t('CCC Offset Market')}</h2>
+                  <p className="text-white/40 text-sm">{t('Purchase verified Carbon Credit Certificates (CCCs) to offset your footprint.')}</p>
+                  <p className="text-[10px] text-emerald-400 mt-1 uppercase tracking-widest font-bold">CERC Price Band: Floor & Forbearance Prices Apply</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <button 
@@ -5098,7 +5127,7 @@ export default function App() {
                           className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Wallet size={16} />
-                          {walletBalance < (credit.price || 0) ? t('Insufficient Funds') : t('Purchase Credit')}
+                          {walletBalance < (credit.price || 0) ? t('Insufficient Funds') : t('Purchase CCC')}
                         </button>
                       </div>
                     </Card>
@@ -5477,9 +5506,9 @@ export default function App() {
                 <div>
                   <h3 className="text-2xl font-bold flex items-center gap-2">
                     <Cpu className="text-emerald-400" />
-                    {t('Immutable Carbon Ledger')}
+                    {t('GRID-INDIA CCC Ledger')}
                   </h3>
-                  <p className="text-white/40 text-sm mt-1">{t('Verifiable blockchain record of all carbon credit minting events')}</p>
+                  <p className="text-white/40 text-sm mt-1">{t('Verifiable blockchain record of all Carbon Credit Certificate (CCC) minting events')}</p>
                 </div>
                 {isChainValid !== null && (
                   <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold self-start ${isChainValid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>

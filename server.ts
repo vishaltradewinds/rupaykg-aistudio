@@ -467,7 +467,7 @@ async function startServer() {
   });
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
-    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage } = req.body;
+    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage, double_counting_declaration } = req.body;
     
     const wasteConfig = dynamicWasteTypes.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
     const base_value = weight_kg * wasteConfig.value;
@@ -557,6 +557,7 @@ async function startServer() {
       geo_long,
       image_url,
       acreage: acreage || 0,
+      double_counting_declaration: double_counting_declaration || false,
       risk_score,
       ai_verification_details,
       satellite_verification,
@@ -581,7 +582,7 @@ async function startServer() {
       timestamp: new Date().toISOString() 
     });
     
-    res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon value pending MRV.`, wallet_balance: user?.wallet_balance });
+    res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. CCC value pending MRV.`, wallet_balance: user?.wallet_balance });
   });
 
   app.post("/api/satellite/verify", auth(["regulator", "super_admin"]), async (req: any, res) => {
@@ -665,7 +666,7 @@ async function startServer() {
         carbon_reduction_kg: record.carbon_reduction_kg,
         verified_by: req.user.id,
         registry_serial_number: registrySerialNumber,
-        event_type: "CARBON_CREDIT_MINTING"
+        event_type: "CCC_MINTING"
       };
       const block = mintBlock(blockchainTx);
       record.blockchain_hash = block.hash;
@@ -674,7 +675,7 @@ async function startServer() {
       logs.push({ 
         id: Date.now(), 
         event: "MRV_VERIFIED", 
-        details: `Carbon credits issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Recorded on Blockchain Block #${block.index}`, 
+        details: `CCCs issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Recorded on Blockchain Block #${block.index}`, 
         timestamp: new Date().toISOString() 
       });
     } else {
