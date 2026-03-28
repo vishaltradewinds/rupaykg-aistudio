@@ -1,18 +1,18 @@
-export class CarbonRegistryService {
+export class CCCRegistryService {
   /**
-   * Simulates registering a verified carbon mitigation activity with the GRID-INDIA Registry API.
-   * This aligns with the Carbon Credit Certificates (CCC) Regulations, 2026.
+   * Simulates registering a verified CCC mitigation activity with the GRID-INDIA Registry API.
+   * This aligns with the CCC Certificates (CCC) Regulations, 2026.
    * If a real API URL is provided in the environment, it attempts to call it.
    * Otherwise, it generates a simulated registry serial number compliant with BEE standards.
    */
   static async registerVerifiedActivity(record: any, verifierId: string): Promise<string> {
-    const registryUrl = process.env.CARBON_REGISTRY_API_URL;
+    const registryUrl = process.env.CCC_REGISTRY_API_URL;
     
     const payload = {
       activity_id: record.id,
       waste_type: record.waste_type,
       weight_kg: record.weight_kg,
-      carbon_reduction_kg: record.carbon_reduction_kg,
+      ccc_reduction_kg: record.ccc_reduction_kg,
       double_counting_safeguard: record.double_counting_declaration,
       market_type: "OFFSET_MARKET",
       location: {
@@ -30,7 +30,7 @@ export class CarbonRegistryService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.CARBON_REGISTRY_API_KEY}`
+            'Authorization': `Bearer ${process.env.CCC_REGISTRY_API_KEY}`
           },
           body: JSON.stringify(payload)
         });

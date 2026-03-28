@@ -71,13 +71,13 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                 </h2>
                 <div className="space-y-4">
                   <p>
-                    {t('RupayKg has been established as a Unified Waste-to-Carbon Digital Operating System designed to support India’s transition toward a compliance-based carbon market.')}
+                    {t('RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.')}
                   </p>
                   <p>
-                    {t('The platform addresses a structural gap in India’s carbon ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade carbon supply.')}
+                    {t('The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.')}
                   </p>
                   <p>
-                    {t('RupayKg is not structured as a project developer, carbon trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.')}
+                    {t('RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.')}
                   </p>
                 </div>
               </section>
@@ -121,7 +121,7 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {[
                     'Waste Generator', 'Aggregator', 'Processor', 'Administrative Authority',
-                    'Producers (EPR)', 'CSR Contributors', 'Carbon Buyers', 'Regulator'
+                    'Producers (EPR)', 'CSR Contributors', 'CCC Buyers', 'Regulator'
                   ].map((role) => (
                     <div key={role} className="p-4 bg-white/5 border border-white/10 rounded-xl text-center text-sm font-medium">
                       {t(role)}
@@ -135,7 +135,7 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
 
               <section className="space-y-6">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <span className="text-emerald-500 font-mono">IV.</span> {t('Carbon Origination')}
+                  <span className="text-emerald-500 font-mono">IV.</span> {t('CCC Origination')}
                 </h2>
                 <ul className="space-y-3 list-disc list-inside">
                   <li>{t('Methane avoidance through diversion')}</li>
@@ -149,7 +149,7 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                   <span className="text-emerald-500 font-mono">V.</span> {t('Multi-Rail Architecture')}
                 </h2>
                 <div className="flex flex-wrap gap-3">
-                  {['Recycler Rail', 'CSR Rail', 'EPR Rail', 'Governance Layer', 'Carbon Rail'].map(rail => (
+                  {['Recycler Rail', 'CSR Rail', 'EPR Rail', 'Governance Layer', 'CCC Rail'].map(rail => (
                     <span key={rail} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium">
                       {t(rail)}
                     </span>
@@ -162,7 +162,7 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                   <span className="text-emerald-500 font-mono">VI.</span> {t('Regulator Sovereignty')}
                 </h2>
                 <p>
-                  {t('Carbon issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national carbon governance frameworks.')}
+                  {t('CCC issuance authority remains regulator-controlled. RupayKg does not independently mint CCCs. All CCCs must be event-traceable, registry-compatible, and align with national CCC governance frameworks.')}
                 </p>
               </section>
 
@@ -172,7 +172,7 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                 </h2>
                 <div className="p-8 bg-emerald-500 text-black rounded-2xl text-center">
                   <p className="text-2xl font-bold italic">
-                    "{t('India’s Unified Waste-to-Carbon Infrastructure Layer for the Compliance Carbon Era.')}"
+                    "{t('India’s Unified Waste-to-CCC Infrastructure Layer for the Compliance CCC Era.')}"
                   </p>
                 </div>
               </section>
@@ -181,13 +181,13 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                 <h2 className="text-2xl font-bold text-white">{t('Founder\'s Note')}</h2>
                 <div className="space-y-4 italic text-white/70">
                   <p>
-                    {t('When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated carbon value?')}
+                    {t('When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?')}
                   </p>
                   <p>
-                    {t('India is entering a compliance carbon era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.')}
+                    {t('India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.')}
                   </p>
                   <p>
-                    {t('RupayKg was built to unify them. Not as a carbon trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.')}
+                    {t('RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.')}
                   </p>
                   <p>
                     {t('Waste is no longer disposal. It is governance-linked climate infrastructure.')}
@@ -209,23 +209,23 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-bold text-white">{t('Article II — Unified Stakeholder Doctrine')}</h4>
-                    <p>{t('The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, Carbon Buyers, Regulator.')}</p>
+                    <p>{t('The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.')}</p>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-bold text-white">{t('Article III — Waste Classification')}</h4>
                     <p>{t('Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.')}</p>
                   </div>
                   <div className="space-y-2">
-                    <h4 className="font-bold text-white">{t('Article IV — Carbon Engine')}</h4>
-                    <p>{t('All emission reductions shall be processed through a single carbon calculation engine with event-level MRV validation.')}</p>
+                    <h4 className="font-bold text-white">{t('Article IV — CCC Engine')}</h4>
+                    <p>{t('All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.')}</p>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-bold text-white">{t('Article V — Rail Separation')}</h4>
-                    <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, Carbon issuance. Double counting is prohibited.')}</p>
+                    <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.')}</p>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-bold text-white">{t('Article VI — Regulator Sovereignty')}</h4>
-                    <p>{t('Carbon mint authority shall remain under regulator control. RupayKg shall not independently issue carbon credits.')}</p>
+                    <p>{t('CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.')}</p>
                   </div>
                 </div>
               </section>
@@ -234,7 +234,7 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
                 <div className="inline-block p-12 border border-white/10 rounded-3xl bg-white/5 max-w-2xl">
                   <h2 className="text-sm font-bold text-emerald-500 uppercase tracking-[0.3em] mb-6">{t('Institutional Identity')}</h2>
                   <p className="text-xl text-white font-medium leading-relaxed">
-                    {t('RupayKg is hereby defined as: A Unified Waste-to-Carbon Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned carbon origination capability.')}
+                    {t('RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.')}
                   </p>
                 </div>
               </section>

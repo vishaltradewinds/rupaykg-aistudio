@@ -8,11 +8,11 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
-import { CarbonRegistryService } from "./src/services/carbonRegistryService";
+import { CCCRegistryService } from "./src/services/cccRegistryService";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
-  carbon_price_per_kg: 10,
+  ccc_price_per_kg: 10,
   logistics_margin_percent: 15
 };
 
@@ -76,7 +76,7 @@ async function startServer() {
       const verifiedRecords = records.filter(r => r.mrv_status === "verified");
       
       const total_weight_kg = verifiedRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
-      const total_carbon_kg = verifiedRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+      const total_ccc_amount_kg = verifiedRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
       const total_value = verifiedRecords.reduce((sum, r) => sum + (r.total_value || 0), 0);
       const active_nodes = users.length;
 
@@ -152,14 +152,14 @@ async function startServer() {
           { name: 'RECYCLER', value: 35 },
           { name: 'CSR', value: 20 },
           { name: 'MUNICIPAL', value: 15 },
-          { name: 'CARBON', value: 20 },
+          { name: 'CCC', value: 20 },
           { name: 'EPR', value: 10 }
         ];
       }
 
       res.json({
         total_weight_kg,
-        total_carbon_kg,
+        total_ccc_amount_kg,
         total_value,
         active_nodes,
         chartData,
@@ -203,7 +203,7 @@ async function startServer() {
     photoUrl: String,
     collectorId: String,
     timestamp: String,
-    estimatedCarbon: Number,
+    estimatedCCC: Number,
     isValidated: Boolean,
     validationScore: Number,
     validationExplanation: String,
@@ -276,7 +276,7 @@ async function startServer() {
   }
 
   // Initialize Genesis Block
-  mintBlock({ message: "Genesis Block - RupayKG Carbon Ledger Initialized" });
+  mintBlock({ message: "Genesis Block - RupayKG CCC Ledger Initialized" });
 
   // ---------------- AUTH MIDDLEWARE ----------------
   function auth(roles: string[] = []) {
@@ -469,11 +469,11 @@ async function startServer() {
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
     const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage, double_counting_declaration } = req.body;
     
-    const wasteConfig = dynamicWasteTypes.find(w => w.type === waste_type) || { value: 5, carbon: 0.5 };
+    const wasteConfig = dynamicWasteTypes.find(w => w.type === waste_type) || { value: 5, ccc_factor: 0.5 };
     const base_value = weight_kg * wasteConfig.value;
-    const carbon_reduction_kg = weight_kg * wasteConfig.carbon;
-    const potential_carbon_value = carbon_reduction_kg * paymentConfig.carbon_price_per_kg;
-    const total_value = base_value + potential_carbon_value;
+    const ccc_amount_kg = weight_kg * wasteConfig.ccc_factor;
+    const potential_ccc_value = ccc_amount_kg * paymentConfig.ccc_price_per_kg;
+    const total_value = base_value + potential_ccc_value;
     
     // AI Risk Score Calculation
     let risk_score = 0;
@@ -565,9 +565,9 @@ async function startServer() {
       status: "pending_pickup",
       mrv_status: "pending", // MRV Status: pending, verified, rejected
       base_value,
-      potential_carbon_value,
+      potential_ccc_value,
       total_value,
-      carbon_reduction_kg,
+      ccc_amount_kg,
       timestamp: new Date().toISOString()
     };
     records.push(record);
@@ -603,14 +603,14 @@ async function startServer() {
   app.get("/api/citizen/impact", auth(["citizen", "fpo"]), (req: any, res) => {
     const userRecords = records.filter(r => r.citizen_id === req.user.id);
     const total_weight = userRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
-    const total_carbon = userRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
-    const verified_carbon = userRecords.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    const total_ccc_amount = userRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
+    const verified_ccc_amount = userRecords.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
     
     res.json({
       total_weight_kg: total_weight,
-      total_carbon_reduction_kg: total_carbon,
-      verified_carbon_reduction_kg: verified_carbon,
-      trees_equivalent: Number((total_carbon / 20).toFixed(1)), // 1 tree = 20kg CO2/year
+      total_ccc_amount_kg: total_ccc_amount,
+      verified_ccc_amount_kg: verified_ccc_amount,
+      trees_equivalent: Number((total_ccc_amount / 20).toFixed(1)), // 1 tree = 20kg CO2/year
       rank: Math.floor(Math.random() * 100) + 1
     });
   });
@@ -650,11 +650,11 @@ async function startServer() {
     if (status === "verified") {
       const user = users.find(u => u.id === record.citizen_id);
       if (user) {
-        user.wallet_balance += record.potential_carbon_value;
+        user.wallet_balance += record.potential_ccc_value;
       }
 
-      // Register with External Carbon Registry
-      const registrySerialNumber = await CarbonRegistryService.registerVerifiedActivity(record, req.user.id);
+      // Register with External CCC Registry
+      const registrySerialNumber = await CCCRegistryService.registerVerifiedActivity(record, req.user.id);
       record.registry_serial_number = registrySerialNumber;
 
       // Record on Blockchain
@@ -663,7 +663,7 @@ async function startServer() {
         user_id: record.citizen_id,
         waste_type: record.waste_type,
         weight_kg: record.weight_kg,
-        carbon_reduction_kg: record.carbon_reduction_kg,
+        ccc_amount_kg: record.ccc_amount_kg,
         verified_by: req.user.id,
         registry_serial_number: registrySerialNumber,
         event_type: "CCC_MINTING"
@@ -820,7 +820,7 @@ async function startServer() {
       userRecords = userRecords.filter(r => r.aggregator_id === req.user.id || r.status === "pending_pickup");
     } else if (req.user.role === "processor") {
       userRecords = userRecords.filter(r => r.processor_id === req.user.id || r.status === "in_transit");
-    } else if (["csr_partner", "epr_partner", "carbon_buyer"].includes(req.user.role)) {
+    } else if (["csr_partner", "epr_partner", "ccc_buyer"].includes(req.user.role)) {
       userRecords = userRecords.filter(r => r.purchased_by === req.user.id);
     }
 
@@ -865,12 +865,12 @@ async function startServer() {
   // Removed demo reset and seed routes for live production environment
 
   // ---------------- PARTNER ROUTES ----------------
-  app.get("/api/partner/wallet", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/partner/wallet", auth(["csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     const user = users.find(u => u.id === req.user.id);
     res.json({ wallet_balance: user?.wallet_balance || 0 });
   });
 
-  app.post("/api/partner/fund", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.post("/api/partner/fund", auth(["csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     const { amount } = req.body;
     const user = users.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -887,28 +887,28 @@ async function startServer() {
     res.json({ message: `Successfully added ₹${amount} to wallet`, wallet_balance: user.wallet_balance });
   });
 
-  app.get("/api/partner/available-credits", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/partner/available-cccs", auth(["csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     // In a real system, these would be aggregated from verified MRV records
-    const availableCredits = records
+    const availableCCCs = records
       .filter(r => r.mrv_status === "verified" && !r.purchased_by)
       .map(r => ({
         id: r.id,
-        carbon_reduction_kg: r.carbon_reduction_kg,
-        price: r.potential_carbon_value,
+        ccc_amount_kg: r.ccc_amount_kg,
+        price: r.potential_ccc_value,
         waste_type: r.waste_type,
         village: r.village,
         blockchain_hash: r.blockchain_hash
       }));
-    res.json(availableCredits);
+    res.json(availableCCCs);
   });
 
-  app.post("/api/partner/purchase-credits", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.post("/api/partner/purchase-cccs", auth(["csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     const { record_ids } = req.body;
     const user = users.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const recordsToPurchase = records.filter(r => record_ids.includes(r.id) && r.mrv_status === "verified" && !r.purchased_by);
-    const totalCost = recordsToPurchase.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0);
+    const totalCost = recordsToPurchase.reduce((sum, r) => sum + (r.potential_ccc_value || 0), 0);
 
     if (user.wallet_balance < totalCost) {
       return res.status(400).json({ error: "Insufficient funds" });
@@ -921,15 +921,15 @@ async function startServer() {
 
     logs.push({ 
       id: Date.now(), 
-      event: "CREDITS_PURCHASED", 
-      details: `${recordsToPurchase.length} credits purchased by ${req.user.id} for ₹${totalCost}`, 
+      event: "CCCS_PURCHASED", 
+      details: `${recordsToPurchase.length} CCCs purchased by ${req.user.id} for ₹${totalCost}`, 
       timestamp: new Date().toISOString() 
     });
 
-    res.json({ message: `Successfully purchased ${recordsToPurchase.length} credits`, wallet_balance: user.wallet_balance });
+    res.json({ message: `Successfully purchased ${recordsToPurchase.length} CCCs`, wallet_balance: user.wallet_balance });
   });
 
-  app.get("/api/partner/purchases", auth(["csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/partner/purchases", auth(["csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     const purchases = records.filter(r => r.purchased_by === req.user.id);
     res.json(purchases);
   });
@@ -949,8 +949,8 @@ async function startServer() {
     const processed = filteredRecords.filter(r => r.status === "processed").length;
     const total_users = users.length;
     
-    // Calculate total wallet disbursed (sum of all potential_carbon_value of verified records)
-    const total_wallet = filteredRecords.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0);
+    // Calculate total wallet disbursed (sum of all potential_ccc_value of verified records)
+    const total_wallet = filteredRecords.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.potential_ccc_value || 0), 0);
 
     res.json({
         total_waste_events: total_waste,
@@ -1033,9 +1033,9 @@ async function startServer() {
   });
 
   // ================================
-  // CARBON POOL STATUS
+  // CCC POOL STATUS
   // ================================
-  app.get("/api/carbon/pool", auth(["carbon_buyer", "regulator", "super_admin", "state_admin", "municipal_admin", "csr_partner", "epr_partner"]), (req: any, res) => {
+  app.get("/api/ccc/pool", auth(["ccc_buyer", "regulator", "super_admin", "state_admin", "municipal_admin", "csr_partner", "epr_partner"]), (req: any, res) => {
     const { context } = req.query;
     let filteredRecords = records.filter(r => r.mrv_status === "verified");
     
@@ -1043,11 +1043,11 @@ async function startServer() {
       filteredRecords = filteredRecords.filter(r => r.context === context);
     }
 
-    const total_minted = filteredRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
-    res.json({ total_carbon_units_minted: total_minted });
+    const total_minted = filteredRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
+    res.json({ total_ccc_units_minted: total_minted });
   });
 
-  app.get("/api/admin/dashboard", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/admin/dashboard", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     const { role, context } = req.query;
     
     let filteredUsers = users;
@@ -1071,7 +1071,7 @@ async function startServer() {
         filteredRecords = filteredRecords.filter(r => filteredUsers.some(u => u.id === r.aggregator_id));
       } else if (role === 'processor') {
         filteredRecords = filteredRecords.filter(r => filteredUsers.some(u => u.id === r.processor_id));
-      } else if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(role)) {
+      } else if (['csr_partner', 'epr_partner', 'ccc_buyer'].includes(role)) {
         filteredRecords = filteredRecords.filter(r => filteredUsers.some(u => u.id === r.purchased_by));
       } else {
         filteredRecords = [];
@@ -1082,13 +1082,13 @@ async function startServer() {
     const totalRecords = filteredRecords.length;
     const totalWallet = filteredUsers.reduce((sum, u) => sum + (u.wallet_balance || 0), 0);
     const totalWeight = filteredRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
-    const totalCarbon = filteredRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    const totalCCC = filteredRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
 
     res.json({
       total_users: totalUsers,
       total_biomass_records: totalRecords,
       total_wallet_disbursed: totalWallet,
-      total_carbon_reduction_kg: totalCarbon,
+      total_ccc_amount_kg: totalCCC,
       total_weight_kg: totalWeight
     });
   });
@@ -1152,22 +1152,22 @@ async function startServer() {
     const total_farmers = farmers.length;
     const total_events = records.length;
     const total_biomass_tonnes = records.reduce((sum, r) => sum + (r.weight_kg || 0), 0) / 1000;
-    const total_carbon_estimate = records.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
+    const total_ccc_amount_estimate = records.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
 
     res.json({
       total_farmers,
       total_events,
       total_biomass_tonnes: Number(total_biomass_tonnes.toFixed(2)),
-      total_carbon_estimate: Number(total_carbon_estimate.toFixed(2))
+      total_ccc_amount_estimate: Number(total_ccc_amount_estimate.toFixed(2))
     });
   });
 
-  app.get("/api/audit-logs", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/audit-logs", auth(["state_admin", "municipal_admin", "super_admin", "regulator", "csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     res.json(logs.slice(-50).reverse());
   });
 
   // ---------------- ANALYTICS & METRICS ----------------
-  app.get("/api/analytics/comprehensive", auth(["super_admin", "state_admin", "municipal_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/analytics/comprehensive", auth(["super_admin", "state_admin", "municipal_admin", "regulator", "csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     const { context } = req.query;
     let filteredRecords = records;
     if (context && context !== 'all') {
@@ -1177,15 +1177,15 @@ async function startServer() {
     const verifiedRecords = filteredRecords.filter(r => r.mrv_status === "verified");
     
     // Environmental Metrics
-    const total_carbon_kg = verifiedRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0);
-    const methane_avoided_kg = total_carbon_kg * 0.21; // Simulated ratio
-    const water_saved_liters = total_carbon_kg * 150; // Simulated ratio
-    const trees_equivalent = total_carbon_kg / 20;
+    const total_ccc_amount_kg = verifiedRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
+    const methane_avoided_kg = total_ccc_amount_kg * 0.21; // Simulated ratio
+    const water_saved_liters = total_ccc_amount_kg * 150; // Simulated ratio
+    const trees_equivalent = total_ccc_amount_kg / 20;
 
     // Economic Metrics
     const total_farmer_earnings = verifiedRecords.reduce((sum, r) => sum + (r.total_value || 0), 0);
     const avg_price_per_kg = total_farmer_earnings / (verifiedRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0) || 1);
-    const govt_cost_savings = total_carbon_kg * 5; // Simulated savings in waste management costs
+    const govt_cost_savings = total_ccc_amount_kg * 5; // Simulated savings in waste management costs
 
     // Operational Metrics
     const total_weight = filteredRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0);
@@ -1198,7 +1198,7 @@ async function startServer() {
 
     res.json({
       environmental: {
-        carbon_offset_kg: Number(total_carbon_kg.toFixed(2)),
+        ccc_offset_kg: Number(total_ccc_amount_kg.toFixed(2)),
         methane_avoided_kg: Number(methane_avoided_kg.toFixed(2)),
         water_saved_liters: Number(water_saved_liters.toFixed(0)),
         trees_equivalent: Number(trees_equivalent.toFixed(1))
@@ -1234,7 +1234,7 @@ async function startServer() {
         month: monthName,
         weight: monthRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0),
         events: monthRecords.length,
-        carbon: monthRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0)
+        ccc: monthRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0)
       });
     }
     
@@ -1268,8 +1268,8 @@ async function startServer() {
   });
 
   app.post("/api/payment-config", auth(["super_admin"]), (req: any, res) => {
-    const { carbon_price_per_kg, logistics_margin_percent } = req.body;
-    if (typeof carbon_price_per_kg === 'number') paymentConfig.carbon_price_per_kg = carbon_price_per_kg;
+    const { ccc_price_per_kg, logistics_margin_percent } = req.body;
+    if (typeof ccc_price_per_kg === 'number') paymentConfig.ccc_price_per_kg = ccc_price_per_kg;
     if (typeof logistics_margin_percent === 'number') paymentConfig.logistics_margin_percent = logistics_margin_percent;
     
     logs.push({ 
@@ -1287,11 +1287,11 @@ async function startServer() {
     res.json({ service: "RUPAYKG", issuer: "ALLIANCEVENTURES", auth: "RS256", status: "Active" });
   });
 
-  app.get("/api/carbon", auth(["super_admin", "state_admin", "regulator", "carbon_buyer"]), (req: any, res: any) => {
+  app.get("/api/ccc", auth(["super_admin", "state_admin", "regulator", "ccc_buyer"]), (req: any, res: any) => {
     res.json({ message: "CCC Secure Data", user: req.user });
   });
 
-  app.get("/api/blockchain/ledger", auth(["super_admin", "state_admin", "municipal_admin", "regulator", "csr_partner", "epr_partner", "carbon_buyer"]), (req: any, res) => {
+  app.get("/api/blockchain/ledger", auth(["super_admin", "state_admin", "municipal_admin", "regulator", "csr_partner", "epr_partner", "ccc_buyer"]), (req: any, res) => {
     res.json(blockchain);
   });
 
@@ -1319,7 +1319,7 @@ async function startServer() {
   app.get("/internal/metrics", async (req, res) => {
     const token = req.headers["x-service-token"];
     if (token !== INTERNAL_TOKEN) return res.status(403).json({ error: "Forbidden" });
-    res.json({ wasteProcessedMT: 1320, carbonCreditsIssued: 56000, totalRevenue: 14000000 });
+    res.json({ wasteProcessedMT: 1320, cccsIssued: 56000, totalRevenue: 14000000 });
   });
 
   app.get("/api/map/environmental-activity", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
@@ -1328,7 +1328,7 @@ async function startServer() {
       waste_points: records.map(r => ({ lat: r.geo_lat, lng: r.geo_long, type: r.waste_type, weight: r.weight_kg })),
       biomass_zones: farmers.map(f => ({ lat: f.geo_lat, lng: f.geo_long, crop: f.crop_type, area: f.land_area })),
       heatmaps: {
-        carbon_reduction: records.filter(r => r.mrv_status === 'verified').map(r => ({ lat: r.geo_lat, lng: r.geo_long, intensity: r.carbon_reduction_kg }))
+        ccc_generation: records.filter(r => r.mrv_status === 'verified').map(r => ({ lat: r.geo_lat, lng: r.geo_long, intensity: r.ccc_amount_kg }))
       }
     };
     res.json(mapData);
@@ -1356,7 +1356,7 @@ async function startServer() {
       // For now, we return a mock response
       return res.status(200).send(`
         <Response>
-          <Message>Welcome to RupayKg Carbon OS! You are not registered. Please contact your supervisor to onboard.</Message>
+          <Message>Welcome to RupayKg CCC OS! You are not registered. Please contact your supervisor to onboard.</Message>
         </Response>
       `);
     }
@@ -1380,7 +1380,7 @@ async function startServer() {
         responseMessage = "Photo received! Please reply with the weight and type (e.g., '50kg plastic').";
       } else {
         const emission_factor = wasteType === 'organic' ? 0.5 : (wasteType === 'plastic' ? 0.8 : 0.4);
-        const estimatedCarbon = (weight * emission_factor) / 1000;
+        const estimatedCCC = (weight * emission_factor) / 1000;
 
         const logEntry = {
           id: "PILOT_WA_" + Date.now().toString(),
@@ -1390,7 +1390,7 @@ async function startServer() {
           photoUrl: MediaUrl0 || null,
           collectorId: user.id,
           timestamp: new Date().toISOString(),
-          estimatedCarbon,
+          estimatedCCC,
           isValidated: false,
           validationScore: null,
           validationExplanation: null,
@@ -1403,7 +1403,7 @@ async function startServer() {
         } else {
           pilotRecords.push(logEntry);
         }
-        responseMessage = `✅ Successfully logged ${logEntry.weight}kg of ${wasteType} waste! Estimated Carbon Impact: ${estimatedCarbon.toFixed(3)} tCO2e.`;
+        responseMessage = `✅ Successfully logged ${logEntry.weight}kg of ${wasteType} waste! Estimated CCC Impact: ${estimatedCCC.toFixed(3)} tCO2e.`;
       }
     } else if (messageText === "stats") {
       let userLogs;
@@ -1452,9 +1452,9 @@ async function startServer() {
   app.post("/api/pilot/log", auth(["citizen", "fpo", "aggregator", "super_admin"]), async (req: any, res: any) => {
     const { weight, wasteType, location, photoUrl, collectorId } = req.body;
     
-    // Simple Carbon Estimation (MRV Light)
+    // Simple CCC Estimation (MRV Light)
     const emission_factor = wasteType === 'organic' ? 0.5 : (wasteType === 'plastic' ? 0.8 : 0.4);
-    const estimatedCarbon = (weight * emission_factor) / 1000; // in tCO2e
+    const estimatedCCC = (weight * emission_factor) / 1000; // in tCO2e
 
     const logEntry = {
       id: "PILOT_" + Date.now().toString(),
@@ -1464,7 +1464,7 @@ async function startServer() {
       photoUrl,
       collectorId: collectorId || req.user.id,
       timestamp: new Date().toISOString(),
-      estimatedCarbon,
+      estimatedCCC,
       isValidated: false,
       validationScore: null,
       validationExplanation: null,
@@ -1493,7 +1493,7 @@ async function startServer() {
     }
 
     const totalWeight = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
-    const totalCarbonCredits = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCarbon || 0), 0);
+    const totalCCCs = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCCC || 0), 0);
     const onboardedCount = currentPilotOnboarding.length;
     const verifiedCount = currentPilotRecords.filter((r: any) => r.status === 'validated').length;
     
@@ -1513,7 +1513,7 @@ async function startServer() {
 
     res.json({
       totalWeight,
-      totalCarbonCredits,
+      totalCCCs,
       onboardedCount,
       verifiedCount,
       trends,
@@ -1591,7 +1591,7 @@ async function startServer() {
         {
           title: "Initial Contact & Trust Building",
           description: "Approach the waste collector with respect. Explain that RupayKg is a government-aligned platform to increase their income.",
-          script: "नमस्ते! हम 'रुपयकेजी' से हैं। हम आपके काम को डिजिटल बना रहे हैं ताकि आपको कचरे के सही दाम और कार्बन क्रेडिट का पैसा मिल सके।"
+          script: "नमस्ते! हम 'रुपयकेजी' से हैं। हम आपके काम को डिजिटल बना रहे हैं ताकि आपको कचरे के सही दाम और CCC का पैसा मिल सके।"
         },
         {
           title: "Digital Identity Creation",
@@ -1620,7 +1620,7 @@ async function startServer() {
     }
 
     const totalWeight = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
-    const totalCarbon = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCarbon || 0), 0);
+    const totalCCC = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCCC || 0), 0);
     
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "Gemini API key not configured" });
@@ -1628,10 +1628,10 @@ async function startServer() {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
     try {
-      const prompt = `Generate a Pilot Summary Report for Jabalpur Waste-to-Carbon Operation.
+      const prompt = `Generate a Pilot Summary Report for Jabalpur Waste-to-CCC Operation.
       Data:
       - Total Waste Collected: ${totalWeight} kg
-      - Estimated Carbon Reduction: ${totalCarbon.toFixed(2)} tCO2e
+      - Estimated CCCs Generated: ${totalCCC.toFixed(2)} tCO2e
       - Total Records: ${currentPilotRecords.length}
       - Active Onboarded Staff: ${currentPilotOnboarding.length}
       
@@ -1657,17 +1657,19 @@ async function startServer() {
   // AI CAPABILITIES
   // ================================
   app.post("/api/ai/chat", async (req, res) => {
-    const { message, useMaps, lat, lng } = req.body;
+    const { message, useMaps, lat, lng, lang } = req.body;
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "Gemini API key not configured" });
     }
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const systemInstruction = `You are RupayKg AI, an expert in waste management, CCC Certificates (CCCs), and environmental sustainability. Provide concise and helpful answers. The user's preferred language is ${lang || 'en'}. Respond in that language if possible.`;
     try {
       if (useMaps && lat && lng) {
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
           contents: message,
           config: {
+            systemInstruction,
             tools: [{ googleMaps: {} }],
             toolConfig: {
               retrievalConfig: { latLng: { latitude: lat, longitude: lng } }
@@ -1679,7 +1681,7 @@ async function startServer() {
         const response = await ai.models.generateContent({
           model: "gemini-3.1-pro-preview",
           contents: message,
-          config: { systemInstruction: "You are RupayKg AI, an expert in waste management, Carbon Credit Certificates (CCCs), and environmental sustainability. Provide concise and helpful answers." }
+          config: { systemInstruction }
         });
         res.json({ text: response.text });
       }

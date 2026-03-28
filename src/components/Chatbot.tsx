@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Mic, MapPin, Volume2, Loader2, StopCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   id: string;
@@ -12,9 +13,10 @@ interface Message {
 }
 
 export const Chatbot = () => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'ai', text: 'Hello! I am RupayKg AI. How can I help you with waste management, carbon credits, or finding nearby facilities?' }
+    { id: '1', role: 'ai', text: t('Hello! I am RupayKg AI. How can I help you with waste management, CCCs, or finding nearby facilities?') }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +60,8 @@ export const Chatbot = () => {
           message: userMsg.text, 
           useMaps, 
           lat: location?.lat, 
-          lng: location?.lng 
+          lng: location?.lng,
+          lang: i18n.language
         })
       });
       const data = await res.json();
@@ -71,7 +74,7 @@ export const Chatbot = () => {
       }]);
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', text: 'Sorry, I encountered an error.' }]);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', text: t('Sorry, I encountered an error.') }]);
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +182,7 @@ export const Chatbot = () => {
             <div className="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                <h3 className="font-bold text-white">RupayKg AI</h3>
+                <h3 className="font-bold text-white">{t('RupayKg AI')}</h3>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white">
                 <X size={20} />
@@ -198,13 +201,13 @@ export const Chatbot = () => {
                     
                     {msg.chunks && msg.chunks.length > 0 && (
                       <div className="mt-2 pt-2 border-t border-white/10 flex flex-col gap-1">
-                        <span className="text-[10px] uppercase text-white/40 font-bold">Sources:</span>
+                        <span className="text-[10px] uppercase text-white/40 font-bold">{t('Sources:')}</span>
                         {msg.chunks.map((chunk, i) => {
                           if (chunk.web?.uri) {
                             return <a key={i} href={chunk.web.uri} target="_blank" rel="noopener noreferrer" className="text-[10px] text-emerald-400 hover:underline truncate block">{chunk.web.title || chunk.web.uri}</a>;
                           }
                           if (chunk.maps?.uri) {
-                            return <a key={i} href={chunk.maps.uri} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400 hover:underline truncate block flex items-center gap-1"><MapPin size={10}/> {chunk.maps.title || 'Map Location'}</a>;
+                            return <a key={i} href={chunk.maps.uri} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400 hover:underline truncate block flex items-center gap-1"><MapPin size={10}/> {chunk.maps.title || t('Map Location')}</a>;
                           }
                           return null;
                         })}
@@ -218,7 +221,7 @@ export const Chatbot = () => {
                       className={`mt-1 text-[10px] flex items-center gap-1 px-2 py-1 rounded-full border ${msg.isAudioPlaying ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'text-white/40 border-white/10 hover:bg-white/5'}`}
                     >
                       {msg.isAudioPlaying ? <Volume2 size={10} className="animate-pulse" /> : <Volume2 size={10} />}
-                      {msg.isAudioPlaying ? 'Playing...' : 'Read Aloud'}
+                      {msg.isAudioPlaying ? t('Playing...') : t('Read Aloud')}
                     </button>
                   )}
                 </div>
@@ -227,7 +230,7 @@ export const Chatbot = () => {
                 <div className="flex items-start">
                   <div className="bg-white/10 text-white p-3 rounded-2xl rounded-bl-sm flex items-center gap-2">
                     <Loader2 size={14} className="animate-spin text-emerald-500" />
-                    <span className="text-xs text-white/60">Thinking...</span>
+                    <span className="text-xs text-white/60">{t('Thinking...')}</span>
                   </div>
                 </div>
               )}
@@ -241,7 +244,7 @@ export const Chatbot = () => {
                   className={`text-[10px] px-2 py-1 rounded-full flex items-center gap-1 transition-colors ${useMaps ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}
                 >
                   <MapPin size={10} />
-                  {useMaps ? 'Maps Grounding On' : 'Use Maps'}
+                  {useMaps ? t('Maps Grounding On') : t('Use Maps')}
                 </button>
               </div>
               <div className="flex items-center gap-2">
@@ -256,7 +259,7 @@ export const Chatbot = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Ask RupayKg AI..."
+                  placeholder={t('Ask RupayKg AI...')}
                   className="flex-1 bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500/50"
                 />
                 <button 

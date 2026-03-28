@@ -1,6 +1,6 @@
-# RupayKg - Sovereign Environmental DPI (The Google Maps of Waste and Carbon)
+# RupayKg - Sovereign Environmental DPI (The Google Maps of Waste and CCC)
 
-RupayKg is a **Waste-to-Carbon Digital MRV Infrastructure Platform**. It acts as a national protocol layer (DPI) that records real-world environmental activity and converts it into verified climate value (carbon credits, recycling credits). It provides a real-time geospatial visualization system similar to Google Maps, but for waste, biomass, recycling, and carbon emissions reduction.
+RupayKg is a **Waste-to-CCC Digital MRV Infrastructure Platform**. It acts as a national protocol layer (DPI) that records real-world environmental activity and converts it into verified climate value (CCCs, recycling credits). It provides a real-time geospatial visualization system similar to Google Maps, but for waste, biomass, recycling, and CCC emissions reduction.
 
 ## Architecture & Tech Stack
 
@@ -20,7 +20,7 @@ The platform integrates the following 12 strategic APIs to power its geospatial 
 3.  **AgriStack APIs:** Farmer registry, crop registry, and land parcel data for biomass estimation.
 4.  **Agricultural Data Exchange (ADeX):** Soil data, crop production, and weather patterns.
 5.  **OpenWeather API:** Weather data to model composting conditions and biomass drying.
-6.  **Climatiq API:** Emission factors to calculate carbon reductions.
+6.  **Climatiq API:** Emission factors to calculate CCC reductions.
 7.  **OpenStreetMap API:** Geospatial data for roads, land use, and facility mapping.
 8.  **Mapbox API:** Interactive maps, routing, and geolocation visualization.
 9.  **ONDC API:** Marketplace creation for trading recyclables and biomass.
@@ -33,8 +33,8 @@ The platform integrates the following 12 strategic APIs to power its geospatial 
 *   `users`: `{ _id, name, phone, role, organization, state, wallet_balance, created_at }`
 *   `activities`: `{ _id, user_id, waste_type, weight_kg, lat, lng, photo_url, status, timestamp }`
 *   `biomass_records`: `{ _id, farmer_id, crop_type, hectares, estimated_tons, status }`
-*   `carbon_records`: `{ _id, activity_id, carbon_reduction_kg, verified_by, status }`
-*   `wallets`: `{ _id, user_id, balance_inr, carbon_credits, transactions: [] }`
+*   `ccc_records`: `{ _id, activity_id, ccc_amount_kg, verified_by, status }`
+*   `wallets`: `{ _id, user_id, balance_inr, cccs, transactions: [] }`
 *   `projects`: `{ _id, name, type, location, capacity, status }`
 *   `marketplace_listings`: `{ _id, material, quantity, price, location, listed_by, status }`
 *   `audit_logs`: `{ _id, action, user_id, timestamp, details, ip_address }`
@@ -42,7 +42,7 @@ The platform integrates the following 12 strategic APIs to power its geospatial 
 ## API Design & Documentation
 
 ### Authentication
-*   `POST /auth/register` - Register a new user (Generator, Aggregator, Recycler, Municipality, Carbon Admin, Corporate Buyer, System Admin)
+*   `POST /auth/register` - Register a new user (Generator, Aggregator, Recycler, Municipality, CCC Admin, Corporate Buyer, System Admin)
 *   `POST /auth/login` - Authenticate and receive JWT
 
 ### Waste Activity Engine
@@ -52,9 +52,9 @@ The platform integrates the following 12 strategic APIs to power its geospatial 
 ### Biomass Supply Chain
 *   `POST /biomass/estimate` - Estimate biomass based on crop type and hectares (Rice: 2.5, Wheat: 1.8, Maize: 2.0)
 
-### MRV Engine & Carbon Registry
+### MRV Engine & CCC Registry
 *   `POST /mrv/verify` - Verify an activity and calculate emission reduction (Biomass: 1.5, Plastic: 2.7, Organic: 0.9)
-*   `POST /carbon/register` - Submit verified environmental activity to carbon registries
+*   `POST /ccc/register` - Submit verified environmental activity to CCC registries
 
 ### Marketplace & Geospatial
 *   `POST /marketplace/list` - Push a listing to the ONDC network

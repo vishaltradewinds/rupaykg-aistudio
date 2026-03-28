@@ -106,7 +106,7 @@ interface BiomassRecord {
   waste_type: string;
   village: string;
   total_value: number;
-  carbon_reduction_kg: number;
+  ccc_amount_kg: number;
   timestamp: string;
   status: string;
   mrv_status?: string;
@@ -116,7 +116,7 @@ interface BiomassRecord {
   acreage?: number;
   risk_score?: number;
   ai_verification_details?: string;
-  potential_carbon_value?: number;
+  potential_ccc_value?: number;
   geo_lat: number;
   geo_long: number;
   image_url?: string;
@@ -140,7 +140,7 @@ interface AdminStats {
   total_farmers?: number;
   total_biomass_records: number;
   total_wallet_disbursed: number;
-  total_carbon_reduction_kg: number;
+  total_ccc_amount_kg: number;
   total_weight_kg: number;
 }
 
@@ -211,7 +211,7 @@ const RailDistributionChart = ({ data }: { data?: any[] }) => {
     { name: 'Recycler', value: 35, color: '#3b82f6' },
     { name: 'CSR', value: 20, color: '#10b981' },
     { name: 'Municipal', value: 15, color: '#f59e0b' },
-    { name: 'Carbon', value: 20, color: '#06b6d4' },
+    { name: 'CCC', value: 20, color: '#06b6d4' },
     { name: 'EPR', value: 10, color: '#8b5cf6' },
   ];
 
@@ -415,13 +415,13 @@ export default function App() {
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [adminKpi, setAdminKpi] = useState<any>({});
   const [fraudMap, setFraudMap] = useState<any[]>([]);
-  const [carbonPool, setCarbonPool] = useState<any>({});
+  const [cccPool, setCccPool] = useState<any>({});
   const [wardAnalytics, setWardAnalytics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config' | 'fraud' | 'integrations'>('dashboard');
   const [wasteTypes, setWasteTypes] = useState<WasteType[]>(WASTE_TYPES);
-  const [paymentConfig, setPaymentConfig] = useState({ carbon_price_per_kg: 10, logistics_margin_percent: 15 });
+  const [paymentConfig, setPaymentConfig] = useState({ ccc_price_per_kg: 10, logistics_margin_percent: 15 });
   const [comprehensiveMetrics, setComprehensiveMetrics] = useState<any>(null);
   const [trendsData, setTrendsData] = useState<any[]>([]);
   const [mrvRecords, setMrvRecords] = useState<BiomassRecord[]>([]);
@@ -429,7 +429,7 @@ export default function App() {
   const [ondcData, setOndcData] = useState<any[]>([]);
   const [mrvHistory, setMrvHistory] = useState<BiomassRecord[]>([]);
   const [mrvTab, setMrvTab] = useState<'pending' | 'history'>('pending');
-  const [availableCredits, setAvailableCredits] = useState<any[]>([]);
+  const [availableCCCs, setAvailableCCCs] = useState<any[]>([]);
   const [aggregatorFleet, setAggregatorFleet] = useState<any>(null);
   const [processorInventory, setProcessorInventory] = useState<any>(null);
   const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
@@ -501,7 +501,7 @@ export default function App() {
       viewTitle: t('Ward-Level Analytics'),
       citizenLabel: t('Citizen (MSW Generator)'),
       allowedCategories: ["Municipal", "Plastics", "Metals", "E-Waste", "Textiles", "Hazardous", "Construction", "Industrial"],
-      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin']
+      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'ccc_buyer', 'regulator', 'super_admin']
     },
     rural: {
       anchor: t('Gram Panchayat'),
@@ -511,7 +511,7 @@ export default function App() {
       viewTitle: t('Village-Level Analytics'),
       citizenLabel: t('Farmer / FPO (Biomass Generator)'),
       allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"],
-      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin']
+      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'ccc_buyer', 'regulator', 'super_admin']
     }
   }[operatingContext];
 
@@ -776,7 +776,7 @@ export default function App() {
         month: monthName,
         weight: monthRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0),
         events: monthRecords.length,
-        carbon: monthRecords.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0)
+        ccc: monthRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0)
       });
     }
     
@@ -838,7 +838,7 @@ export default function App() {
           const walletData = await walletRes.json();
           setWalletBalance(walletData.wallet_balance);
         }
-      } else if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
+      } else if (['csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const walletRes = await fetch('/api/partner/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
         if (walletRes.ok) {
           const walletData = await walletRes.json();
@@ -854,7 +854,7 @@ export default function App() {
       }
 
       // 4. Fetch admin stats
-      if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
+      if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}&context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (statsRes.ok) {
           const statsData = await statsRes.json();
@@ -882,7 +882,7 @@ export default function App() {
         const kpiRes = await fetch('/api/dashboard/kpi', { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) {
           const kpiData = await kpiRes.json();
-          setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_carbon_reduction_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
+          setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_ccc_amount_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
         }
       }
 
@@ -910,14 +910,14 @@ export default function App() {
         if (mrvHistRes.ok) setMrvHistory(await mrvHistRes.json());
       }
 
-      // 7. Fetch available credits for partners
-      if (['csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
-        const creditsRes = await fetch('/api/partner/available-credits', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (creditsRes.ok) setAvailableCredits(await creditsRes.json());
+      // 7. Fetch available CCCs for partners
+      if (['csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
+        const cccsRes = await fetch('/api/partner/available-cccs', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (cccsRes.ok) setAvailableCCCs(await cccsRes.json());
       }
 
       // 8. Fetch Series A / Admin KPI data
-      if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'carbon_buyer'].includes(currentUser?.role || '')) {
+      if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const compRes = await fetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (compRes.ok) setComprehensiveMetrics(await compRes.json());
       }
@@ -954,10 +954,10 @@ export default function App() {
         if (ondcRes.ok) setOndcData(await ondcRes.json());
       }
 
-      // 10. Fetch Carbon Pool
-      if (['carbon_buyer', 'regulator', 'super_admin', 'state_admin', 'municipal_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
-        const poolRes = await fetch(`/api/carbon/pool?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (poolRes.ok) setCarbonPool(await poolRes.json());
+      // 10. Fetch CCC Pool
+      if (['ccc_buyer', 'regulator', 'super_admin', 'state_admin', 'municipal_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
+        const poolRes = await fetch(`/api/ccc/pool?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (poolRes.ok) setCccPool(await poolRes.json());
       }
     } catch (err) {
       console.error(err);
@@ -1097,7 +1097,7 @@ export default function App() {
       if (!res.ok) throw new Error(data.error || 'Operation failed');
 
       setMessage({ type: 'success', text: data.message });
-      setUploadData({ weight_kg: '', waste_type: wasteTypes[0]?.type || '', village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: '' });
+      setUploadData({ weight_kg: '', waste_type: wasteTypes[0]?.type || '', village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: '', double_counting_declaration: false });
       fetchUserData();
       setTimeout(() => setView('dashboard'), 2000);
     } catch (err: any) {
@@ -1174,11 +1174,11 @@ export default function App() {
     }
   };
 
-  const handlePurchaseCredits = async (recordIds: string[]) => {
+  const handlePurchaseCCCs = async (recordIds: string[]) => {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch('/api/partner/purchase-credits', {
+      const res = await fetch('/api/partner/purchase-cccs', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -1278,7 +1278,7 @@ export default function App() {
                 onClick={() => setShowAuth(true)}
                 className="bg-white text-black px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-white/90 transition-all flex items-center gap-2"
               >
-                Launch OS <ArrowRight size={16} />
+                {t('Launch OS')} <ArrowRight size={16} />
               </button>
             </div>
           </nav>
@@ -1354,7 +1354,7 @@ export default function App() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">{t('Multi-Rail Value Engine')}</h3>
                 <p className="text-white/50 leading-relaxed">
-                  {t('Simultaneously extract value from Recycler, CSR, Municipal, Carbon, and EPR rails for every kilogram of biomass processed.')}
+                  {t('Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.')}
                 </p>
               </Card>
               <Card className="bg-black/40">
@@ -1402,7 +1402,7 @@ export default function App() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                       {[
                         { label: 'Total Weight', value: publicImpact ? `${(publicImpact.total_weight_kg / 1000).toFixed(1)}t` : '0t', icon: Scale, color: 'emerald' },
-                        { label: 'Carbon Offset', value: publicImpact ? `${(publicImpact.total_carbon_kg / 1000).toFixed(1)}t` : '0t', icon: Globe, color: 'cyan' },
+                        { label: 'CCC Offset', value: publicImpact ? `${(publicImpact.total_ccc_amount_kg / 1000).toFixed(1)}t` : '0t', icon: Globe, color: 'cyan' },
                         { label: 'Active Nodes', value: publicImpact ? publicImpact.active_nodes.toLocaleString() : '0', icon: Activity, color: 'blue' },
                         { label: 'Value Minted', value: publicImpact ? `₹${(publicImpact.total_value / 1000000).toFixed(1)}M` : '₹0', icon: Wallet, color: 'purple' }
                       ].map((stat) => (
@@ -1699,7 +1699,7 @@ export default function App() {
                       {labels.allowedRoles.includes('epr_partner') && <option value="epr_partner" className="bg-[#0A0A0B]">{t('EPR Partner')}</option>}
                       {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[#0A0A0B]">{labels.anchor} {t('Admin')}</option>}
                       {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[#0A0A0B]">{t('State Admin')}</option>}
-                      {labels.allowedRoles.includes('carbon_buyer') && <option value="carbon_buyer" className="bg-[#0A0A0B]">{t('Carbon Buyer')}</option>}
+                      {labels.allowedRoles.includes('ccc_buyer') && <option value="ccc_buyer" className="bg-[#0A0A0B]">{t('CCC Buyer')}</option>}
                       {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[#0A0A0B]">{t('National Regulator')}</option>}
                       {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[#0A0A0B]">{t('Super Admin')}</option>}
                     </select>
@@ -1875,7 +1875,7 @@ export default function App() {
                   <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded-full">Pilot</span>
                 </div>
                 <h3 className="text-white/40 text-xs uppercase tracking-widest font-bold">{t('CCCs')}</h3>
-                <p className="text-3xl font-bold mt-1">{(pilotStats?.totalCarbonCredits || 0).toFixed(2)} tCO2e</p>
+                <p className="text-3xl font-bold mt-1">{(pilotStats?.totalCCCs || 0).toFixed(2)} tCO2e</p>
               </Card>
 
               <Card className="p-6 bg-amber-500/10 border-amber-500/20">
@@ -1948,7 +1948,7 @@ export default function App() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-bold">{log.weight} kg</p>
-                        <p className="text-[10px] text-emerald-400 font-bold">+{log.estimatedCarbon.toFixed(3)} tCO2e</p>
+                        <p className="text-[10px] text-emerald-400 font-bold">+{log.estimatedCCC.toFixed(3)} tCO2e</p>
                       </div>
                     </div>
                   ))}
@@ -2104,7 +2104,7 @@ export default function App() {
 
                 <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{t('Estimated Carbon Impact')}</span>
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{t('Estimated CCC Impact')}</span>
                     <Zap size={16} className="text-emerald-400" />
                   </div>
                   <p className="text-2xl font-bold text-emerald-400">
@@ -2263,7 +2263,7 @@ export default function App() {
                       </li>
                       <li className="flex gap-3">
                         <span className="w-5 h-5 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
-                        {t('Data is automatically ingested into Carbon OS MRV.')}
+                        {t('Data is automatically ingested into CCC OS MRV.')}
                       </li>
                     </ul>
                   </div>
@@ -2300,7 +2300,7 @@ export default function App() {
                       </div>
                       <div className="flex justify-start">
                         <div className="bg-white/10 text-white px-4 py-2 rounded-2xl rounded-tl-none text-sm">
-                          {t('Verified! 45kg Organic logged at Jabalpur Ward 12. Carbon Impact: +0.022 tCO2e.')}
+                          {t('Verified! 45kg Organic logged at Jabalpur Ward 12. CCC Impact: +0.022 tCO2e.')}
                         </div>
                       </div>
                     </div>
@@ -2494,7 +2494,7 @@ export default function App() {
     <div className="min-h-screen bg-[#0A0A0B] text-white font-sans">
       <Helmet>
         <title>{view.charAt(0).toUpperCase() + view.slice(1)} | RupayKg - National Digital Public Infrastructure</title>
-        <meta name="description" content={`RupayKg ${view} - National Digital Public Infrastructure for Waste Management and Carbon Credit Certificates (CCCs).`} />
+        <meta name="description" content={`RupayKg ${view} - National Digital Public Infrastructure for Waste Management and CCC Certificates (CCCs).`} />
       </Helmet>
       {/* Sidebar Navigation */}
       <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
@@ -2569,7 +2569,7 @@ export default function App() {
               <span className="hidden md:block font-medium">{labels.analytics}</span>
             </button>
           )}
-          {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+          {['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('partner')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'partner' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -2578,7 +2578,7 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('CCC Offset Market')}</span>
             </button>
           )}
-          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('blockchain')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -2679,7 +2679,7 @@ export default function App() {
                 RURAL
               </button>
             </div>
-            {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '')) && (
+            {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '')) && (
               <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
                 <Wallet className="text-emerald-400" size={20} />
                 <div>
@@ -2726,7 +2726,7 @@ export default function App() {
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Stat label={t('Carbon Offset')} value={`${(history.reduce((acc, r) => acc + r.carbon_reduction_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={t('CCC Offset')} value={`${(history.reduce((acc, r) => acc + r.ccc_amount_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
                     <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" setView={setView} />
                     <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" setView={setView} />
                     <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" setView={setView} />
@@ -2763,17 +2763,17 @@ export default function App() {
               {user?.role === 'processor' && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Stat label={t('Total Processed')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="purple" setView={setView} />
-                  <Stat label={t('CCCs')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" blockchainLink setView={setView} />
+                  <Stat label={t('CCCs')} value={`${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.ccc_amount_kg, 0).toFixed(1)} kg`} icon={Globe} color="emerald" blockchainLink setView={setView} />
                   <Stat label={t('Value Generated')} value={`₹${history.filter(r => r.processor_id === user.id).reduce((sum, r) => sum + r.total_value, 0).toFixed(2)}`} icon={TrendingUp} color="blue" setView={setView} />
                   <Stat label={t('Processing Yield')} value="98.2%" icon={Zap} color="cyan" setView={setView} />
                 </div>
               )}
 
-              {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+              {['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '') && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_carbon_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
-                    <Stat label={t('CCCs')} value={`${history.reduce((sum, r) => sum + r.carbon_reduction_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={t('Total Investment')} value={`₹${history.reduce((sum, r) => sum + (r.potential_ccc_value || 0), 0).toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
+                    <Stat label={t('CCCs')} value={`${history.reduce((sum, r) => sum + r.ccc_amount_kg, 0).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
                     <Stat label={`${labels.waste} ${t('Diverted')}`} value={`${history.reduce((sum, r) => sum + r.weight_kg, 0).toFixed(1)} kg`} icon={Scale} color="blue" setView={setView} />
                     <Stat label={t('ESG Score')} value="A+" icon={ShieldCheck} color="purple" setView={setView} />
                   </div>
@@ -2900,14 +2900,14 @@ export default function App() {
                         <option value="processor" className="bg-[#0A0A0B]">{t('Processors')}</option>
                         <option value="csr_partner" className="bg-[#0A0A0B]">{t('CSR Partners')}</option>
                         <option value="epr_partner" className="bg-[#0A0A0B]">{t('EPR Partners')}</option>
-                        <option value="carbon_buyer" className="bg-[#0A0A0B]">{t('Carbon Buyers')}</option>
+                        <option value="ccc_buyer" className="bg-[#0A0A0B]">{t('CCC Buyers')}</option>
                       </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <Stat label={t('Total Users')} value={adminStats.total_users} icon={User} color="blue" setView={setView} />
                     <Stat label={t('Total Weight')} value={`${adminStats.total_weight_kg.toFixed(1)} kg`} icon={Scale} color="purple" setView={setView} />
-                    <Stat label={t('Carbon Reduced')} value={`${adminStats.total_carbon_reduction_kg.toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={t('CCCs Generated')} value={`${adminStats.total_ccc_amount_kg.toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
                     <Stat label={t('Total Value')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
                   </div>
                   
@@ -2966,7 +2966,7 @@ export default function App() {
               </Card>
 
               {/* Shared Recent Activity & Climate Impact for Citizen, FPO, Aggregator, Processor */}
-              {!['csr_partner', 'epr_partner', 'carbon_buyer', 'state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
+              {!['csr_partner', 'epr_partner', 'ccc_buyer', 'state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && (
                 <>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <Card>
@@ -3052,13 +3052,13 @@ export default function App() {
               )}
 
               {/* Partner & Admin specific content */}
-              {['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+              {['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '') && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="p-6 border-white/5 bg-white/5">
                       <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2">{t('Total Offset')}</h4>
                       <p className="text-3xl font-bold text-cyan-400">
-                        {history.reduce((sum, r) => sum + (r.carbon_reduction_kg || 0), 0).toFixed(2)} kg
+                        {history.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0).toFixed(2)} kg
                       </p>
                     </Card>
                     <Card className="p-6 border-white/5 bg-white/5">
@@ -3253,9 +3253,9 @@ export default function App() {
                             value={uploadData.crop_type}
                             onChange={e => setUploadData({...uploadData, crop_type: e.target.value})}
                           >
-                            <option value="Rice" className="bg-[#0A0A0B] text-white">Rice</option>
-                            <option value="Wheat" className="bg-[#0A0A0B] text-white">Wheat</option>
-                            <option value="Maize" className="bg-[#0A0A0B] text-white">Maize</option>
+                            <option value="Rice" className="bg-[#0A0A0B] text-white">{t('Rice')}</option>
+                            <option value="Wheat" className="bg-[#0A0A0B] text-white">{t('Wheat')}</option>
+                            <option value="Maize" className="bg-[#0A0A0B] text-white">{t('Maize')}</option>
                           </select>
                         </div>
                         <button 
@@ -3275,9 +3275,9 @@ export default function App() {
                           onChange={e => setUploadData({...uploadData, waste_type: e.target.value})}
                         >
                           {WASTE_CATEGORIES.filter(c => labels.allowedCategories.includes(c)).map(category => (
-                            <optgroup key={category} label={category} className="bg-[#0A0A0B] text-emerald-400">
+                            <optgroup key={category} label={t(category)} className="bg-[#0A0A0B] text-emerald-400">
                               {wasteTypes.filter(w => w.category === category).map(item => (
-                                <option key={item.type} value={item.type} className="bg-[#0A0A0B] text-white">{item.type}</option>
+                                <option key={item.type} value={item.type} className="bg-[#0A0A0B] text-white">{t(item.type)}</option>
                               ))}
                             </optgroup>
                           ))}
@@ -3349,7 +3349,7 @@ export default function App() {
                         </div>
                         <div className="flex justify-between text-xs text-white/40">
                           <span>{t('CCC Value (Offset Market)')}</span>
-                          <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.carbon || 0) * paymentConfig.carbon_price_per_kg).toFixed(2)}</span>
+                          <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.ccc_factor || 0) * paymentConfig.ccc_price_per_kg).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/5">
                           <span>{t('Total Sovereign Value')}</span>
@@ -3357,7 +3357,7 @@ export default function App() {
                             ₹{(
                               parseFloat(uploadData.weight_kg || '0') * 
                               ((wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0) + 
-                               (wasteTypes.find(w => w.type === uploadData.waste_type)?.carbon || 0) * paymentConfig.carbon_price_per_kg)
+                               (wasteTypes.find(w => w.type === uploadData.waste_type)?.ccc_factor || 0) * paymentConfig.ccc_price_per_kg)
                             ).toFixed(2)}
                           </span>
                         </div>
@@ -3422,7 +3422,7 @@ export default function App() {
                       />
                       <label htmlFor="double_counting" className="text-xs text-white/80 leading-relaxed cursor-pointer">
                         <strong className="text-blue-400 block mb-1">Double-Counting Safeguard Declaration</strong>
-                        I declare that this emission reduction is not claimed under Renewable Energy Certificates (RECs), International RECs (I-RECs), or any other mechanism. I understand this is required for Offset Market CCCs under the Carbon Credit Certificates Regulations, 2026.
+                        I declare that this emission reduction is not claimed under Renewable Energy Certificates (RECs), International RECs (I-RECs), or any other mechanism. I understand this is required for Offset Market CCCs under the CCC Certificates Regulations, 2026.
                       </label>
                     </div>
 
@@ -3852,7 +3852,7 @@ export default function App() {
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Weight')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{labels.sub}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Value')}</th>
-                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Carbon Reduction')}</th>
+                        <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('CCC Reduction')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('AI Risk')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Satellite')}</th>
                         <th className="p-4 text-xs uppercase tracking-widest text-white/40 font-mono">{t('Status')}</th>
@@ -3871,7 +3871,7 @@ export default function App() {
                           <td className="p-4 text-sm font-mono">{record.weight_kg} kg</td>
                           <td className="p-4 text-sm text-white/60">{record.village}</td>
                           <td className="p-4 text-sm font-bold text-emerald-400">₹{record.total_value.toFixed(2)}</td>
-                          <td className="p-4 text-sm font-mono text-blue-400">{record.carbon_reduction_kg.toFixed(2)} kg</td>
+                          <td className="p-4 text-sm font-mono text-blue-400">{record.ccc_amount_kg.toFixed(2)} kg</td>
                           <td className="p-4">
                             {record.risk_score !== undefined ? (
                               <span 
@@ -4031,12 +4031,12 @@ export default function App() {
                           
                           <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
                             <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Carbon Reduction')}</p>
-                              <p className="text-lg font-mono text-cyan-400">{record.carbon_reduction_kg?.toFixed(2)} kg</p>
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('CCC Reduction')}</p>
+                              <p className="text-lg font-mono text-cyan-400">{record.ccc_amount_kg?.toFixed(2)} kg</p>
                             </div>
                             <div>
                               <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('CCC Value')}</p>
-                              <p className="text-lg font-bold text-emerald-400">₹{record.potential_carbon_value?.toFixed(2)}</p>
+                              <p className="text-lg font-bold text-emerald-400">₹{record.potential_ccc_value?.toFixed(2)}</p>
                             </div>
                           </div>
 
@@ -4557,11 +4557,11 @@ export default function App() {
                     <Card className="p-6 border-white/5 bg-white/5">
                       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                         <Globe className="text-cyan-400" size={20} />
-                        {t('Carbon Pool Status')}
+                        {t('CCC Pool Status')}
                       </h3>
                       <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5 relative group">
-                        <p className="text-white/40 text-sm uppercase tracking-widest mb-2">{t('Total Minted Carbon Units')}</p>
-                        <p className="text-5xl font-mono text-cyan-400">{carbonPool.total_carbon_units_minted?.toFixed(2) || 0} kg</p>
+                        <p className="text-white/40 text-sm uppercase tracking-widest mb-2">{t('Total Minted CCC Units')}</p>
+                        <p className="text-5xl font-mono text-cyan-400">{cccPool.total_ccc_units_minted?.toFixed(2) || 0} kg</p>
                         <button 
                           onClick={() => setView('blockchain')}
                           className="absolute bottom-4 flex items-center gap-1 text-[10px] text-emerald-400/40 group-hover:text-emerald-400 transition-colors uppercase tracking-widest font-bold"
@@ -4612,7 +4612,7 @@ export default function App() {
                                 <option value="super_admin">{t('Super Admin')}</option>
                                 <option value="csr_partner">{t('CSR Partner')}</option>
                                 <option value="epr_partner">{t('EPR Partner')}</option>
-                                <option value="carbon_buyer">{t('Carbon Buyer')}</option>
+                                <option value="ccc_buyer">{t('CCC Buyer')}</option>
                               </select>
                             </td>
                             <td className="py-4">
@@ -4739,15 +4739,15 @@ export default function App() {
                     <h4 className="font-bold text-emerald-400 mb-4">{t('Global Payment Settings')}</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <label className="text-sm font-medium text-white block mb-2">{t('Carbon Price (₹ per kg CO2)')}</label>
+                        <label className="text-sm font-medium text-white block mb-2">{t('CCC Price (₹ per kg CO2)')}</label>
                         <input 
                           type="number" 
                           step="0.1"
-                          value={paymentConfig.carbon_price_per_kg} 
-                          onChange={(e) => setPaymentConfig(prev => ({ ...prev, carbon_price_per_kg: parseFloat(e.target.value) || 0 }))}
+                          value={paymentConfig.ccc_price_per_kg} 
+                          onChange={(e) => setPaymentConfig(prev => ({ ...prev, ccc_price_per_kg: parseFloat(e.target.value) || 0 }))}
                           className="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
                         />
-                        <p className="text-xs text-white/40 mt-2">{t('Global multiplier for carbon offset value.')}</p>
+                        <p className="text-xs text-white/40 mt-2">{t('Global multiplier for CCC offset value.')}</p>
                       </div>
                       <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                         <label className="text-sm font-medium text-white block mb-2">{t('Logistics Margin (%)')}</label>
@@ -4769,11 +4769,11 @@ export default function App() {
                       if (categoryTypes.length === 0) return null;
                       return (
                         <div key={category} className="bg-black/20 rounded-xl p-4 border border-white/5">
-                          <h4 className="font-bold text-emerald-400 mb-4">{category}</h4>
+                          <h4 className="font-bold text-emerald-400 mb-4">{t(category)}</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {categoryTypes.map(wt => (
                               <div key={wt.type} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                                <div className="font-medium mb-3 text-sm">{wt.type}</div>
+                                <div className="font-medium mb-3 text-sm">{t(wt.type)}</div>
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-xs text-white/40 block mb-1">{t('Base Value (₹/kg)')}</label>
@@ -4793,16 +4793,16 @@ export default function App() {
                                     />
                                   </div>
                                   <div>
-                                    <label className="text-xs text-white/40 block mb-1">{t('Carbon Offset (kg CO2/kg)')}</label>
+                                    <label className="text-xs text-white/40 block mb-1">{t('CCC Offset (kg CO2/kg)')}</label>
                                     <input 
                                       type="number" 
                                       step="0.01"
-                                      value={wt.carbon} 
+                                      value={wt.ccc_factor} 
                                       onChange={(e) => {
                                         const newTypes = [...wasteTypes];
                                         const index = newTypes.findIndex(w => w.type === wt.type);
                                         if (index !== -1) {
-                                          newTypes[index].carbon = parseFloat(e.target.value) || 0;
+                                          newTypes[index].ccc_factor = parseFloat(e.target.value) || 0;
                                           setWasteTypes(newTypes);
                                         }
                                       }}
@@ -5019,7 +5019,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'partner' && ['csr_partner', 'epr_partner', 'carbon_buyer'].includes(user?.role || '') && (
+          {view === 'partner' && ['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '') && (
             <motion.div 
               key="partner"
               initial={{ opacity: 0, x: 20 }}
@@ -5030,7 +5030,7 @@ export default function App() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold">{t('CCC Offset Market')}</h2>
-                  <p className="text-white/40 text-sm">{t('Purchase verified Carbon Credit Certificates (CCCs) to offset your footprint.')}</p>
+                  <p className="text-white/40 text-sm">{t('Purchase verified CCC Certificates (CCCs) to offset your footprint.')}</p>
                   <p className="text-[10px] text-emerald-400 mt-1 uppercase tracking-widest font-bold">CERC Price Band: Floor & Forbearance Prices Apply</p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -5052,59 +5052,55 @@ export default function App() {
                 </div>
               )}
 
-              {availableCredits.length === 0 ? (
+              {availableCCCs.length === 0 ? (
                 <Card className="py-12 text-center border-dashed">
                   <Globe size={48} className="mx-auto text-white/20 mb-4" />
                   <p className="text-white/60 text-lg font-medium">{t('No CCCs available')}</p>
-                  <p className="text-white/40 text-sm mt-2">{t('Check back later for newly verified Carbon Credit Certificates.')}</p>
+                  <p className="text-white/40 text-sm mt-2">{t('Check back later for newly verified CCC Certificates.')}</p>
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {availableCredits.map(credit => (
-                    <Card key={credit.id} className="border-emerald-500/20 relative overflow-hidden group">
+                  {availableCCCs.map(ccc => (
+                    <Card key={ccc.id} className="border-emerald-500/20 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
                         <Leaf size={100} className="text-emerald-400" />
                       </div>
                       <div className="relative z-10">
                         <div className="flex justify-between items-start mb-6">
                           <div>
-                            <p className="text-[10px] font-mono text-white/40 mb-1">ID: {credit.id}</p>
-                            <h4 className="font-bold text-lg">{credit.waste_type}</h4>
+                            <p className="text-[10px] font-mono text-white/40 mb-1">ID: {ccc.id}</p>
+                            <h4 className="font-bold text-lg">{ccc.waste_type}</h4>
                             <p className="text-sm text-white/60 flex items-center gap-1 mt-1">
-                              <MapPin size={12} /> {credit.village}
+                              <MapPin size={12} /> {ccc.village}
                             </p>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded uppercase font-bold border border-emerald-500/20">
-                              {t('Verified')}
-                            </span>
-                            {credit.risk_score !== undefined && (
-                              <span 
-                                className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold border cursor-help ${
-                                  credit.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                  credit.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                          <div className="text-right">
+                            {ccc.risk_score !== undefined && (
+                              <div className={`px-2 py-1 rounded-md text-[10px] font-bold border flex items-center gap-1 ${
+                                  ccc.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  ccc.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                                   'bg-red-500/10 text-red-400 border-red-500/20'
                                 }`}
-                                title={credit.ai_verification_details || "AI Risk Score"}
+                                title={ccc.ai_verification_details || "AI Risk Score"}
                               >
-                                {t('AI Risk')}: {(credit.risk_score * 100).toFixed(0)}%
-                              </span>
+                                {t('AI Risk')}: {(ccc.risk_score * 100).toFixed(0)}%
+                              </div>
                             )}
                           </div>
                         </div>
 
-                        {credit.blockchain_hash && (
+                        {ccc.blockchain_hash && (
                           <div className="mb-4">
                             <button 
                               onClick={() => setView('blockchain')}
                               className="flex items-center gap-1 text-[10px] text-emerald-400/60 hover:text-emerald-400 font-mono transition-colors"
                             >
                               <Cpu size={12} />
-                              {credit.blockchain_hash.substring(0, 12)}...
+                              {ccc.blockchain_hash.substring(0, 12)}...
                             </button>
-                            {credit.registry_serial_number && (
+                            {ccc.registry_serial_number && (
                               <div className="mt-1 text-[10px] text-blue-400 font-mono">
-                                Reg: {credit.registry_serial_number}
+                                Reg: {ccc.registry_serial_number}
                               </div>
                             )}
                           </div>
@@ -5113,21 +5109,21 @@ export default function App() {
                         <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
                           <div>
                             <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Offset')}</p>
-                            <p className="text-lg font-mono text-emerald-400">{credit.carbon_reduction_kg?.toFixed(2)} kg</p>
+                            <p className="text-lg font-mono text-emerald-400">{ccc.ccc_amount_kg?.toFixed(2)} kg</p>
                           </div>
                           <div>
                             <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Price')}</p>
-                            <p className="text-lg font-bold text-white">₹{credit.price?.toFixed(2)}</p>
+                            <p className="text-lg font-bold text-white">₹{ccc.price?.toFixed(2)}</p>
                           </div>
                         </div>
 
                         <button 
-                          onClick={() => handlePurchaseCredits([credit.id])}
-                          disabled={loading || walletBalance < (credit.price || 0)}
+                          onClick={() => handlePurchaseCCCs([ccc.id])}
+                          disabled={loading || walletBalance < (ccc.price || 0)}
                           className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Wallet size={16} />
-                          {walletBalance < (credit.price || 0) ? t('Insufficient Funds') : t('Purchase CCC')}
+                          {walletBalance < (ccc.price || 0) ? t('Insufficient Funds') : t('Purchase CCC')}
                         </button>
                       </div>
                     </Card>
@@ -5204,7 +5200,7 @@ export default function App() {
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/40 cursor-not-allowed"
                       />
                     </div>
-                    {['fpo', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'carbon_buyer', 'regulator', 'super_admin'].includes(user?.role || '') && (
+                    {['fpo', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'ccc_buyer', 'regulator', 'super_admin'].includes(user?.role || '') && (
                       <div className="md:col-span-2">
                         <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Organization Name')}</label>
                         <input 
@@ -5314,13 +5310,13 @@ export default function App() {
                 </h2>
                 <div className="space-y-4 text-white/70 leading-relaxed">
                   <p>
-                    {t('RupayKg has been established as a Unified Waste-to-Carbon Digital Operating System designed to support India’s transition toward a compliance-based carbon market.')}
+                    {t('RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.')}
                   </p>
                   <p>
-                    {t('The platform addresses a structural gap in India’s carbon ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade carbon supply.')}
+                    {t('The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.')}
                   </p>
                   <p>
-                    {t('RupayKg is not structured as a project developer, carbon trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.')}
+                    {t('RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.')}
                   </p>
                 </div>
               </Card>
@@ -5367,7 +5363,7 @@ export default function App() {
                     {[
                       t("Waste Generator"), t("Aggregator"), t("Processor"), 
                       t("Administrative Authority"), t("Producers (EPR)"), 
-                      t("CSR Contributors"), t("Carbon Buyers"), t("Regulator")
+                      t("CSR Contributors"), t("CCC Buyers"), t("Regulator")
                     ].map((s) => (
                       <span key={s} className="px-3 py-1 bg-white/10 rounded-full text-sm border border-white/10">
                         {s}
@@ -5384,7 +5380,7 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="p-8 border-white/10 bg-white/5">
                   <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <Zap className="text-emerald-400" /> {t('IV. Carbon Origination')}
+                    <Zap className="text-emerald-400" /> {t('IV. CCC Origination')}
                   </h2>
                   <ul className="space-y-3 text-white/70">
                     <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> {t('Methane avoidance through diversion')}</li>
@@ -5398,7 +5394,7 @@ export default function App() {
                     <TrendingUp className="text-emerald-400" /> {t('V. Multi-Rail Architecture')}
                   </h2>
                   <div className="grid grid-cols-2 gap-2">
-                    {[t("Recycler Rail"), t("CSR Rail"), t("EPR Rail"), t("Governance Layer"), t("Carbon Rail")].map((r) => (
+                    {[t("Recycler Rail"), t("CSR Rail"), t("EPR Rail"), t("Governance Layer"), t("CCC Rail")].map((r) => (
                       <div key={r} className="p-2 bg-white/5 rounded border border-white/5 text-xs text-center">
                         {r}
                       </div>
@@ -5414,7 +5410,7 @@ export default function App() {
                     <Scale className="text-emerald-400" /> {t('VI. Regulator Sovereignty')}
                   </h2>
                   <p className="text-white/70 text-sm leading-relaxed">
-                    {t('CCC issuance authority remains regulator-controlled. RupayKg does not independently mint CCCs. All CCCs must be event-traceable, registry-compatible, and align with national carbon governance frameworks.')}
+                    {t('CCC issuance authority remains regulator-controlled. RupayKg does not independently mint CCCs. All CCCs must be event-traceable, registry-compatible, and align with national CCC governance frameworks.')}
                   </p>
                 </Card>
 
@@ -5423,7 +5419,7 @@ export default function App() {
                     <Activity className="text-emerald-400" /> {t('VII. Strategic Position')}
                   </h2>
                   <p className="text-lg font-medium text-emerald-400 italic">
-                    {t('"India’s Unified Waste-to-Carbon Infrastructure Layer for the Compliance Carbon Era."')}
+                    {t('"India’s Unified Waste-to-CCC Infrastructure Layer for the Compliance CCC Era."')}
                   </p>
                 </Card>
               </div>
@@ -5436,9 +5432,9 @@ export default function App() {
                 <div className="relative z-10 max-w-3xl">
                   <h2 className="text-3xl font-black mb-8 italic">{t("Founder's Note")}</h2>
                   <div className="space-y-6 text-xl text-white/80 font-light leading-relaxed">
-                    <p>{t('When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated carbon value?')}</p>
-                    <p>{t('India is entering a compliance carbon era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.')}</p>
-                    <p>{t('RupayKg was built to unify them. Not as a carbon trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.')}</p>
+                    <p>{t('When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?')}</p>
+                    <p>{t('India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.')}</p>
+                    <p>{t('RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.')}</p>
                     <p className="text-emerald-400 font-bold">{t('Waste is no longer disposal. It is governance-linked climate infrastructure.')}</p>
                   </div>
                   <p className="mt-12 font-bold text-white/40 uppercase tracking-widest">{t('— Founder, RupayKg')}</p>
@@ -5461,7 +5457,7 @@ export default function App() {
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article II — Unified Stakeholder Doctrine')}</h4>
-                      <p>{t('The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, Carbon Buyers, Regulator.')}</p>
+                      <p>{t('The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.')}</p>
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article III — Waste Classification')}</h4>
@@ -5470,12 +5466,12 @@ export default function App() {
                   </div>
                   <div className="space-y-6">
                     <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article IV — Carbon Engine')}</h4>
-                      <p>{t('All emission reductions shall be processed through a single carbon calculation engine with event-level MRV validation.')}</p>
+                      <h4 className="font-bold text-white mb-2">{t('Article IV — CCC Engine')}</h4>
+                      <p>{t('All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.')}</p>
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article V — Rail Separation')}</h4>
-                      <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, Carbon issuance. Double counting is prohibited.')}</p>
+                      <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.')}</p>
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article VI — Regulator Sovereignty')}</h4>
@@ -5487,7 +5483,7 @@ export default function App() {
                 <div className="mt-12 pt-12 border-t border-white/10 text-center">
                   <p className="text-emerald-400 font-bold text-xl">{t('Institutional Identity')}</p>
                   <p className="text-white/40 mt-2 max-w-2xl mx-auto">
-                    {t('RupayKg is hereby defined as: A Unified Waste-to-Carbon Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned carbon origination capability.')}
+                    {t('RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.')}
                   </p>
                 </div>
               </section>
@@ -5508,7 +5504,7 @@ export default function App() {
                     <Cpu className="text-emerald-400" />
                     {t('GRID-INDIA CCC Ledger')}
                   </h3>
-                  <p className="text-white/40 text-sm mt-1">{t('Verifiable blockchain record of all Carbon Credit Certificate (CCC) minting events')}</p>
+                  <p className="text-white/40 text-sm mt-1">{t('Verifiable blockchain record of all CCC Certificate (CCC) minting events')}</p>
                 </div>
                 {isChainValid !== null && (
                   <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold self-start ${isChainValid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
@@ -5565,8 +5561,8 @@ export default function App() {
                                 <span className="text-sm font-bold text-emerald-400">{block.data.waste_type}</span>
                               </div>
                               <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Carbon (kg)')}</label>
-                                <span className="text-sm font-bold text-cyan-400">{block.data.carbon_reduction_kg}kg</span>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('CCC (kg)')}</label>
+                                <span className="text-sm font-bold text-cyan-400">{block.data.ccc_amount_kg}kg</span>
                               </div>
                               {block.data.registry_serial_number && (
                                 <div className="col-span-2 md:col-span-4 mt-2">

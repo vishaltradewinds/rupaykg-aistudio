@@ -1,6 +1,6 @@
 {
-  "name": "RupayKg Carbon OS - Pilot Engine",
-  "description": "Sovereign-grade waste-to-carbon execution system for Jabalpur pilot, featuring MRV Light, AI-assisted validation, and carbon estimation for informal economies.",
+  "name": "RupayKg CCC OS - Pilot Engine",
+  "description": "Sovereign-grade waste-to-CCC execution system for Jabalpur pilot, featuring MRV Light, AI-assisted validation, and CCC estimation for informal economies.",
   "requestFramePermissions": [
     "geolocation",
     "camera"

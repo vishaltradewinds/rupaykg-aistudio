@@ -60,7 +60,7 @@ CROP_FACTORS = {
 }
 
 # Allowed Roles
-ROLES = ["Generator", "Aggregator", "Recycler", "Municipality", "Carbon Verifier", "Corporate Buyer", "System Admin"]
+ROLES = ["Generator", "Aggregator", "Recycler", "Municipality", "CCC Verifier", "Corporate Buyer", "System Admin"]
 
 # =============================================================================
 # 2. DATABASE & CACHING ABSTRACTION (PRODUCTION + MOCK FALLBACK)
@@ -70,7 +70,7 @@ class MockDB:
     def __init__(self):
         self.collections = {
             "users": {}, "activities": {}, "biomass_records": {},
-            "carbon_records": {}, "wallets": {}, "projects": {},
+            "ccc_records": {}, "wallets": {}, "projects": {},
             "marketplace_listings": {}, "audit_logs": {}
         }
 
@@ -230,9 +230,9 @@ class MRVVerify(BaseModel):
     waste_type: str
     weight_kg: float
 
-class CarbonRegister(BaseModel):
+class CCCRegister(BaseModel):
     activity_id: str
-    carbon_reduction_kg: float
+    ccc_amount_kg: float
 
 class MarketplaceListingCreate(BaseModel):
     material: str
@@ -355,26 +355,26 @@ class MRVEngine:
         
         # Calculation: (Weight in tons) * Emission Factor
         tons = weight_kg / 1000.0
-        carbon_reduction_kg = (tons * factor) * 1000
-        return carbon_reduction_kg
+        ccc_amount_kg = (tons * factor) * 1000
+        return ccc_amount_kg
 
-class CarbonRegistry:
+class CCCRegistry:
     @staticmethod
-    async def issue_credits(user_id: str, carbon_kg: float):
+    async def issue_credits(user_id: str, ccc_amount_kg: float):
         wallet = await db.find_one("wallets", {"user_id": user_id})
         if not wallet:
-            wallet_id = await db.insert_one("wallets", {"user_id": user_id, "carbon_credits": 0, "balance_inr": 0})
+            wallet_id = await db.insert_one("wallets", {"user_id": user_id, "cccs": 0, "balance_inr": 0})
             wallet = await db.find_one("wallets", {"_id": wallet_id})
         
-        new_balance = wallet["carbon_credits"] + carbon_kg
-        await db.update_one("wallets", {"user_id": user_id}, {"$set": {"carbon_credits": new_balance}})
+        new_balance = wallet["cccs"] + ccc_amount_kg
+        await db.update_one("wallets", {"user_id": user_id}, {"$set": {"cccs": new_balance}})
         return new_balance
 
 # =============================================================================
 # 7. FASTAPI APPLICATION INITIALIZATION
 # =============================================================================
 app = FastAPI(
-    title="RupayKg - Google Maps of Waste and Carbon",
+    title="RupayKg - Google Maps of Waste and CCCs",
     description="National Digital Public Infrastructure for Environmental MRV",
     version="2.0.0"
 )
@@ -429,7 +429,7 @@ async def register(user: UserCreate):
     user_dict["created_at"] = datetime.utcnow().isoformat()
     
     user_id = await db.insert_one("users", user_dict)
-    await db.insert_one("wallets", {"user_id": user_id, "carbon_credits": 0.0, "balance_inr": 0.0})
+    await db.insert_one("wallets", {"user_id": user_id, "cccs": 0.0, "balance_inr": 0.0})
     
     return {"message": "User registered successfully", "user_id": user_id}
 
@@ -488,35 +488,35 @@ async def estimate_biomass(data: BiomassEstimate, current_user: dict = Depends(g
     return {"estimated_tons": estimated_tons, "record_id": record_id}
 
 @app.post("/mrv/verify")
-async def verify_mrv(data: MRVVerify, current_user: dict = Depends(require_role(["Carbon Verifier", "System Admin"]))):
+async def verify_mrv(data: MRVVerify, current_user: dict = Depends(require_role(["CCC Verifier", "System Admin"]))):
     activity = await db.find_one("activities", {"_id": data.activity_id})
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
         
-    carbon_reduction_kg = await MRVEngine.calculate(data.waste_type, data.weight_kg)
+    ccc_amount_kg = await MRVEngine.calculate(data.waste_type, data.weight_kg)
     
     await db.update_one("activities", {"_id": data.activity_id}, {"$set": {"status": "verified"}})
     
-    return {"activity_id": data.activity_id, "carbon_reduction_kg": carbon_reduction_kg, "status": "verified"}
+    return {"activity_id": data.activity_id, "ccc_amount_kg": ccc_amount_kg, "status": "verified"}
 
-@app.post("/carbon/register")
-async def register_carbon(data: CarbonRegister, current_user: dict = Depends(require_role(["Carbon Verifier", "System Admin"]))):
+@app.post("/ccc/register")
+async def register_ccc(data: CCCRegister, current_user: dict = Depends(require_role(["CCC Verifier", "System Admin"]))):
     activity = await db.find_one("activities", {"_id": data.activity_id})
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
         
     # Issue credits to the original generator
     generator_id = activity["user_id"]
-    new_balance = await CarbonRegistry.issue_credits(generator_id, data.carbon_reduction_kg)
+    new_balance = await CCCRegistry.issue_credits(generator_id, data.ccc_amount_kg)
     
-    record_id = await db.insert_one("carbon_records", {
+    record_id = await db.insert_one("ccc_records", {
         "activity_id": data.activity_id,
-        "carbon_reduction_kg": data.carbon_reduction_kg,
+        "ccc_amount_kg": data.ccc_amount_kg,
         "issued_to": generator_id,
         "timestamp": datetime.utcnow().isoformat()
     })
     
-    return {"message": "Carbon credits registered", "record_id": record_id, "generator_new_balance": new_balance}
+    return {"message": "CCCs registered", "record_id": record_id, "generator_new_balance": new_balance}
 
 @app.post("/marketplace/list")
 async def create_listing(listing: MarketplaceListingCreate, current_user: dict = Depends(get_current_user)):
@@ -576,17 +576,17 @@ async def get_dashboard(current_user: dict = Depends(get_current_user)):
     
     stats = {
         "wallet_balance_inr": wallet["balance_inr"] if wallet else 0,
-        "carbon_credits_kg": wallet["carbon_credits"] if wallet else 0,
+        "cccs_kg": wallet["cccs"] if wallet else 0,
     }
     
-    if role in ["System Admin", "Municipality", "Carbon Verifier"]:
+    if role in ["System Admin", "Municipality", "CCC Verifier"]:
         all_activities = await db.find("activities")
-        carbon_records = await db.find("carbon_records")
+        ccc_records = await db.find("ccc_records")
         users = await db.find("users")
         listings = await db.find("marketplace_listings", {"status": "active"})
         
         stats["total_waste_tracked_kg"] = sum(a.get("weight_kg", 0) for a in all_activities)
-        stats["total_carbon_reduced_kg"] = sum(c.get("carbon_reduction_kg", 0) for c in carbon_records)
+        stats["total_ccc_amount_reduced_kg"] = sum(c.get("ccc_amount_kg", 0) for c in ccc_records)
         stats["active_users"] = len(users)
         stats["active_listings"] = len(listings)
     else:
@@ -605,7 +605,7 @@ FRONTEND_HTML = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RupayKg - Google Maps of Waste and Carbon</title>
+    <title>RupayKg - Google Maps of Waste and CCCs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -703,7 +703,7 @@ FRONTEND_HTML = """
                                             <option>Aggregator</option>
                                             <option>Recycler</option>
                                             <option>Municipality</option>
-                                            <option>Carbon Verifier</option>
+                                            <option>CCC Verifier</option>
                                             <option>Corporate Buyer</option>
                                             <option>System Admin</option>
                                         </select>
@@ -758,7 +758,7 @@ FRONTEND_HTML = """
                     map.current.on('load', () => {
                         // Add Heatmap Layer for Carbon Reduction
                         if (mapData.heatmaps.length > 0) {
-                            map.current.addSource('carbon-heat', {
+                            map.current.addSource('ccc-heat', {
                                 type: 'geojson',
                                 data: {
                                     type: 'FeatureCollection',
@@ -770,9 +770,9 @@ FRONTEND_HTML = """
                                 }
                             });
                             map.current.addLayer({
-                                id: 'carbon-heat-layer',
+                                id: 'ccc-heat-layer',
                                 type: 'heatmap',
-                                source: 'carbon-heat',
+                                source: 'ccc-heat',
                                 paint: {
                                     'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 1000, 1],
                                     'heatmap-intensity': 1,
@@ -913,8 +913,8 @@ FRONTEND_HTML = """
                         {stats && (
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                                 <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 border-l-4 border-l-green-500">
-                                    <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Carbon Wallet</div>
-                                    <div className="mt-2 text-3xl font-bold text-gray-900">{stats.carbon_credits_kg?.toLocaleString() || 0} <span className="text-lg text-gray-500">kg CO2e</span></div>
+                                    <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">CCC Wallet</div>
+                                    <div className="mt-2 text-3xl font-bold text-gray-900">{stats.cccs_kg?.toLocaleString() || 0} <span className="text-lg text-gray-500">kg CO2e</span></div>
                                 </div>
                                 <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 border-l-4 border-l-blue-500">
                                     <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">INR Balance</div>
@@ -927,8 +927,8 @@ FRONTEND_HTML = """
                                             <div className="mt-2 text-3xl font-bold text-gray-900">{stats.total_waste_tracked_kg?.toLocaleString() || 0} <span className="text-lg text-gray-500">kg</span></div>
                                         </div>
                                         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 border-l-4 border-l-yellow-500">
-                                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Carbon Reduced</div>
-                                            <div className="mt-2 text-3xl font-bold text-gray-900">{stats.total_carbon_reduced_kg?.toLocaleString() || 0} <span className="text-lg text-gray-500">kg</span></div>
+                                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total CCCs Generated</div>
+                                            <div className="mt-2 text-3xl font-bold text-gray-900">{stats.total_ccc_amount_reduced_kg?.toLocaleString() || 0} <span className="text-lg text-gray-500">kg</span></div>
                                         </div>
                                     </>
                                 )}
@@ -959,7 +959,7 @@ FRONTEND_HTML = """
                                     <div className="flex space-x-4 text-xs">
                                         <span className="flex items-center"><span className="w-3 h-3 rounded-full bg-blue-500 mr-1 shadow-[0_0_5px_rgba(59,130,246,0.8)]"></span> Waste Points</span>
                                         <span className="flex items-center"><span className="w-3 h-3 rounded-full bg-emerald-500 mr-1 shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span> Biomass Zones</span>
-                                        <span className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-1 opacity-70"></span> Carbon Heatmap</span>
+                                        <span className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-1 opacity-70"></span> CCC Heatmap</span>
                                     </div>
                                 </div>
                                 <div className="p-0">
@@ -977,7 +977,7 @@ FRONTEND_HTML = """
                                         <li className="flex items-start"><i className="fa-solid fa-check text-green-500 mt-1 mr-2"></i> <strong>Fraud Detection:</strong> AI analyzes weight anomalies and rate limits.</li>
                                         <li className="flex items-start"><i className="fa-solid fa-check text-green-500 mt-1 mr-2"></i> <strong>Geospatial Sync:</strong> Google Earth Engine verifies land cover type.</li>
                                         <li className="flex items-start"><i className="fa-solid fa-check text-green-500 mt-1 mr-2"></i> <strong>MRV Engine:</strong> Climatiq API calculates exact tCO2e reduction.</li>
-                                        <li className="flex items-start"><i className="fa-solid fa-check text-green-500 mt-1 mr-2"></i> <strong>Registry:</strong> Credits are minted to your Carbon Wallet.</li>
+                                        <li className="flex items-start"><i className="fa-solid fa-check text-green-500 mt-1 mr-2"></i> <strong>Registry:</strong> Credits are minted to your CCC Wallet.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -1034,13 +1034,13 @@ async def startup_event():
             "role": "System Admin",
             "created_at": datetime.utcnow().isoformat()
         })
-        await db.insert_one("wallets", {"user_id": user_id, "carbon_credits": 1500.5, "balance_inr": 250000.0})
+        await db.insert_one("wallets", {"user_id": user_id, "cccs": 1500.5, "balance_inr": 250000.0})
         
         # Seed some dummy activities for the map
         await db.insert_one("activities", {"user_id": user_id, "waste_type": "Plastic", "weight_kg": 1200, "lat": 28.6139, "lng": 77.2090, "status": "verified"})
         await db.insert_one("activities", {"user_id": user_id, "waste_type": "Organic", "weight_kg": 3400, "lat": 19.0760, "lng": 72.8777, "status": "verified"})
         await db.insert_one("biomass_records", {"user_id": user_id, "crop_type": "Wheat", "hectares": 10, "estimated_tons": 18, "lat": 30.9010, "lng": 75.8573})
-        await db.insert_one("carbon_records", {"activity_id": "mock1", "carbon_reduction_kg": 3240, "issued_to": user_id})
+        await db.insert_one("ccc_records", {"activity_id": "mock1", "ccc_amount_kg": 3240, "issued_to": user_id})
 
 # =============================================================================
 # RUNNER

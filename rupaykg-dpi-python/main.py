@@ -28,9 +28,9 @@ class BiomassEstimateRequest(BaseModel):
     crop_type: str
     hectares: float
 
-class CarbonRegisterRequest(BaseModel):
+class CCCRegisterRequest(BaseModel):
     activity_id: str
-    carbon_reduction_kg: float
+    ccc_amount_kg: float
 
 # --- ROUTES ---
 
@@ -51,12 +51,12 @@ async def record_activity(payload: ActivityPayload):
     location_verified = FraudDetectionService.verify_activity_location(payload.lat, payload.lng)
     
     # 3. MRV Calculation (Climatiq / OpenGHG)
-    carbon_credits = MRVEngine.calculate_emission_reduction(payload.quantity_kg, payload.waste_type)
+    cccs = MRVEngine.calculate_emission_reduction(payload.quantity_kg, payload.waste_type)
     
     return {
         "status": "success",
         "message": "Activity recorded successfully",
-        "carbon_credits_generated": carbon_credits,
+        "cccs_generated": cccs,
         "location_verified": location_verified
     }
 
@@ -81,19 +81,19 @@ async def estimate_biomass(payload: BiomassEstimateRequest):
 @app.post("/mrv/verify")
 async def verify_mrv(activity_id: str, waste_type: str, quantity_kg: float):
     # Verifies activity and calculates emission reduction
-    carbon_credits = MRVEngine.calculate_emission_reduction(quantity_kg, waste_type)
+    cccs = MRVEngine.calculate_emission_reduction(quantity_kg, waste_type)
     return {
         "activity_id": activity_id,
         "verified": True,
-        "carbon_reduction_kg": carbon_credits
+        "ccc_amount_kg": cccs
     }
 
-@app.post("/carbon/register")
-async def register_carbon(payload: CarbonRegisterRequest):
-    # Submits verified environmental activity to carbon registries
+@app.post("/ccc/register")
+async def register_ccc(payload: CCCRegisterRequest):
+    # Submits verified environmental activity to CCC registries
     return {
         "status": "success",
-        "message": "Carbon credits registered successfully",
+        "message": "CCCs registered successfully",
         "registry_id": f"REG-{payload.activity_id}-{datetime.datetime.now().timestamp()}"
     }
 
@@ -114,7 +114,7 @@ async def get_map_data():
         "waste_points": [{"lat": 28.6139, "lng": 77.2090, "type": "Plastic", "weight": 50}],
         "biomass_zones": [{"lat": 28.7041, "lng": 77.1025, "crop": "Rice", "area": 10}],
         "heatmaps": {
-            "carbon_reduction": [{"lat": 28.6139, "lng": 77.2090, "intensity": 135}]
+            "ccc_generation": [{"lat": 28.6139, "lng": 77.2090, "intensity": 135}]
         }
     }
 
