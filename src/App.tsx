@@ -268,19 +268,19 @@ const NetworkNode = ({ x, y, delay = 0 }: { x: string, y: string, delay?: number
 // --- COMPONENTS ---
 
 const Card = ({ children, className = "", ...props }: { children: React.ReactNode, className?: string, [key: string]: any }) => (
-  <div className={`bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm ${className}`} {...props}>
+  <div className={`os-card rounded-2xl p-6 ${className}`} {...props}>
     {children}
   </div>
 );
 
 const Stat = ({ label, value, icon: Icon, color = "emerald", blockchainLink = false, setView }: { label: string, value: string | number, icon: any, color?: string, blockchainLink?: boolean, setView?: (v: any) => void }) => (
   <Card className="flex items-center gap-4 relative group">
-    <div className={`p-3 rounded-xl bg-${color}-500/20 text-${color}-400`}>
+    <div className={`p-3 rounded-xl bg-${color}-500/10 text-${color}-400 border border-${color}-500/20`}>
       <Icon size={24} />
     </div>
     <div>
-      <p className="text-xs uppercase tracking-wider text-white/40 font-mono">{label}</p>
-      <p className="text-2xl font-semibold text-white">{value}</p>
+      <p className="meta-label text-white/50">{label}</p>
+      <p className="text-3xl font-bold tracking-tight text-white mt-1">{value}</p>
       {blockchainLink && setView && (
         <button 
           onClick={() => setView('blockchain')}
@@ -1231,9 +1231,9 @@ export default function App() {
   if (!token) {
     if (!showAuth) {
       return (
-        <div className="min-h-screen bg-[#0A0A0B] text-white font-sans overflow-hidden">
+        <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans overflow-hidden">
           {/* Navigation */}
-          <nav className="flex items-center justify-between p-6 md:px-12 border-b border-white/10 bg-[#0A0A0B]/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
+          <nav className="flex items-center justify-between p-6 md:px-12 border-b border-white/10 bg-[var(--color-bg)]/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-emerald-500 rounded-xl text-black">
                 <Leaf size={24} />
@@ -1586,12 +1586,12 @@ export default function App() {
     }
 
     return (
-      <div className="min-h-screen bg-[#0A0A0B] text-white flex items-center justify-center p-4 font-sans relative">
+      <div className="min-h-screen bg-[var(--color-bg)] text-white flex items-center justify-center p-4 font-sans relative">
         <div className="absolute top-6 right-6 z-50">
           <div className="relative">
             <button 
               onClick={() => setShowLangDropdown(!showLangDropdown)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium bg-[#0A0A0B]/80 backdrop-blur-md"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium bg-[var(--color-bg)]/80 backdrop-blur-md"
             >
               <Globe size={16} />
               {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
@@ -1692,16 +1692,16 @@ export default function App() {
                       value={formData.role}
                       onChange={e => setFormData({...formData, role: e.target.value})}
                     >
-                      {labels.allowedRoles.includes('citizen') && <option value="citizen" className="bg-[#0A0A0B]">{labels.citizenLabel}</option>}
-                      {labels.allowedRoles.includes('aggregator') && <option value="aggregator" className="bg-[#0A0A0B]">{t('Aggregator (Collection & Transport)')}</option>}
-                      {labels.allowedRoles.includes('processor') && <option value="processor" className="bg-[#0A0A0B]">{t('Processor (Recycler)')}</option>}
-                      {labels.allowedRoles.includes('csr_partner') && <option value="csr_partner" className="bg-[#0A0A0B]">{t('CSR Partner')}</option>}
-                      {labels.allowedRoles.includes('epr_partner') && <option value="epr_partner" className="bg-[#0A0A0B]">{t('EPR Partner')}</option>}
-                      {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[#0A0A0B]">{labels.anchor} {t('Admin')}</option>}
-                      {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[#0A0A0B]">{t('State Admin')}</option>}
-                      {labels.allowedRoles.includes('ccc_buyer') && <option value="ccc_buyer" className="bg-[#0A0A0B]">{t('CCC Buyer')}</option>}
-                      {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[#0A0A0B]">{t('National Regulator')}</option>}
-                      {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[#0A0A0B]">{t('Super Admin')}</option>}
+                      {labels.allowedRoles.includes('citizen') && <option value="citizen" className="bg-[var(--color-bg)]">{labels.citizenLabel}</option>}
+                      {labels.allowedRoles.includes('aggregator') && <option value="aggregator" className="bg-[var(--color-bg)]">{t('Aggregator (Collection & Transport)')}</option>}
+                      {labels.allowedRoles.includes('processor') && <option value="processor" className="bg-[var(--color-bg)]">{t('Processor (Recycler)')}</option>}
+                      {labels.allowedRoles.includes('csr_partner') && <option value="csr_partner" className="bg-[var(--color-bg)]">{t('CSR Partner')}</option>}
+                      {labels.allowedRoles.includes('epr_partner') && <option value="epr_partner" className="bg-[var(--color-bg)]">{t('EPR Partner')}</option>}
+                      {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[var(--color-bg)]">{labels.anchor} {t('Admin')}</option>}
+                      {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[var(--color-bg)]">{t('State Admin')}</option>}
+                      {labels.allowedRoles.includes('ccc_buyer') && <option value="ccc_buyer" className="bg-[var(--color-bg)]">{t('CCC Buyer')}</option>}
+                      {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[var(--color-bg)]">{t('National Regulator')}</option>}
+                      {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[var(--color-bg)]">{t('Super Admin')}</option>}
                     </select>
                   </div>
                   
@@ -2491,7 +2491,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-white font-sans">
+    <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans">
       <Helmet>
         <title>{view.charAt(0).toUpperCase() + view.slice(1)} | RupayKg - National Digital Public Infrastructure</title>
         <meta name="description" content={`RupayKg ${view} - National Digital Public Infrastructure for Waste Management and CCC Certificates (CCCs).`} />
@@ -2894,13 +2894,13 @@ export default function App() {
                         onChange={(e) => setAdminRoleFilter(e.target.value)}
                         className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
                       >
-                        <option value="all" className="bg-[#0A0A0B]">{t('All Roles')}</option>
-                        <option value="citizen" className="bg-[#0A0A0B]">{operatingContext === 'urban' ? t('Citizens') : t('Farmers / FPOs')}</option>
-                        <option value="aggregator" className="bg-[#0A0A0B]">{t('Aggregators')}</option>
-                        <option value="processor" className="bg-[#0A0A0B]">{t('Processors')}</option>
-                        <option value="csr_partner" className="bg-[#0A0A0B]">{t('CSR Partners')}</option>
-                        <option value="epr_partner" className="bg-[#0A0A0B]">{t('EPR Partners')}</option>
-                        <option value="ccc_buyer" className="bg-[#0A0A0B]">{t('CCC Buyers')}</option>
+                        <option value="all" className="bg-[var(--color-bg)]">{t('All Roles')}</option>
+                        <option value="citizen" className="bg-[var(--color-bg)]">{operatingContext === 'urban' ? t('Citizens') : t('Farmers / FPOs')}</option>
+                        <option value="aggregator" className="bg-[var(--color-bg)]">{t('Aggregators')}</option>
+                        <option value="processor" className="bg-[var(--color-bg)]">{t('Processors')}</option>
+                        <option value="csr_partner" className="bg-[var(--color-bg)]">{t('CSR Partners')}</option>
+                        <option value="epr_partner" className="bg-[var(--color-bg)]">{t('EPR Partners')}</option>
+                        <option value="ccc_buyer" className="bg-[var(--color-bg)]">{t('CCC Buyers')}</option>
                       </select>
                     </div>
                   </div>
@@ -3253,9 +3253,9 @@ export default function App() {
                             value={uploadData.crop_type}
                             onChange={e => setUploadData({...uploadData, crop_type: e.target.value})}
                           >
-                            <option value="Rice" className="bg-[#0A0A0B] text-white">{t('Rice')}</option>
-                            <option value="Wheat" className="bg-[#0A0A0B] text-white">{t('Wheat')}</option>
-                            <option value="Maize" className="bg-[#0A0A0B] text-white">{t('Maize')}</option>
+                            <option value="Rice" className="bg-[var(--color-bg)] text-white">{t('Rice')}</option>
+                            <option value="Wheat" className="bg-[var(--color-bg)] text-white">{t('Wheat')}</option>
+                            <option value="Maize" className="bg-[var(--color-bg)] text-white">{t('Maize')}</option>
                           </select>
                         </div>
                         <button 
@@ -3275,9 +3275,9 @@ export default function App() {
                           onChange={e => setUploadData({...uploadData, waste_type: e.target.value})}
                         >
                           {WASTE_CATEGORIES.filter(c => labels.allowedCategories.includes(c)).map(category => (
-                            <optgroup key={category} label={t(category)} className="bg-[#0A0A0B] text-emerald-400">
+                            <optgroup key={category} label={t(category)} className="bg-[var(--color-bg)] text-emerald-400">
                               {wasteTypes.filter(w => w.category === category).map(item => (
-                                <option key={item.type} value={item.type} className="bg-[#0A0A0B] text-white">{t(item.type)}</option>
+                                <option key={item.type} value={item.type} className="bg-[var(--color-bg)] text-white">{t(item.type)}</option>
                               ))}
                             </optgroup>
                           ))}
