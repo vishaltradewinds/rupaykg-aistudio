@@ -298,9 +298,34 @@ async function startServer() {
   }
 
   // ---------------- AUTH ROUTES ----------------
+  const PUBLIC_ROLES = ["citizen", "fpo", "csr_partner", "epr_partner", "ccc_buyer"];
+  const ADMIN_ROLES = ["super_admin", "state_admin", "municipal_admin", "regulator"];
+
   app.post("/api/register", async (req, res) => {
     const { phone, password, role, name, district, state, organization_name } = req.body;
     
+    // Security check: prevent self-registration of admin roles
+    if (ADMIN_ROLES.includes(role)) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return res.status(403).json({ error: "Administrative roles must be created by an existing administrator" });
+      }
+      
+      const token = authHeader.split(" ")[1];
+      try {
+        const decoded = jwt.verify(token, publicKey, { algorithms: ["RS256"] }) as any;
+        if (decoded.role !== "super_admin" && decoded.role !== "state_admin") {
+          return res.status(403).json({ error: "Forbidden: Only super admins or state admins can create administrative accounts" });
+        }
+      } catch (err) {
+        return res.status(401).json({ error: "Invalid or expired administrator token" });
+      }
+    }
+
+    if (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role)) {
+      return res.status(400).json({ error: "Invalid role specified" });
+    }
+
     if (dbStatus === "connected") {
       const existingUser = await User.findOne({ phone });
       if (existingUser) return res.status(400).json({ error: "User already exists" });
@@ -329,7 +354,7 @@ async function startServer() {
       users.push(newUser);
     }
 
-    res.json({ message: "Registered successfully" });
+    res.json({ message: "Registered successfully", role });
   });
 
   app.post("/api/login", async (req, res) => {
@@ -345,7 +370,13 @@ async function startServer() {
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     // Handle legacy plain text passwords for mock data, and bcrypt for new users
-    const isMatch = user.password === password || await bcrypt.compare(password, user.password).catch(() => false);
+    let isMatch = false;
+    try {
+      isMatch = await bcrypt.compare(password, user.password);
+    } catch (e) {
+      // Fallback for legacy plain text passwords in mock data
+      isMatch = user.password === password;
+    }
     
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
@@ -1739,7 +1770,7 @@ async function startServer() {
     }
   });
 
-  app.post("/api/ai/fast-categorize", async (req, res) => {
+  app.post("/api/ai/fast-categorize", auth(), async (req, res) => {
     const { description } = req.body;
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "Gemini API key not configured" });

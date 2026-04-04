@@ -970,9 +970,14 @@ export default function App() {
     setMessage(null);
     try {
       const endpoint = authMode === 'login' ? '/api/login' : '/api/register';
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(formData)
       });
       const data = await res.json();
@@ -1034,7 +1039,7 @@ export default function App() {
     try {
       const res = await fetch('/api/ai/fast-categorize', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ description })
       });
       if (res.ok) {
@@ -1697,11 +1702,17 @@ export default function App() {
                       {labels.allowedRoles.includes('processor') && <option value="processor" className="bg-[var(--color-bg)]">{t('Processor (Recycler)')}</option>}
                       {labels.allowedRoles.includes('csr_partner') && <option value="csr_partner" className="bg-[var(--color-bg)]">{t('CSR Partner')}</option>}
                       {labels.allowedRoles.includes('epr_partner') && <option value="epr_partner" className="bg-[var(--color-bg)]">{t('EPR Partner')}</option>}
-                      {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[var(--color-bg)]">{labels.anchor} {t('Admin')}</option>}
-                      {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[var(--color-bg)]">{t('State Admin')}</option>}
                       {labels.allowedRoles.includes('ccc_buyer') && <option value="ccc_buyer" className="bg-[var(--color-bg)]">{t('CCC Buyer')}</option>}
-                      {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[var(--color-bg)]">{t('National Regulator')}</option>}
-                      {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[var(--color-bg)]">{t('Super Admin')}</option>}
+                      
+                      {/* Administrative roles only visible to existing admins */}
+                      {(user?.role === 'super_admin' || user?.role === 'state_admin') && (
+                        <>
+                          {labels.allowedRoles.includes('municipal_admin') && <option value="municipal_admin" className="bg-[var(--color-bg)]">{labels.anchor} {t('Admin')}</option>}
+                          {labels.allowedRoles.includes('state_admin') && <option value="state_admin" className="bg-[var(--color-bg)]">{t('State Admin')}</option>}
+                          {labels.allowedRoles.includes('regulator') && <option value="regulator" className="bg-[var(--color-bg)]">{t('National Regulator')}</option>}
+                          {labels.allowedRoles.includes('super_admin') && <option value="super_admin" className="bg-[var(--color-bg)]">{t('Super Admin')}</option>}
+                        </>
+                      )}
                     </select>
                   </div>
                   
