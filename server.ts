@@ -371,9 +371,9 @@ async function startServer() {
 
     // Handle legacy plain text passwords for mock data, and bcrypt for new users
     let isMatch = false;
-    try {
+    if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$'))) {
       isMatch = await bcrypt.compare(password, user.password);
-    } catch (e) {
+    } else {
       // Fallback for legacy plain text passwords in mock data
       isMatch = user.password === password;
     }
