@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Mic, MapPin, Volume2, Loader2, StopCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { ai } from "../lib/gemini";
 import { useTranslation } from 'react-i18next';
 
 interface Message {
@@ -53,24 +55,34 @@ export const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userMsg.text, 
-          useMaps, 
-          lat: location?.lat, 
-          lng: location?.lng,
-          lang: i18n.language
-        })
-      });
-      const data = await res.json();
+      const systemInstruction = `You are RupayKg AI, an expert in waste management, CCC Certificates (CCCs), and environmental sustainability. Provide concise and helpful answers. The user's preferred language is ${i18n.language || 'en'}. Respond in that language if possible.`;
+      
+      let response;
+      if (useMaps && location) {
+        response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: userMsg.text,
+          config: {
+            systemInstruction,
+            tools: [{ googleMaps: {} }],
+            toolConfig: {
+              retrievalConfig: { latLng: { latitude: location.lat, longitude: location.lng } }
+            }
+          }
+        });
+      } else {
+        response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: userMsg.text,
+          config: { systemInstruction }
+        });
+      }
       
       setMessages(prev => [...prev, { 
         id: (Date.now() + 1).toString(), 
         role: 'ai', 
-        text: data.text,
-        chunks: data.chunks
+        text: response.text || t('Sorry, I could not generate a response.'),
+        chunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks
       }]);
     } catch (err) {
       console.error(err);
@@ -105,14 +117,19 @@ export const Chatbot = () => {
             
             setIsLoading(true);
             try {
-              const res = await fetch('/api/ai/transcribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ audioBase64: base64Audio, mimeType: mimeInfo.split(':')[1] })
+              const response = await ai.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: [
+                  {
+                    parts: [
+                      { inlineData: { data: base64Audio, mimeType: mimeInfo.split(':')[1] } },
+                      { text: "Transcribe the following audio accurately." }
+                    ]
+                  }
+                ]
               });
-              const data = await res.json();
-              if (data.text) {
-                setInput(prev => prev + (prev ? ' ' : '') + data.text);
+              if (response.text) {
+                setInput(prev => prev + (prev ? ' ' : '') + response.text);
               }
             } catch (err) {
               console.error(err);
@@ -141,15 +158,18 @@ export const Chatbot = () => {
     setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: true } : m));
 
     try {
-      const res = await fetch('/api/ai/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
+        contents: [{ parts: [{ text }] }],
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
+        }
       });
-      const data = await res.json();
+      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       
-      if (data.audio) {
-        const audio = new Audio(`data:audio/mp3;base64,${data.audio}`);
+      if (base64Audio) {
+        const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
         currentAudioRef.current = audio;
         audio.onended = () => {
           setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));

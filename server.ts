@@ -5,7 +5,6 @@ import fs from "fs";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
@@ -498,7 +497,7 @@ async function startServer() {
   });
 
   app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
-    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage, double_counting_declaration } = req.body;
+    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage, double_counting_declaration, ai_risk_score, ai_verification_details } = req.body;
     
     const wasteConfig = dynamicWasteTypes.find(w => w.type === waste_type) || { value: 5, ccc_factor: 0.5 };
     const base_value = weight_kg * wasteConfig.value;
@@ -506,61 +505,13 @@ async function startServer() {
     const potential_ccc_value = ccc_amount_kg * paymentConfig.ccc_price_per_kg;
     const total_value = base_value + potential_ccc_value;
     
-    // AI Risk Score Calculation
-    let risk_score = 0;
-    let ai_verification_details = "AI Verification Skipped";
+    // AI Risk Score from Frontend
+    let risk_score = ai_risk_score !== undefined ? ai_risk_score : 0;
+    let verification_details = ai_verification_details || "AI Verification Skipped";
     
-    if (image_url && process.env.GEMINI_API_KEY) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const [mimeInfo, base64Data] = image_url.split(';base64,');
-        const mimeType = mimeInfo.split(':')[1];
-        
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-pro-preview",
-          contents: {
-            parts: [
-              {
-                inlineData: {
-                  mimeType: mimeType,
-                  data: base64Data
-                }
-              },
-              {
-                text: `Analyze this image of waste. The user claims it is ${weight_kg} kg of ${waste_type}. 
-                1. Does the image appear to contain ${waste_type}? 
-                2. Does the volume look plausible for ${weight_kg} kg?
-                Provide a brief assessment and a risk score between 0.0 (perfect match) and 1.0 (completely fake/mismatched).
-                Return JSON in this format: {"risk_score": number, "assessment": "string"}`
-              }
-            ]
-          },
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                risk_score: { type: Type.NUMBER },
-                assessment: { type: Type.STRING }
-              },
-              required: ["risk_score", "assessment"]
-            }
-          }
-        });
-        
-        const aiResult = JSON.parse(response.text || "{}");
-        if (typeof aiResult.risk_score === 'number') {
-          risk_score += aiResult.risk_score;
-          ai_verification_details = aiResult.assessment;
-        }
-      } catch (err) {
-        console.error("AI Verification failed:", err);
-        risk_score += 0.2;
-        ai_verification_details = "AI Verification Failed due to an error.";
-      }
-    } else {
+    if (!image_url) {
       risk_score += 0.2;
-      ai_verification_details = "No image provided for AI verification.";
+      verification_details = "No image provided for AI verification.";
     }
     
     // 1. Geolocation accuracy (mock: if missing, high risk)
@@ -590,7 +541,7 @@ async function startServer() {
       acreage: acreage || 0,
       double_counting_declaration: double_counting_declaration || false,
       risk_score,
-      ai_verification_details,
+      ai_verification_details: verification_details,
       satellite_verification,
       context: context || "rural", // Default to rural if not provided
       status: "pending_pickup",
@@ -1553,7 +1504,7 @@ async function startServer() {
   });
 
   app.post("/api/pilot/validate", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), async (req, res) => {
-    const { record_id } = req.body;
+    const { record_id, validationScore, validationExplanation } = req.body;
     
     let record;
     if (dbStatus === "connected") {
@@ -1564,56 +1515,25 @@ async function startServer() {
     
     if (!record) return res.status(404).json({ error: "Record not found" });
 
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const score = validationScore || 100;
+    const explanation = validationExplanation || "Manual validation";
 
-    try {
-      const prompt = `Validate this pilot waste collection record for Jabalpur: ${JSON.stringify(record)}. 
-      Check for:
-      1. Unrealistic weight (e.g., > 5000kg for a single manual collection).
-      2. Duplicate patterns.
-      3. Volume inconsistencies for waste type.
-      Assign a confidence score (0-100) and a brief explanation. Return as JSON.`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              confidence_score: { type: Type.NUMBER },
-              explanation: { type: Type.STRING }
-            }
-          }
+    if (dbStatus === "connected") {
+      await PilotRecord.updateOne(
+        { id: record_id },
+        { 
+          validationScore: score,
+          validationExplanation: explanation,
+          status: score > 70 ? 'validated' : 'flagged'
         }
-      });
-
-      const result = JSON.parse(response.text || "{}");
-      
-      if (dbStatus === "connected") {
-        await PilotRecord.updateOne(
-          { id: record_id },
-          { 
-            validationScore: result.confidence_score,
-            validationExplanation: result.explanation,
-            status: result.confidence_score > 70 ? 'validated' : 'flagged'
-          }
-        );
-      } else {
-        record.validationScore = result.confidence_score;
-        record.validationExplanation = result.explanation;
-        record.status = result.confidence_score > 70 ? 'validated' : 'flagged';
-      }
-
-      res.json({ message: "Validation complete", result });
-    } catch (err) {
-      console.error("Pilot Validation Error:", err);
-      res.status(500).json({ error: "Validation failed" });
+      );
+    } else {
+      record.validationScore = score;
+      record.validationExplanation = explanation;
+      record.status = score > 70 ? 'validated' : 'flagged';
     }
+
+    res.json({ message: "Validation complete", result: { confidence_score: score, explanation } });
   });
 
   app.get("/api/pilot/playbook", (req, res) => {
@@ -1639,237 +1559,7 @@ async function startServer() {
   });
 
   app.get("/api/pilot/report", auth(["super_admin", "state_admin", "municipal_admin"]), async (req, res) => {
-    let currentPilotRecords;
-    let currentPilotOnboarding;
-    
-    if (dbStatus === "connected") {
-      currentPilotRecords = await PilotRecord.find();
-      currentPilotOnboarding = await PilotOnboarding.find();
-    } else {
-      currentPilotRecords = pilotRecords;
-      currentPilotOnboarding = pilotOnboarding;
-    }
-
-    const totalWeight = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
-    const totalCCC = currentPilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCCC || 0), 0);
-    
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-    try {
-      const prompt = `Generate a Pilot Summary Report for Jabalpur Waste-to-CCC Operation.
-      Data:
-      - Total Waste Collected: ${totalWeight} kg
-      - Estimated CCCs Generated: ${totalCCC.toFixed(2)} tCO2e
-      - Total Records: ${currentPilotRecords.length}
-      - Active Onboarded Staff: ${currentPilotOnboarding.length}
-      
-      Format as a professional executive summary in Markdown. Include sections for:
-      1. Operational Overview
-      2. Environmental Impact
-      3. Data Integrity & AI Validation
-      4. Recommendations for Scale-up.`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents: prompt
-      });
-
-      res.json({ report: response.text });
-    } catch (err) {
-      console.error("Pilot Report Error:", err);
-      res.status(500).json({ error: "Failed to generate report" });
-    }
-  });
-
-  // ================================
-  // AI CAPABILITIES
-  // ================================
-  app.post("/api/ai/chat", async (req, res) => {
-    const { message, useMaps, lat, lng, lang } = req.body;
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const systemInstruction = `You are RupayKg AI, an expert in waste management, CCC Certificates (CCCs), and environmental sustainability. Provide concise and helpful answers. The user's preferred language is ${lang || 'en'}. Respond in that language if possible.`;
-    try {
-      if (useMaps && lat && lng) {
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: message,
-          config: {
-            systemInstruction,
-            tools: [{ googleMaps: {} }],
-            toolConfig: {
-              retrievalConfig: { latLng: { latitude: lat, longitude: lng } }
-            }
-          }
-        });
-        res.json({ text: response.text, chunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks });
-      } else {
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-pro-preview",
-          contents: message,
-          config: { systemInstruction }
-        });
-        res.json({ text: response.text });
-      }
-    } catch (err) {
-      console.error("AI Chat Error:", err);
-      res.status(500).json({ error: "Failed to generate AI response" });
-    }
-  });
-
-  app.post("/api/ai/tts", async (req, res) => {
-    const { text } = req.body;
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-tts",
-        contents: [{ parts: [{ text }] }],
-        config: {
-          responseModalities: ["AUDIO"],
-          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
-        }
-      });
-      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      res.json({ audio: base64Audio });
-    } catch (err) {
-      console.error("AI TTS Error:", err);
-      res.status(500).json({ error: "Failed to generate speech" });
-    }
-  });
-
-  app.post("/api/ai/transcribe", async (req, res) => {
-    const { audioBase64, mimeType } = req.body;
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [
-          {
-            parts: [
-              { inlineData: { data: audioBase64, mimeType } },
-              { text: "Transcribe the following audio accurately." }
-            ]
-          }
-        ]
-      });
-      res.json({ text: response.text });
-    } catch (err) {
-      console.error("AI Transcription Error:", err);
-      res.status(500).json({ error: "Failed to transcribe audio" });
-    }
-  });
-
-  app.post("/api/ai/fast-categorize", auth(), async (req, res) => {
-    const { description } = req.body;
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite-preview",
-        contents: `Categorize this waste description into one of our types (Plastics, Organic, E-Waste, Metals, Paper, Glass, Biomass, Textile, Hazardous, Construction, Industrial) and estimate weight in kg if mentioned. Description: "${description}"`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              waste_type: { type: Type.STRING },
-              weight_kg: { type: Type.NUMBER }
-            }
-          }
-        }
-      });
-      res.json(JSON.parse(response.text || "{}"));
-    } catch (err) {
-      console.error("AI Categorize Error:", err);
-      res.status(500).json({ error: "Failed to categorize waste" });
-    }
-  });
-
-  app.post("/api/ai/eco-tips", async (req, res) => {
-    const { history } = req.body;
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    try {
-      const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history)}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
-          }
-        }
-      });
-      res.json({ tips: JSON.parse(response.text || "[]") });
-    } catch (err) {
-      console.error("AI Eco-Tips Error:", err);
-      res.status(500).json({ error: "Failed to generate tips" });
-    }
-  });
-
-  app.post("/api/ai/mrv-risk", async (req, res) => {
-    const { record } = req.body;
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    try {
-      const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              risk_score: { type: Type.NUMBER },
-              explanation: { type: Type.STRING }
-            }
-          }
-        }
-      });
-      res.json(JSON.parse(response.text || "{}"));
-    } catch (err) {
-      console.error("AI MRV Risk Error:", err);
-      res.status(500).json({ error: "Failed to assess risk" });
-    }
-  });
-
-  app.post("/api/ai/forecast", async (req, res) => {
-    const { stats } = req.body;
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
-    }
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    try {
-      const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(stats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents: prompt
-      });
-      res.json({ forecast: response.text });
-    } catch (err) {
-      console.error("AI Forecast Error:", err);
-      res.status(500).json({ error: "Failed to generate forecast" });
-    }
+    res.status(404).json({ error: "Report generation moved to frontend" });
   });
 
   // Vite middleware for development

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { GoogleGenAI, Type } from "@google/genai";
+import { ai } from "./lib/gemini";
 import { Helmet } from 'react-helmet-async';
 import { 
   Leaf, 
@@ -46,6 +47,7 @@ import {
   Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
@@ -581,35 +583,49 @@ export default function App() {
   // Removed demo functions for live production environment
 
   useEffect(() => {
-    if (view === 'dashboard' && user && history.length > 0) {
-      if (['citizen', 'fpo'].includes(user.role)) {
-        fetch('/api/ai/eco-tips', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ history: history.slice(0, 5) })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.tips) setEcoTips(data.tips);
-        })
-        .catch(console.error);
+    const getEcoTips = async () => {
+      if (view === 'dashboard' && user && history.length > 0) {
+        if (['citizen', 'fpo'].includes(user.role)) {
+          try {
+            const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history.slice(0, 5))}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
+            const response = await ai.models.generateContent({
+              model: "gemini-3-flash-preview",
+              contents: prompt,
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING }
+                }
+              }
+            });
+            const tips = JSON.parse(response.text || "[]");
+            if (tips.length > 0) setEcoTips(tips);
+          } catch (err) {
+            console.error("AI Eco-Tips Error:", err);
+          }
+        }
       }
-    }
+    };
+    getEcoTips();
   }, [view, user, history]);
 
   useEffect(() => {
-    if (view === 'dashboard' && user && ['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user.role) && adminStats) {
-      fetch('/api/ai/forecast', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stats: adminStats })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.forecast) setForecast(data.forecast);
-      })
-      .catch(console.error);
-    }
+    const getForecast = async () => {
+      if (view === 'dashboard' && user && ['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user.role) && adminStats) {
+        try {
+          const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(adminStats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
+          const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: prompt
+          });
+          if (response.text) setForecast(response.text);
+        } catch (err) {
+          console.error("AI Forecast Error:", err);
+        }
+      }
+    };
+    getForecast();
   }, [view, user, adminStats]);
 
   const handleRetryDb = async () => {
@@ -1037,22 +1053,28 @@ export default function App() {
     if (!description.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/ai/fast-categorize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ description })
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Categorize this waste description into one of our types (Plastics, Organic, E-Waste, Metals, Paper, Glass, Biomass, Textile, Hazardous, Construction, Industrial) and estimate weight in kg if mentioned. Description: "${description}"`,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              waste_type: { type: Type.STRING },
+              weight_kg: { type: Type.NUMBER }
+            }
+          }
+        }
       });
-      if (res.ok) {
-        const data = await res.json();
-        setUploadData(prev => ({
-          ...prev,
-          waste_type: data.waste_type || prev.waste_type,
-          weight_kg: data.weight_kg ? data.weight_kg.toString() : prev.weight_kg
-        }));
-        setMessage({ type: 'success', text: 'AI auto-filled the form successfully.' });
-      } else {
-        setMessage({ type: 'error', text: 'Failed to auto-fill form using AI.' });
-      }
+      
+      const data = JSON.parse(response.text || "{}");
+      setUploadData(prev => ({
+        ...prev,
+        waste_type: data.waste_type || prev.waste_type,
+        weight_kg: data.weight_kg ? data.weight_kg.toString() : prev.weight_kg
+      }));
+      setMessage({ type: 'success', text: 'AI auto-filled the form successfully.' });
     } catch (err) {
       console.error(err);
       setMessage({ type: 'error', text: 'Error calling AI service.' });
@@ -1082,12 +1104,63 @@ export default function App() {
     setLoading(true);
     setMessage(null);
     try {
+      let risk_score = 0;
+      let ai_verification_details = "AI Verification Skipped";
+
+      if (uploadData.image_url) {
+        try {
+          const [mimeInfo, base64Data] = uploadData.image_url.split(';base64,');
+          const mimeType = mimeInfo.split(':')[1];
+          
+          const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: mimeType,
+                    data: base64Data
+                  }
+                },
+                {
+                  text: `Analyze this image of waste. The user claims it is ${uploadData.weight_kg} kg of ${uploadData.waste_type}. 
+                  1. Does the image appear to contain ${uploadData.waste_type}? 
+                  2. Does the volume look plausible for ${uploadData.weight_kg} kg?
+                  Provide a brief assessment and a risk score between 0.0 (perfect match) and 1.0 (completely fake/mismatched).
+                  Return JSON in this format: {"risk_score": number, "assessment": "string"}`
+                }
+              ]
+            },
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  risk_score: { type: Type.NUMBER },
+                  assessment: { type: Type.STRING }
+                },
+                required: ["risk_score", "assessment"]
+              }
+            }
+          });
+          
+          const result = JSON.parse(response.text || "{}");
+          risk_score = result.risk_score || 0;
+          ai_verification_details = result.assessment || "AI Verification Completed";
+        } catch (aiErr) {
+          console.error("AI Verification Error:", aiErr);
+          ai_verification_details = "AI Verification Failed: " + (aiErr instanceof Error ? aiErr.message : String(aiErr));
+        }
+      }
+
       const endpoint = '/api/citizen/upload';
       const payload = {
         ...uploadData,
         weight_kg: parseFloat(uploadData.weight_kg),
         acreage: parseFloat(uploadData.acreage) || 0,
-        context: operatingContext
+        context: operatingContext,
+        ai_risk_score: risk_score,
+        ai_verification_details: ai_verification_details
       };
 
       const res = await fetch(endpoint, {
@@ -1164,12 +1237,24 @@ export default function App() {
   const handleAssessRisk = async (record: BiomassRecord) => {
     try {
       setMrvRiskAssessments(prev => ({ ...prev, [record.id]: { risk_score: -1, explanation: 'Analyzing...' } }));
-      const res = await fetch('/api/ai/mrv-risk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ record })
+      
+      const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              risk_score: { type: Type.NUMBER },
+              explanation: { type: Type.STRING }
+            }
+          }
+        }
       });
-      const data = await res.json();
+      
+      const data = JSON.parse(response.text || "{}");
       if (data.risk_score !== undefined) {
         setMrvRiskAssessments(prev => ({ ...prev, [record.id]: data }));
       }
@@ -2425,11 +2510,28 @@ export default function App() {
                 onClick={async () => {
                   setLoading(true);
                   try {
-                    const res = await fetch('/api/pilot/report', {
-                      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    const totalWeight = pilotRecords.reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
+                    const totalCCC = pilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCCC || 0), 0);
+                    
+                    const prompt = `Generate a Pilot Summary Report for Jabalpur Waste-to-CCC Operation.
+                    Data:
+                    - Total Waste Collected: ${totalWeight} kg
+                    - Estimated CCCs Generated: ${totalCCC.toFixed(2)} tCO2e
+                    - Total Records: ${pilotRecords.length}
+                    - Active Onboarded Staff: ${pilotOnboarding.length}
+                    
+                    Format as a professional executive summary in Markdown. Include sections for:
+                    1. Operational Overview
+                    2. Environmental Impact
+                    3. Data Integrity & AI Validation
+                    4. Recommendations for Scale-up.`;
+
+                    const response = await ai.models.generateContent({
+                      model: "gemini-3-flash-preview",
+                      contents: prompt
                     });
-                    const data = await res.json();
-                    setPilotReport(data.report);
+
+                    setPilotReport(response.text || "Failed to generate report.");
                   } catch (err) {
                     console.error(err);
                   } finally {
