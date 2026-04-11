@@ -1020,7 +1020,10 @@ export default function App() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadData(prev => ({ ...prev, image_url: reader.result as string }));
+        const base64 = reader.result as string;
+        setUploadData(prev => ({ ...prev, image_url: base64 }));
+        // Automatically categorize based on image
+        handleFastCategorize(undefined, base64);
       };
       reader.readAsDataURL(file);
     }
@@ -1049,35 +1052,73 @@ export default function App() {
     }
   };
 
-  const handleFastCategorize = async (description: string) => {
-    if (!description.trim()) return;
+  const handleFastCategorize = async (description?: string, imageUrl?: string) => {
+    if (!description?.trim() && !imageUrl) return;
     setLoading(true);
     try {
+      const parts: any[] = [];
+      const categoriesStr = WASTE_CATEGORIES.join(", ");
+      const typesStr = WASTE_TYPES.map(t => t.type).join(", ");
+
+      if (description) {
+        parts.push({ text: `Analyze this waste description: "${description}". 
+        1. Categorize it into one of these categories: [${categoriesStr}].
+        2. Select the most specific type from this list: [${typesStr}].
+        3. Estimate the weight in kg if mentioned or implied.
+        Return JSON format: {"waste_type": "string", "weight_kg": number, "confidence": number}` });
+      }
+      
+      if (imageUrl) {
+        const [mimeInfo, base64Data] = imageUrl.split(';base64,');
+        const mimeType = mimeInfo.split(':')[1];
+        parts.push({
+          inlineData: {
+            mimeType: mimeType,
+            data: base64Data
+          }
+        });
+        parts.push({ text: `Analyze this image of waste.
+        1. Categorize it into one of these categories: [${categoriesStr}].
+        2. Select the most specific type from this list: [${typesStr}].
+        3. Estimate the weight in kg based on visual volume and typical density.
+        Return JSON format: {"waste_type": "string", "weight_kg": number, "confidence": number}` });
+      }
+
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Categorize this waste description into one of our types (Plastics, Organic, E-Waste, Metals, Paper, Glass, Biomass, Textile, Hazardous, Construction, Industrial) and estimate weight in kg if mentioned. Description: "${description}"`,
+        contents: { parts },
         config: {
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
             properties: {
               waste_type: { type: Type.STRING },
-              weight_kg: { type: Type.NUMBER }
-            }
+              weight_kg: { type: Type.NUMBER },
+              confidence: { type: Type.NUMBER }
+            },
+            required: ["waste_type", "weight_kg"]
           }
         }
       });
       
       const data = JSON.parse(response.text || "{}");
+      
+      // Find the closest matching waste type from our list if AI returned something slightly different
+      const matchedType = WASTE_TYPES.find(t => t.type.toLowerCase() === data.waste_type.toLowerCase())?.type || data.waste_type;
+
       setUploadData(prev => ({
         ...prev,
-        waste_type: data.waste_type || prev.waste_type,
+        waste_type: matchedType,
         weight_kg: data.weight_kg ? data.weight_kg.toString() : prev.weight_kg
       }));
-      setMessage({ type: 'success', text: 'AI auto-filled the form successfully.' });
+      
+      setMessage({ 
+        type: 'success', 
+        text: `AI Categorized: ${matchedType}${data.weight_kg ? ` (${data.weight_kg}kg)` : ''}. Confidence: ${Math.round((data.confidence || 0) * 100)}%` 
+      });
     } catch (err) {
-      console.error(err);
-      setMessage({ type: 'error', text: 'Error calling AI service.' });
+      console.error("AI Categorization Error:", err);
+      setMessage({ type: 'error', text: 'AI Categorization failed. Please select manually.' });
     } finally {
       setLoading(false);
     }
@@ -3308,7 +3349,7 @@ export default function App() {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          handleFastCategorize((e.target as HTMLInputElement).value);
+                          handleFastCategorize((e.target as HTMLInputElement).value, uploadData.image_url);
                         }
                       }}
                     />
@@ -3316,7 +3357,7 @@ export default function App() {
                       type="button"
                       onClick={() => {
                         const input = document.getElementById('ai-fast-input') as HTMLInputElement;
-                        if (input) handleFastCategorize(input.value);
+                        if (input) handleFastCategorize(input.value, uploadData.image_url);
                       }}
                       className="px-4 py-2 bg-emerald-500 text-black font-bold rounded-xl text-sm hover:bg-emerald-400 transition-colors whitespace-nowrap"
                     >
@@ -3478,7 +3519,13 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">{t('Verification Image')}</label>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 flex items-center justify-between">
+                        <span>{t('Verification Image')}</span>
+                        <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                          <Zap size={10} />
+                          AI VISION
+                        </span>
+                      </label>
                       
                       {!uploadData.image_url ? (
                         <div className="relative">
