@@ -55,7 +55,7 @@ export const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const systemInstruction = `You are RupayKg AI, an expert in waste management, CCC Certificates (CCCs), and environmental sustainability. Provide concise and helpful answers. The user's preferred language is ${i18n.language || 'en'}. Respond in that language if possible.`;
+      const systemInstruction = `You are RupayKg AI, an expert in waste management, CCC Certificates (CCCs), and environmental sustainability. You assist users with the RupayKg Circular Economy OS, which is powered by Google CircularNet for AI-assisted waste sorting, contamination detection, and weight estimation. Provide concise and helpful answers. The user's preferred language is ${i18n.language || 'en'}. Respond in that language if possible.`;
       
       let response;
       if (useMaps && location) {

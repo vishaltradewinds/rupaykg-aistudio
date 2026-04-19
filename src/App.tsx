@@ -1061,11 +1061,12 @@ export default function App() {
       const typesStr = WASTE_TYPES.map(t => t.type).join(", ");
 
       if (description) {
-        parts.push({ text: `Analyze this waste description: "${description}". 
+        parts.push({ text: `Analyze this waste description using Google CircularNet methodology: "${description}". 
         1. Categorize it into one of these categories: [${categoriesStr}].
-        2. Select the most specific type from this list: [${typesStr}].
+        2. Select the most specific material type from this list: [${typesStr}].
         3. Estimate the weight in kg if mentioned or implied.
-        Return JSON format: {"waste_type": "string", "weight_kg": number, "confidence": number}` });
+        4. Assess the expected contamination level (low, medium, high).
+        Return JSON format: {"waste_type": "string", "weight_kg": number, "confidence": number, "contamination": "string"}` });
       }
       
       if (imageUrl) {
@@ -1077,11 +1078,12 @@ export default function App() {
             data: base64Data
           }
         });
-        parts.push({ text: `Analyze this image of waste.
+        parts.push({ text: `Analyze this image of waste using Google CircularNet capabilities.
         1. Categorize it into one of these categories: [${categoriesStr}].
-        2. Select the most specific type from this list: [${typesStr}].
+        2. Detect the most prominent material type from this list: [${typesStr}].
         3. Estimate the weight in kg based on visual volume and typical density.
-        Return JSON format: {"waste_type": "string", "weight_kg": number, "confidence": number}` });
+        4. Analyze visual contamination or mixing (low, medium, high).
+        Return JSON format: {"waste_type": "string", "weight_kg": number, "confidence": number, "contamination": "string"}` });
       }
 
       const response = await ai.models.generateContent({
@@ -1094,12 +1096,14 @@ export default function App() {
             properties: {
               waste_type: { type: Type.STRING },
               weight_kg: { type: Type.NUMBER },
-              confidence: { type: Type.NUMBER }
+              confidence: { type: Type.NUMBER },
+              contamination: { type: Type.STRING }
             },
             required: ["waste_type", "weight_kg"]
           }
         }
       });
+
       
       const data = JSON.parse(response.text || "{}");
       
@@ -1114,11 +1118,11 @@ export default function App() {
       
       setMessage({ 
         type: 'success', 
-        text: `AI Categorized: ${matchedType}${data.weight_kg ? ` (${data.weight_kg}kg)` : ''}. Confidence: ${Math.round((data.confidence || 0) * 100)}%` 
+        text: `CircularNet Identified: ${matchedType}${data.weight_kg ? ` (${data.weight_kg}kg)` : ''}. Contamination: ${data.contamination || 'Unknown'}` 
       });
     } catch (err) {
-      console.error("AI Categorization Error:", err);
-      setMessage({ type: 'error', text: 'AI Categorization failed. Please select manually.' });
+      console.error("CircularNet Analysis Error:", err);
+      setMessage({ type: 'error', text: 'CircularNet analysis failed. Please select manually.' });
     } finally {
       setLoading(false);
     }
@@ -3364,7 +3368,7 @@ export default function App() {
                       {t('Auto-fill')}
                     </button>
                   </div>
-                  <p className="text-[10px] text-white/40 mt-2">Powered by Gemini Flash-Lite</p>
+                  <p className="text-[10px] text-white/40 mt-2">Powered by Google CircularNet AI</p>
                 </div>
 
                 <form onSubmit={handleUpload} className="space-y-6">
@@ -3521,9 +3525,9 @@ export default function App() {
                     <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-2 flex items-center justify-between">
                         <span>{t('Verification Image')}</span>
-                        <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          <Zap size={10} />
-                          AI VISION
+                        <span className="flex items-center gap-1 text-[10px] text-[var(--color-bg)] font-bold bg-white px-2 py-0.5 rounded-full uppercase">
+                          <Zap size={10} className="text-[var(--color-bg)]" />
+                          Powered by CircularNet
                         </span>
                       </label>
                       
