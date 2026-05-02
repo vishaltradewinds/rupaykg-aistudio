@@ -2651,8 +2651,18 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans">
       <Helmet>
-        <title>{view.charAt(0).toUpperCase() + view.slice(1)} | RupayKg - National Digital Public Infrastructure</title>
-        <meta name="description" content={`RupayKg ${view} - National Digital Public Infrastructure for Waste Management and CCC Certificates (CCCs).`} />
+        <title>{t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg - National Waste Management OS</title>
+        <meta name="description" content={t(`Access the RupayKg ${view} dashboard. India's sovereign-grade digital infrastructure for waste-to-value conversion, AI-verified intake, and CCC Certificate issuance.`)} />
+        <meta name="keywords" content={`RupayKg ${view}, circular economy India, waste management system, MRV verification, climate certificates, sustainable logistics`} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:title" content={`${t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg Circular OS`} />
+        <meta property="og:description" content={t(`RupayKg OS ${view} view: Transforming waste into digital climate value through integrated sovereign-grade infrastructure.`)} />
+        <meta property="og:image" content="/icon.svg" />
+        
+        {/* Twitter */}
+        <meta name="twitter:title" content={`${t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg Circular OS`} />
+        <meta name="twitter:description" content={t(`RupayKg OS ${view} view: Transforming waste into digital climate value through integrated sovereign-grade infrastructure.`)} />
       </Helmet>
       {/* Sidebar Navigation */}
       <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
