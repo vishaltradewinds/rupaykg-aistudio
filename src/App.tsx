@@ -589,7 +589,7 @@ export default function App() {
           try {
             const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history.slice(0, 5))}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
             const response = await ai.models.generateContent({
-              model: "gemini-1.5-flash-8b",
+              model: "gemini-3.1-flash-lite",
               contents: prompt,
               config: {
                 responseMimeType: "application/json",
@@ -616,7 +616,7 @@ export default function App() {
         try {
           const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(adminStats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
           const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash-8b",
+            model: "gemini-3.1-flash-lite",
             contents: prompt
           });
           if (response.text) setForecast(response.text);
@@ -1087,7 +1087,7 @@ export default function App() {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.1-flash-lite",
         contents: { parts },
         config: {
           responseMimeType: "application/json",
@@ -1158,7 +1158,7 @@ export default function App() {
           const mimeType = mimeInfo.split(':')[1];
           
           const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-3.1-flash-lite",
             contents: {
               parts: [
                 {
@@ -1285,7 +1285,7 @@ export default function App() {
       
       const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.1-flash-lite",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -2572,7 +2572,7 @@ export default function App() {
                     4. Recommendations for Scale-up.`;
 
                     const response = await ai.models.generateContent({
-                      model: "gemini-3-flash-preview",
+                      model: "gemini-3.1-flash-lite",
                       contents: prompt
                     });
 
