@@ -589,7 +589,7 @@ export default function App() {
           try {
             const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history.slice(0, 5))}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
             const response = await ai.models.generateContent({
-              model: "gemini-3-flash-preview",
+              model: "gemini-1.5-flash-8b",
               contents: prompt,
               config: {
                 responseMimeType: "application/json",
@@ -616,7 +616,7 @@ export default function App() {
         try {
           const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(adminStats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
           const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-1.5-flash-8b",
             contents: prompt
           });
           if (response.text) setForecast(response.text);
