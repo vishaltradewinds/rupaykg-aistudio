@@ -529,6 +529,7 @@ export default function App() {
   const [ecoTips, setEcoTips] = useState<string[]>([]);
   const [forecast, setForecast] = useState<string>('');
   const [mrvRiskAssessments, setMrvRiskAssessments] = useState<Record<string, { risk_score: number, explanation: string }>>({});
+  const [carbonDashboard, setCarbonDashboard] = useState<any>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -936,6 +937,13 @@ export default function App() {
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const compRes = await fetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (compRes.ok) setComprehensiveMetrics(await compRes.json());
+      }
+
+      // 9. Fetch Carbon Dashboard
+      const carbonRes = await fetch(`/api/carbon/dashboard`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (carbonRes.ok) {
+        const carbonData = await carbonRes.json();
+        setCarbonDashboard(carbonData);
       }
 
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
@@ -3078,6 +3086,64 @@ export default function App() {
                     <Stat label={t('CCCs Generated')} value={`${adminStats.total_ccc_amount_kg.toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
                     <Stat label={t('Total Value')} value={`₹${adminStats.total_wallet_disbursed.toFixed(2)}`} icon={Wallet} color="emerald" setView={setView} />
                   </div>
+
+                  {carbonDashboard && (
+                    <div className="mt-8 border border-emerald-500/20 bg-emerald-950/20 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
+                      <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                        <Globe size={180} className="text-emerald-400" />
+                      </div>
+                      
+                      <div className="flex items-center gap-3 mb-8 relative z-10">
+                        <div className="p-2 bg-emerald-500/20 rounded-lg">
+                          <Activity className="text-emerald-400" size={24} />
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                            Digital Carbon MRV Engine & Intelligence
+                          </h2>
+                          <p className="text-sm text-white/50">Real-time additionality & compliance tracking</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+                        <div className="bg-black/40 border border-white/5 rounded-xl p-4">
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Net CO₂e Avoided</p>
+                          <div className="flex items-end gap-2">
+                            <span className="text-2xl font-bold text-emerald-400">{carbonDashboard.total_carbon_reduction_kg_co2e.toFixed(1)}</span>
+                            <span className="text-emerald-400/50 pb-1">kg</span>
+                          </div>
+                        </div>
+                        <div className="bg-black/40 border border-white/5 rounded-xl p-4">
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Methane Mitigated</p>
+                          <div className="flex items-end gap-2">
+                            <span className="text-2xl font-bold text-cyan-400">{carbonDashboard.total_methane_avoided_kg_co2e.toFixed(1)}</span>
+                            <span className="text-cyan-400/50 pb-1">kg CO₂e</span>
+                          </div>
+                        </div>
+                        <div className="bg-black/40 border border-white/5 rounded-xl p-4">
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Landfill Diversion</p>
+                          <div className="flex items-end gap-2">
+                            <span className="text-2xl font-bold text-blue-400">{carbonDashboard.total_diverted_kg_co2e.toFixed(1)}</span>
+                            <span className="text-blue-400/50 pb-1">kg CO₂e</span>
+                          </div>
+                        </div>
+                        <div className="bg-black/40 border border-white/5 rounded-xl p-4">
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">CCC Issuance Readiness</p>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-amber-400/80">MRV Confidence</span>
+                                <span className="text-amber-400 font-mono">{carbonDashboard.average_mrv_score.toFixed(1)}%</span>
+                              </div>
+                              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-amber-400" style={{ width: `${carbonDashboard.average_mrv_score}%` }} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   {forecast && (
                     <Card className="bg-blue-500/5 border-blue-500/20">

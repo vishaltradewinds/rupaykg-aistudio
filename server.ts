@@ -8,6 +8,7 @@ import { createServer as createViteServer } from "vite";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
+import { generateCarbonEvent } from "./src/services/carbonEngine";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -233,6 +234,18 @@ async function startServer() {
   const blockchain: any[] = [];
   const pilotRecords: any[] = [];
   const pilotOnboarding: any[] = [];
+
+  // Carbon Event Memory Stores
+  const carbonEvents: any[] = [];
+  const carbonCalculations: any[] = [];
+  const methaneEvents: any[] = [];
+  const mrvEvidence: any[] = [];
+  const wasteComposition: any[] = [];
+  const biomassProfiles: any[] = [];
+  const carbonProjects: any[] = [];
+  const carbonAuditLogs: any[] = [];
+  const carbonRegistryExports: any[] = [];
+  const additionalityAnalysis: any[] = [];
 
   // ---------------- BLOCKCHAIN LOGIC ----------------
   function calculateHash(index: number, timestamp: string, data: any, previousHash: string) {
@@ -554,17 +567,21 @@ async function startServer() {
     };
     records.push(record);
     
+    // Core Integration Principle: ENRICH existing workflows with carbon intelligence
+    const carbonEvent = generateCarbonEvent(record, wasteConfig);
+    carbonEvents.push(carbonEvent);
+
     const user = users.find(u => u.id === req.user.id);
     if (user) user.wallet_balance += base_value; // Only base value is credited initially
 
     logs.push({ 
       id: Date.now(), 
       event: "WASTE_UPLOADED", 
-      details: `Record ${record.id} uploaded by ${req.user.id}`, 
+      details: `Record ${record.id} uploaded by ${req.user.id} - Carbon Event ${carbonEvent.id}`, 
       timestamp: new Date().toISOString() 
     });
     
-    res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. CCC value pending MRV.`, wallet_balance: user?.wallet_balance });
+    res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`, wallet_balance: user?.wallet_balance });
   });
 
   app.post("/api/satellite/verify", auth(["regulator", "super_admin"]), async (req: any, res) => {
@@ -1560,6 +1577,37 @@ async function startServer() {
 
   app.get("/api/pilot/report", auth(["super_admin", "state_admin", "municipal_admin"]), async (req, res) => {
     res.status(404).json({ error: "Report generation moved to frontend" });
+  });
+
+  // ========================================================
+  // CARBON API INTEGRATION
+  // ========================================================
+  
+  app.get("/api/carbon/dashboard", auth(), (req: any, res) => {
+    const totalReduction = carbonEvents.reduce((acc, ev) => acc + (ev.net_carbon_reduction_kg_co2e || 0), 0);
+    const totalDiverted = carbonEvents.reduce((acc, ev) => acc + (ev.diversion_estimate_kg_co2e || 0), 0);
+    const totalMethane = carbonEvents.reduce((acc, ev) => acc + (ev.methane_estimate_kg_co2e || 0), 0);
+    
+    res.json({
+      total_carbon_reduction_kg_co2e: totalReduction,
+      total_diverted_kg_co2e: totalDiverted,
+      total_methane_avoided_kg_co2e: totalMethane,
+      events_count: carbonEvents.length,
+      average_mrv_score: carbonEvents.length > 0 ? carbonEvents.reduce((acc, ev) => acc + ev.mrv_score, 0) / carbonEvents.length : 0,
+      carbonEvents
+    });
+  });
+
+  app.post("/api/carbon/calculate", auth(), (req: any, res) => {
+    // Allows testing the carbon engine manually
+    const record = req.body;
+    const wasteConfig = dynamicWasteTypes.find(w => w.type === record.waste_type) || { value: 5, ccc_factor: 0.5 };
+    const carbonEvent = generateCarbonEvent(record, wasteConfig);
+    res.json(carbonEvent);
+  });
+  
+  app.get("/api/carbon/mrv", auth(["regulator", "super_admin"]), (req: any, res) => {
+    res.json({ carbonEvents });
   });
 
   // Vite middleware for development
