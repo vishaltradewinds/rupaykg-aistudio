@@ -1,6 +1,6 @@
 {
-  "name": "RupayKg - National Circular Economy OS",
-  "description": "Unified national waste-to-carbon infrastructure for India. Sovereign-grade execution system featuring MRV Light, AI-assisted validation, and CCC issuance across multi-state informal economies.",
+  "name": "RupayKg - Sovereign Carbon OS",
+  "description": "National waste-to-carbon infrastructure with Hedera-backed trust rails. Sovereign-grade Digital MRV, append-only wallet engine, and auditable CCC issuance lifecycle for circular economy transition.",
   "requestFramePermissions": [
     "geolocation",
     "camera"

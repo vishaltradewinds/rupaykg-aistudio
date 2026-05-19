@@ -7,6 +7,8 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import helmet from "helmet";
 import cors from "cors";
+import pino from "pino";
+import rateLimit from "express-rate-limit";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
@@ -16,6 +18,15 @@ import { generateCarbonEvent } from "./src/services/carbonEngine";
 import { VCService } from "./src/services/vcService";
 import { GuardianService } from "./src/services/guardianService";
 
+import { hedera } from "./services/hedera-service/index";
+import { WalletEngine } from "./services/wallet-engine/logic";
+import { initAuth } from "./services/auth-service/index";
+import { initCCC } from "./services/ccc-engine/index";
+import { initMRV } from "./services/mrv-engine/index";
+import { initRegistry } from "./services/registry-service/index";
+import { initFraud } from "./services/fraud-engine/index";
+import { initPayoutWorker } from "./workers/payout-worker/index";
+
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
   ccc_price_per_kg: 10,
@@ -23,7 +34,32 @@ let paymentConfig = {
 };
 
 async function startServer() {
+  // --- Domain Service Orchestration ---
+  initAuth();
+  initCCC();
+  initMRV();
+  initRegistry();
+  initFraud();
+  initPayoutWorker();
+
+  const logger = pino({
+    transport: {
+      target: "pino-pretty",
+      options: { colorize: true },
+    },
+  });
+
   const app = express();
+
+  // Rate Limiting - Hardening for Nation Scale
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please try again later." },
+  });
+  app.use("/api/", limiter);
 
   // Security Hardenings
   app.use(
@@ -752,7 +788,7 @@ async function startServer() {
           waste_type,
         );
 
-      const record = {
+      const record: any = {
         id: "REC" + Date.now(),
         citizen_id: req.user.id,
         weight_kg,
@@ -777,10 +813,25 @@ async function startServer() {
       };
       records.push(record);
 
-      const user = users.find((u) => u.id === req.user.id);
-      if (user) user.wallet_balance += base_value;
+      // Hedera HCS Anchor - Trust Rail Audit
+      const eventHash = crypto.createHash('sha256').update(JSON.stringify(record)).digest('hex');
+      const hcsResult = await hedera.anchorEvent("0.0.1234", eventHash, { type: "WASTE_LOG", actor: req.user.id });
+      record.hcs_transaction_id = hcsResult.transactionId;
 
+      const user = users.find((u) => u.id === req.user.id);
+      
       try {
+        // Sovereign Wallet Engine: Atomic transact
+        if (dbStatus === "connected") {
+            await WalletEngine.transact(req.user.id, base_value, 'CREDIT', { 
+                eventId: record.id, 
+                category: 'base_waste_payout',
+                hcsTx: record.hcs_transaction_id 
+            });
+        } else {
+            if (user) user.wallet_balance += base_value;
+        }
+
         // Core Integration Principle: ENRICH existing workflows with carbon intelligence
         const carbonEvent = generateCarbonEvent(record, wasteConfig);
         carbonEvents.push(carbonEvent);
@@ -916,8 +967,16 @@ async function startServer() {
 
       if (status === "verified") {
         const user = users.find((u) => u.id === record.citizen_id);
-        if (user) {
-          user.wallet_balance += record.potential_ccc_value;
+        
+        // Sovereign Wallet Engine: Atomic transact for CCC value
+        if (dbStatus === "connected") {
+            await WalletEngine.transact(record.citizen_id, record.potential_ccc_value, 'CREDIT', { 
+                eventId: record.id, 
+                category: 'carbon_payout',
+                type: 'CCC_VALUE_AWARD' 
+            });
+        } else {
+            if (user) user.wallet_balance += record.potential_ccc_value;
         }
 
         // Register with External CCC Registry
