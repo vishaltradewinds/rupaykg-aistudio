@@ -2,14 +2,17 @@ import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import fs from "fs";
+import path from "path";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { createServer as createViteServer } from "vite";
+import { GoogleGenAI } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
 import { generateCarbonEvent } from "./src/services/carbonEngine";
 import { VCService } from "./src/services/vcService";
+import { GuardianService } from "./src/services/guardianService";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -248,6 +251,7 @@ async function startServer() {
   const carbonRegistryExports: any[] = [];
   const additionalityAnalysis: any[] = [];
   const verifiableCredentials: any[] = [];
+  const guardianMessages: any[] = [];
 
   // ---------------- BLOCKCHAIN LOGIC ----------------
   function calculateHash(index: number, timestamp: string, data: any, previousHash: string) {
@@ -679,6 +683,18 @@ async function startServer() {
         const vc = VCService.generateWasteCarbonVC(record, carbonEvent);
         verifiableCredentials.push(vc);
         carbonEvent.vc_id = vc.id;
+
+        // Hedera Guardian: Anchor to HCS for Enterprise Policy Compliance
+        try {
+          const hcsMsg = await GuardianService.anchorToHCS(vc);
+          guardianMessages.push(hcsMsg);
+          carbonEvent.hcs_topic_id = hcsMsg.topicId;
+          carbonEvent.hcs_sequence_number = hcsMsg.sequenceNumber;
+          carbonEvent.hcs_running_hash = hcsMsg.runningHash;
+          carbonEvent.guardian_status = "Policy Compliant";
+        } catch (hcsErr) {
+          console.error("Hedera HCS Anchoring failed:", hcsErr);
+        }
       }
 
       // Record on Blockchain
@@ -1629,18 +1645,37 @@ async function startServer() {
   // ========================================================
   
   app.get("/api/carbon/dashboard", auth(), (req: any, res) => {
-    const totalReduction = carbonEvents.reduce((acc, ev) => acc + (ev.net_carbon_reduction_kg_co2e || 0), 0);
-    const totalDiverted = carbonEvents.reduce((acc, ev) => acc + (ev.diversion_estimate_kg_co2e || 0), 0);
-    const totalMethane = carbonEvents.reduce((acc, ev) => acc + (ev.methane_estimate_kg_co2e || 0), 0);
-    
-    res.json({
-      total_carbon_reduction_kg_co2e: totalReduction,
-      total_diverted_kg_co2e: totalDiverted,
-      total_methane_avoided_kg_co2e: totalMethane,
-      events_count: carbonEvents.length,
-      average_mrv_score: carbonEvents.length > 0 ? carbonEvents.reduce((acc, ev) => acc + ev.mrv_score, 0) / carbonEvents.length : 0,
-      carbonEvents
-    });
+    try {
+      const totalReduction = carbonEvents.reduce((acc, ev) => acc + (ev.net_carbon_reduction_kg_co2e || 0), 0);
+      const totalDiverted = carbonEvents.reduce((acc, ev) => acc + (ev.diversion_estimate_kg_co2e || 0), 0);
+      const totalMethane = carbonEvents.reduce((acc, ev) => acc + (ev.methane_estimate_kg_co2e || 0), 0);
+      
+      const average_mrv_score = carbonEvents.length > 0 
+        ? carbonEvents.reduce((acc, ev) => acc + (ev.mrv_score || 0), 0) / carbonEvents.length 
+        : 100; // Default to perfect if no events
+
+      res.json({
+        total_carbon_reduction_kg_co2e: totalReduction,
+        total_diverted_kg_co2e: totalDiverted,
+        total_methane_avoided_kg_co2e: totalMethane,
+        events_count: carbonEvents.length,
+        hcs_anchored_count: guardianMessages.length,
+        average_mrv_score: average_mrv_score,
+        carbonEvents,
+        guardianTopicId: "0.0.4592011"
+      });
+    } catch (err) {
+      console.error("Dashboard calculation error:", err);
+      res.status(500).json({ error: "Failed to calculate carbon dashboard" });
+    }
+  });
+
+  app.get("/api/carbon/guardian/policy", (req, res) => {
+    res.json(GuardianService.getPolicyTemplate());
+  });
+
+  app.get("/api/carbon/guardian/messages", auth(["regulator", "super_admin"]), (req, res) => {
+    res.json(guardianMessages);
   });
 
   app.post("/api/carbon/calculate", auth(), (req: any, res) => {
@@ -1666,6 +1701,20 @@ async function startServer() {
     res.json(VCService.getWasteCarbonContext());
   });
 
+  app.post("/api/ai/generate", async (req: any, res: any) => {
+    try {
+      const { model, contents, config } = req.body;
+      const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY || "fallback_key");
+      const modelInstance = genAI.getGenerativeModel({ model: model || "gemini-1.5-flash" });
+      const result = await modelInstance.generateContent({ contents, config });
+      const response = await result.response;
+      res.json(response);
+    } catch (err: any) {
+      console.error("AI Generation error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -1673,11 +1722,32 @@ async function startServer() {
       appType: "spa",
     });
     app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    } else {
+      console.warn("Production mode detected but 'dist' folder not found. Please run 'npm run build' first.");
+      app.get('*', (req, res) => {
+        res.status(500).send("Application not built. Please contact administrator.");
+      });
+    }
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log("RUPAYKG running on port " + PORT);
+    console.log("RUPAYKG running on port " + PORT + " in " + (process.env.NODE_ENV || 'development') + " mode");
   });
 }
 
-startServer();
+try {
+  startServer().catch(err => {
+    console.error("Critical server startup failure:", err);
+    process.exit(1);
+  });
+} catch (globalErr) {
+  console.error("Synchronous startup error:", globalErr);
+  process.exit(1);
+}

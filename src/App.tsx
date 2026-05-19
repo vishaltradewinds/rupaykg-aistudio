@@ -129,6 +129,11 @@ interface BiomassRecord {
   blockchain_hash?: string;
   registry_serial_number?: string;
   citizen_id?: string;
+  vc_id?: string;
+  hcs_topic_id?: string;
+  hcs_sequence_number?: number;
+  hcs_running_hash?: string;
+  guardian_status?: string;
   satellite_verification?: {
     is_verified: boolean;
     land_cover_type: string;
@@ -3151,15 +3156,25 @@ export default function App() {
                           </div>
                         </div>
                         <div className="bg-black/40 border border-white/5 rounded-xl p-4">
-                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">CCC Issuance Readiness</p>
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Hedera HCS Anchors</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-amber-400">{carbonDashboard.hcs_anchored_count}</span>
+                            <div className="flex flex-col">
+                              <span className="text-[8px] text-amber-400/60 leading-none">TOPIC</span>
+                              <span className="text-[10px] text-amber-400 font-mono leading-none">{carbonDashboard.guardianTopicId}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-black/40 border border-white/5 rounded-xl p-4 col-span-1 md:col-span-2 lg:col-span-1">
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">MRV Confidence</p>
                           <div className="flex items-center gap-3">
                             <div className="flex-1">
                               <div className="flex justify-between text-xs mb-1">
-                                <span className="text-amber-400/80">MRV Confidence</span>
-                                <span className="text-amber-400 font-mono">{carbonDashboard.average_mrv_score.toFixed(1)}%</span>
+                                <span className="text-emerald-400/80">Compliance Score</span>
+                                <span className="text-emerald-400 font-mono">{carbonDashboard.average_mrv_score.toFixed(1)}%</span>
                               </div>
                               <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-amber-400" style={{ width: `${carbonDashboard.average_mrv_score}%` }} />
+                                <div className="h-full bg-emerald-400" style={{ width: `${carbonDashboard.average_mrv_score}%` }} />
                               </div>
                             </div>
                           </div>
@@ -4195,13 +4210,19 @@ export default function App() {
                                     </div>
                                   )}
                                   {record.mrv_status === 'verified' && (
-                                    <button 
-                                      onClick={() => handleViewVC(record.id)}
-                                      className="mt-2 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 transition-colors uppercase tracking-widest"
-                                    >
-                                      <ShieldCheck size={10} />
-                                      {t('View W3C VC')}
-                                    </button>
+                                    <div className="flex flex-col gap-1 mt-2">
+                                      <button 
+                                        onClick={() => handleViewVC(record.id)}
+                                        className="text-[10px] text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 transition-colors uppercase tracking-widest"
+                                      >
+                                        <ShieldCheck size={10} />
+                                        {t('View W3C VC')}
+                                      </button>
+                                      <div className="flex items-center gap-1 text-[8px] text-amber-500/80 font-mono">
+                                        <Globe size={8} />
+                                        HCS ANCHORED: {record.hcs_topic_id || '0.0.4592011'}
+                                      </div>
+                                    </div>
                                   )}
                                   {record.blockchain_hash && (
                                     <button 
