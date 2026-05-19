@@ -9,6 +9,7 @@ import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
 import { generateCarbonEvent } from "./src/services/carbonEngine";
+import { VCService } from "./src/services/vcService";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -246,6 +247,7 @@ async function startServer() {
   const carbonAuditLogs: any[] = [];
   const carbonRegistryExports: any[] = [];
   const additionalityAnalysis: any[] = [];
+  const verifiableCredentials: any[] = [];
 
   // ---------------- BLOCKCHAIN LOGIC ----------------
   function calculateHash(index: number, timestamp: string, data: any, previousHash: string) {
@@ -567,6 +569,9 @@ async function startServer() {
     };
     records.push(record);
     
+    const user = users.find(u => u.id === req.user.id);
+    if (user) user.wallet_balance += base_value;
+
     try {
       // Core Integration Principle: ENRICH existing workflows with carbon intelligence
       const carbonEvent = generateCarbonEvent(record, wasteConfig);
@@ -669,6 +674,11 @@ async function startServer() {
         carbonEvent.verified_at = new Date().toISOString();
         carbonEvent.verified_by = req.user.id;
         carbonEvent.registry_serial_number = registrySerialNumber;
+
+        // Generate W3C Verifiable Credential 2.0 (JSON-LD)
+        const vc = VCService.generateWasteCarbonVC(record, carbonEvent);
+        verifiableCredentials.push(vc);
+        carbonEvent.vc_id = vc.id;
       }
 
       // Record on Blockchain
@@ -1505,8 +1515,8 @@ async function startServer() {
       };
       const carbonEvent = generateCarbonEvent(tempRecord, { value: 5, ccc_factor: emission_factor });
       carbonEvents.push(carbonEvent);
-      logEntry.carbon_event_id = carbonEvent.id;
-      logEntry.net_carbon_reduction = carbonEvent.net_carbon_reduction_kg_co2e;
+      (logEntry as any).carbon_event_id = carbonEvent.id;
+      (logEntry as any).net_carbon_reduction = carbonEvent.net_carbon_reduction_kg_co2e;
     } catch (err) {
       console.error("Failed to enrich pilot log with carbon intelligence:", err);
     }
@@ -1643,6 +1653,17 @@ async function startServer() {
   
   app.get("/api/carbon/mrv", auth(["regulator", "super_admin"]), (req: any, res) => {
     res.json({ carbonEvents });
+  });
+
+  app.get("/api/carbon/vc/:recordId", auth(), (req: any, res) => {
+    const vc = verifiableCredentials.find(v => v.credentialSubject.id === `did:rupaykg:event:${req.params.recordId}`);
+    if (!vc) return res.status(404).json({ error: "Verifiable Credential not found. Ensure the record is MRV verified." });
+    res.json(vc);
+  });
+
+  app.get("/api/carbon/context.jsonld", (req, res) => {
+    // Public endpoint for VVB programmatic parsing
+    res.json(VCService.getWasteCarbonContext());
   });
 
   // Vite middleware for development

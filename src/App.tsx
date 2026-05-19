@@ -42,6 +42,7 @@ import {
   FileText,
   Download,
   Plus,
+  X,
   IndianRupee,
   MessageSquare,
   Send
@@ -530,6 +531,7 @@ export default function App() {
   const [forecast, setForecast] = useState<string>('');
   const [mrvRiskAssessments, setMrvRiskAssessments] = useState<Record<string, { risk_score: number, explanation: string }>>({});
   const [carbonDashboard, setCarbonDashboard] = useState<any>(null);
+  const [selectedVC, setSelectedVC] = useState<any>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -985,6 +987,27 @@ export default function App() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleViewVC = async (recordId: string) => {
+    setLoading(true);
+    try {
+      const storedToken = localStorage.getItem('token');
+      const res = await fetch(`/api/carbon/vc/${recordId}`, {
+        headers: { 'Authorization': `Bearer ${storedToken}` }
+      });
+      if (res.ok) {
+        const vc = await res.json();
+        setSelectedVC(vc);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'VC not found');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -4171,6 +4194,15 @@ export default function App() {
                                       <span className="block capitalize">{record.mrv_verified_by_role?.replace('_', ' ')}</span>
                                     </div>
                                   )}
+                                  {record.mrv_status === 'verified' && (
+                                    <button 
+                                      onClick={() => handleViewVC(record.id)}
+                                      className="mt-2 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 transition-colors uppercase tracking-widest"
+                                    >
+                                      <ShieldCheck size={10} />
+                                      {t('View W3C VC')}
+                                    </button>
+                                  )}
                                   {record.blockchain_hash && (
                                     <button 
                                       onClick={() => setView('blockchain')}
@@ -5838,6 +5870,63 @@ export default function App() {
         </AnimatePresence>
       </main>
       <Chatbot />
+
+      {/* W3C VC Modal */}
+      <AnimatePresence>
+        {selectedVC && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-[#0a0a0a] border border-white/10 rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-emerald-500/10 to-transparent">
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+                    <ShieldCheck className="text-emerald-400" />
+                    {t('W3C Verifiable Credential 2.0')}
+                  </h3>
+                  <p className="text-xs text-white/40 mt-1">{t('Interoperable Sovereign-Grade Compliance Object (JSON-LD)')}</p>
+                </div>
+                <button 
+                  onClick={() => setSelectedVC(null)}
+                  className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/40 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto font-mono text-[10px] bg-black/20">
+                <pre className="text-emerald-400/90 whitespace-pre-wrap break-all leading-relaxed">
+                  {JSON.stringify(selectedVC, null, 2)}
+                </pre>
+              </div>
+
+              <div className="p-6 border-t border-white/5 bg-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] text-white/40 uppercase tracking-widest">{t('ISO 14064-3 Verifiable')}</span>
+                </div>
+                <button 
+                  onClick={() => {
+                    const blob = new Blob([JSON.stringify(selectedVC, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `rupaykg-vc-${selectedVC.id.split(':').pop()}.jsonld`;
+                    a.click();
+                  }}
+                  className="px-4 py-2 bg-emerald-500 text-black font-bold rounded-lg text-sm hover:bg-emerald-400 transition-all flex items-center gap-2"
+                >
+                  <Download size={14} />
+                  {t('Download JSON-LD')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
