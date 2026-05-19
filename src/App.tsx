@@ -373,7 +373,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'pilot_engine'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations'>('dashboard');
   
   useEffect(() => {
     document.documentElement.lang = i18n.language;
@@ -396,7 +396,7 @@ export default function App() {
     isManual: false,
     notes: ''
   });
-  const [pilotOnboardFormData, setPilotOnboardFormData] = useState({ name: '', role: 'collector', phone: '', location: 'Jabalpur' });
+  const [pilotOnboardFormData, setPilotOnboardFormData] = useState({ name: '', role: 'collector', phone: '', location: '' });
   const [pilotSubView, setPilotSubView] = useState<'dashboard' | 'log' | 'onboard' | 'playbook' | 'reports' | 'whatsapp'>('dashboard');
   
   // Form States
@@ -598,18 +598,33 @@ export default function App() {
     const getEcoTips = async () => {
       if (view === 'dashboard' && user && history.length > 0) {
         if (['citizen', 'fpo'].includes(user.role)) {
-          // Caching to mitigate 5 RPM limit
-          const cacheKey = `ecoTips_${user.id}_${history.length}`;
-          const cached = sessionStorage.getItem(cacheKey);
-          if (cached) {
-            setEcoTips(JSON.parse(cached));
+          // Check if AI is globally blocked for this session due to quota
+          if (sessionStorage.getItem('ai_daily_blocked')) {
+            console.log("AI is blocked for this session due to daily quota exhaustion.");
+            setEcoTips([
+              "Always clean and dry your recyclables to prevent contamination.",
+              "Switch to reusable bags and containers to reduce daily plastic waste.",
+              "Segregate organic waste for local composting."
+            ]);
             return;
+          }
+
+          // Caching to mitigate 5 RPM limit
+          const cacheKey = `ecoTips_${user.id}`;
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            const { tips, timestamp } = JSON.parse(cached);
+            // 24 hour TTL to respect strict 20 RPD daily limit
+            if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+              setEcoTips(tips);
+              return;
+            }
           }
 
           try {
             const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history.slice(0, 5))}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
             const response = await ai.models.generateContent({
-              model: "gemini-1.5-flash",
+              model: "gemini-3-flash-preview",
               contents: prompt,
               config: {
                 responseMimeType: "application/json",
@@ -622,10 +637,16 @@ export default function App() {
             const tips = JSON.parse(response.text || "[]");
             if (tips.length > 0) {
               setEcoTips(tips);
-              sessionStorage.setItem(cacheKey, JSON.stringify(tips));
+              localStorage.setItem(cacheKey, JSON.stringify({ tips, timestamp: Date.now() }));
             }
-          } catch (err) {
+          } catch (err: any) {
             console.error("AI Eco-Tips Error:", err);
+            
+            // If it's a daily limit error, block AI for the rest of this session
+            if (err.message?.includes("Daily Quota Exhausted") || err.message?.includes("limit: 20")) {
+              sessionStorage.setItem('ai_daily_blocked', 'true');
+            }
+
             // Fallback for Quota Exhaustion
             const fallbacks = [
               "Always clean and dry your recyclables to prevent contamination of the entire batch.",
@@ -643,28 +664,43 @@ export default function App() {
   useEffect(() => {
     const getForecast = async () => {
       if (view === 'dashboard' && user && ['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user.role) && adminStats) {
-        // Caching to mitigate 5 RPM limit
-        const cacheKey = `forecast_${user.id}_${adminStats.total_biomass_records}`;
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-          setForecast(cached);
+        // Check session block
+        if (sessionStorage.getItem('ai_daily_blocked')) {
+          setForecast("System Insight: Regional biomass output is projected to grow 5-10% next month. Local segregation efficiency remains high across districts.");
           return;
+        }
+
+        // Caching to mitigate 20 RPD (Per Day) limit
+        const cacheKey = `forecast_${user.id}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const { forecast, timestamp } = JSON.parse(cached);
+          // 24 hour TTL
+          if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+            setForecast(forecast);
+            return;
+          }
         }
 
         try {
           const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(adminStats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
           const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-3-flash-preview",
             contents: prompt
           });
           if (response.text) {
             setForecast(response.text);
-            sessionStorage.setItem(cacheKey, response.text);
+            localStorage.setItem(cacheKey, JSON.stringify({ forecast: response.text, timestamp: Date.now() }));
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error("AI Forecast Error:", err);
+          
+          if (err.message?.includes("Daily Quota Exhausted") || err.message?.includes("limit: 20")) {
+            sessionStorage.setItem('ai_daily_blocked', 'true');
+          }
+
           // Fallback for Quota Exhaustion
-          setForecast("System Insight: Jabalpur's biomass output is projected to grow 5-10% next month as collection efficiency improves. We recommend prioritizing fuel allocation for the western quadrant to handle increasing volumes.");
+          setForecast("System Insight: Regional biomass output is projected to grow 5-10% next month as collection efficiency improves. We recommend prioritizing fuel allocation for high-yield zones to handle increasing volumes.");
         }
       }
     };
@@ -867,7 +903,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (view === 'pilot_engine') {
+    if (view === 'operations') {
       fetchPilotData();
       const interval = setInterval(fetchPilotData, 10000);
       return () => clearInterval(interval);
@@ -1202,7 +1238,7 @@ export default function App() {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: { parts },
         config: {
           responseMimeType: "application/json",
@@ -1273,7 +1309,7 @@ export default function App() {
           const mimeType = mimeInfo.split(':')[1];
           
           const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-3-flash-preview",
             contents: {
               parts: [
                 {
@@ -1400,7 +1436,7 @@ export default function App() {
       
       const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -2054,16 +2090,16 @@ export default function App() {
     );
   }
 
-  const renderPilotEngine = () => {
+  const renderOperationsCenter = () => {
     return (
       <motion.div 
-        key="pilot_engine"
+        key="operations_center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         className="space-y-6"
       >
-        {/* Pilot Sub-navigation */}
+        {/* Operations Sub-navigation */}
         <div className="flex flex-wrap gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/10 w-fit">
           <button 
             onClick={() => setPilotSubView('dashboard')}
@@ -2242,7 +2278,7 @@ export default function App() {
                     setPilotFormData({ 
                       weight: 0, 
                       wasteType: 'organic', 
-                      location: 'Jabalpur', 
+                      location: '', 
                       photoUrl: '', 
                       collectorId: user?.id || '',
                       isManual: false,
@@ -2314,7 +2350,7 @@ export default function App() {
                       type="text"
                       required
                       className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                      placeholder="e.g. Ward 12, Jabalpur"
+                      placeholder="e.g. Ward 12, Main City"
                       value={pilotFormData.location}
                       onChange={e => setPilotFormData({...pilotFormData, location: e.target.value})}
                     />
@@ -2408,7 +2444,7 @@ export default function App() {
                   });
                   if (res.ok) {
                     setMessage({ type: 'success', text: t('Partner onboarded successfully!') });
-                    setPilotOnboardFormData({ name: '', role: 'collector', phone: '', location: 'Jabalpur' });
+                    setPilotOnboardFormData({ name: '', role: 'collector', phone: '', location: '' });
                     fetchPilotData();
                   } else {
                     setMessage({ type: 'error', text: t('Failed to onboard partner.') });
@@ -2463,7 +2499,7 @@ export default function App() {
                     type="text"
                     required
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                    placeholder="e.g. Civil Lines, Jabalpur"
+                    placeholder="e.g. Main Street, Hub"
                     value={pilotOnboardFormData.location}
                     onChange={e => setPilotOnboardFormData({...pilotOnboardFormData, location: e.target.value})}
                   />
@@ -2556,7 +2592,7 @@ export default function App() {
                       </div>
                       <div className="flex justify-start">
                         <div className="bg-white/10 text-white px-4 py-2 rounded-2xl rounded-tl-none text-sm">
-                          {t('Verified! 45kg Organic logged at Jabalpur Ward 12. CCC Impact: +0.022 tCO2e.')}
+                          {t('Verified! 45kg Organic logged at Area Hub. CCC Impact: +0.022 tCO2e.')}
                         </div>
                       </div>
                     </div>
@@ -2582,7 +2618,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold">{t('Operations Playbook')}</h3>
-                <p className="text-white/40 text-sm">{t('Standard Operating Procedures for Jabalpur Pilot.')}</p>
+                <p className="text-white/40 text-sm">{t('Standard Operating Procedures for National Deployment.')}</p>
               </div>
               <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">
                 <Download size={14} />
@@ -2673,7 +2709,7 @@ export default function App() {
                     const totalWeight = pilotRecords.reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
                     const totalCCC = pilotRecords.reduce((sum: any, r: any) => sum + (r.estimatedCCC || 0), 0);
                     
-                    const prompt = `Generate a Pilot Summary Report for Jabalpur Waste-to-CCC Operation.
+                    const prompt = `Generate an Operations Summary Report for National Waste-to-CCC Operation.
                     Data:
                     - Total Waste Collected: ${totalWeight} kg
                     - Estimated CCCs Generated: ${totalCCC.toFixed(2)} tCO2e
@@ -2687,7 +2723,7 @@ export default function App() {
                     4. Recommendations for Scale-up.`;
 
                     const response = await ai.models.generateContent({
-                      model: "gemini-1.5-flash",
+                      model: "gemini-3-flash-preview",
                       contents: prompt
                     });
 
@@ -2843,6 +2879,15 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('National KPI')}</span>
             </button>
           )}
+          {['super_admin', 'state_admin', 'municipal_admin'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('operations')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'operations' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <Activity size={20} />
+              <span className="hidden md:block font-medium">{t('Operations Hub')}</span>
+            </button>
+          )}
           {['municipal_admin', 'state_admin', 'super_admin'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('municipal')}
@@ -2905,6 +2950,7 @@ export default function App() {
               {view === 'tasks' && t('Operations Management')}
               {view === 'history' && t('Transaction Ledger')}
               {view === 'admin' && t('National Dashboard')}
+              {view === 'operations' && t('Operations Control Center')}
               {view === 'municipal' && labels.viewTitle}
               {view === 'blockchain' && t('GRID-INDIA CCC Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
@@ -6009,6 +6055,7 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'operations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && renderOperationsCenter()}
         </AnimatePresence>
       </main>
       <Chatbot />

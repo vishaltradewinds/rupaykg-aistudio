@@ -56,12 +56,22 @@ export const Chatbot = () => {
     setIsLoading(true);
 
     try {
+      if (sessionStorage.getItem('ai_daily_blocked')) {
+        setMessages(prev => [...prev, { 
+          id: Date.now().toString(), 
+          role: 'ai', 
+          text: "I'm sorry, my daily processing quota (20 requests) has been exhausted for all users. I'm currently in 'Lite Mode' - I can still answer simple questions from my knowledge, but complex or real-time queries are unavailable. Please try again tomorrow!" 
+        }]);
+        setIsLoading(false);
+        return;
+      }
+
       const systemInstruction = `You are RupayKg AI, an expert in waste management, CCC Certificates (CCCs), and environmental sustainability. You assist users with the RupayKg Circular Economy OS, which is powered by Google CircularNet for AI-assisted waste sorting, contamination detection, and weight estimation. Provide concise and helpful answers. The user's preferred language is ${i18n.language || 'en'}. Respond in that language if possible.`;
       
       let response;
       if (useMaps && location) {
         response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-3-flash-preview",
           contents: userMsg.text,
           config: {
             systemInstruction,
@@ -73,7 +83,7 @@ export const Chatbot = () => {
         });
       } else {
         response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-3-flash-preview",
           contents: userMsg.text,
           config: { systemInstruction }
         });
@@ -88,8 +98,11 @@ export const Chatbot = () => {
     } catch (err: any) {
       console.error(err);
       let errorMsg = t('Sorry, I encountered an error.');
-      if (err.message?.includes('Quota') || err.message?.includes('429')) {
-        errorMsg = "I'm experiencing high demand (System Load). I can still help you with basic recycling: Plastic (PET/HDPE), Paper, and Biomass segregation. Please try complex queries again in a minute.";
+      if (err.message?.includes('Daily Quota Exhausted') || err.message?.includes('limit: 20')) {
+        sessionStorage.setItem('ai_daily_blocked', 'true');
+        errorMsg = "My daily quota (20 requests/day) has been reached. Please upgrade the API key or come back tomorrow for more AI-powered insights!";
+      } else if (err.message?.includes('Quota') || err.message?.includes('429')) {
+        errorMsg = "I'm experiencing high demand (RPM limit). Please wait 60 seconds before sending another message.";
       }
       setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', text: errorMsg }]);
     } finally {
@@ -123,7 +136,7 @@ export const Chatbot = () => {
             setIsLoading(true);
             try {
               const response = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
+                model: "gemini-3-flash-preview",
                 contents: [
                   {
                     parts: [
@@ -177,7 +190,7 @@ export const Chatbot = () => {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [{ parts: [{ text }] }],
         config: {
           responseModalities: [Modality.AUDIO],

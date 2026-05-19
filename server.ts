@@ -1739,10 +1739,11 @@ async function startServer() {
         }
       });
       
-      let modelName = model || "gemini-1.5-flash";
-      // Map all requests to gemini-1.5-flash for maximum quota availability on free Tier
-      if (modelName.includes("gemini-3") || modelName.includes("lite") || modelName === "gemini-1.5-pro") {
-        modelName = "gemini-1.5-flash";
+      let modelName = model || "gemini-3-flash-preview";
+      
+      // Map legacy or unsupported names to the best available stable preview
+      if (modelName === "gemini-1.5-flash" || modelName === "gemini-3.1-flash-lite" || modelName === "gemini-1.5-pro") {
+        modelName = "gemini-3-flash-preview";
       }
 
       // Retry Logic with Exponential Backoff
@@ -1766,17 +1767,29 @@ async function startServer() {
           return res.json(response);
         } catch (err: any) {
           lastError = err;
-          const status = err.message?.includes("429") || err.message?.includes("503") || err.status === 429 || err.status === 503;
-          if (!status || attempt === maxRetries) break;
+          const is429 = err.message?.includes("429") || err.status === 429;
+          const is503 = err.message?.includes("503") || err.status === 503;
+          
+          // Check for daily limit (usually 20) vs minute limit (usually 5)
+          const isDailyLimit = 
+            err.message?.includes("limit: 20") || 
+            err.message?.includes("daily") || 
+            err.message?.includes("quota_daily") ||
+            err.message?.includes("RESOURCE_EXHAUSTED") && err.message?.includes("20");
+          
+          if (isDailyLimit || ! (is429 || is503) || attempt === maxRetries) break;
         }
       }
 
       console.error("AI Generation final failure:", lastError);
       
       if (lastError.message?.includes("429") || lastError.message?.includes("quota") || lastError.status === 429) {
-        return res.status(429).json({ 
-          error: "Gemini API Quota Exhausted. This build is on a free tier (5 RPM). Please wait 60 seconds or upgrade your API key tier." 
-        });
+        const isDaily = lastError.message?.includes("limit: 20");
+        const msg = isDaily 
+          ? "Gemini Daily Quota Exhausted (20 Requests/Day). Please upgrade to a paid tiered API key or wait until tomorrow."
+          : "Gemini RPM Quota Exhausted (5 Requests/Minute). Please wait 60 seconds.";
+        
+        return res.status(429).json({ error: msg });
       }
 
       if (lastError.message?.includes("503") || lastError.status === 503) {

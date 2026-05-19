@@ -17,8 +17,10 @@ export class GuardianAIToolkit {
    * (Verra, Gold Standard, CDM) to generate a "Methodology Alignment Report".
    */
   static async generateMethodologyReport(vc: any): Promise<string> {
-    if (this.reportCache[vc.id]) {
-      return this.reportCache[vc.id];
+    const cacheKey = `guardian_report_${vc.id}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      return cached;
     }
 
     const prompt = `
@@ -39,18 +41,25 @@ export class GuardianAIToolkit {
     `;
 
     try {
+      if (sessionStorage.getItem('ai_daily_blocked')) {
+        throw new Error("AI Daily Quota Exhausted");
+      }
+
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt
       });
       const result = response.text || "Failed to generate alignment report.";
       if (response.text) {
-        this.reportCache[vc.id] = result;
+        sessionStorage.setItem(cacheKey, result);
       }
       return result;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Guardian AI Report Error:", err);
-      return "Critical failure in Guardian AI analysis.";
+      if (err.message?.includes("Daily Quota Exhausted") || err.message?.includes("limit: 20")) {
+        sessionStorage.setItem('ai_daily_blocked', 'true');
+      }
+      return "Critical failure in Guardian AI analysis. Please try again later.";
     }
   }
 
@@ -70,13 +79,20 @@ export class GuardianAIToolkit {
     `;
 
     try {
+      if (sessionStorage.getItem('ai_daily_blocked')) {
+        return "I cannot interpret the HCS ledger at this moment due to high traffic/quota limits. Please try again tomorrow.";
+      }
+
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt
       });
       return response.text || "I cannot interpret the HCS ledger at this moment.";
-    } catch (err) {
+    } catch (err: any) {
       console.error("Guardian Ledger AI Query Error:", err);
+      if (err.message?.includes("Daily Quota Exhausted") || err.message?.includes("limit: 20")) {
+        sessionStorage.setItem('ai_daily_blocked', 'true');
+      }
       return "HCS Data interpretation failure.";
     }
   }
