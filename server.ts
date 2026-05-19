@@ -12,11 +12,22 @@ import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
 import { generateCarbonEvent } from "./src/services/carbonEngine";
 import { VCService } from "./src/services/vcService";
-import { GuardianService } from "./src/services/guardianService";
-import { IntakeService } from "./server/services/IntakeService";
-import { AIValidationService } from "./server/services/AIValidationService";
-import { CarbonEngine } from "./server/services/CarbonEngine";
-import { GovernanceService } from "./server/services/GovernanceService";
+import { GuardianService as LegacyGuardianService } from "./src/services/guardianService";
+import { GuardianService } from "./services/guardian_service/GuardianService";
+import { AuthService } from "./services/auth_service/AuthService";
+import { PolicyService } from "./services/auth_service/PolicyService";
+import { InfraService } from "./services/shared/InfraService";
+import { SearchService } from "./services/shared/SearchService";
+import { QueueService } from "./services/shared/QueueService";
+import { ObservabilityService } from "./services/shared/ObservabilityService";
+import { IntakeService } from "./services/intake_service/IntakeService";
+import { AIValidationService } from "./services/ai_validation_service/AIValidationService";
+import { CarbonEngine } from "./services/carbon_engine/CarbonEngine";
+import { GovernanceService } from "./services/governance_service/GovernanceService";
+import { ReportingService } from "./services/reporting_service/ReportingService";
+import { PayoutService } from "./services/payout_service/PayoutService";
+import { UserRole } from "./shared/types/auth";
+import { WasteEvent, CarbonOutput, ApprovalChain } from "./shared/types/mrv";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -27,6 +38,20 @@ let paymentConfig = {
 async function startServer() {
   const app = express();
   app.use(express.json());
+
+  // Observability Middleware
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      ObservabilityService.trackRequest(duration, res.statusCode);
+    });
+    next();
+  });
+
+  // Initialize Infra (DB, Redis)
+  await InfraService.init().catch(err => console.error("Infra Init Failed:", err));
+  await QueueService.init().catch(err => console.error("Queue Init Failed:", err));
 
   // MUST run on port 3000 in this environment
   const PORT = 3000; 
@@ -300,21 +325,38 @@ async function startServer() {
   // Initialize Genesis Block
   mintBlock({ message: "Genesis Block - RupayKG CCC Ledger Initialized" });
 
-  // ---------------- AUTH MIDDLEWARE ----------------
-  function auth(roles: string[] = []) {
-    return (req: any, res: any, next: any) => {
-      const token = req.headers.authorization?.split(" ")[1];
-      if (!token) return res.status(401).json({ error: "Unauthorized" });
+  // ---------------- AUTH MIDDLEWARE & SECURITY ----------------
+  
+  // Security Headers Middleware
+  app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    next();
+  });
 
+  // JWT Middleware using jose (AuthService)
+  function auth(roles: string[] = []) {
+    return async (req: any, res: any, next: any) => {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Unauthorized - Sovereign Auth Required" });
+      }
+
+      const token = authHeader.split(" ")[1];
       try {
-        const decoded = jwt.verify(token, publicKey, { algorithms: ["RS256"] }) as any;
-        if (roles.length && !roles.includes(decoded.role)) {
-          return res.status(403).json({ error: "Forbidden" });
+        const payload = await AuthService.verifyToken(token);
+        req.user = payload;
+
+        if (roles.length > 0 && !roles.includes(payload.role)) {
+          return res.status(403).json({ error: "Insufficient Permissions - RBAC Violation" });
         }
-        req.user = decoded;
+
         next();
-      } catch {
-        return res.status(401).json({ error: "Invalid Token" });
+      } catch (err) {
+        console.error("Auth Verification Error:", err);
+        return res.status(401).json({ error: "Invalid or expired session token" });
       }
     };
   }
@@ -336,8 +378,8 @@ async function startServer() {
       
       const token = authHeader.split(" ")[1];
       try {
-        const decoded = jwt.verify(token, publicKey, { algorithms: ["RS256"] }) as any;
-        if (decoded.role !== "super_admin" && decoded.role !== "state_admin") {
+        const payload = await AuthService.verifyToken(token);
+        if (payload.role !== "super_admin" && payload.role !== "state_admin") {
           return res.status(403).json({ error: "Forbidden: Only super admins or state admins can create administrative accounts" });
         }
       } catch (err) {
@@ -397,22 +439,21 @@ async function startServer() {
     if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$'))) {
       isMatch = await bcrypt.compare(password, user.password);
     } else {
-      // Fallback for legacy plain text passwords in mock data
       isMatch = user.password === password;
     }
     
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
-    const tokenPayload = { 
-      id: user.id, 
-      role: user.role, 
-      name: user.name, 
-      district: user.district, 
+    const token = await AuthService.generateToken({
+      id: user.id,
+      role: user.role as UserRole,
+      name: user.name,
+      district: user.district,
       state: user.state,
-      organization_name: user.organization_name
-    };
-    const token = jwt.sign(tokenPayload, privateKey, { algorithm: "RS256", expiresIn: "24h" });
-    res.json({ token, user: tokenPayload });
+      tenant_id: user.state || 'national'
+    });
+
+    res.json({ token, user: { id: user.id, name: user.name, role: user.role, district: user.district, state: user.state, wallet_balance: user.wallet_balance } });
   });
 
   app.post("/api/auth/reset-password", async (req, res) => {
@@ -546,7 +587,15 @@ async function startServer() {
       };
 
       records.push(record);
+      await SearchService.indexEvent(record as any);
       
+      // Offload to background queue
+      await QueueService.publish({
+        action: 'PROCESS_IMAGE',
+        resource_id: record.id,
+        payload: { image_url: record.image_url }
+      });
+
       const user = users.find(u => u.id === req.user.id);
       if (user) user.wallet_balance += base_value;
 
@@ -657,12 +706,12 @@ async function startServer() {
 
         // Hedera Guardian: Anchor to HCS for Enterprise Policy Compliance
         try {
-          const hcsMsg = await GuardianService.anchorToHCS(vc);
-          guardianMessages.push(hcsMsg);
-          carbonEvent.hcs_topic_id = hcsMsg.topicId;
-          carbonEvent.hcs_sequence_number = hcsMsg.sequenceNumber;
-          carbonEvent.hcs_running_hash = hcsMsg.runningHash;
-          carbonEvent.guardian_status = "Policy Compliant";
+          const trustChain = await GuardianService.anchorToTrustChain(vc);
+          guardianMessages.push(trustChain);
+          carbonEvent.hcs_topic_id = trustChain.topic_id;
+          carbonEvent.hcs_sequence_number = trustChain.sequence_number;
+          carbonEvent.hcs_running_hash = trustChain.running_hash;
+          carbonEvent.guardian_status = trustChain.compliance_status;
         } catch (hcsErr) {
           console.error("Hedera HCS Anchoring failed:", hcsErr);
         }
@@ -949,25 +998,23 @@ async function startServer() {
   // ================================
   // SERIES A KPI ENDPOINT
   // ================================
-  app.get("/api/admin/kpi", auth(["super_admin", "state_admin", "municipal_admin", "regulator"]), (req: any, res) => {
-    const { context } = req.query;
-    let filteredRecords = records;
-    if (context && context !== 'all') {
-      filteredRecords = filteredRecords.filter(r => r.context === context);
+  app.get("/api/admin/kpi", auth(["super_admin", "state_admin", "regulator", "auditor"]), (req: any, res) => {
+    if (!PolicyService.canPerformAction(req.user, 'view_national_analytics')) {
+      return res.status(403).json({ error: "Access Denied: Policy Engine Restriction" });
     }
 
-    const total_waste = filteredRecords.length;
-    const processed = filteredRecords.filter(r => r.status === "processed").length;
-    const total_users = users.length;
+    const stats = ReportingService.generateNationalStats(records as any);
     
-    // Calculate total wallet disbursed (sum of all potential_ccc_value of verified records)
-    const total_wallet = filteredRecords.filter(r => r.mrv_status === "verified").reduce((sum, r) => sum + (r.potential_ccc_value || 0), 0);
+    const processed = records.filter(r => r.status === "processed").length;
+    const total_users = users.length;
+    const total_wallet = records.filter(r => r.status === "governance_complete").reduce((sum, r) => sum + PayoutService.calculatePayout(r as any), 0);
 
     res.json({
-        total_waste_events: total_waste,
+        total_waste_events: stats.total_events,
         processed_events: processed,
         total_users: total_users,
-        wallet_disbursed: total_wallet
+        wallet_disbursed: total_wallet,
+        total_ccc_amount_kg: stats.total_weight_kg * 0.5 // Mock aggregate
     });
   });
 
@@ -1642,7 +1689,7 @@ async function startServer() {
   });
 
   app.get("/api/carbon/guardian/policy", (req, res) => {
-    res.json(GuardianService.getPolicyTemplate());
+    res.json(LegacyGuardianService.getPolicyTemplate());
   });
 
   app.get("/api/carbon/guardian/messages", auth(["regulator", "super_admin"]), (req, res) => {

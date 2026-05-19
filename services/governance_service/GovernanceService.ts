@@ -1,18 +1,4 @@
-export enum GovernanceLevel {
-  FIELD = 'field',
-  LOCAL = 'local',
-  REGIONAL = 'regional',
-  NATIONAL = 'national'
-}
-
-export interface ApprovalChain {
-  waste_event_id: string;
-  field_sign_off: { user_id: string; timestamp: string; hash: string } | null;
-  panchayat_sign_off: { user_id: string; name: string; timestamp: string; seal_id: string } | null;
-  municipal_sign_off: { user_id: string; name: string; timestamp: string; ward_id: string } | null;
-  regulator_sign_off: { user_id: string; timestamp: string; registry_id: string } | null;
-  status: 'pending' | 'partially_verified' | 'governance_complete' | 'rejected';
-}
+import { ApprovalChain } from "../../shared/types/mrv";
 
 export class GovernanceService {
   static createApprovalChain(wasteEventId: string): ApprovalChain {

@@ -1,41 +1,33 @@
-import { AIValidationService } from './AIValidationService';
-import { CarbonEngine } from './CarbonEngine';
-import { GovernanceService } from './GovernanceService';
-
-export interface WasteEvent {
-  id: string;
-  source: 'citizen' | 'farmer' | 'municipal' | 'panchayat';
-  type: string;
-  weight: number;
-  geo: { lat: number; lng: number };
-  evidence: {
-    photo_url: string;
-    qr_batch_id?: string;
-    vehicle_proof?: string;
-  };
-  trust_score: number;
-  carbon_output: any;
-  governance: any;
-  status: string;
-  timestamp: string;
-}
+import { AIValidationService } from '../ai_validation_service/AIValidationService';
+import { CarbonEngine } from '../carbon_engine/CarbonEngine';
+import { GovernanceService } from '../governance_service/GovernanceService';
+import { GeoService } from '../geo_service/GeoService';
+import { WorkflowService } from '../workflow_service/WorkflowService';
+import { WasteEvent } from '../../shared/types/mrv';
 
 export class IntakeService {
   static async process(data: any, user: any): Promise<WasteEvent> {
     const eventId = `WE-${Date.now()}`;
     
-    // 1. AI Validation
+    const workflow = await WorkflowService.initiateWasteWorkflow(eventId, data.context || 'citizen');
+
+    // Geo Fraud Detection (Stage 7)
+    const isMockFraud = await GeoService.detectGeoFraud(data.geo_lat, data.geo_long, data.user_lat || data.geo_lat, data.user_long || data.geo_long);
+
     const aiResult = await AIValidationService.validateWasteActivity(
       data.image_url, 
       data.weight_kg, 
       data.waste_type
     );
 
-    // 2. Carbon Computation
+    if (isMockFraud) {
+        aiResult.score -= 30;
+        aiResult.explanation += " [GEO-ANOMALY]: Upload location far from registered node.";
+    }
+
     const carbon = CarbonEngine.compute(data.waste_type, data.weight_kg);
     carbon.waste_event_id = eventId;
 
-    // 3. Initialize Governance Chain
     const governance = GovernanceService.createApprovalChain(eventId);
 
     return {

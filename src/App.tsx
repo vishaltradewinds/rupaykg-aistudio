@@ -49,6 +49,7 @@ import {
   MessageSquare,
   Send
 } from 'lucide-react';
+import { TrustScoreWidget, MRVTimeline } from './components/SovereignWidgets';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -130,6 +131,8 @@ interface BiomassRecord {
   geo_long: number;
   image_url?: string;
   double_counting_declaration?: boolean;
+  trust_score?: number;
+  validation_explanation?: string;
   aggregator_id?: string;
   processor_id?: string;
   blockchain_hash?: string;
@@ -4492,6 +4495,12 @@ export default function App() {
                               {t('Pending MRV')}
                             </span>
                           </div>
+
+                          {record.trust_score !== undefined && (
+                            <div className="mb-6">
+                              <TrustScoreWidget score={record.trust_score} explanation={record.validation_explanation} />
+                            </div>
+                          )}
                           
                           <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
                             <div>

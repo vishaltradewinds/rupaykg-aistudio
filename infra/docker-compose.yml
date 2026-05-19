@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  rupaykg-gateway:
+    image: kong:latest
+    environment:
+      KONG_DATABASE: "off"
+    ports:
+      - "8000:8000"
+
+  rupaykg-backend:
+    build: .
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/rupaykg
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/rupaykg
+    depends_on:
+      - mongo
+      - redis
+      - postgres
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:alpine
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: rupaykg
+
+volumes:
+  mongo_data:
