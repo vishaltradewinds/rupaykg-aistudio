@@ -162,19 +162,9 @@ interface AdminStats {
 }
 
 const ImpactChart = ({ data }: { data?: any[] }) => {
-  const defaultData = [
-    { name: 'Jan', value: 400 },
-    { name: 'Feb', value: 700 },
-    { name: 'Mar', value: 600 },
-    { name: 'Apr', value: 1200 },
-    { name: 'May', value: 1500 },
-    { name: 'Jun', value: 2100 },
-    { name: 'Jul', value: 2800 },
-  ];
-
   const chartData = data !== undefined 
     ? data.map(d => ({ name: d.month, value: d.weight })) 
-    : defaultData;
+    : [];
 
   if (chartData.length === 0) {
     return (
@@ -224,15 +214,7 @@ const ImpactChart = ({ data }: { data?: any[] }) => {
 };
 
 const RailDistributionChart = ({ data }: { data?: any[] }) => {
-  const defaultData = [
-    { name: 'Recycler', value: 35, color: '#3b82f6' },
-    { name: 'CSR', value: 20, color: '#10b981' },
-    { name: 'Municipal', value: 15, color: '#f59e0b' },
-    { name: 'CCC', value: 20, color: '#06b6d4' },
-    { name: 'EPR', value: 10, color: '#8b5cf6' },
-  ];
-
-  const chartData = data !== undefined ? data : defaultData;
+  const chartData = data !== undefined ? data : [];
 
   if (chartData.length === 0) {
     return (

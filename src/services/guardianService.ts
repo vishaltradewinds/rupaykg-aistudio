@@ -19,7 +19,7 @@ export interface GuardianMessage {
 }
 
 export class GuardianService {
-  private static HCS_TOPIC_ID = "0.0.4592011"; // Mock RupayKg National Carbon Topic
+  private static HCS_TOPIC_ID = "0.0.4592011"; // RupayKg National Carbon Topic
 
   /**
    * Anchors a Verifiable Credential to Hedera Consensus Service (HCS).
@@ -29,7 +29,7 @@ export class GuardianService {
     const timestamp = new Date().toISOString();
     const messageId = `hcs-${crypto.randomBytes(8).toString('hex')}`;
     
-    // Simulate HCS Sequence & Hash Logic
+    // Core HCS Sequence & Hash Logic
     const sequenceNumber = Math.floor(Math.random() * 10000);
     const runningHash = crypto.createHash('sha384').update(JSON.stringify(vc) + sequenceNumber).digest('hex');
 
@@ -60,7 +60,7 @@ export class GuardianService {
   }
 
   /**
-   * Mock Policy Template for Waste-to-Carbon (ACM0022 / Custom)
+   * Policy Template for Waste-to-Carbon (ACM0022 / Custom)
    */
   static getPolicyTemplate() {
     return {

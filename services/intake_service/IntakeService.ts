@@ -12,7 +12,7 @@ export class IntakeService {
     const workflow = await WorkflowService.initiateWasteWorkflow(eventId, data.context || 'citizen');
 
     // Geo Fraud Detection (Stage 7)
-    const isMockFraud = await GeoService.detectGeoFraud(data.geo_lat, data.geo_long, data.user_lat || data.geo_lat, data.user_long || data.geo_long);
+    const isGeoAnomalous = await GeoService.detectGeoFraud(data.geo_lat, data.geo_long, data.user_lat || data.geo_lat, data.user_long || data.geo_long);
 
     const aiResult = await AIValidationService.validateWasteActivity(
       data.image_url, 
@@ -20,7 +20,7 @@ export class IntakeService {
       data.waste_type
     );
 
-    if (isMockFraud) {
+    if (isGeoAnomalous) {
         aiResult.score -= 30;
         aiResult.explanation += " [GEO-ANOMALY]: Upload location far from registered node.";
     }

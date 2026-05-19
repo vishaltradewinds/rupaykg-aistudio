@@ -6,32 +6,65 @@ export class AnalyticsService {
    * In production, this performs OLAP queries on ClickHouse
    */
 
-  static async getNationalCO2Trends() {
-      // Mocked ClickHouse time-series data
-      return [
-          { date: '2024-01-01', co2e: 450, growth: 12 },
-          { date: '2024-02-01', co2e: 780, growth: 15 },
-          { date: '2024-03-01', co2e: 1200, growth: 22 },
-          { date: '2024-04-01', co2e: 2100, growth: 30 }
-      ];
+  static async getNationalCO2Trends(records: any[] = []) {
+      if (!records || records.length === 0) {
+          return [];
+      }
+      
+      const trends: any[] = [];
+      const groupedByMonth = records.reduce((acc: any, r: any) => {
+          const date = new Date(r.timestamp);
+          const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+          if (!acc[month]) acc[month] = 0;
+          acc[month] += (r.carbon_output?.co2e_avoided_kg || 0) / 1000;
+          return acc;
+      }, {});
+      
+      Object.entries(groupedByMonth).forEach(([date, co2e]) => {
+          trends.push({ date, co2e, growth: 0 }); // Simplification for demo
+      });
+      
+      return trends;
   }
 
-  static async getFraudTrends() {
-      return [
-          { type: 'Duplicate Image', count: 14, district: 'Jabalpur' },
-          { type: 'Geo-mismatch', count: 8, district: 'Indore' },
-          { type: 'Unlikely Weight', count: 5, district: 'Gwalior' }
-      ];
+  static async getFraudTrends(records: any[] = []) {
+      const fraudRecords = records.filter(r => r.mrv_status === 'rejected' || r.status === 'flagged');
+      
+      const typeCounts: Record<string, { count: number, district: string }> = {};
+      
+      fraudRecords.forEach((r: any) => {
+          const type = r.mrv_reason || 'Anomaly';
+          const district = r.governance?.municipal_sign_off?.ward_id || 'Unknown';
+          
+          if (!typeCounts[type]) {
+              typeCounts[type] = { count: 0, district };
+          }
+          typeCounts[type].count++;
+      });
+
+      return Object.entries(typeCounts).map(([type, data]) => ({
+          type,
+          count: data.count,
+          district: data.district
+      }));
   }
 
-  static async getStatePerformance(state: string) {
+  static async getStatePerformance(state: string, records: any[] = []) {
+      const stateRecords = records.filter((r: any) => 
+          (r.governance?.municipal_sign_off?.ward_id?.toLowerCase().includes(state.toLowerCase()) || '')
+      );
+      
+      const total_tonnage = stateRecords.reduce((sum, r: any) => sum + (r.weight_kg || 0), 0) / 1000;
+      const verified_count = stateRecords.filter(r => r.mrv_status === 'verified').length;
+      
       return {
           state,
-          total_tonnage: 45000,
-          payout_efficiency: '94.2%',
-          verified_rate: '89.5%',
-          active_farmers: 1250,
-          recycler_count: 42
+          total_tonnage,
+          payout_efficiency: '0%',
+          verified_rate: stateRecords.length ? `${Math.round((verified_count / stateRecords.length) * 100)}%` : '0%',
+          active_farmers: 0,
+          recycler_count: 0
       };
   }
 }
+

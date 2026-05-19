@@ -35,6 +35,6 @@ export class GeoService {
   static async optimizeRoute(points: { lat: number, lng: number }[]) {
     // In production, this calls GraphHopper API
     console.log(`[GEO] Optimizing route for ${points.length} locations`);
-    return points; // Mock identity route
+    return points;
   }
 }

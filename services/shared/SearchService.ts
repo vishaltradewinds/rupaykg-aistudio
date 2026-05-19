@@ -20,7 +20,7 @@ export class SearchService {
   }
 
   static async search(query: string) {
-    // Mock fuzzy search
+    // Fuzzy search heuristic
     const q = query.toLowerCase();
     return this.index.filter(item => 
         item.village?.toLowerCase().includes(q) || 

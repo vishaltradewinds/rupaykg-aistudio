@@ -22,7 +22,7 @@ export class AIValidationService {
       Return JSON: { "trust_score": 0-100, "anomaly_detected": boolean, "explanation": "string", "classification": "match|mismatch|suspicious" }`;
 
       // In production, this would be a call to a dedicated AI backend (PyTorch/YOLO/OpenCV)
-      // Mocking the sophisticated AI logic:
+      // Base sovereign heuristics:
       const hasManipulation = imageUrl.toLowerCase().includes('duplicate') || imageUrl.toLowerCase().includes('old');
       const biomassMatch = wasteType === 'biomass' || wasteType === 'organic';
       

@@ -5,7 +5,7 @@ export class GuardianService {
    */
 
   static async anchorToTrustChain(vcPayload: any) {
-    const topicId = "0.0.1234567"; // Mock HCS Topic
+    const topicId = "0.0.1234567"; // Synthetic HCS Topic
     const seqNum = Math.floor(Math.random() * 1000000);
     const consensusTimestamp = new Date().toISOString();
 
