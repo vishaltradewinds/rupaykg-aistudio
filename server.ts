@@ -567,21 +567,27 @@ async function startServer() {
     };
     records.push(record);
     
-    // Core Integration Principle: ENRICH existing workflows with carbon intelligence
-    const carbonEvent = generateCarbonEvent(record, wasteConfig);
-    carbonEvents.push(carbonEvent);
-
-    const user = users.find(u => u.id === req.user.id);
-    if (user) user.wallet_balance += base_value; // Only base value is credited initially
-
-    logs.push({ 
-      id: Date.now(), 
-      event: "WASTE_UPLOADED", 
-      details: `Record ${record.id} uploaded by ${req.user.id} - Carbon Event ${carbonEvent.id}`, 
-      timestamp: new Date().toISOString() 
-    });
-    
-    res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`, wallet_balance: user?.wallet_balance });
+    try {
+      // Core Integration Principle: ENRICH existing workflows with carbon intelligence
+      const carbonEvent = generateCarbonEvent(record, wasteConfig);
+      carbonEvents.push(carbonEvent);
+      logs.push({ 
+        id: Date.now(), 
+        event: "WASTE_UPLOADED", 
+        details: `Record ${record.id} uploaded by ${req.user.id} - Carbon Event ${carbonEvent.id}`, 
+        timestamp: new Date().toISOString() 
+      });
+      res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`, wallet_balance: user?.wallet_balance });
+    } catch (carbonErr) {
+      console.error("Carbon Engine enriched upload failed, continuing with base workflow:", carbonErr);
+      logs.push({ 
+        id: Date.now(), 
+        event: "WASTE_UPLOADED", 
+        details: `Record ${record.id} uploaded by ${req.user.id}`, 
+        timestamp: new Date().toISOString() 
+      });
+      res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. CCC value pending MRV.`, wallet_balance: user?.wallet_balance });
+    }
   });
 
   app.post("/api/satellite/verify", auth(["regulator", "super_admin"]), async (req: any, res) => {
@@ -655,6 +661,15 @@ async function startServer() {
       // Register with External CCC Registry
       const registrySerialNumber = await CCCRegistryService.registerVerifiedActivity(record, req.user.id);
       record.registry_serial_number = registrySerialNumber;
+
+      // Update Carbon Event status to verified
+      const carbonEvent = carbonEvents.find(ev => ev.waste_event_id === record.id);
+      if (carbonEvent) {
+        carbonEvent.status = "verified";
+        carbonEvent.verified_at = new Date().toISOString();
+        carbonEvent.verified_by = req.user.id;
+        carbonEvent.registry_serial_number = registrySerialNumber;
+      }
 
       // Record on Blockchain
       const blockchainTx = {
@@ -1474,6 +1489,26 @@ async function startServer() {
       await PilotRecord.create(logEntry);
     } else {
       pilotRecords.push(logEntry);
+    }
+
+    try {
+      // Enrich pilot log with Carbon Intelligence
+      // Map pilot log to standard record format for engine
+      const tempRecord = {
+        id: logEntry.id,
+        weight_kg: weight,
+        waste_type: wasteType === 'organic' ? 'Food & Kitchen Waste' : (wasteType === 'plastic' ? 'PET Bottles (Clear)' : 'Agricultural'),
+        geo_lat: location?.split(',')[0] || 0,
+        geo_long: location?.split(',')[1] || 0,
+        citizen_id: req.user.id,
+        context: 'rural'
+      };
+      const carbonEvent = generateCarbonEvent(tempRecord, { value: 5, ccc_factor: emission_factor });
+      carbonEvents.push(carbonEvent);
+      logEntry.carbon_event_id = carbonEvent.id;
+      logEntry.net_carbon_reduction = carbonEvent.net_carbon_reduction_kg_co2e;
+    } catch (err) {
+      console.error("Failed to enrich pilot log with carbon intelligence:", err);
     }
     
     res.json({ message: "Waste logged successfully", entry: logEntry });

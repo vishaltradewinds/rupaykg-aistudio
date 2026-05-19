@@ -5664,6 +5664,16 @@ export default function App() {
                 </Card>
               </div>
 
+              {/* VIII. Digital Carbon MRV Doctrine */}
+              <Card className="p-8 border-cyan-500/20 bg-cyan-500/5 mt-8">
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <ShieldCheck className="text-cyan-400" /> {t('VIII. Digital Carbon MRV Doctrine')}
+                </h2>
+                <p className="text-white/70 text-sm leading-relaxed">
+                  {t('The platform operates a Digital MRV (Measurement, Reporting, and Verification) engine where every physical waste event automatically triggers a corresponding Carbon Lifecycle Event. Net emission reductions are calculated based on landfill methane avoidance, biomass substitution, and transport optimization, ensuring that every kilogram of waste and its climate value are immutably linked and audit-ready for national registries.')}
+                </p>
+              </Card>
+
               {/* Founder's Note */}
               <section className="bg-white/5 border border-white/10 rounded-3xl p-12 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -5716,6 +5726,10 @@ export default function App() {
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article VI — Regulator Sovereignty')}</h4>
                       <p>{t('CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.')}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white mb-2">{t('Article VII — Digital Carbon MRV')}</h4>
+                      <p>{t('Every waste transaction must generate a carbon event ID with timestamp, stakeholder chain, and emission reduction estimate for sovereign auditability.')}</p>
                     </div>
                   </div>
                 </div>
