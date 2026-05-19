@@ -6,7 +6,8 @@ import path from "path";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import * as GoogleGenAIModule from "@google/genai";
+const { GoogleGenAI } = GoogleGenAIModule;
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
@@ -1678,6 +1679,24 @@ async function startServer() {
     res.json(guardianMessages);
   });
 
+  app.post("/api/carbon/guardian/ai-analyze", auth(["regulator", "super_admin"]), async (req, res) => {
+    const { vcId } = req.body;
+    const vc = verifiableCredentials.find(v => v.id === vcId);
+    if (!vc) return res.status(404).json({ error: "VC not found for analysis." });
+    
+    // Import GuardianAIToolkit dynamically since it's in src
+    const { GuardianAIToolkit } = await import("./src/services/guardianAIService");
+    const report = await GuardianAIToolkit.generateMethodologyReport(vc);
+    res.json({ report });
+  });
+
+  app.post("/api/carbon/guardian/ledger-query", auth(["regulator", "super_admin"]), async (req, res) => {
+    const { query } = req.body;
+    const { GuardianAIToolkit } = await import("./src/services/guardianAIService");
+    const answer = await GuardianAIToolkit.queryHederaTopic(guardianMessages, query);
+    res.json({ answer });
+  });
+
   app.post("/api/carbon/calculate", auth(), (req: any, res) => {
     // Allows testing the carbon engine manually
     const record = req.body;
@@ -1704,14 +1723,43 @@ async function startServer() {
   app.post("/api/ai/generate", async (req: any, res: any) => {
     try {
       const { model, contents, config } = req.body;
-      const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY || "fallback_key");
-      const modelInstance = genAI.getGenerativeModel({ model: model || "gemini-1.5-flash" });
+      const apiKey = process.env.GEMINI_API_KEY;
+      
+      if (!apiKey || apiKey === "fallback_key") {
+        return res.status(400).json({ 
+          error: "Gemini API Key is not configured. Please add GEMINI_API_KEY to your environment variables in the settings menu." 
+        });
+      }
+
+      // Robust instantiation
+      let GoogleGenAIClass: any = GoogleGenAI;
+      if (!GoogleGenAIClass && (GoogleGenAIModule as any).default) {
+        GoogleGenAIClass = (GoogleGenAIModule as any).default;
+      }
+      
+      const genAI = new GoogleGenAIClass(apiKey);
+      
+      // Map unsupported models to stable versions
+      let modelName = model || "gemini-1.5-flash";
+      if (modelName.includes("gemini-3") || modelName.includes("lite")) {
+        modelName = "gemini-1.5-flash";
+      }
+
+      const modelInstance = genAI.getGenerativeModel({ model: modelName });
       const result = await modelInstance.generateContent({ contents, config });
       const response = await result.response;
       res.json(response);
     } catch (err: any) {
       console.error("AI Generation error:", err);
-      res.status(500).json({ error: err.message });
+      
+      // Handle Quota/Rate Limit Errors explicitly
+      if (err.message?.includes("429") || err.message?.includes("quota") || err.message?.includes("RESOURCE_EXHAUSTED")) {
+        return res.status(429).json({ 
+          error: "Gemini API Quota Exhausted. If you are using the free tier, you may have hit the rate limit. Please try again after 60 seconds or provide a paid tiered API key." 
+        });
+      }
+
+      res.status(500).json({ error: err.message || "Internal AI generation failure" });
     }
   });
 

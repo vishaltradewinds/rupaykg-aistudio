@@ -43,6 +43,7 @@ import {
   Download,
   Plus,
   X,
+  Search,
   IndianRupee,
   MessageSquare,
   Send
@@ -537,6 +538,9 @@ export default function App() {
   const [mrvRiskAssessments, setMrvRiskAssessments] = useState<Record<string, { risk_score: number, explanation: string }>>({});
   const [carbonDashboard, setCarbonDashboard] = useState<any>(null);
   const [selectedVC, setSelectedVC] = useState<any>(null);
+  const [guardianReport, setGuardianReport] = useState<string>('');
+  const [ledgerQuery, setLedgerQuery] = useState<string>('');
+  const [ledgerResponse, setLedgerResponse] = useState<string>('');
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -597,7 +601,7 @@ export default function App() {
           try {
             const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history.slice(0, 5))}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
             const response = await ai.models.generateContent({
-              model: "gemini-3.1-flash-lite",
+              model: "gemini-1.5-flash",
               contents: prompt,
               config: {
                 responseMimeType: "application/json",
@@ -624,7 +628,7 @@ export default function App() {
         try {
           const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(adminStats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
           const response = await ai.models.generateContent({
-            model: "gemini-3.1-flash-lite",
+            model: "gemini-1.5-flash",
             contents: prompt
           });
           if (response.text) setForecast(response.text);
@@ -1016,6 +1020,50 @@ export default function App() {
     }
   };
 
+  const handleGuardianAnalysis = async (vcId: string) => {
+    setLoading(true);
+    setGuardianReport('');
+    try {
+      const storedToken = localStorage.getItem('token');
+      const res = await fetch('/api/carbon/guardian/ai-analyze', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${storedToken}` 
+        },
+        body: JSON.stringify({ vcId })
+      });
+      const data = await res.json();
+      setGuardianReport(data.report);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLedgerQuery = async () => {
+    if (!ledgerQuery) return;
+    setLoading(true);
+    try {
+      const storedToken = localStorage.getItem('token');
+      const res = await fetch('/api/carbon/guardian/ledger-query', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${storedToken}` 
+        },
+        body: JSON.stringify({ query: ledgerQuery })
+      });
+      const data = await res.json();
+      setLedgerResponse(data.answer);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -1123,7 +1171,7 @@ export default function App() {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-1.5-flash",
         contents: { parts },
         config: {
           responseMimeType: "application/json",
@@ -1194,7 +1242,7 @@ export default function App() {
           const mimeType = mimeInfo.split(':')[1];
           
           const response = await ai.models.generateContent({
-            model: "gemini-3.1-flash-lite",
+            model: "gemini-1.5-flash",
             contents: {
               parts: [
                 {
@@ -1321,7 +1369,7 @@ export default function App() {
       
       const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -2608,7 +2656,7 @@ export default function App() {
                     4. Recommendations for Scale-up.`;
 
                     const response = await ai.models.generateContent({
-                      model: "gemini-3.1-flash-lite",
+                      model: "gemini-1.5-flash",
                       contents: prompt
                     });
 
@@ -5884,6 +5932,48 @@ export default function App() {
                     </Card>
                   ))
                 )}
+
+                {blockchainLedger.length > 0 && (
+                  <div className="mt-8 pt-8 border-t border-white/5">
+                    <h3 className="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                      <Globe size={20} />
+                      {t('Guardian HCS Ledger AI Interface')}
+                    </h3>
+                    <p className="text-white/40 text-sm mb-4">
+                      {t('Query the Hedera Consensus Service topic 0.0.4592011 directly using natural language.')}
+                    </p>
+                    <div className="flex gap-2 mb-4">
+                      <input 
+                        type="text"
+                        value={ledgerQuery}
+                        onChange={(e) => setLedgerQuery(e.target.value)}
+                        placeholder={t('Example: How many carbon units are anchored in total?')}
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-amber-500/50"
+                      />
+                      <button 
+                        onClick={handleLedgerQuery}
+                        disabled={loading}
+                        className="bg-amber-500 text-black px-6 py-3 rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {loading ? <div className="w-4 h-4 border-2 border-black/30 border-t-black animate-spin rounded-full" /> : <Search size={18} />}
+                        {t('Query Ledger')}
+                      </button>
+                    </div>
+                    {ledgerResponse && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl text-amber-400/90 text-sm leading-relaxed"
+                      >
+                        <div className="flex items-center gap-2 mb-2 font-bold text-[10px] uppercase tracking-widest text-amber-500">
+                          <Zap size={10} />
+                          {t('Guardian AI Response')}
+                        </div>
+                        <ReactMarkdown>{ledgerResponse}</ReactMarkdown>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -5919,7 +6009,31 @@ export default function App() {
               </div>
               
               <div className="p-6 overflow-y-auto font-mono text-[10px] bg-black/20">
-                <pre className="text-emerald-400/90 whitespace-pre-wrap break-all leading-relaxed">
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-1 rounded bg-emerald-500/10">
+                      <Zap size={12} className="text-emerald-400" />
+                    </div>
+                    <span className="text-white/40 uppercase tracking-widest">{t('Guardian AI Analysis')}</span>
+                  </div>
+                  {!guardianReport ? (
+                    <button 
+                      onClick={() => handleGuardianAnalysis(selectedVC.id)}
+                      className="text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors"
+                    >
+                      {t('Run ESG Methodology Alignment Check')}
+                    </button>
+                  ) : (
+                    <div className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-xl text-xs text-emerald-400/80 leading-relaxed font-sans whitespace-pre-wrap">
+                      <ReactMarkdown>{guardianReport}</ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-px bg-white/5 my-4" />
+                
+                <h4 className="text-white/40 uppercase tracking-widest mb-2">{t('Raw VC JSON-LD Content')}</h4>
+                <pre className="text-cyan-400/90 whitespace-pre-wrap break-all leading-relaxed">
                   {JSON.stringify(selectedVC, null, 2)}
                 </pre>
               </div>

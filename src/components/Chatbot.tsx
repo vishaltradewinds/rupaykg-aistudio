@@ -60,7 +60,7 @@ export const Chatbot = () => {
       let response;
       if (useMaps && location) {
         response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
+          model: "gemini-1.5-flash",
           contents: userMsg.text,
           config: {
             systemInstruction,
@@ -72,7 +72,7 @@ export const Chatbot = () => {
         });
       } else {
         response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
+          model: "gemini-1.5-flash",
           contents: userMsg.text,
           config: { systemInstruction }
         });
@@ -118,7 +118,7 @@ export const Chatbot = () => {
             setIsLoading(true);
             try {
               const response = await ai.models.generateContent({
-                model: "gemini-3.1-flash-lite",
+                model: "gemini-1.5-flash",
                 contents: [
                   {
                     parts: [
@@ -159,7 +159,7 @@ export const Chatbot = () => {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-tts-preview",
+        model: "gemini-1.5-flash",
         contents: [{ parts: [{ text }] }],
         config: {
           responseModalities: [Modality.AUDIO],
