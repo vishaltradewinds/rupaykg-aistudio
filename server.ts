@@ -13,6 +13,10 @@ import { CCCRegistryService } from "./src/services/cccRegistryService";
 import { generateCarbonEvent } from "./src/services/carbonEngine";
 import { VCService } from "./src/services/vcService";
 import { GuardianService } from "./src/services/guardianService";
+import { IntakeService } from "./server/services/IntakeService";
+import { AIValidationService } from "./server/services/AIValidationService";
+import { CarbonEngine } from "./server/services/CarbonEngine";
+import { GovernanceService } from "./server/services/GovernanceService";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -316,8 +320,9 @@ async function startServer() {
   }
 
   // ---------------- AUTH ROUTES ----------------
-  const PUBLIC_ROLES = ["citizen", "fpo", "csr_partner", "epr_partner", "ccc_buyer"];
-  const ADMIN_ROLES = ["super_admin", "state_admin", "municipal_admin", "regulator"];
+  const PUBLIC_ROLES = ["citizen", "farmer", "fpo", "csr_partner", "epr_partner", "ccc_buyer"];
+  const GOVERNANCE_ROLES = ["municipal_officer", "panchayat_officer", "carbon_verifier", "auditor"];
+  const ADMIN_ROLES = ["super_admin", "state_admin", "regulator"];
 
   app.post("/api/register", async (req, res) => {
     const { phone, password, role, name, district, state, organization_name } = req.body;
@@ -340,7 +345,7 @@ async function startServer() {
       }
     }
 
-    if (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role)) {
+    if (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role) && !GOVERNANCE_ROLES.includes(role)) {
       return res.status(400).json({ error: "Invalid role specified" });
     }
 
@@ -515,87 +520,53 @@ async function startServer() {
     res.json({ crop_type, hectares, estimated_tons, estimated_kg: estimated_tons * 1000 });
   });
 
-  app.post("/api/citizen/upload", auth(["citizen", "fpo"]), async (req: any, res) => {
-    const { weight_kg, waste_type, village, geo_lat, geo_long, image_url, context, acreage, double_counting_declaration, ai_risk_score, ai_verification_details } = req.body;
-    
-    const wasteConfig = dynamicWasteTypes.find(w => w.type === waste_type) || { value: 5, ccc_factor: 0.5 };
-    const base_value = weight_kg * wasteConfig.value;
-    const ccc_amount_kg = weight_kg * wasteConfig.ccc_factor;
-    const potential_ccc_value = ccc_amount_kg * paymentConfig.ccc_price_per_kg;
-    const total_value = base_value + potential_ccc_value;
-    
-    // AI Risk Score from Frontend
-    let risk_score = ai_risk_score !== undefined ? ai_risk_score : 0;
-    let verification_details = ai_verification_details || "AI Verification Skipped";
-    
-    if (!image_url) {
-      risk_score += 0.2;
-      verification_details = "No image provided for AI verification.";
-    }
-    
-    // 1. Geolocation accuracy (mock: if missing, high risk)
-    if (!geo_lat || !geo_long) {
-      risk_score += 0.3;
-    } else {
-      // Mock: check if coordinates are within expected bounds (e.g., India)
-      if (geo_lat < 8 || geo_lat > 37 || geo_long < 68 || geo_long > 97) {
-        risk_score += 0.2;
-      }
-    }
-
-    // Cap at 1.0
-    risk_score = Math.min(risk_score, 1.0);
-    
-    const satellite_verification = await SatelliteVerificationService.verifyActivity(geo_lat, geo_long, waste_type);
-    
-    const record = {
-      id: "REC" + Date.now(),
-      citizen_id: req.user.id,
-      weight_kg,
-      waste_type,
-      village,
-      geo_lat,
-      geo_long,
-      image_url,
-      acreage: acreage || 0,
-      double_counting_declaration: double_counting_declaration || false,
-      risk_score,
-      ai_verification_details: verification_details,
-      satellite_verification,
-      context: context || "rural", // Default to rural if not provided
-      status: "pending_pickup",
-      mrv_status: "pending", // MRV Status: pending, verified, rejected
-      base_value,
-      potential_ccc_value,
-      total_value,
-      ccc_amount_kg,
-      timestamp: new Date().toISOString()
-    };
-    records.push(record);
-    
-    const user = users.find(u => u.id === req.user.id);
-    if (user) user.wallet_balance += base_value;
-
+  app.post("/api/citizen/upload", auth(["citizen", "farmer", "fpo"]), async (req: any, res) => {
     try {
-      // Core Integration Principle: ENRICH existing workflows with carbon intelligence
-      const carbonEvent = generateCarbonEvent(record, wasteConfig);
-      carbonEvents.push(carbonEvent);
+      const intakeEvent = await IntakeService.process(req.body, req.user);
+      
+      const wasteConfig = dynamicWasteTypes.find(w => w.type === req.body.waste_type) || { value: 5, ccc_factor: 0.5 };
+      const base_value = req.body.weight_kg * wasteConfig.value;
+
+      const record = {
+        ...intakeEvent,
+        citizen_id: req.user.id,
+        weight_kg: intakeEvent.weight,
+        waste_type: intakeEvent.type,
+        village: req.body.village,
+        geo_lat: intakeEvent.geo.lat,
+        geo_long: intakeEvent.geo.lng,
+        image_url: intakeEvent.evidence.photo_url,
+        risk_score: 1 - (intakeEvent.trust_score / 100),
+        status: "pending_pickup",
+        mrv_status: "pending",
+        base_value,
+        potential_ccc_value: intakeEvent.carbon_output.net_co2e_kg * (paymentConfig.ccc_price_per_kg / 1000),
+        total_value: base_value,
+        ccc_amount_kg: intakeEvent.carbon_output.net_co2e_kg
+      };
+
+      records.push(record);
+      
+      const user = users.find(u => u.id === req.user.id);
+      if (user) user.wallet_balance += base_value;
+
+      carbonEvents.push(intakeEvent.carbon_output);
+      
       logs.push({ 
         id: Date.now(), 
-        event: "WASTE_UPLOADED", 
-        details: `Record ${record.id} uploaded by ${req.user.id} - Carbon Event ${carbonEvent.id}`, 
+        event: "WASTE_INTAKE_SOVEREIGN", 
+        details: `National Event ${intakeEvent.id} captured. Trust Score: ${intakeEvent.trust_score}`, 
         timestamp: new Date().toISOString() 
       });
-      res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`, wallet_balance: user?.wallet_balance });
-    } catch (carbonErr) {
-      console.error("Carbon Engine enriched upload failed, continuing with base workflow:", carbonErr);
-      logs.push({ 
-        id: Date.now(), 
-        event: "WASTE_UPLOADED", 
-        details: `Record ${record.id} uploaded by ${req.user.id}`, 
-        timestamp: new Date().toISOString() 
+
+      res.json({ 
+        message: `Activity Logged! Trust Score: ${intakeEvent.trust_score}. Base value credited.`, 
+        event_id: intakeEvent.id,
+        wallet_balance: user?.wallet_balance 
       });
-      res.json({ message: `Success! Base value ₹${base_value.toFixed(2)} credited. CCC value pending MRV.`, wallet_balance: user?.wallet_balance });
+    } catch (err) {
+      console.error("Intake Service Failure:", err);
+      res.status(500).json({ error: "Sovereign Intake Layer Failure" });
     }
   });
 

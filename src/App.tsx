@@ -22,6 +22,7 @@ import {
   Globe,
   ArrowRight,
   ShieldCheck,
+  Landmark,
   Truck,
   Factory,
   Sprout,
@@ -57,6 +58,10 @@ import ReactMarkdown from 'react-markdown';
 import { WASTE_TYPES, WASTE_CATEGORIES, WasteType } from './constants';
 
 import { Chatbot } from './components/Chatbot';
+import { TrustScore } from './components/integrity/TrustScore';
+import { CarbonIntegrityPanel } from './components/integrity/CarbonIntegrityPanel';
+import { GovernanceTimeline } from './components/governance/GovernanceTimeline';
+import { NationalAnalytics } from './components/analytics/NationalAnalytics';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -276,7 +281,7 @@ const NetworkNode = ({ x, y, delay = 0 }: { x: string, y: string, delay?: number
 
 // --- COMPONENTS ---
 
-const Card = ({ children, className = "", ...props }: { children: React.ReactNode, className?: string, [key: string]: any }) => (
+export const Card = ({ children, className = "", ...props }: { children: React.ReactNode, className?: string, [key: string]: any }) => (
   <div className={`os-card rounded-2xl p-6 ${className}`} {...props}>
     {children}
   </div>
@@ -373,7 +378,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'panchayat' | 'audit'>('dashboard');
   
   useEffect(() => {
     document.documentElement.lang = i18n.language;
@@ -2799,6 +2804,73 @@ export default function App() {
     );
   };
 
+  const renderPanchayatDesk = () => {
+    const pendingPanchayat = history.filter(r => r.mrv_status === 'pending' && r.status === 'pending_pickup');
+    
+    return (
+      <motion.div 
+        key="panchayat"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 1.05 }}
+        className="space-y-6"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="md:col-span-2">
+            <h3 className="text-xl font-bold mb-4">{t('Village Waste Log')}</h3>
+            <div className="space-y-4">
+              {pendingPanchayat.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-white/20">
+                  <ClipboardList size={48} className="mb-4 opacity-20" />
+                  <p>{t('No village events awaiting local sign-off.')}</p>
+                </div>
+              ) : (
+                pendingPanchayat.map(record => (
+                  <div key={record.id} className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-bold">{record.waste_type.toUpperCase()}</span>
+                        <span className="text-xs text-white/40">{record.weight_kg}kg</span>
+                      </div>
+                      <p className="text-[10px] text-white/40 uppercase tracking-widest">{record.village}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <TrustScore score={record.risk_score ? (1 - record.risk_score) * 100 : 85} />
+                      <button className="px-4 py-2 bg-amber-500 font-bold text-black rounded-lg text-xs hover:bg-amber-400 transition-colors">
+                        {t('Local Seal')}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <div className="space-y-6">
+            <Card className="bg-amber-500/10 border-amber-500/20">
+              <h4 className="font-bold mb-2 flex items-center gap-2">
+                <Landmark size={18} className="text-amber-500" />
+                {t('Panchayat Authority')}
+              </h4>
+              <p className="text-xs text-white/50 leading-relaxed">
+                {t('As a Panchayat Officer, your digital seal validates that the waste activity physically occurred within village bounds.')}
+              </p>
+            </Card>
+
+            <Card>
+              <h4 className="font-bold mb-4">{t('Activity Timeline')}</h4>
+              <GovernanceTimeline stages={[
+                { label: 'Citizen Upload', actor: 'Local Farmer', status: 'complete', timestamp: new Date().toISOString() },
+                { label: 'Panchayat Desk', actor: 'You (Officer)', status: 'active' },
+                { label: 'State Regulator', actor: 'Verification Hub', status: 'pending' },
+              ]} />
+            </Card>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans">
       <Helmet>
@@ -2879,13 +2951,31 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('National KPI')}</span>
             </button>
           )}
-          {['super_admin', 'state_admin', 'municipal_admin'].includes(user?.role || '') && (
+          {['super_admin', 'state_admin', 'municipal_officer', 'panchayat_officer'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('operations')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'operations' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
               <Activity size={20} />
               <span className="hidden md:block font-medium">{t('Operations Hub')}</span>
+            </button>
+          )}
+          {user?.role === 'panchayat_officer' && (
+            <button 
+              onClick={() => setView('panchayat')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'panchayat' ? 'bg-amber-500/10 text-amber-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <Globe size={20} />
+              <span className="hidden md:block font-medium">{t('Panchayat Desk')}</span>
+            </button>
+          )}
+          {['super_admin', 'auditor', 'regulator'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('audit')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'audit' ? 'bg-blue-500/10 text-blue-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <ShieldCheck size={20} />
+              <span className="hidden md:block font-medium">{t('Audit Rail')}</span>
             </button>
           )}
           {['municipal_admin', 'state_admin', 'super_admin'].includes(user?.role || '') && (
@@ -2951,72 +3041,28 @@ export default function App() {
               {view === 'history' && t('Transaction Ledger')}
               {view === 'admin' && t('National Dashboard')}
               {view === 'operations' && t('Operations Control Center')}
+              {view === 'panchayat' && t('Gram Panchayat Governance')}
+              {view === 'audit' && t('Sovereign Audit Trail')}
               {view === 'municipal' && labels.viewTitle}
               {view === 'blockchain' && t('GRID-INDIA CCC Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
             </h2>
-            <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
-              {t('Welcome back')}, {user?.name || 'Citizen'}
-              {user?.role && (
-                <span className="px-2 py-0.5 bg-white/10 rounded-full text-[10px] uppercase tracking-wider text-white/80">
-                  {user.role}
-                </span>
-              )}
+            <p className="text-white/40 text-sm mt-1">
+              {view === 'dashboard' && t('AI-monitored sovereign circular infrastructure.')}
+              {view === 'upload' && t('Secure, verifiable record of origin.')}
+              {view === 'tasks' && t('Supply chain execution and logistics.')}
             </p>
           </div>
+          
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <button 
-                onClick={() => setShowLangDropdown(!showLangDropdown)}
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold transition-all hover:bg-white/10 text-white"
-              >
-                <Globe size={14} />
-                {LANGUAGES.find(l => l.code === i18n.language)?.label || 'English'}
-              </button>
-              {showLangDropdown && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowLangDropdown(false)} />
-                  <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1C] border border-white/10 rounded-xl shadow-xl transition-all overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-                    {LANGUAGES.map((lang) => (
-                      <button 
-                        key={lang.code}
-                        onClick={() => {
-                          i18n.changeLanguage(lang.code);
-                          setShowLangDropdown(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${i18n.language === lang.code ? 'text-emerald-400 font-medium' : 'text-white/70'}`}
-                      >
-                        {lang.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] uppercase tracking-widest text-white/40">{t('Your Node')}</span>
+              <span className="text-sm font-bold text-emerald-400 capitalize">{user?.role.replace('_', ' ')}</span>
             </div>
-            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
-              <button 
-                onClick={() => setOperatingContext('urban')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
-              >
-                URBAN
-              </button>
-              <button 
-                onClick={() => setOperatingContext('rural')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
-              >
-                RURAL
-              </button>
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+              {user?.name?.[0]?.toUpperCase() || 'U'}
             </div>
-            {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '')) && (
-              <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
-                <Wallet className="text-emerald-400" size={20} />
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-white/40">{t('Wallet Balance')}</p>
-                  <p className="text-xl font-bold">₹{walletBalance.toFixed(2)}</p>
-                </div>
-              </div>
-            )}
           </div>
         </header>
 
@@ -4684,7 +4730,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'admin' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
+          {view === 'admin' && ['super_admin', 'state_admin', 'municipal_officer', 'regulator', 'auditor'].includes(user?.role || '') && (
             <motion.div 
               key="admin"
               initial={{ opacity: 0, x: 20 }}
@@ -4692,89 +4738,73 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              {user?.role === 'super_admin' && (
-                <div className="flex gap-4 mb-6">
-                  <button 
-                    onClick={() => setAdminSubView('dashboard')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'dashboard' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                  >
-                    {t('National Dashboard')}
-                  </button>
-                  <button 
-                    onClick={() => setAdminSubView('users')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'users' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                  >
-                    {t('User Management')}
-                  </button>
-                  <button 
-                    onClick={() => setAdminSubView('audit')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'audit' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                  >
-                    {t('Audit Logs')}
-                  </button>
-                  <button 
-                    onClick={() => setAdminSubView('waste_config')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'waste_config' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                  >
-                    {t('Waste & Payment Config')}
-                  </button>
-                  <button 
-                    onClick={() => setAdminSubView('fraud')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'fraud' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                  >
-                    {t('Fraud Alerts')}
-                  </button>
-                  <button 
-                    onClick={() => setAdminSubView('integrations')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'integrations' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                  >
-                    {t('DPI Integrations')}
-                  </button>
-                </div>
-              )}
+              <div className="flex flex-wrap gap-4 mb-6">
+                <button 
+                  onClick={() => setAdminSubView('dashboard')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${adminSubView === 'dashboard' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                >
+                  {t('Sovereign Analytics')}
+                </button>
+                {['super_admin', 'state_admin'].includes(user?.role || '') && (
+                  <>
+                    <button 
+                      onClick={() => setAdminSubView('users')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${adminSubView === 'users' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                    >
+                      {t('Node Management')}
+                    </button>
+                    <button 
+                      onClick={() => setAdminSubView('fraud')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${adminSubView === 'fraud' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                    >
+                      {t('Fraud Detection')}
+                    </button>
+                  </>
+                )}
+                <button 
+                  onClick={() => setAdminSubView('integrations')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${adminSubView === 'integrations' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                >
+                  {t('DPI Rails')}
+                </button>
+              </div>
 
               {adminSubView === 'dashboard' ? (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <Activity size={80} className="text-white" />
-                      </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Total Waste Events')}</h4>
-                      <p className="text-4xl font-black tracking-tighter">{adminKpi.total_waste_events || 0}</p>
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <Stat label={t('Verified Events')} value={adminKpi.total_waste_events || 0} icon={CheckCircle2} color="emerald" />
+                    <Stat label={t('Active Nodes')} value={adminKpi.total_users || 0} icon={Cpu} color="blue" />
+                    <Stat label={t('National CCC Yield')} value={`${((adminKpi.total_ccc_amount_kg || 0) / 1000).toFixed(2)}t`} icon={Leaf} color="emerald" />
+                    <Stat label={t('DPI Payouts')} value={`₹${(adminKpi.wallet_disbursed || 0).toLocaleString()}`} icon={IndianRupee} color="amber" />
+                  </div>
+
+                  <NationalAnalytics data={[
+                    { state: 'Maharashtra', tonnage: 1240 },
+                    { state: 'Punjab', tonnage: 890 },
+                    { state: 'Gujarat', tonnage: 1100 },
+                    { state: 'Karnataka', tonnage: 950 },
+                    { state: 'Haryana', tonnage: 760 },
+                  ]} />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                        <MapPin size={20} className="text-blue-400" />
+                        {t('District Density')}
+                      </h3>
+                      <BiomassMap records={history} />
                     </Card>
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <CheckCircle2 size={80} className="text-emerald-400" />
-                      </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Processed Events')}</h4>
-                      <p className="text-4xl font-black tracking-tighter text-emerald-400">{adminKpi.processed_events || 0}</p>
-                      <button 
-                        onClick={() => setView('blockchain')}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
-                        title="Verify on Blockchain"
-                      >
-                        <Cpu size={12} />
-                      </button>
-                    </Card>
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <Users size={80} className="text-blue-400" />
-                      </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Total Users')}</h4>
-                      <p className="text-4xl font-black tracking-tighter text-blue-400">{adminKpi.total_users || 0}</p>
-                    </Card>
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <Wallet size={80} className="text-amber-400" />
-                      </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Wallet Disbursed')}</h4>
-                      <p className="text-4xl font-black tracking-tighter text-amber-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
+                    <Card>
+                      <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                        <Shield size={20} className="text-rose-400" />
+                        {t('Anomaly Heatmap')}
+                      </h3>
+                      <FraudMap alerts={fraudMap} subLabel={t('District')} />
                     </Card>
                   </div>
 
                   {comprehensiveMetrics && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       <Card className="p-6 border-white/5 bg-white/5 col-span-2">
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                           <TrendingUp className="text-emerald-400" size={20} />
@@ -4964,11 +4994,6 @@ export default function App() {
                             ))}
                           </div>
                         )}
-                        
-                        <div className="mt-4">
-                          <p className="text-xs uppercase tracking-widest text-white/40 mb-3">{t('Geospatial Fraud Distribution')}</p>
-                          <FraudMap alerts={fraudMap} subLabel={labels.sub} />
-                        </div>
                       </div>
                     </Card>
                     
@@ -4990,7 +5015,7 @@ export default function App() {
                       </div>
                     </Card>
                   </div>
-                </>
+                </div>
               ) : adminSubView === 'users' ? (
                 <Card className="p-6 border-white/5 bg-white/5">
                   <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
@@ -6055,7 +6080,8 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'operations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && renderOperationsCenter()}
+          {view === 'operations' && ['super_admin', 'state_admin', 'municipal_officer', 'panchayat_officer', 'regulator'].includes(user?.role || '') && renderOperationsCenter()}
+          {view === 'panchayat' && user?.role === 'panchayat_officer' && renderPanchayatDesk()}
         </AnimatePresence>
       </main>
       <Chatbot />
