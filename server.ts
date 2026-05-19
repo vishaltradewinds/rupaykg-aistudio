@@ -379,9 +379,12 @@ async function startServer() {
   // Initialize Genesis Block
   mintBlock({ message: "Genesis Block - RupayKG CCC Ledger Initialized" });
 
-  // ---------------- AUTH MIDDLEWARE ----------------
+  // ---------------- AUTH MIDDLEWARE (HARDENED) ----------------
+  const clientRedis = require('redis').createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
+  clientRedis.connect().catch(() => console.warn('Redis not connected, skipping token blocklist.'));
+
   function auth(roles: string[] = []) {
-    return (req: any, res: any, next: any) => {
+    return async (req: any, res: any, next: any) => {
       const token = req.headers.authorization?.split(" ")[1];
       if (!token) return res.status(401).json({ error: "Unauthorized" });
 
@@ -389,12 +392,42 @@ async function startServer() {
         const decoded = jwt.verify(token, publicKey, {
           algorithms: ["RS256"],
         }) as any;
-        if (roles.length && !roles.includes(decoded.role)) {
-          return res.status(403).json({ error: "Forbidden" });
+        
+        // Redis JTI Blacklist Check
+        if (decoded.jti && clientRedis.isReady) {
+          const isBlacklisted = await clientRedis.get(`bl_${decoded.jti}`);
+          if (isBlacklisted) {
+             return res.status(401).json({ error: "Token revoked" });
+          }
         }
+
+        // Map legacy roles to new Sovereign Roles for backwards compatibility in existing code
+        let mappedRole = decoded.role;
+        if (["citizen", "fpo"].includes(mappedRole)) mappedRole = "GENERATOR";
+        else if (mappedRole === "aggregator") mappedRole = "AGGREGATOR";
+        else if (mappedRole === "processor") mappedRole = "RECYCLER";
+        else if (["super_admin", "state_admin", "municipal_admin"].includes(mappedRole)) mappedRole = "ADMIN";
+        else if (mappedRole === "regulator") mappedRole = "REGULATOR";
+        
+        const strictRoles = ['ADMIN', 'GENERATOR', 'AGGREGATOR', 'RECYCLER', 'VERIFIER', 'REGULATOR'];
+
+        if (roles.length) {
+            const mappedAllowedRoles = roles.map(r => {
+                if (["citizen", "fpo"].includes(r)) return "GENERATOR";
+                if (r === "aggregator") return "AGGREGATOR";
+                if (r === "processor") return "RECYCLER";
+                if (["super_admin", "state_admin", "municipal_admin"].includes(r)) return "ADMIN";
+                if (r === "regulator") return "REGULATOR";
+                return r;
+            });
+            if (!mappedAllowedRoles.includes(mappedRole)) {
+              return res.status(403).json({ error: "Forbidden: Strict RBAC verification failed" });
+            }
+        }
+
         req.user = decoded;
         next();
-      } catch {
+      } catch (err) {
         return res.status(401).json({ error: "Invalid Token" });
       }
     };
@@ -516,11 +549,26 @@ async function startServer() {
       state: user.state,
       organization_name: user.organization_name,
     };
+    
+    // Sovereign capability: JTI injection for revocation
+    const jti = crypto.randomUUID();
     const token = jwt.sign(tokenPayload, privateKey, {
       algorithm: "RS256",
       expiresIn: "24h",
+      jwtid: jti
     });
     res.json({ token, user: tokenPayload });
+  });
+
+  app.post("/api/logout", auth(), async (req: any, res) => {
+     if (req.user?.jti && clientRedis.isReady) {
+         const { exp } = req.user;
+         const ttl = exp ? exp - Math.floor(Date.now() / 1000) : 86400; // 24h fallback
+         if (ttl > 0) {
+            await clientRedis.setEx(`bl_${req.user.jti}`, ttl, "true");
+         }
+     }
+     res.json({ message: "Logged out successfully" });
   });
 
   app.post("/api/auth/reset-password", async (req, res) => {
