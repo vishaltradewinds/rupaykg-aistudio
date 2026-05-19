@@ -1739,9 +1739,10 @@ async function startServer() {
         }
       });
       
-      let modelName = model || "gemini-3-flash-preview";
-      if (modelName === "gemini-1.5-flash" || modelName === "gemini-3.1-flash-lite" || modelName === "gemini-1.5-pro") {
-        modelName = "gemini-3-flash-preview";
+      let modelName = model || "gemini-1.5-flash";
+      // Map all requests to gemini-1.5-flash for maximum quota availability on free Tier
+      if (modelName.includes("gemini-3") || modelName.includes("lite") || modelName === "gemini-1.5-pro") {
+        modelName = "gemini-1.5-flash";
       }
 
       // Retry Logic with Exponential Backoff

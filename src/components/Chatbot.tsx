@@ -61,7 +61,7 @@ export const Chatbot = () => {
       let response;
       if (useMaps && location) {
         response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-1.5-flash",
           contents: userMsg.text,
           config: {
             systemInstruction,
@@ -73,7 +73,7 @@ export const Chatbot = () => {
         });
       } else {
         response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-1.5-flash",
           contents: userMsg.text,
           config: { systemInstruction }
         });
@@ -85,9 +85,13 @@ export const Chatbot = () => {
         text: response.text || t('Sorry, I could not generate a response.'),
         chunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks
       }]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', text: t('Sorry, I encountered an error.') }]);
+      let errorMsg = t('Sorry, I encountered an error.');
+      if (err.message?.includes('Quota') || err.message?.includes('429')) {
+        errorMsg = "I'm experiencing high demand (System Load). I can still help you with basic recycling: Plastic (PET/HDPE), Paper, and Biomass segregation. Please try complex queries again in a minute.";
+      }
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', text: errorMsg }]);
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +123,7 @@ export const Chatbot = () => {
             setIsLoading(true);
             try {
               const response = await ai.models.generateContent({
-                model: "gemini-3-flash-preview",
+                model: "gemini-1.5-flash",
                 contents: [
                   {
                     parts: [
@@ -173,7 +177,7 @@ export const Chatbot = () => {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: [{ parts: [{ text }] }],
         config: {
           responseModalities: [Modality.AUDIO],
