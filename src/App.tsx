@@ -598,10 +598,18 @@ export default function App() {
     const getEcoTips = async () => {
       if (view === 'dashboard' && user && history.length > 0) {
         if (['citizen', 'fpo'].includes(user.role)) {
+          // Caching to mitigate 5 RPM limit
+          const cacheKey = `ecoTips_${user.id}_${history.length}`;
+          const cached = sessionStorage.getItem(cacheKey);
+          if (cached) {
+            setEcoTips(JSON.parse(cached));
+            return;
+          }
+
           try {
             const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history.slice(0, 5))}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
             const response = await ai.models.generateContent({
-              model: "gemini-1.5-flash",
+              model: "gemini-3-flash-preview",
               contents: prompt,
               config: {
                 responseMimeType: "application/json",
@@ -612,7 +620,10 @@ export default function App() {
               }
             });
             const tips = JSON.parse(response.text || "[]");
-            if (tips.length > 0) setEcoTips(tips);
+            if (tips.length > 0) {
+              setEcoTips(tips);
+              sessionStorage.setItem(cacheKey, JSON.stringify(tips));
+            }
           } catch (err) {
             console.error("AI Eco-Tips Error:", err);
           }
@@ -625,13 +636,24 @@ export default function App() {
   useEffect(() => {
     const getForecast = async () => {
       if (view === 'dashboard' && user && ['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user.role) && adminStats) {
+        // Caching to mitigate 5 RPM limit
+        const cacheKey = `forecast_${user.id}_${adminStats.total_biomass_records}`;
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+          setForecast(cached);
+          return;
+        }
+
         try {
           const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(adminStats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
           const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-3-flash-preview",
             contents: prompt
           });
-          if (response.text) setForecast(response.text);
+          if (response.text) {
+            setForecast(response.text);
+            sessionStorage.setItem(cacheKey, response.text);
+          }
         } catch (err) {
           console.error("AI Forecast Error:", err);
         }
@@ -1171,7 +1193,7 @@ export default function App() {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: { parts },
         config: {
           responseMimeType: "application/json",
@@ -1242,7 +1264,7 @@ export default function App() {
           const mimeType = mimeInfo.split(':')[1];
           
           const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-3-flash-preview",
             contents: {
               parts: [
                 {
@@ -1369,7 +1391,7 @@ export default function App() {
       
       const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -2656,7 +2678,7 @@ export default function App() {
                     4. Recommendations for Scale-up.`;
 
                     const response = await ai.models.generateContent({
-                      model: "gemini-1.5-flash",
+                      model: "gemini-3-flash-preview",
                       contents: prompt
                     });
 

@@ -6,8 +6,7 @@ import path from "path";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { createServer as createViteServer } from "vite";
-import * as GoogleGenAIModule from "@google/genai";
-const { GoogleGenAI } = GoogleGenAIModule;
+import { GoogleGenAI } from "@google/genai";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
@@ -1731,35 +1730,64 @@ async function startServer() {
         });
       }
 
-      // Robust instantiation
-      let GoogleGenAIClass: any = GoogleGenAI;
-      if (!GoogleGenAIClass && (GoogleGenAIModule as any).default) {
-        GoogleGenAIClass = (GoogleGenAIModule as any).default;
-      }
+      const client = new GoogleGenAI({ 
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
       
-      const genAI = new GoogleGenAIClass(apiKey);
-      
-      // Map unsupported models to stable versions
-      let modelName = model || "gemini-1.5-flash";
-      if (modelName.includes("gemini-3") || modelName.includes("lite")) {
-        modelName = "gemini-1.5-flash";
+      let modelName = model || "gemini-3-flash-preview";
+      if (modelName === "gemini-1.5-flash" || modelName === "gemini-3.1-flash-lite" || modelName === "gemini-1.5-pro") {
+        modelName = "gemini-3-flash-preview";
       }
 
-      const modelInstance = genAI.getGenerativeModel({ model: modelName });
-      const result = await modelInstance.generateContent({ contents, config });
-      const response = await result.response;
-      res.json(response);
-    } catch (err: any) {
-      console.error("AI Generation error:", err);
+      // Retry Logic with Exponential Backoff
+      const maxRetries = 3;
+      let lastError: any = null;
       
-      // Handle Quota/Rate Limit Errors explicitly
-      if (err.message?.includes("429") || err.message?.includes("quota") || err.message?.includes("RESOURCE_EXHAUSTED")) {
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          if (attempt > 0) {
+            const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+            console.log(`AI Retry attempt ${attempt} after ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+
+          const response = await client.models.generateContent({ 
+            model: modelName,
+            contents, 
+            config 
+          });
+          
+          return res.json(response);
+        } catch (err: any) {
+          lastError = err;
+          const status = err.message?.includes("429") || err.message?.includes("503") || err.status === 429 || err.status === 503;
+          if (!status || attempt === maxRetries) break;
+        }
+      }
+
+      console.error("AI Generation final failure:", lastError);
+      
+      if (lastError.message?.includes("429") || lastError.message?.includes("quota") || lastError.status === 429) {
         return res.status(429).json({ 
-          error: "Gemini API Quota Exhausted. If you are using the free tier, you may have hit the rate limit. Please try again after 60 seconds or provide a paid tiered API key." 
+          error: "Gemini API Quota Exhausted. This build is on a free tier (5 RPM). Please wait 60 seconds or upgrade your API key tier." 
         });
       }
 
-      res.status(500).json({ error: err.message || "Internal AI generation failure" });
+      if (lastError.message?.includes("503") || lastError.status === 503) {
+        return res.status(503).json({ 
+          error: "Gemini models are currently overloaded. Please try again in 10 seconds." 
+        });
+      }
+
+      res.status(500).json({ error: lastError.message || "Internal AI generation failure" });
+    } catch (err: any) {
+      console.error("AI Generation outer error:", err);
+      res.status(500).json({ error: err.message });
     }
   });
 

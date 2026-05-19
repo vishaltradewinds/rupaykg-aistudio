@@ -12,6 +12,7 @@ interface Message {
   text: string;
   chunks?: any[];
   isAudioPlaying?: boolean;
+  audioBase64?: string;
 }
 
 export const Chatbot = () => {
@@ -60,7 +61,7 @@ export const Chatbot = () => {
       let response;
       if (useMaps && location) {
         response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-3-flash-preview",
           contents: userMsg.text,
           config: {
             systemInstruction,
@@ -72,7 +73,7 @@ export const Chatbot = () => {
         });
       } else {
         response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-3-flash-preview",
           contents: userMsg.text,
           config: { systemInstruction }
         });
@@ -118,7 +119,7 @@ export const Chatbot = () => {
             setIsLoading(true);
             try {
               const response = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
+                model: "gemini-3-flash-preview",
                 contents: [
                   {
                     parts: [
@@ -149,6 +150,19 @@ export const Chatbot = () => {
   };
 
   const playTTS = async (messageId: string, text: string) => {
+    // Check if we already have the audio for this message
+    const targetMsg = messages.find(m => m.id === messageId);
+    if (targetMsg?.audioBase64) {
+      const audio = new Audio(`data:audio/mp3;base64,${targetMsg.audioBase64}`);
+      currentAudioRef.current = audio;
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: true } : m));
+      audio.onended = () => {
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));
+      };
+      audio.play();
+      return;
+    }
+
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
@@ -159,7 +173,7 @@ export const Chatbot = () => {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [{ parts: [{ text }] }],
         config: {
           responseModalities: [Modality.AUDIO],
@@ -169,6 +183,9 @@ export const Chatbot = () => {
       const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       
       if (base64Audio) {
+        // Cache the audio base64 in the message state
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, audioBase64: base64Audio } : m));
+        
         const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
         currentAudioRef.current = audio;
         audio.onended = () => {

@@ -10,11 +10,17 @@ import { ai } from "../lib/gemini";
  */
 
 export class GuardianAIToolkit {
+  private static reportCache: Record<string, string> = {};
+
   /**
    * Analyzes an anchored VC against international carbon standards 
    * (Verra, Gold Standard, CDM) to generate a "Methodology Alignment Report".
    */
   static async generateMethodologyReport(vc: any): Promise<string> {
+    if (this.reportCache[vc.id]) {
+      return this.reportCache[vc.id];
+    }
+
     const prompt = `
       As an environmental auditor specializing in the Hedera Guardian ecosystem, 
       analyze the following W3C Verifiable Credential which represents a waste-to-carbon sequestration event:
@@ -34,10 +40,14 @@ export class GuardianAIToolkit {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt
       });
-      return response.text || "Failed to generate alignment report.";
+      const result = response.text || "Failed to generate alignment report.";
+      if (response.text) {
+        this.reportCache[vc.id] = result;
+      }
+      return result;
     } catch (err) {
       console.error("Guardian AI Report Error:", err);
       return "Critical failure in Guardian AI analysis.";
@@ -61,7 +71,7 @@ export class GuardianAIToolkit {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt
       });
       return response.text || "I cannot interpret the HCS ledger at this moment.";
