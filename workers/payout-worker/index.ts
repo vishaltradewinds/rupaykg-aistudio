@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { WalletJournal } from '../../services/wallet-engine/logic';
 
 /**
@@ -8,6 +9,10 @@ export const initPayoutWorker = () => {
     
     // Simulate a periodic sweep
     setInterval(async () => {
+        // Skip query if mongoose is not fully connected (readyState 1)
+        if (mongoose.connection?.readyState !== 1) {
+            return;
+        }
         try {
             const pendingHolds = await (WalletJournal as any).find({ status: 'PENDING', type: 'HOLD' }).lean();
             for (const hold of (pendingHolds as any[])) {

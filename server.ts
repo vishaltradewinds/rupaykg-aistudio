@@ -11,6 +11,7 @@ import pino from "pino";
 import rateLimit from "express-rate-limit";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { createClient } from "redis";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
@@ -50,6 +51,7 @@ async function startServer() {
   });
 
   const app = express();
+  app.set("trust proxy", 1);
 
   // Rate Limiting - Hardening for Nation Scale
   const limiter = rateLimit({
@@ -58,6 +60,7 @@ async function startServer() {
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Too many requests, please try again later." },
+    validate: { xForwardedForHeader: false, forwardedHeader: false, trustProxy: false },
   });
   app.use("/api/", limiter);
 
@@ -416,7 +419,7 @@ async function startServer() {
   mintBlock({ message: "Genesis Block - RupayKG CCC Ledger Initialized" });
 
   // ---------------- AUTH MIDDLEWARE (HARDENED) ----------------
-  const clientRedis = require('redis').createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
+  const clientRedis = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
   clientRedis.connect().catch(() => console.warn('Redis not connected, skipping token blocklist.'));
 
   function auth(roles: string[] = []) {
