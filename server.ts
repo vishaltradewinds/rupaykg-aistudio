@@ -32,6 +32,7 @@ let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
   ccc_price_per_kg: 10,
   logistics_margin_percent: 15,
+  system_profit_percent: 10,
 };
 
 async function startServer() {
@@ -755,11 +756,18 @@ async function startServer() {
       const wasteConfig = dynamicWasteTypes.find(
         (w) => w.type === waste_type,
       ) || { value: 5, ccc_factor: 0.5 };
-      const base_value = weight_kg * wasteConfig.value;
+      const total_base_value = weight_kg * wasteConfig.value;
+      const system_profit = total_base_value * (paymentConfig.system_profit_percent / 100);
+      const logistics_cost = total_base_value * (paymentConfig.logistics_margin_percent / 100);
+      const generator_payout = total_base_value - system_profit - logistics_cost;
+      
+      // Generator receives generator_payout. Total base value is stored for system reference.
+      const base_value = total_base_value;
+      
       const ccc_amount_kg = weight_kg * wasteConfig.ccc_factor;
       const potential_ccc_value =
         ccc_amount_kg * paymentConfig.ccc_price_per_kg;
-      const total_value = base_value + potential_ccc_value;
+      const total_value = generator_payout; // Generator only sees their payout, CCC stays in system
 
       // AI Risk Score from Frontend
       let risk_score = ai_risk_score !== undefined ? ai_risk_score : 0;
@@ -826,13 +834,13 @@ async function startServer() {
       try {
         // Sovereign Wallet Engine: Atomic transact
         if (dbStatus === "connected") {
-            await WalletEngine.transact(req.user.id, base_value, 'CREDIT', { 
+            await WalletEngine.transact(req.user.id, generator_payout, 'CREDIT', { 
                 eventId: record.id, 
                 category: 'base_waste_payout',
                 hcsTx: record.hcs_transaction_id 
             });
         } else {
-            if (user) user.wallet_balance += base_value;
+            if (user) user.wallet_balance += generator_payout;
         }
 
         // Core Integration Principle: ENRICH existing workflows with carbon intelligence
@@ -845,7 +853,7 @@ async function startServer() {
           timestamp: new Date().toISOString(),
         });
         res.json({
-          message: `Success! Base value ₹${base_value.toFixed(2)} credited. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`,
+          message: `Success! Base value ₹${generator_payout.toFixed(2)} credited. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`,
           wallet_balance: user?.wallet_balance,
         });
       } catch (carbonErr) {
@@ -860,7 +868,7 @@ async function startServer() {
           timestamp: new Date().toISOString(),
         });
         res.json({
-          message: `Success! Base value ₹${base_value.toFixed(2)} credited. CCC value pending MRV.`,
+          message: `Success! Base value ₹${generator_payout.toFixed(2)} credited. CCC value pending MRV.`,
           wallet_balance: user?.wallet_balance,
         });
       }
@@ -971,16 +979,9 @@ async function startServer() {
       if (status === "verified") {
         const user = users.find((u) => u.id === record.citizen_id);
         
-        // Sovereign Wallet Engine: Atomic transact for CCC value
-        if (dbStatus === "connected") {
-            await WalletEngine.transact(record.citizen_id, record.potential_ccc_value, 'CREDIT', { 
-                eventId: record.id, 
-                category: 'carbon_payout',
-                type: 'CCC_VALUE_AWARD' 
-            });
-        } else {
-            if (user) user.wallet_balance += record.potential_ccc_value;
-        }
+        // System mints and earns the CCCs. 
+        // The Generator does not receive their carbon bonus, it stays in the system as system earnings.
+        // Therefore, we skip crediting the citizen_id wallet.
 
         // Register with External CCC Registry
         const registrySerialNumber =
@@ -1135,7 +1136,7 @@ async function startServer() {
     res.json(available);
   });
 
-  app.post("/api/processor/receipt", auth(["processor"]), (req: any, res) => {
+  app.post("/api/processor/receipt", auth(["processor"]), async (req: any, res) => {
     const { record_id } = req.body;
     const record = records.find((r) => r.id === record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
@@ -1144,13 +1145,40 @@ async function startServer() {
 
     record.status = "processed";
     record.processor_id = req.user.id;
+    
+    // Processor pays for the aggregated material received
+    const recycler = users.find(u => u.id === req.user.id);
+    const material_value = record.base_value; // the total base value
+    if (dbStatus === "connected") {
+        await WalletEngine.transact(req.user.id, material_value, 'DEBIT', {
+            eventId: record.id,
+            category: 'material_purchase_cost'
+        });
+    } else {
+        if (recycler) recycler.wallet_balance = (recycler.wallet_balance || 0) - material_value;
+    }
+
+    // Aggregator receives their transit payout based on config
+    const aggregator = users.find(u => u.id === record.aggregator_id);
+    const logistics_payout = record.base_value * (paymentConfig.logistics_margin_percent / 100);
+    if (aggregator) {
+        if (dbStatus === "connected") {
+            await WalletEngine.transact(aggregator.id, logistics_payout, 'CREDIT', {
+                eventId: record.id,
+                category: 'logistics_payout'
+            });
+        } else {
+            aggregator.wallet_balance = (aggregator.wallet_balance || 0) + logistics_payout;
+        }
+    }
+
     logs.push({
       id: Date.now(),
       event: "BIOMASS_PROCESSED",
       details: `Record ${record.id} processed by ${req.user.id}`,
       timestamp: new Date().toISOString(),
     });
-    res.json({ message: "Processing confirmed" });
+    res.json({ message: "Processing confirmed. Material cost deducted and aggregator paid." });
   });
 
   app.post("/api/processor/report", auth(["processor"]), (req: any, res) => {
@@ -1859,11 +1887,13 @@ async function startServer() {
   });
 
   app.post("/api/payment-config", auth(["super_admin"]), (req: any, res) => {
-    const { ccc_price_per_kg, logistics_margin_percent } = req.body;
+    const { ccc_price_per_kg, logistics_margin_percent, system_profit_percent } = req.body;
     if (typeof ccc_price_per_kg === "number")
       paymentConfig.ccc_price_per_kg = ccc_price_per_kg;
     if (typeof logistics_margin_percent === "number")
       paymentConfig.logistics_margin_percent = logistics_margin_percent;
+    if (typeof system_profit_percent === "number")
+      paymentConfig.system_profit_percent = system_profit_percent;
 
     logs.push({
       id: Date.now(),
