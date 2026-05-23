@@ -817,6 +817,7 @@ async function startServer() {
         status: "pending_pickup",
         mrv_status: "pending", // MRV Status: pending, verified, rejected
         base_value,
+        generator_payout,
         potential_ccc_value,
         total_value,
         ccc_amount_kg,
@@ -832,17 +833,6 @@ async function startServer() {
       const user = users.find((u) => u.id === req.user.id);
       
       try {
-        // Sovereign Wallet Engine: Atomic transact
-        if (dbStatus === "connected") {
-            await WalletEngine.transact(req.user.id, generator_payout, 'CREDIT', { 
-                eventId: record.id, 
-                category: 'base_waste_payout',
-                hcsTx: record.hcs_transaction_id 
-            });
-        } else {
-            if (user) user.wallet_balance += generator_payout;
-        }
-
         // Core Integration Principle: ENRICH existing workflows with carbon intelligence
         const carbonEvent = generateCarbonEvent(record, wasteConfig);
         carbonEvents.push(carbonEvent);
@@ -853,7 +843,7 @@ async function startServer() {
           timestamp: new Date().toISOString(),
         });
         res.json({
-          message: `Success! Base value ₹${generator_payout.toFixed(2)} credited. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`,
+          message: `Success! Waste recorded. Payout of ₹${generator_payout.toFixed(2)} pending processor receipt. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`,
           wallet_balance: user?.wallet_balance,
         });
       } catch (carbonErr) {
@@ -868,7 +858,7 @@ async function startServer() {
           timestamp: new Date().toISOString(),
         });
         res.json({
-          message: `Success! Base value ₹${generator_payout.toFixed(2)} credited. CCC value pending MRV.`,
+          message: `Success! Waste recorded. Payout of ₹${generator_payout.toFixed(2)} pending processor receipt. CCC value pending MRV.`,
           wallet_balance: user?.wallet_balance,
         });
       }
@@ -1158,6 +1148,21 @@ async function startServer() {
         if (recycler) recycler.wallet_balance = (recycler.wallet_balance || 0) - material_value;
     }
 
+    // Generator receives their payout now that the processor has paid
+    const generator = users.find(u => u.id === record.citizen_id);
+    const generator_payout = record.generator_payout || 0; // Fallback to 0 if missing
+    if (generator && generator_payout > 0) {
+        if (dbStatus === "connected") {
+            await WalletEngine.transact(generator.id, generator_payout, 'CREDIT', {
+                eventId: record.id,
+                category: 'base_waste_payout',
+                hcsTx: record.hcs_transaction_id 
+            });
+        } else {
+            generator.wallet_balance = (generator.wallet_balance || 0) + generator_payout;
+        }
+    }
+
     // Aggregator receives their transit payout based on config
     const aggregator = users.find(u => u.id === record.aggregator_id);
     const logistics_payout = record.base_value * (paymentConfig.logistics_margin_percent / 100);
@@ -1178,7 +1183,7 @@ async function startServer() {
       details: `Record ${record.id} processed by ${req.user.id}`,
       timestamp: new Date().toISOString(),
     });
-    res.json({ message: "Processing confirmed. Material cost deducted and aggregator paid." });
+    res.json({ message: "Processing confirmed. Material cost deducted, and generator/aggregator paid." });
   });
 
   app.post("/api/processor/report", auth(["processor"]), (req: any, res) => {
