@@ -509,12 +509,12 @@ async function startServer() {
         const decoded = jwt.verify(token, publicKey, {
           algorithms: ["RS256"],
         }) as any;
-        if (decoded.role !== "super_admin" && decoded.role !== "state_admin") {
+        if (decoded.role !== "super_admin") {
           return res
             .status(403)
             .json({
               error:
-                "Forbidden: Only super admins or state admins can create administrative accounts",
+                "Forbidden: Only super admins can create administrative accounts",
             });
         }
       } catch (err) {
