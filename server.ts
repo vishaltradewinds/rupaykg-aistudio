@@ -1867,7 +1867,7 @@ async function startServer() {
       }
 
       if (role && role !== "all") {
-        if (role === "citizen" || role === "fpo") {
+        if (["citizen", "fpo", "industry_generator", "commercial_generator", "institution_generator", "municipal_generator", "industry", "commercial", "institution", "municipality"].includes(role)) {
           filteredRecords = filteredRecords.filter((r) =>
             filteredUsers.some((u) => u.id === r.citizen_id),
           );
@@ -1875,7 +1875,7 @@ async function startServer() {
           filteredRecords = filteredRecords.filter((r) =>
             filteredUsers.some((u) => u.id === r.aggregator_id),
           );
-        } else if (role === "processor") {
+        } else if (role === "processor" || role === "recycler_manager") {
           filteredRecords = filteredRecords.filter((r) =>
             filteredUsers.some((u) => u.id === r.processor_id),
           );
@@ -1883,6 +1883,8 @@ async function startServer() {
           filteredRecords = filteredRecords.filter((r) =>
             filteredUsers.some((u) => u.id === r.purchased_by),
           );
+        } else if (role === "compliance_officer") {
+          filteredRecords = filteredRecords.filter((r) => r.status === "verified");
         } else {
           filteredRecords = [];
         }

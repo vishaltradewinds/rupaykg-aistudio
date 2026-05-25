@@ -525,7 +525,7 @@ export default function App() {
       viewTitle: t('Ward-Level Analytics'),
       citizenLabel: t('Citizen (MSW Generator)'),
       allowedCategories: ["Municipal", "Plastics", "Metals", "E-Waste", "Textiles", "Hazardous", "Construction", "Industrial"],
-      allowedRoles: ['citizen', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'compliance_officer', 'recycler_manager', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'ccc_buyer', 'regulator', 'super_admin']
+      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'municipal_admin', 'state_admin', 'regulator', 'super_admin']
     },
     rural: {
       anchor: t('Gram Panchayat'),
@@ -535,7 +535,7 @@ export default function App() {
       viewTitle: t('Village-Level Analytics'),
       citizenLabel: t('Farmer / FPO (Biomass Generator)'),
       allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"],
-      allowedRoles: ['citizen', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'compliance_officer', 'recycler_manager', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'ccc_buyer', 'regulator', 'super_admin']
+      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'municipal_admin', 'state_admin', 'regulator', 'super_admin']
     }
   }[operatingContext];
 
@@ -2053,12 +2053,6 @@ export default function App() {
                       onChange={e => setFormData({...formData, role: e.target.value})}
                     >
                       {labels.allowedRoles.includes('citizen') && <option value="citizen" className="bg-[var(--color-bg)]">{labels.citizenLabel}</option>}
-                      {labels.allowedRoles.includes('industry_generator') && <option value="industry_generator" className="bg-[var(--color-bg)]">{t('Industry Generator (Factory/MSME)')}</option>}
-                      {labels.allowedRoles.includes('commercial_generator') && <option value="commercial_generator" className="bg-[var(--color-bg)]">{t('Commercial Generator (Malls/Hotels)')}</option>}
-                      {labels.allowedRoles.includes('institution_generator') && <option value="institution_generator" className="bg-[var(--color-bg)]">{t('Institution Generator (Hospitals/Campus)')}</option>}
-                      {labels.allowedRoles.includes('municipal_generator') && <option value="municipal_generator" className="bg-[var(--color-bg)]">{t('Municipal Generator (ULB/Public)')}</option>}
-                      {labels.allowedRoles.includes('compliance_officer') && <option value="compliance_officer" className="bg-[var(--color-bg)]">{t('Compliance & Verification Officer (ESG)')}</option>}
-                      {labels.allowedRoles.includes('recycler_manager') && <option value="recycler_manager" className="bg-[var(--color-bg)]">{t('Recycler / Processor Manager')}</option>}
                       {labels.allowedRoles.includes('aggregator') && <option value="aggregator" className="bg-[var(--color-bg)]">{t('Aggregator (Collection & Transport)')}</option>}
                       {labels.allowedRoles.includes('processor') && <option value="processor" className="bg-[var(--color-bg)]">{t('Processor (Recycler)')}</option>}
                       {labels.allowedRoles.includes('csr_partner') && <option value="csr_partner" className="bg-[var(--color-bg)]">{t('CSR Partner')}</option>}
@@ -3621,7 +3615,7 @@ export default function App() {
                         className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
                       >
                         <option value="all" className="bg-[var(--color-bg)]">{t('All Roles')}</option>
-                        <option value="citizen" className="bg-[var(--color-bg)]">{operatingContext === 'urban' ? t('Citizens') : t('Farmers / FPOs')}</option>
+                        <option value="citizen" className="bg-[var(--color-bg)]">{operatingContext === 'urban' ? t('Citizens / Domestic') : t('Farmers / FPOs')}</option>
                         <option value="aggregator" className="bg-[var(--color-bg)]">{t('Aggregators')}</option>
                         <option value="processor" className="bg-[var(--color-bg)]">{t('Processors')}</option>
                         <option value="csr_partner" className="bg-[var(--color-bg)]">{t('CSR Partners')}</option>
