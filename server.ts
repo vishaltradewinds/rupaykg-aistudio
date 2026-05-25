@@ -357,6 +357,100 @@ async function startServer() {
   const pilotRecords: any[] = [];
   const pilotOnboarding: any[] = [];
 
+  // --- MULTI-GENERATOR PLATFORM STORES ---
+  const generators: any[] = [
+    {
+      id: "gen_ind_abc",
+      generator_id: "gen_ind_abc",
+      generator_type: "industry",
+      legal_name: "ABC Chemical Manufacturing Ltd",
+      trade_name: "ABC Chemicals",
+      gst_number: "27AAACA1234F1Z5",
+      facility_type: "chemical_processing",
+      waste_categories: ["organic", "chemical_sludge", "mixed"],
+      geo_location: { lat: 19.076, lng: 72.877 },
+      district: "Mumbai",
+      state: "Maharashtra",
+      panchayat_or_municipality: "MCGM",
+      contact_person: "Mr. Ramesh Sharma",
+      contact_details: "+91-9876543210",
+      recurring_volume_estimate: 2500,
+      compliance_profile: "ISO 14001 Certified, Tier-1 Compliance",
+      ESG_profile: "Net-Zero Path, ESG B+ Rating",
+      EPR_profile: "EPR Registered - EPR-2026-CHE",
+      active_status: true
+    },
+    {
+      id: "gen_comm_mall",
+      generator_id: "gen_comm_mall",
+      generator_type: "commercial",
+      legal_name: "Infinity Retail Hubs Pvt Ltd",
+      trade_name: "Infinity Mall Delhi",
+      gst_number: "07AAACI4567A1Z2",
+      facility_type: "commercial_mall",
+      waste_categories: ["organic", "dry_waste", "mixed"],
+      geo_location: { lat: 28.613, lng: 77.209 },
+      district: "Central Delhi",
+      state: "Delhi",
+      panchayat_or_municipality: "NDMC",
+      contact_person: "Ms. Priya Sen",
+      contact_details: "+91-9999911111",
+      recurring_volume_estimate: 1200,
+      compliance_profile: "Municipal SWM Compliant",
+      ESG_profile: "Zero-Waste-to-Landfill Target",
+      EPR_profile: "EPR Exempt - Generator Tier-3",
+      active_status: true
+    }
+  ];
+  const contracts: any[] = [
+    {
+      id: "con_101",
+      generator_id: "gen_ind_abc",
+      recycler_id: "processor_1", // linked to current mock processor
+      sla_terms: "Weekly collection of minimum 500kg processed organic waste, moisture < 15%",
+      pickup_commitment_kg: 500,
+      vendor_rating: 4.8,
+      status: "active",
+      created_at: new Date().toISOString()
+    }
+  ];
+  const compliance_records: any[] = [
+    {
+      id: "comp_201",
+      generator_id: "gen_ind_abc",
+      waste_batch_id: "REC1716632400000",
+      compliance_proof_hash: "8f489f6323a7efbd9783f6aa36a71cbcfd45bc89a74de5e921cf8b7625dc98a2",
+      classification: "non-hazardous",
+      epr_ref_number: "EPR-REF-ABC-01",
+      regulator_review_status: "approved",
+      verified_at: new Date().toISOString()
+    }
+  ];
+  const ESG_exports: any[] = [];
+  const EPR_records: any[] = [
+    {
+      id: "epr_301",
+      generator_id: "gen_ind_abc",
+      target_kg: 5000,
+      fulfilled_kg: 3200,
+      certificate_id: "EPR-CERT-77312",
+      status: "active"
+    }
+  ];
+  const pickup_schedules: any[] = [
+    {
+      id: "sched_401",
+      generator_id: "gen_ind_abc",
+      generator_type: "industry",
+      waste_type: "organic",
+      volume_estimate_kg: 600,
+      pickup_frequency: "weekly",
+      day_of_week: "Monday",
+      status: "scheduled",
+      contact_person: "Mr. Ramesh Sharma"
+    }
+  ];
+
   // Carbon Event Memory Stores
   const carbonEvents: any[] = [];
   const carbonCalculations: any[] = [];
@@ -443,21 +537,23 @@ async function startServer() {
 
         // Map legacy roles to new Sovereign Roles for backwards compatibility in existing code
         let mappedRole = decoded.role;
-        if (["citizen", "fpo"].includes(mappedRole)) mappedRole = "GENERATOR";
+        if (["citizen", "fpo", "farmer", "industry_generator", "commercial_generator", "institution_generator", "municipal_generator", "industry", "commercial", "institution", "municipality"].includes(mappedRole)) mappedRole = "GENERATOR";
         else if (mappedRole === "aggregator") mappedRole = "AGGREGATOR";
-        else if (mappedRole === "processor") mappedRole = "RECYCLER";
+        else if (mappedRole === "processor" || mappedRole === "recycler_manager") mappedRole = "RECYCLER";
         else if (["super_admin", "state_admin", "municipal_admin"].includes(mappedRole)) mappedRole = "ADMIN";
         else if (mappedRole === "regulator") mappedRole = "REGULATOR";
+        else if (mappedRole === "compliance_officer") mappedRole = "VERIFIER";
         
         const strictRoles = ['ADMIN', 'GENERATOR', 'AGGREGATOR', 'RECYCLER', 'VERIFIER', 'REGULATOR'];
 
         if (roles.length) {
             const mappedAllowedRoles = roles.map(r => {
-                if (["citizen", "fpo"].includes(r)) return "GENERATOR";
+                if (["citizen", "fpo", "farmer", "industry_generator", "commercial_generator", "institution_generator", "municipal_generator", "industry", "commercial", "institution", "municipality"].includes(r)) return "GENERATOR";
                 if (r === "aggregator") return "AGGREGATOR";
-                if (r === "processor") return "RECYCLER";
+                if (r === "processor" || r === "recycler_manager") return "RECYCLER";
                 if (["super_admin", "state_admin", "municipal_admin"].includes(r)) return "ADMIN";
                 if (r === "regulator") return "REGULATOR";
+                if (r === "compliance_officer") return "VERIFIER";
                 return r;
             });
             if (!mappedAllowedRoles.includes(mappedRole)) {
@@ -477,6 +573,17 @@ async function startServer() {
   const PUBLIC_ROLES = [
     "citizen",
     "fpo",
+    "farmer",
+    "industry", 
+    "commercial", 
+    "institution", 
+    "municipality",
+    "industry_generator",
+    "commercial_generator",
+    "institution_generator",
+    "municipal_generator",
+    "compliance_officer",
+    "recycler_manager",
     "csr_partner",
     "epr_partner",
     "ccc_buyer",
@@ -677,13 +784,177 @@ async function startServer() {
     },
   );
 
+  // ---------------- MULTI-GENERATOR & CLIMATE PLATFORM ENDPOINTS ----------------
+  app.get("/api/generators", auth(), (req: any, res) => {
+    res.json(generators);
+  });
+
+  app.get("/api/generators/:id", auth(), (req: any, res) => {
+    const gen = generators.find((g) => g.id === req.params.id);
+    if (!gen) return res.status(404).json({ error: "Generator not found" });
+    res.json(gen);
+  });
+
+  app.post("/api/generators", auth(), (req: any, res) => {
+    const g = req.body;
+    const newGen = {
+      id: g.generator_id || "gen_" + Date.now(),
+      generator_id: g.generator_id || "gen_" + Date.now(),
+      generator_type: g.generator_type || "industry",
+      legal_name: g.legal_name || "Enterprise Waste Partner",
+      trade_name: g.trade_name || g.legal_name || "Enterprise Generator",
+      gst_number: g.gst_number || "",
+      facility_type: g.facility_type || "factory",
+      waste_categories: g.waste_categories || ["organic", "mixed"],
+      geo_location: g.geo_location || { lat: 19.076, lng: 72.877 },
+      district: g.district || "Default District",
+      state: g.state || "Default State",
+      panchayat_or_municipality: g.panchayat_or_municipality || "Municipal Authority",
+      contact_person: g.contact_person || "Operations Manager",
+      contact_details: g.contact_details || "",
+      recurring_volume_estimate: g.recurring_volume_estimate || 1000,
+      compliance_profile: g.compliance_profile || "Standard SWM Compliant",
+      ESG_profile: g.ESG_profile || "Awaiting Verification",
+      EPR_profile: g.EPR_profile || "EPR-TBD",
+      active_status: true
+    };
+    generators.push(newGen);
+    res.status(201).json(newGen);
+  });
+
+  app.get("/api/generators/:id/batches", auth(), (req: any, res) => {
+    const filtered = records.filter((r) => r.citizen_id === req.params.id);
+    res.json(filtered);
+  });
+
+  app.get("/api/generators/:id/contracts", auth(), (req: any, res) => {
+    const filtered = contracts.filter((c) => c.generator_id === req.params.id);
+    res.json(filtered);
+  });
+
+  app.post("/api/generators/:id/contracts", auth(), (req: any, res) => {
+    const newContract = {
+      id: "con_" + Date.now(),
+      generator_id: req.params.id,
+      recycler_id: req.body.recycler_id || "processor_1",
+      sla_terms: req.body.sla_terms || "Weekly collection contract",
+      pickup_commitment_kg: req.body.pickup_commitment_kg || 100,
+      vendor_rating: 5.0,
+      status: "active",
+      created_at: new Date().toISOString()
+    };
+    contracts.push(newContract);
+    res.status(201).json(newContract);
+  });
+
+  app.get("/api/generators/:id/compliance", auth(), (req: any, res) => {
+    const filtered = compliance_records.filter((c) => c.generator_id === req.params.id);
+    res.json(filtered);
+  });
+
+  app.post("/api/generators/:id/compliance", auth(), (req: any, res) => {
+    const newRecord = {
+      id: "comp_" + Date.now(),
+      generator_id: req.params.id,
+      waste_batch_id: req.body.waste_batch_id || "REC_GENERIC",
+      compliance_proof_hash: req.body.compliance_proof_hash || crypto.randomBytes(32).toString("hex"),
+      classification: req.body.classification || "non-hazardous",
+      epr_ref_number: req.body.epr_ref_number || "EPR-REF-" + Date.now(),
+      regulator_review_status: "approved",
+      verified_at: new Date().toISOString()
+    };
+    compliance_records.push(newRecord);
+    res.status(201).json(newRecord);
+  });
+
+  app.get("/api/generators/:id/analytics", auth(), (req: any, res) => {
+    const genId = req.params.id;
+    const gen = generators.find(g => g.id === genId) || {};
+    const genRecords = records.filter(r => r.citizen_id === genId);
+    
+    const total_waste_kg = genRecords.reduce((acc, r) => acc + (r.weight_kg || r.weight || 0), 0);
+    const total_value_rupees = genRecords.reduce((acc, r) => acc + (r.generator_payout || r.total_value || 0), 0);
+    const total_ccc_minted = genRecords.filter(r => r.mrv_status === 'verified').reduce((acc, r) => acc + (r.ccc_amount_kg || 0), 0);
+    
+    // Climate metrics calculations (carbon Engine-aligned)
+    const carbon_co2e_avoided_kg = total_waste_kg * 1.83; // Baseline average reduction factor
+    const diversion_rate = total_waste_kg > 0 ? 94.5 : 0; // standard recovery efficiency for industries
+    
+    res.json({
+      generator_id: genId,
+      generator_type: gen.generator_type || "industry",
+      legal_name: gen.legal_name || "Facility",
+      total_waste_kg,
+      total_value_rupees,
+      total_ccc_minted,
+      carbon_co2e_avoided_kg,
+      diversion_rate,
+      compliance_rating: 98,
+      epr_obligation_fulfilled_percent: 74.2,
+      facility_performance: [
+        { month: 'Jan', organic: total_waste_kg * 0.4, plastic: total_waste_kg * 0.35, mixed: total_waste_kg * 0.25 },
+        { month: 'Feb', organic: total_waste_kg * 0.42, plastic: total_waste_kg * 0.38, mixed: total_waste_kg * 0.2 },
+        { month: 'Mar', organic: total_waste_kg * 0.45, plastic: total_waste_kg * 0.4, mixed: total_waste_kg * 0.15 },
+        { month: 'Apr', organic: total_waste_kg * 0.48, plastic: total_waste_kg * 0.42, mixed: total_waste_kg * 0.1 },
+        { month: 'May', organic: total_waste_kg * 0.51, plastic: total_waste_kg * 0.44, mixed: total_waste_kg * 0.05 },
+      ]
+    });
+  });
+
+  app.get("/api/facilities", auth(), (req: any, res) => {
+    const list = generators.map((g) => ({
+      facility_id: g.id,
+      legal_name: g.legal_name,
+      trade_name: g.trade_name,
+      facility_type: g.facility_type,
+      geo_location: g.geo_location || { lat: 19.076, lng: 72.877 },
+      waste_categories: g.waste_categories || ["organic", "mixed"],
+      active_status: g.active_status
+    }));
+    res.json(list);
+  });
+
+  app.get("/api/pickups/schedule", auth(), (req: any, res) => {
+    const list = pickup_schedules.filter(
+      (s) => s.generator_id === req.user.id || ["super_admin", "state_admin", "aggregator"].includes(req.user.role)
+    );
+    res.json(list);
+  });
+
+  app.post("/api/pickups/schedule", auth(), (req: any, res) => {
+    const s = req.body;
+    const newSchedule = {
+      id: "sched_" + Date.now(),
+      generator_id: req.user.id,
+      generator_type: req.user.role || "industry",
+      waste_type: s.waste_type || "organic",
+      volume_estimate_kg: s.volume_estimate_kg || 150,
+      pickup_frequency: s.pickup_frequency || "weekly",
+      day_of_week: s.day_of_week || "Monday",
+      status: "scheduled",
+      contact_person: s.contact_person || req.user.name || "Main Contact"
+    };
+    pickup_schedules.push(newSchedule);
+    res.status(201).json(newSchedule);
+  });
+
+  app.post("/api/recyclers/assign", auth(["super_admin", "recycler_manager"]), (req: any, res) => {
+    const { contract_id, recycler_id } = req.body;
+    const contract = contracts.find((c) => c.id === contract_id);
+    if (contract) {
+      contract.recycler_id = recycler_id;
+      return res.json({ message: "Recycler assigned successfully", contract });
+    }
+    res.status(404).json({ error: "Contract not found" });
+  });
+
   // ---------------- CITIZEN ROUTES ----------------
-  app.get("/api/citizen/wallet", auth(["citizen", "fpo"]), (req: any, res) => {
+  app.get("/api/citizen/wallet", auth(["citizen", "fpo", "farmer", "industry", "commercial", "institution", "municipality", "industry_generator", "commercial_generator", "institution_generator", "municipal_generator"]), (req: any, res) => {
     const user = users.find((u) => u.id === req.user.id);
     res.json({ wallet_balance: user?.wallet_balance || 0 });
   });
 
-  app.get("/api/citizen/profile", auth(["citizen", "fpo"]), (req: any, res) => {
+  app.get("/api/citizen/profile", auth(["citizen", "fpo", "farmer", "industry", "commercial", "institution", "municipality", "industry_generator", "commercial_generator", "institution_generator", "municipal_generator"]), (req: any, res) => {
     const user = users.find((u) => u.id === req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     const { password, ...safeUser } = user;
@@ -737,7 +1008,7 @@ async function startServer() {
 
   app.post(
     "/api/citizen/upload",
-    auth(["citizen", "fpo"]),
+    auth(["citizen", "fpo", "farmer", "industry", "commercial", "institution", "municipality", "industry_generator", "commercial_generator", "institution_generator", "municipal_generator"]),
     async (req: any, res) => {
       const {
         weight_kg,
@@ -822,6 +1093,14 @@ async function startServer() {
         total_value,
         ccc_amount_kg,
         timestamp: new Date().toISOString(),
+        generator_type: req.body.generator_type || req.user.role || 'citizen',
+        legal_name: req.body.legal_name || req.user.name || '',
+        trade_name: req.body.trade_name || '',
+        gst_number: req.body.gst_number || '',
+        facility_type: req.body.facility_type || '',
+        contract_id: req.body.contract_id || '',
+        is_recurring: req.body.is_recurring || false,
+        pickup_frequency: req.body.pickup_frequency || ''
       };
       records.push(record);
 
