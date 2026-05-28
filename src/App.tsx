@@ -1660,7 +1660,7 @@ export default function App() {
                 {t('Convert Every Kilogram of Waste into')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">{t('Global Circular Value')}</span>
               </h1>
               <p className="text-xl text-white/60 mb-12 max-w-2xl mx-auto leading-relaxed">
-                {t('RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.')}
+                {t('RupayKg is the Sovereign Digital MRV Infrastructure for Waste-to-Carbon Economies, architected for global scale.')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
@@ -1870,7 +1870,7 @@ export default function App() {
             >
               <div className="text-center mb-16">
                 <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">{t('Ecosystem Roles')}</h2>
-                <p className="text-white/50 max-w-2xl mx-auto">{t('Choose your part in the circular economy.')}</p>
+                <p className="text-white/50 max-w-2xl mx-auto">{t('Choose your part in the Sovereign Environmental Trust Infrastructure.')}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1934,7 +1934,7 @@ export default function App() {
                 </div>
                 <span className="text-lg font-bold tracking-tighter">RUPAYKG</span>
               </div>
-              <p className="text-white/40 text-sm">{t('© 2026 RupayKg Circular Economy OS. All rights reserved.')}</p>
+              <p className="text-white/40 text-sm">{t('© 2026 RupayKg Sovereign Digital MRV Infrastructure. All rights reserved.')}</p>
               <div className="flex gap-4 text-sm text-white/40">
                 <a href="#" className="hover:text-white transition-colors">{t('Privacy')}</a>
                 <a href="#" className="hover:text-white transition-colors">{t('Terms')}</a>
@@ -2876,12 +2876,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans">
       <Helmet>
-        <title>{t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg - National Waste Management OS</title>
-        <meta name="description" content={t(`Access the RupayKg ${view} dashboard. India's sovereign-grade digital infrastructure for waste-to-value conversion, AI-verified intake, and CCC Certificate issuance.`)} />
-        <meta name="keywords" content={`RupayKg ${view}, circular economy India, waste management system, MRV verification, climate certificates, sustainable logistics`} />
+        <title>{t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg - Sovereign Digital MRV Infrastructure</title>
+        <meta name="description" content={t(`Access the RupayKg ${view} dashboard. Sovereign-grade digital MRV infrastructure for waste-to-carbon accounting, AI-verification, and climate intelligence.`)} />
+        <meta name="keywords" content={`RupayKg ${view}, digital MRV infrastructure, waste to carbon, MRV verification, climate reporting, sovereign environmental data`} />
         
         {/* Open Graph / Facebook */}
-        <meta property="og:title" content={`${t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg Circular OS`} />
+        <meta property="og:title" content={`${t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg MRV Infrastructure`} />
         <meta property="og:description" content={t(`RupayKg OS ${view} view: Transforming waste into digital climate value through integrated sovereign-grade infrastructure.`)} />
         <meta property="og:image" content="/icon.svg" />
         
@@ -3651,42 +3651,42 @@ export default function App() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
                         <div className="bg-black/40 border border-white/5 rounded-xl p-4">
-                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Net CO₂e Avoided</p>
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">{t('MRV Verified CO₂e Avoided')}</p>
                           <div className="flex items-end gap-2">
-                            <span className="text-2xl font-bold text-emerald-400">{carbonDashboard.total_carbon_reduction_kg_co2e.toFixed(1)}</span>
+                            <span className="text-2xl font-bold text-emerald-400">{carbonDashboard.total_carbon_reduction_kg_co2e?.toFixed(1) || '0.0'}</span>
                             <span className="text-emerald-400/50 pb-1">kg</span>
                           </div>
                         </div>
                         <div className="bg-black/40 border border-white/5 rounded-xl p-4">
-                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Methane Mitigated</p>
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">{t('Methane Emission Prevention')}</p>
                           <div className="flex items-end gap-2">
-                            <span className="text-2xl font-bold text-cyan-400">{carbonDashboard.total_methane_avoided_kg_co2e.toFixed(1)}</span>
+                            <span className="text-2xl font-bold text-cyan-400">{carbonDashboard.total_methane_avoided_kg_co2e?.toFixed(1) || '0.0'}</span>
                             <span className="text-cyan-400/50 pb-1">kg CO₂e</span>
                           </div>
                         </div>
                         <div className="bg-black/40 border border-white/5 rounded-xl p-4">
-                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Landfill Diversion</p>
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">{t('Verified Landfill Diversion')}</p>
                           <div className="flex items-end gap-2">
-                            <span className="text-2xl font-bold text-blue-400">{carbonDashboard.total_diverted_kg_co2e.toFixed(1)}</span>
+                            <span className="text-2xl font-bold text-blue-400">{carbonDashboard.total_diverted_kg_co2e?.toFixed(1) || '0.0'}</span>
                             <span className="text-blue-400/50 pb-1">kg CO₂e</span>
                           </div>
                         </div>
                         <div className="bg-black/40 border border-white/5 rounded-xl p-4">
-                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Hedera HCS Anchors</p>
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">{t('Immutable Registry Anchors')}</p>
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-amber-400">{carbonDashboard.hcs_anchored_count}</span>
+                            <span className="text-2xl font-bold text-amber-400">{carbonDashboard.hcs_anchored_count || 0}</span>
                             <div className="flex flex-col">
                               <span className="text-[8px] text-amber-400/60 leading-none">TOPIC</span>
-                              <span className="text-[10px] text-amber-400 font-mono leading-none">{carbonDashboard.guardianTopicId}</span>
+                              <span className="text-[10px] text-amber-400 font-mono leading-none">{carbonDashboard.guardianTopicId || '-'}</span>
                             </div>
                           </div>
                         </div>
                         <div className="bg-black/40 border border-white/5 rounded-xl p-4 col-span-1 md:col-span-2 lg:col-span-1">
-                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">MRV Confidence</p>
-                          <div className="flex items-center gap-3">
+                          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">{t('MRV Confidence & Trust')}</p>
+                          <div className="flex flex-col gap-3">
                             <div className="flex-1">
                               <div className="flex justify-between text-xs mb-1">
-                                <span className="text-emerald-400/80">Compliance Score</span>
+                                <span className="text-emerald-400/80">{t('Verification Score')}</span>
                                 <span className="text-emerald-400 font-mono">{carbonDashboard.average_mrv_score.toFixed(1)}%</span>
                               </div>
                               <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -6290,7 +6290,7 @@ export default function App() {
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article V — Rail Separation')}</h4>
-                      <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.')}</p>
+                      <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, and Carbon Certificate (CCC) issuance. Double counting is explicitly prohibited through cryptographic Environmental Trust scores.')}</p>
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article VI — Regulator Sovereignty')}</h4>
@@ -6306,7 +6306,7 @@ export default function App() {
                 <div className="mt-12 pt-12 border-t border-white/10 text-center">
                   <p className="text-emerald-400 font-bold text-xl">{t('Institutional Identity')}</p>
                   <p className="text-white/40 mt-2 max-w-2xl mx-auto">
-                    {t('RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.')}
+                    {t('RupayKg is hereby defined as: A Sovereign Digital MRV Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.')}
                   </p>
                 </div>
               </section>

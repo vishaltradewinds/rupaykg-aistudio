@@ -2077,6 +2077,43 @@ async function startServer() {
   );
 
   // ---------------- ANALYTICS & METRICS ----------------
+  // ================================
+  // ENVIRONMENTAL REPORTING (ESG/EPR/BUR)
+  // ================================
+  app.get(
+    "/api/analytics/environmental-report",
+    auth(["super_admin", "state_admin", "municipal_admin", "regulator", "industry", "commercial", "institution"]),
+    (req: any, res) => {
+      // Sovereign Climate Reporting Infrastructure
+      const filteredRecords = filterByJurisdiction(req.user, records, "records");
+      const filteredCarbonEvents = filterByJurisdiction(req.user, carbonEvents, "carbon");
+      
+      const report = {
+        timestamp: new Date().toISOString(),
+        issuer: req.user.role,
+        jurisdiction: req.user.state || req.user.district || 'national',
+        esg_metrics: {
+          total_diverted_kg: filteredRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0),
+          net_methane_avoided_kg_co2e: filteredCarbonEvents.reduce((sum, c) => sum + (c.methane_estimate_kg_co2e || 0), 0),
+          carbon_reductions_kg_co2e: filteredCarbonEvents.reduce((sum, c) => sum + (c.net_carbon_reduction_kg_co2e || 0), 0),
+          average_trust_score: filteredCarbonEvents.length > 0 
+            ? filteredCarbonEvents.reduce((sum, c) => sum + (c.environmental_trust_scores?.verification_confidence_score || c.mrv_score || 0), 0) / filteredCarbonEvents.length 
+            : 0
+        },
+        epr_compliance: {
+          plastics_recovered_kg: filteredRecords.filter(r => r.waste_type.toLowerCase().includes('plastic')).reduce((sum, r) => sum + (r.weight_kg || 0), 0),
+          ewaste_recovered_kg: filteredRecords.filter(r => r.waste_type.toLowerCase().includes('e-waste')).reduce((sum, r) => sum + (r.weight_kg || 0), 0),
+        },
+        article_6_readiness: {
+          registry_anchored_events: filteredCarbonEvents.filter(c => c.hierarchy_status === "Blockchain Anchored" || c.status === "Registry Ready").length,
+          total_certified_value_kg_co2e: filteredCarbonEvents.filter(c => c.status === "Registry Ready").reduce((sum, c) => sum + (c.net_carbon_reduction_kg_co2e || 0), 0)
+        }
+      };
+
+      res.json(report);
+    }
+  );
+
   app.get(
     "/api/analytics/comprehensive",
     auth([

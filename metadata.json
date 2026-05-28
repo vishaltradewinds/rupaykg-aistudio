@@ -1,6 +1,6 @@
 {
-  "name": "RupayKg - Sovereign Carbon OS",
-  "description": "National waste-to-carbon infrastructure with Hedera-backed trust rails. Sovereign-grade Digital MRV, append-only wallet engine, and auditable CCC issuance lifecycle for circular economy transition.",
+  "name": "RupayKg - Sovereign Digital MRV Infrastructure",
+  "description": "Sovereign-grade digital MRV infrastructure for waste-to-carbon accounting, AI-verification, and climate intelligence.",
   "requestFramePermissions": [
     "geolocation",
     "camera"
