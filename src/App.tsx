@@ -47,7 +47,8 @@ import {
   IndianRupee,
   MessageSquare,
   Send,
-  Calendar
+  Calendar,
+  LineChart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
