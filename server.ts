@@ -357,6 +357,52 @@ async function startServer() {
   const pilotRecords: any[] = [];
   const pilotOnboarding: any[] = [];
 
+  const filterByJurisdiction = (reqUser: any, targetArray: any[], type: "users" | "records" | "farmers" | "carbon" = "records") => {
+    let filtered = targetArray;
+    if (reqUser.role === "state_admin" && reqUser.state) {
+      if (type === "users") {
+        filtered = filtered.filter(u => u.state === reqUser.state);
+      } else if (type === "records") {
+        filtered = filtered.filter(r => {
+          const u = users.find(user => user.id === r.citizen_id);
+          return u && u.state === reqUser.state;
+        });
+      } else if (type === "farmers") {
+        filtered = filtered.filter(f => {
+          const u = users.find(user => user.id === f.created_by);
+          return u && u.state === reqUser.state;
+        });
+      } else if (type === "carbon") {
+        filtered = filtered.filter(c => {
+          const citizen_id = c.stakeholder_chain ? c.stakeholder_chain[0] : null;
+          const u = users.find(user => user.id === citizen_id);
+          return u && u.state === reqUser.state;
+        });
+      }
+    } else if (reqUser.role === "municipal_admin" && reqUser.district) {
+      if (type === "users") {
+        filtered = filtered.filter(u => u.district === reqUser.district);
+      } else if (type === "records") {
+        filtered = filtered.filter(r => {
+          const u = users.find(user => user.id === r.citizen_id);
+          return u && u.district === reqUser.district;
+        });
+      } else if (type === "farmers") {
+        filtered = filtered.filter(f => {
+          const u = users.find(user => user.id === f.created_by);
+          return u && u.district === reqUser.district;
+        });
+      } else if (type === "carbon") {
+        filtered = filtered.filter(c => {
+          const citizen_id = c.stakeholder_chain ? c.stakeholder_chain[0] : null;
+          const u = users.find(user => user.id === citizen_id);
+          return u && u.district === reqUser.district;
+        });
+      }
+    }
+    return filtered;
+  };
+
   // --- MULTI-GENERATOR PLATFORM STORES ---
   const generators: any[] = [
     {
@@ -1195,7 +1241,7 @@ async function startServer() {
     "/api/mrv/pending",
     auth(["regulator", "state_admin", "super_admin"]),
     (req: any, res) => {
-      const pendingMRV = records.filter(
+      const pendingMRV = filterByJurisdiction(req.user, records, "records").filter(
         (r) => r.mrv_status === "pending" && r.status === "processed",
       );
       res.json(pendingMRV);
@@ -1206,7 +1252,7 @@ async function startServer() {
     "/api/mrv/history",
     auth(["regulator", "state_admin", "super_admin"]),
     (req: any, res) => {
-      const historyMRV = records
+      const historyMRV = filterByJurisdiction(req.user, records, "records")
         .filter(
           (r) => r.mrv_status === "verified" || r.mrv_status === "rejected",
         )
@@ -1492,7 +1538,7 @@ async function startServer() {
   // ---------------- COMMON ROUTES ----------------
   app.get("/api/history", auth(), (req: any, res) => {
     const { context } = req.query;
-    let userRecords = records;
+    let userRecords = filterByJurisdiction(req.user, records, "records");
 
     if (context && context !== "all") {
       userRecords = userRecords.filter((r) => r.context === context);
@@ -1684,7 +1730,7 @@ async function startServer() {
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
     (req: any, res) => {
       const { context } = req.query;
-      let filteredRecords = records;
+      let filteredRecords = filterByJurisdiction(req.user, records, "records");
       if (context && context !== "all") {
         filteredRecords = filteredRecords.filter((r) => r.context === context);
       }
@@ -1722,7 +1768,7 @@ async function startServer() {
         { _id: string; total_weight: number; count: number }
       > = {};
 
-      let filteredRecords = records;
+      let filteredRecords = filterByJurisdiction(req.user, records, "records");
       if (context && context !== "all") {
         filteredRecords = filteredRecords.filter((r) => r.context === context);
       }
@@ -1748,7 +1794,7 @@ async function startServer() {
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
     (req: any, res) => {
       const { context } = req.query;
-      let filteredRecords = records.filter(
+      let filteredRecords = filterByJurisdiction(req.user, records, "records").filter(
         (r) => r.mrv_status === "rejected" || r.status === "flagged",
       );
 
@@ -1822,7 +1868,7 @@ async function startServer() {
     ]),
     (req: any, res) => {
       const { context } = req.query;
-      let filteredRecords = records.filter((r) => r.mrv_status === "verified");
+      let filteredRecords = filterByJurisdiction(req.user, records, "records").filter((r) => r.mrv_status === "verified");
 
       if (context && context !== "all") {
         filteredRecords = filteredRecords.filter((r) => r.context === context);
@@ -1850,7 +1896,7 @@ async function startServer() {
     (req: any, res) => {
       const { role, context } = req.query;
 
-      let filteredUsers = users;
+      let filteredUsers = filterByJurisdiction(req.user, users, "users");
       if (role && role !== "all") {
         if (role === "citizen" || role === "fpo") {
           filteredUsers = users.filter(
@@ -1861,7 +1907,7 @@ async function startServer() {
         }
       }
 
-      let filteredRecords = records;
+      let filteredRecords = filterByJurisdiction(req.user, records, "records");
       if (context && context !== "all") {
         filteredRecords = filteredRecords.filter((r) => r.context === context);
       }
@@ -1919,8 +1965,9 @@ async function startServer() {
     "/api/admin/users",
     auth(["super_admin", "state_admin"]),
     (req: any, res) => {
+      const filteredUsers = filterByJurisdiction(req.user, users, "users");
       res.json(
-        users.map((u) => {
+        filteredUsers.map((u) => {
           const { password, ...safeUser } = u;
           return safeUser;
         }),
@@ -1992,11 +2039,14 @@ async function startServer() {
     "/api/dashboard/kpi",
     auth(["super_admin", "state_admin", "municipal_admin", "aggregator"]),
     (req: any, res) => {
-      const total_farmers = farmers.length;
-      const total_events = records.length;
+      const filteredFarmers = filterByJurisdiction(req.user, farmers, "farmers");
+      const filteredRecords = filterByJurisdiction(req.user, records, "records");
+
+      const total_farmers = filteredFarmers.length;
+      const total_events = filteredRecords.length;
       const total_biomass_tonnes =
-        records.reduce((sum, r) => sum + (r.weight_kg || 0), 0) / 1000;
-      const total_ccc_amount_estimate = records.reduce(
+        filteredRecords.reduce((sum, r) => sum + (r.weight_kg || 0), 0) / 1000;
+      const total_ccc_amount_estimate = filteredRecords.reduce(
         (sum, r) => sum + (r.ccc_amount_kg || 0),
         0,
       );
@@ -2040,7 +2090,7 @@ async function startServer() {
     ]),
     (req: any, res) => {
       const { context } = req.query;
-      let filteredRecords = records;
+      let filteredRecords = filterByJurisdiction(req.user, records, "records");
       if (context && context !== "all") {
         filteredRecords = filteredRecords.filter((r) => r.context === context);
       }
@@ -2114,6 +2164,8 @@ async function startServer() {
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
     (req: any, res) => {
       // Group records by month for the last 6 months
+      let filteredRecords = filterByJurisdiction(req.user, records, "records");
+      
       const now = new Date();
       const trends = [];
 
@@ -2123,7 +2175,7 @@ async function startServer() {
           month: "short",
         });
 
-        const monthRecords = records.filter((r) => {
+        const monthRecords = filteredRecords.filter((r) => {
           const d = new Date(r.timestamp);
           return (
             d.getMonth() === monthDate.getMonth() &&
@@ -2631,33 +2683,35 @@ async function startServer() {
 
   app.get("/api/carbon/dashboard", auth(), (req: any, res) => {
     try {
-      const totalReduction = carbonEvents.reduce(
+      const filteredCarbonEvents = filterByJurisdiction(req.user, carbonEvents, "carbon");
+
+      const totalReduction = filteredCarbonEvents.reduce(
         (acc, ev) => acc + (ev.net_carbon_reduction_kg_co2e || 0),
         0,
       );
-      const totalDiverted = carbonEvents.reduce(
+      const totalDiverted = filteredCarbonEvents.reduce(
         (acc, ev) => acc + (ev.diversion_estimate_kg_co2e || 0),
         0,
       );
-      const totalMethane = carbonEvents.reduce(
+      const totalMethane = filteredCarbonEvents.reduce(
         (acc, ev) => acc + (ev.methane_estimate_kg_co2e || 0),
         0,
       );
 
       const average_mrv_score =
-        carbonEvents.length > 0
-          ? carbonEvents.reduce((acc, ev) => acc + (ev.mrv_score || 0), 0) /
-            carbonEvents.length
+        filteredCarbonEvents.length > 0
+          ? filteredCarbonEvents.reduce((acc, ev) => acc + (ev.mrv_score || 0), 0) /
+            filteredCarbonEvents.length
           : 100; // Default to perfect if no events
 
       res.json({
         total_carbon_reduction_kg_co2e: totalReduction,
         total_diverted_kg_co2e: totalDiverted,
         total_methane_avoided_kg_co2e: totalMethane,
-        events_count: carbonEvents.length,
+        events_count: filteredCarbonEvents.length,
         hcs_anchored_count: guardianMessages.length,
         average_mrv_score: average_mrv_score,
-        carbonEvents,
+        carbonEvents: filteredCarbonEvents,
         guardianTopicId: "0.0.4592011",
       });
     } catch (err) {
