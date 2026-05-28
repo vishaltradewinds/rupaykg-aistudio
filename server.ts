@@ -501,6 +501,10 @@ async function startServer() {
   const carbonEvents: any[] = [];
   const carbonCalculations: any[] = [];
   const methaneEvents: any[] = [];
+
+  // Carbon Market Infrastructure Stores (CCTS / CERC)
+  const cccCertificates: any[] = []; // Registry stored CCC certificates
+  const orderBook: any[] = []; // Power Exchange Order Market
   const mrvEvidence: any[] = [];
   const wasteComposition: any[] = [];
   const biomassProfiles: any[] = [];
@@ -1320,6 +1324,19 @@ async function startServer() {
           const vc = VCService.generateWasteCarbonVC(record, carbonEvent);
           verifiableCredentials.push(vc);
           carbonEvent.vc_id = vc.id;
+
+          // Issue to Market / Registry Store
+          cccCertificates.push({
+            id: registrySerialNumber,
+            carbon_event_id: carbonEvent.id,
+            owner_id: record.citizen_id, // Giving generator the certificate to sell on CCTS Offset Market
+            industry_sector: record.context,
+            waste_type: record.waste_type,
+            net_carbon_reduction_kg_co2e: carbonEvent.net_carbon_reduction_kg_co2e,
+            hierarchy_status: carbonEvent.hierarchy_status,
+            status: "active",
+            issued_at: new Date().toISOString()
+          });
 
           // Hedera Guardian: Anchor to HCS for Enterprise Policy Compliance
           try {
@@ -2837,6 +2854,68 @@ async function startServer() {
   app.get("/api/carbon/context.jsonld", (req, res) => {
     // Public endpoint for VVB programmatic parsing
     res.json(VCService.getWasteCarbonContext());
+  });
+
+  // ========================================================
+  // CERC CCTS MARKET & REGISTRY INFRASTRUCTURE
+  // ========================================================
+
+  app.get("/api/registry/certificates", auth(), (req: any, res) => {
+    let filteredCccs = cccCertificates;
+    if (req.user.role !== "super_admin" && req.user.role !== "regulator") {
+      filteredCccs = filteredCccs.filter((c) => c.owner_id === req.user.id);
+    }
+    res.json(filteredCccs);
+  });
+
+  app.post("/api/market/orders", auth(), (req: any, res) => {
+    const { ccc_id, price_per_ton, order_type } = req.body;
+    
+    // Simplistic limit order placement
+    const order = {
+      id: crypto.randomBytes(4).toString("hex"),
+      user_id: req.user.id,
+      ccc_id,
+      price_per_ton,
+      order_type, // "buy" | "sell"
+      status: "open",
+      timestamp: new Date().toISOString()
+    };
+    
+    orderBook.push(order);
+    
+    // For sell orders, mark CCC as locked
+    if (order_type === "sell" && ccc_id) {
+       const cert = cccCertificates.find(c => c.id === ccc_id);
+       if (cert && cert.owner_id === req.user.id) {
+         cert.status = "locked_for_trading";
+       }
+    }
+
+    res.json({ message: "Order placed successfully", order });
+  });
+
+  app.get("/api/market/orderbook", auth(), (req: any, res) => {
+    res.json(orderBook);
+  });
+
+  app.post("/api/market/execute", auth(), (req: any, res) => {
+    const { order_id } = req.body;
+    const sellOrder = orderBook.find(o => o.id === order_id && o.order_type === "sell" && o.status === "open");
+    
+    if (!sellOrder) return res.status(404).json({ error: "Order not found or already executed." });
+    
+    const cert = cccCertificates.find(c => c.id === sellOrder.ccc_id);
+    if (!cert) return res.status(404).json({ error: "Certificate not found." });
+
+    // Execute Trade
+    cert.owner_id = req.user.id;
+    cert.status = "active";
+    sellOrder.status = "executed";
+    sellOrder.buyer_id = req.user.id;
+    sellOrder.execution_time = new Date().toISOString();
+
+    res.json({ message: "Trade executed successfully", executed_order: sellOrder, certificate: cert });
   });
 
   app.post("/api/ai/generate", async (req: any, res: any) => {

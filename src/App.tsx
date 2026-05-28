@@ -374,7 +374,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market'>('dashboard');
   
   useEffect(() => {
     document.documentElement.lang = i18n.language;
@@ -552,6 +552,8 @@ export default function App() {
   const [forecast, setForecast] = useState<string>('');
   const [mrvRiskAssessments, setMrvRiskAssessments] = useState<Record<string, { risk_score: number, explanation: string }>>({});
   const [carbonDashboard, setCarbonDashboard] = useState<any>(null);
+  const [registryCertificates, setRegistryCertificates] = useState<any[]>([]);
+  const [marketOrderBook, setMarketOrderBook] = useState<any[]>([]);
   const [selectedVC, setSelectedVC] = useState<any>(null);
   const [guardianReport, setGuardianReport] = useState<string>('');
   const [ledgerQuery, setLedgerQuery] = useState<string>('');
@@ -1037,6 +1039,16 @@ export default function App() {
       if (carbonRes.ok) {
         const carbonData = await carbonRes.json();
         setCarbonDashboard(carbonData);
+      }
+      
+      // 10. Fetch CCTS Market Data
+      if (token) {
+        const [regRes, orderRes] = await Promise.all([
+          fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+        if (regRes.ok) setRegistryCertificates(await regRes.json());
+        if (orderRes.ok) setMarketOrderBook(await orderRes.json());
       }
 
       // 9b. Fetch Enterprise Generator specific profiles, contracts, compliance profiles, and schedules
@@ -1654,13 +1666,13 @@ export default function App() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-8">
                 <Globe size={16} />
-                {t('Sovereign-Grade Circular Economy Engine')}
+                {t('Sovereign-Grade CCTS & Offset Market Infrastructure')}
               </div>
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 leading-[1.1]">
-                {t('Convert Every Kilogram of Waste into')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">{t('Global Circular Value')}</span>
+                {t('Convert Every Kilogram of Waste into')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">{t('National Market Infrastructure')}</span>
               </h1>
               <p className="text-xl text-white/60 mb-12 max-w-2xl mx-auto leading-relaxed">
-                {t('RupayKg is the Sovereign Digital MRV Infrastructure for Waste-to-Carbon Economies, architected for global scale.')}
+                {t('RupayKg is India’s comprehensive Environmental Financial Infrastructure platform, directly integrating local waste mitigation projects into national registry-compatible MRV architectures and carbon offset exchanges.')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
@@ -2163,6 +2175,120 @@ export default function App() {
       </div>
     );
   }
+
+  const renderMarketCenter = () => {
+    return (
+      <motion.div 
+        key="market_center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="space-y-6"
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 bg-gradient-to-r from-emerald-950/40 to-blue-950/40 border border-emerald-500/20 rounded-2xl relative overflow-hidden">
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold flex items-center gap-2 text-white">
+              <LineChart className="text-emerald-400" />
+              {t('CERC Compliance & Offset Market')}
+            </h2>
+            <p className="text-white/60 mt-1 max-w-2xl">{t('National carbon certificate exchange and registry integration for compliance and offset mechanisms.')}</p>
+          </div>
+          <div className="mt-4 md:mt-0 flex gap-2">
+            <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold rounded-lg flex flex-col uppercase tracking-widest">
+              <span>{t('Active CCCs')}</span>
+              <span className="text-xl">{registryCertificates.filter(c => c.status === 'active' || c.status === 'Registry Ready').length}</span>
+            </div>
+            <div className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-bold rounded-lg flex flex-col uppercase tracking-widest">
+              <span>{t('Open Orders')}</span>
+              <span className="text-xl">{marketOrderBook.filter(o => o.status === 'open').length}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="p-6 border-white/5 bg-white/5">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <ShieldCheck className="text-emerald-400" size={20} />
+              {t('My Registry Vault')}
+            </h3>
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              {registryCertificates.length === 0 ? (
+                <p className="text-white/40 text-sm">{t('No certificates found in your registry account.')}</p>
+              ) : (
+                registryCertificates.map(cert => (
+                  <div key={cert.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold">{cert.hierarchy_status || cert.status}</span>
+                      <p className="font-mono text-sm text-white/80">{cert.id.substring(0, 16)}...</p>
+                      <p className="text-xs text-white/40 mt-1">{cert.net_carbon_reduction_kg_co2e?.toFixed(1)} kg CO₂e</p>
+                    </div>
+                    {cert.status !== 'locked_for_trading' ? (
+                      <button 
+                        className="px-3 py-1 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded text-xs transition-colors"
+                        onClick={async () => {
+                          const price = prompt('Enter selling price per ton (INR):', '500');
+                          if (price && !isNaN(Number(price))) {
+                            const res = await fetch('/api/market/orders', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                              body: JSON.stringify({ ccc_id: cert.id, price_per_ton: Number(price), order_type: 'sell' })
+                            });
+                            if (res.ok) alert('Order placed!');
+                          }
+                        }}
+                      >
+                        {t('List on Exchange')}
+                      </button>
+                    ) : (
+                      <span className="text-xs text-amber-400 border border-amber-500/20 bg-amber-500/10 px-2 py-1 rounded">Listed</span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <Card className="p-6 border-white/5 bg-white/5">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <Activity className="text-blue-400" size={20} />
+              {t('Power Exchange Orderbook')}
+            </h3>
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              {marketOrderBook.filter(o => o.status === 'open').length === 0 ? (
+                <p className="text-white/40 text-sm">{t('No open orders on the exchange.')}</p>
+              ) : (
+                marketOrderBook.filter(o => o.status === 'open').map(order => (
+                  <div key={order.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="text-xs uppercase tracking-widest text-blue-400 font-bold">{order.order_type} ORDER</span>
+                      <p className="font-mono text-sm text-white/80">{order.ccc_id ? order.ccc_id.substring(0, 16) + '...' : 'Market Buy'}</p>
+                      <p className="text-xs text-white/40 mt-1">₹{order.price_per_ton} / ton</p>
+                    </div>
+                    {order.user_id !== user?.id && (
+                      <button 
+                        className="px-3 py-1 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded text-xs transition-colors"
+                        onClick={async () => {
+                          const res = await fetch('/api/market/execute', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ order_id: order.id })
+                          });
+                          if (res.ok) alert('Trade executed successfully!');
+                          else alert('Trade failed');
+                        }}
+                      >
+                        {t('Execute')}
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+        </div>
+      </motion.div>
+    );
+  };
 
   const renderOperationsCenter = () => {
     return (
@@ -2953,6 +3079,15 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('National KPI')}</span>
             </button>
           )}
+          
+          <button 
+            onClick={() => setView('market')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'market' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <LineChart size={20} />
+            <span className="hidden md:block font-medium">{t('CCTS Market')}</span>
+          </button>
+
           {['super_admin', 'state_admin', 'municipal_admin'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('operations')}
@@ -6446,6 +6581,7 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'market' && renderMarketCenter()}
           {view === 'operations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && renderOperationsCenter()}
         </AnimatePresence>
       </main>
