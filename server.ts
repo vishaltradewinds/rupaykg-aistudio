@@ -509,6 +509,16 @@ async function startServer() {
   const wasteComposition: any[] = [];
   const biomassProfiles: any[] = [];
   const carbonProjects: any[] = [];
+  const projectDesignDocuments: any[] = [];
+  const methodologyLibrary: any[] = [
+    { id: "METH-001", name: "Landfill Methane Avoidance", version: "1.0", sector: "Waste", approved: true },
+    { id: "METH-002", name: "Biomass Decentralized Utilisation", version: "1.2", sector: "Agriculture", approved: true },
+    { id: "METH-003", name: "Rural Composting Offset", version: "1.0", sector: "Waste", approved: true },
+    { id: "METH-004", name: "Recycling Energy Offset", version: "2.1", sector: "Energy", approved: true }
+  ];
+  const monitoringReports: any[] = [];
+  const verificationReports: any[] = [];
+  const environmentalIdentities: any[] = [];
   const carbonAuditLogs: any[] = [];
   const carbonRegistryExports: any[] = [];
   const additionalityAnalysis: any[] = [];
@@ -2854,6 +2864,71 @@ async function startServer() {
   app.get("/api/carbon/context.jsonld", (req, res) => {
     // Public endpoint for VVB programmatic parsing
     res.json(VCService.getWasteCarbonContext());
+  });
+
+  // ========================================================
+  // OFFSET PROJECT INFRASTRUCTURE (CCTS PHASE)
+  // ========================================================
+
+  app.post("/api/offset-projects/register", auth(), (req: any, res) => {
+    const { title, description, project_type, location } = req.body;
+    const project = {
+      id: "PROJ-" + crypto.randomBytes(4).toString("hex").toUpperCase(),
+      title,
+      description,
+      project_type,
+      location,
+      owner_id: req.user.id,
+      status: "draft_pdd", // Draft PDD -> Validation -> Registered
+      methodology_id: req.body.methodology_id || null,
+      created_at: new Date().toISOString()
+    };
+    carbonProjects.push(project);
+    res.json({ message: "Project registered successfully", project });
+  });
+
+  app.get("/api/offset-projects", auth(), (req: any, res) => {
+    let filtered = carbonProjects;
+    if (req.user.role !== "super_admin" && req.user.role !== "regulator") {
+       filtered = carbonProjects.filter((p) => p.owner_id === req.user.id);
+    }
+    res.json(filtered);
+  });
+
+  app.post("/api/offset-projects/:projectId/pdd", auth(), (req: any, res) => {
+    const pdd = {
+      id: "PDD-" + crypto.randomBytes(4).toString("hex").toUpperCase(),
+      project_id: req.params.projectId,
+      ...req.body,
+      status: "under_review",
+      submitted_at: new Date().toISOString()
+    };
+    projectDesignDocuments.push(pdd);
+    
+    // Update project status
+    const proj = carbonProjects.find(p => p.id === req.params.projectId);
+    if (proj) proj.status = "validation";
+
+    res.json({ message: "PDD submitted for validation", pdd });
+  });
+
+  app.get("/api/offset-projects/methodologies", auth(), (req, res) => {
+    res.json(methodologyLibrary);
+  });
+
+  app.post("/api/offset-projects/generate-pdd", auth(), async (req: any, res: any) => {
+    try {
+       // Mock AI PDD generation based on project details
+       const pddDraft = {
+          executiveSummary: `This project aims to implement ${req.body.project_type || "waste mitigation"} in ${req.body.location || "the region"}.`,
+          baselineScenario: "Continued disposal of waste in unmanaged landfills causing methane emissions.",
+          additionality: "The project relies on carbon finance to overcome implementation barriers.",
+          monitoringPlan: "Daily weighbridge records and monthly AI contamination sampling."
+       };
+       res.json(pddDraft);
+    } catch (e: any) {
+       res.status(500).json({ error: e.message });
+    }
   });
 
   // ========================================================

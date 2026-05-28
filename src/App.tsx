@@ -374,7 +374,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects'>('dashboard');
   
   useEffect(() => {
     document.documentElement.lang = i18n.language;
@@ -554,6 +554,8 @@ export default function App() {
   const [carbonDashboard, setCarbonDashboard] = useState<any>(null);
   const [registryCertificates, setRegistryCertificates] = useState<any[]>([]);
   const [marketOrderBook, setMarketOrderBook] = useState<any[]>([]);
+  const [offsetProjects, setOffsetProjects] = useState<any[]>([]);
+  const [methodologies, setMethodologies] = useState<any[]>([]);
   const [selectedVC, setSelectedVC] = useState<any>(null);
   const [guardianReport, setGuardianReport] = useState<string>('');
   const [ledgerQuery, setLedgerQuery] = useState<string>('');
@@ -1041,14 +1043,18 @@ export default function App() {
         setCarbonDashboard(carbonData);
       }
       
-      // 10. Fetch CCTS Market Data
+      // 10. Fetch CCTS Market Data & Offset Projects
       if (token) {
-        const [regRes, orderRes] = await Promise.all([
+        const [regRes, orderRes, projRes, methRes] = await Promise.all([
           fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`/api/offset-projects`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`/api/offset-projects/methodologies`, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
         if (regRes.ok) setRegistryCertificates(await regRes.json());
         if (orderRes.ok) setMarketOrderBook(await orderRes.json());
+        if (projRes.ok) setOffsetProjects(await projRes.json());
+        if (methRes.ok) setMethodologies(await methRes.json());
       }
 
       // 9b. Fetch Enterprise Generator specific profiles, contracts, compliance profiles, and schedules
@@ -2176,6 +2182,123 @@ export default function App() {
     );
   }
 
+  const renderOffsetProjectsCenter = () => {
+    return (
+      <motion.div 
+        key="offset_projects_center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="space-y-6"
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 bg-gradient-to-r from-emerald-950/40 to-blue-950/40 border border-emerald-500/20 rounded-2xl relative overflow-hidden">
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold flex items-center gap-2 text-white">
+              <Sprout className="text-emerald-400" />
+              {t('Offset Project Infrastructure')}
+            </h2>
+            <p className="text-white/60 mt-1 max-w-2xl">{t('Register waste-to-carbon projects, generate AI-assisted Project Design Documents (PDDs), and connect to the CCTS Offset Mechanism.')}</p>
+          </div>
+          <button 
+             className="px-4 py-2 mt-4 md:mt-0 bg-emerald-500 hover:bg-emerald-400 text-black font-bold uppercase tracking-widest rounded transition-colors flex items-center gap-2"
+             onClick={async () => {
+               const title = prompt('Project Title:', 'Municipal Landfill Diversion Program Phase 1');
+               const desc = prompt('Project Description:', 'Aggregating municipal solid waste to divert from landfill footprint.');
+               const type = prompt('Project Type (e.g. MSW, Biomass, Methane):', 'MSW Diversion');
+               if (title && type) {
+                  const res = await fetch('/api/offset-projects/register', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                     body: JSON.stringify({ title, description: desc, project_type: type })
+                  });
+                  if (res.ok) {
+                     alert('Project Registered! Fetching details...');
+                     const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
+                     if (updated.ok) setOffsetProjects(await updated.json());
+                  }
+               }
+             }}
+          >
+             <Plus size={16} /> {t('New Project')}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="p-6 border-white/5 bg-white/5">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <ClipboardList className="text-emerald-400" size={20} />
+              {t('My Offset Projects')}
+            </h3>
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+              {offsetProjects.length === 0 ? (
+                <p className="text-white/40 text-sm">{t('No offset projects registered.')}</p>
+              ) : (
+                offsetProjects.map(proj => (
+                  <div key={proj.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex flex-col justify-between">
+                    <div>
+                      <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-1 block">{proj.status}</span>
+                      <h4 className="font-bold text-white text-lg">{proj.title}</h4>
+                      <p className="font-mono text-xs text-white/50">{proj.id}</p>
+                      <p className="text-sm text-white/60 mt-2">{proj.description}</p>
+                    </div>
+                    {proj.status === 'draft_pdd' && (
+                      <button 
+                        className="mt-4 px-3 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded text-xs font-bold uppercase tracking-widest transition-colors"
+                        onClick={async () => {
+                           setLoading(true);
+                           const draftRes = await fetch('/api/offset-projects/generate-pdd', {
+                             method: 'POST',
+                             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                             body: JSON.stringify({ project_type: proj.project_type, location: proj.location })
+                           });
+                           if (draftRes.ok) {
+                             const pdd = await draftRes.json();
+                             const subRes = await fetch(`/api/offset-projects/${proj.id}/pdd`, {
+                               method: 'POST',
+                               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                               body: JSON.stringify(pdd)
+                             });
+                             if (subRes.ok) alert('PDD Generated & Submitted for Validation!');
+                             
+                             const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
+                             if (updated.ok) setOffsetProjects(await updated.json());
+                           }
+                           setLoading(false);
+                        }}
+                      >
+                        {t('Generate PDD & Submit')}
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <Card className="p-6 border-white/5 bg-white/5">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <BookOpen className="text-blue-400" size={20} />
+              {t('Approved Methodologies')}
+            </h3>
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              {methodologies.length === 0 ? (
+                <p className="text-white/40 text-sm">{t('Loading methodologies...')}</p>
+              ) : (
+                methodologies.map(meth => (
+                  <div key={meth.id} className="p-4 bg-black/40 border border-white/5 rounded-xl">
+                    <span className="text-[10px] uppercase tracking-widest text-blue-400 font-bold block mb-1">{meth.sector} Sector</span>
+                    <h4 className="font-bold text-white text-sm">{meth.name}</h4>
+                    <p className="text-xs text-white/50">{meth.id} v{meth.version}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+        </div>
+      </motion.div>
+    );
+  };
+
   const renderMarketCenter = () => {
     return (
       <motion.div 
@@ -3087,6 +3210,14 @@ export default function App() {
             <LineChart size={20} />
             <span className="hidden md:block font-medium">{t('CCTS Market')}</span>
           </button>
+          
+          <button 
+            onClick={() => setView('projects')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'projects' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Settings size={20} />
+            <span className="hidden md:block font-medium">{t('Offset Projects')}</span>
+          </button>
 
           {['super_admin', 'state_admin', 'municipal_admin'].includes(user?.role || '') && (
             <button 
@@ -3160,6 +3291,8 @@ export default function App() {
               {view === 'history' && t('Transaction Ledger')}
               {view === 'admin' && t('National Dashboard')}
               {view === 'operations' && t('Operations Control Center')}
+              {view === 'market' && t('CCTS Carbon Market')}
+              {view === 'projects' && t('Offset Projects')}
               {view === 'municipal' && labels.viewTitle}
               {view === 'blockchain' && t('GRID-INDIA CCC Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
@@ -6581,6 +6714,7 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'projects' && renderOffsetProjectsCenter()}
           {view === 'market' && renderMarketCenter()}
           {view === 'operations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && renderOperationsCenter()}
         </AnimatePresence>
