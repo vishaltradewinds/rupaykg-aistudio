@@ -57,7 +57,7 @@ async function startServer() {
   // Rate Limiting - Hardening for Nation Scale
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
+    max: 5000, // Limit each IP to 5000 requests per window to prevent false-positive 429 errors
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Too many requests, please try again later." },
