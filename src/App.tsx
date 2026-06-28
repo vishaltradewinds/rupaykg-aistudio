@@ -448,6 +448,25 @@ export default function App() {
 
   // --- MULTI-GENERATOR ENTERPRISE STATE HOOKS ---
   const [generatorProfile, setGeneratorProfile] = useState<any>(null);
+  
+  const ORGANIZATION_PROFILES = [
+    { id: 'municipal_corporation', label: 'Municipal Corporation', type: 'Urban', mode: 'urban' },
+    { id: 'nagar_panchayat', label: 'Nagar Panchayat', type: 'Urban Lite', mode: 'urban' },
+    { id: 'gram_panchayat', label: 'Gram Panchayat', type: 'Rural', mode: 'rural' },
+    { id: 'district_admin', label: 'District Administration', type: 'District', mode: 'rural' },
+    { id: 'state_gov', label: 'State Government', type: 'State', mode: 'urban' },
+    { id: 'smart_city', label: 'Smart City SPV', type: 'Smart City', mode: 'urban' },
+    { id: 'industrial_park', label: 'Industrial Park', type: 'Industrial', mode: 'urban' },
+    { id: 'sez', label: 'SEZ', type: 'Industrial', mode: 'urban' },
+    { id: 'cement_plant', label: 'Cement Plant', type: 'Industry', mode: 'urban' },
+    { id: 'recycler', label: 'Recycler', type: 'Recycler', mode: 'urban' },
+    { id: 'pro', label: 'PRO', type: 'EPR', mode: 'urban' },
+    { id: 'fpo', label: 'FPO', type: 'Agriculture', mode: 'rural' },
+    { id: 'cooperative', label: 'Cooperative', type: 'Rural Enterprise', mode: 'rural' },
+    { id: 'ngo', label: 'NGO', type: 'Community', mode: 'rural' },
+    { id: 'csr', label: 'CSR Program', type: 'CSR', mode: 'urban' }
+  ];
+  const [activeProfile, setActiveProfile] = useState(ORGANIZATION_PROFILES[0]);
   const [activeContracts, setActiveContracts] = useState<any[]>([]);
   const [complianceRecords, setComplianceRecords] = useState<any[]>([]);
   const [pickupSchedules, setPickupSchedules] = useState<any[]>([]);
@@ -519,21 +538,21 @@ export default function App() {
 
   const labels = {
     urban: {
-      anchor: t('Municipal Corporation'),
-      sub: t('Ward'),
+      anchor: activeProfile?.label || t('Municipal Corporation'),
+      sub: activeProfile?.type === 'State' ? t('City') : activeProfile?.type === 'District' ? t('Zone') : t('Ward'),
       waste: t('MSW'),
-      analytics: t('Ward Analytics'),
-      viewTitle: t('Ward-Level Analytics'),
+      analytics: t('Territory Analytics'),
+      viewTitle: t('Territory-Level Analytics'),
       citizenLabel: t('Citizen (MSW Generator)'),
       allowedCategories: ["Municipal", "Plastics", "Metals", "E-Waste", "Textiles", "Hazardous", "Construction", "Industrial"],
       allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'municipal_admin', 'state_admin', 'regulator', 'super_admin']
     },
     rural: {
-      anchor: t('Gram Panchayat'),
-      sub: t('Village'),
+      anchor: activeProfile?.label || t('Gram Panchayat'),
+      sub: activeProfile?.type === 'District' ? t('Block') : activeProfile?.type === 'State' ? t('District') : t('Village'),
       waste: t('Biomass'),
-      analytics: t('Village Analytics'),
-      viewTitle: t('Village-Level Analytics'),
+      analytics: t('Territory Analytics'),
+      viewTitle: t('Territory-Level Analytics'),
       citizenLabel: t('Farmer / FPO (Biomass Generator)'),
       allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"],
       allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'municipal_admin', 'state_admin', 'regulator', 'super_admin']
@@ -2015,24 +2034,35 @@ export default function App() {
           </div>
 
           <Card>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex gap-2 p-1 bg-white/5 rounded-xl">
-                <button 
-                  onClick={() => setOperatingContext('urban')}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
-                >
-                  URBAN
-                </button>
-                <button 
-                  onClick={() => setOperatingContext('rural')}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
-                >
-                  RURAL
-                </button>
-              </div>
-              <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold">
-                {t('Context:')} {operatingContext}
-              </div>
+            <div className="flex flex-col gap-2 mb-6">
+              <label className="text-xs uppercase tracking-widest text-emerald-400 font-bold ml-1">{t('Governance Profile Engine')}</label>
+              <select
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 appearance-none text-white font-bold"
+                value={activeProfile.id}
+                onChange={(e) => {
+                  const prof = ORGANIZATION_PROFILES.find(p => p.id === e.target.value);
+                  if (prof) {
+                    setActiveProfile(prof);
+                    setOperatingContext(prof.mode as 'urban' | 'rural');
+                  }
+                }}
+              >
+                <optgroup label="Urban Governance">
+                  {ORGANIZATION_PROFILES.filter(p => p.type.includes('Urban') || p.type.includes('Smart City') || p.type.includes('State') || p.type.includes('Industrial') || p.type.includes('Industry')).map(p => (
+                    <option key={p.id} value={p.id} className="bg-[var(--color-bg)]">{p.label} - {p.type}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Rural Governance">
+                  {ORGANIZATION_PROFILES.filter(p => p.type.includes('Rural') || p.type.includes('District') || p.type.includes('Agriculture') || p.type.includes('Community')).map(p => (
+                    <option key={p.id} value={p.id} className="bg-[var(--color-bg)]">{p.label} - {p.type}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Shared & Partners">
+                  {ORGANIZATION_PROFILES.filter(p => p.type.includes('Recycler') || p.type.includes('EPR') || p.type.includes('CSR')).map(p => (
+                    <option key={p.id} value={p.id} className="bg-[var(--color-bg)]">{p.label} - {p.type}</option>
+                  ))}
+                </optgroup>
+              </select>
             </div>
 
             <div className="flex gap-4 mb-8 p-1 bg-white/5 rounded-xl">
@@ -3286,7 +3316,7 @@ export default function App() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">
-              {view === 'dashboard' && t('System Overview')}
+              {view === 'dashboard' && (activeProfile.type.includes('Urban') ? t('Municipal Dashboard') : activeProfile.type.includes('Rural') ? t('Village Dashboard') : t('Organization Dashboard'))}
               {view === 'upload' && `${labels.waste} ${t('Intake')}`}
               {view === 'tasks' && t('Operations Management')}
               {view === 'history' && t('Transaction Ledger')}
@@ -3337,19 +3367,35 @@ export default function App() {
                 </>
               )}
             </div>
-            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
-              <button 
-                onClick={() => setOperatingContext('urban')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 items-center px-3 gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">{t('Profile:')}</span>
+              <select
+                className="bg-transparent text-xs font-bold text-white focus:outline-none appearance-none cursor-pointer"
+                value={activeProfile.id}
+                onChange={(e) => {
+                  const prof = ORGANIZATION_PROFILES.find(p => p.id === e.target.value);
+                  if (prof) {
+                    setActiveProfile(prof);
+                    setOperatingContext(prof.mode as 'urban' | 'rural');
+                  }
+                }}
               >
-                URBAN
-              </button>
-              <button 
-                onClick={() => setOperatingContext('rural')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
-              >
-                RURAL
-              </button>
+                <optgroup label="Urban Governance">
+                  {ORGANIZATION_PROFILES.filter(p => p.type.includes('Urban') || p.type.includes('Smart City') || p.type.includes('State') || p.type.includes('Industrial') || p.type.includes('Industry')).map(p => (
+                    <option key={p.id} value={p.id} className="bg-[var(--color-bg)]">{p.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Rural Governance">
+                  {ORGANIZATION_PROFILES.filter(p => p.type.includes('Rural') || p.type.includes('District') || p.type.includes('Agriculture') || p.type.includes('Community')).map(p => (
+                    <option key={p.id} value={p.id} className="bg-[var(--color-bg)]">{p.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Shared & Partners">
+                  {ORGANIZATION_PROFILES.filter(p => p.type.includes('Recycler') || p.type.includes('EPR') || p.type.includes('CSR')).map(p => (
+                    <option key={p.id} value={p.id} className="bg-[var(--color-bg)]">{p.label}</option>
+                  ))}
+                </optgroup>
+              </select>
             </div>
             {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '')) && (
               <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
@@ -6373,7 +6419,7 @@ export default function App() {
               {/* Hero Section */}
               <section className="text-center space-y-4 py-12">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">
-                  <Activity size={12} /> {t('Currently Active: ')}{operatingContext}{t(' Context (')}{labels.anchor})
+                  <Activity size={12} /> {t('Active Profile: ')}{activeProfile.label}{t(' (')}{activeProfile.type}{t(')')}
                 </div>
                 <h1 className="text-6xl font-black tracking-tighter text-emerald-500">{t('GENESIS')}</h1>
                 <p className="text-xl text-white/60 max-w-2xl mx-auto">
