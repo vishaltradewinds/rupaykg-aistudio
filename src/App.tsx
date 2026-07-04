@@ -56,7 +56,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
 import ReactMarkdown from 'react-markdown';
-import { WASTE_TYPES, WASTE_CATEGORIES, WasteType } from './constants';
+import { WASTE_TYPES, WASTE_CATEGORIES, WasteType, INDIAN_STATES } from './constants';
 
 import { Chatbot } from './components/Chatbot';
 
@@ -444,6 +444,9 @@ export default function App() {
   const [aggregatorFleet, setAggregatorFleet] = useState<any>(null);
   const [processorInventory, setProcessorInventory] = useState<any>(null);
   const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
+  const [dashboardStateFilter, setDashboardStateFilter] = useState<string>('');
+  const [dashboardDistrictFilter, setDashboardDistrictFilter] = useState<string>('');
+  const [dashboardLocalAreaFilter, setDashboardLocalAreaFilter] = useState<string>('');
   const [publicImpact, setPublicImpact] = useState<any>(null);
 
   // --- MULTI-GENERATOR ENTERPRISE STATE HOOKS ---
@@ -595,7 +598,7 @@ export default function App() {
       const interval = setInterval(fetchUserData, 5000);
       return () => clearInterval(interval);
     }
-  }, [token, adminRoleFilter, operatingContext, adminSubView]);
+  }, [token, adminRoleFilter, operatingContext, adminSubView, dashboardStateFilter, dashboardDistrictFilter, dashboardLocalAreaFilter]);
 
   useEffect(() => {
     const checkDbStatus = async () => {
@@ -994,7 +997,7 @@ export default function App() {
 
       // Fetch KPI stats for aggregators and admins
       if (['aggregator', 'super_admin', 'state_admin', 'municipal_admin'].includes(currentUser?.role || '')) {
-        const kpiRes = await fetch('/api/dashboard/kpi', { headers: { 'Authorization': `Bearer ${token}` } });
+        const kpiRes = await fetch(`/api/dashboard/kpi?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) {
           const kpiData = await kpiRes.json();
           setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_ccc_amount_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
@@ -1086,16 +1089,16 @@ export default function App() {
       }
 
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
-        const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) setAdminKpi(await kpiRes.json());
 
-        const fraudRes = await fetch(`/api/admin/fraud-map?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const fraudRes = await fetch(`/api/admin/fraud-map?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (fraudRes.ok) {
           const fraudData = await fraudRes.json();
           setFraudMap(fraudData.flagged_events);
         }
 
-        const trendsRes = await fetch('/api/analytics/trends', { headers: { 'Authorization': `Bearer ${token}` } });
+        const trendsRes = await fetch(`/api/analytics/trends?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (trendsRes.ok) setTrendsData(await trendsRes.json());
       }
 
@@ -3878,6 +3881,63 @@ export default function App() {
                         <Database size={16} />
                         {dbStatus?.status === 'connected' ? t('Live Database Connected') : t('In-Memory Mode')}
                       </div>
+                      
+                      
+                      <select 
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
+                        value={dashboardStateFilter}
+                        onChange={(e) => {
+                          setDashboardStateFilter(e.target.value);
+                          setDashboardDistrictFilter('');
+                          setDashboardLocalAreaFilter('');
+                        }}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All States</option>
+                        {Object.keys(INDIAN_STATES).map(state => (
+                          <option key={state} value={state} className="bg-[var(--color-bg)]">{state}</option>
+                        ))}
+                      </select>
+                      <select 
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
+                        value={dashboardDistrictFilter}
+                        onChange={(e) => {
+                           setDashboardDistrictFilter(e.target.value);
+                           setDashboardLocalAreaFilter('');
+                        }}
+                        disabled={!dashboardStateFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Districts</option>
+                        {dashboardStateFilter && Object.keys(INDIAN_STATES[dashboardStateFilter] || {}).map(district => (
+                          <option key={district} value={district} className="bg-[var(--color-bg)]">{district}</option>
+                        ))}
+                      </select>
+                      <select 
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
+                        value={dashboardLocalAreaFilter}
+                        onChange={(e) => setDashboardLocalAreaFilter(e.target.value)}
+                        disabled={!dashboardDistrictFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Cities/Villages</option>
+                        {dashboardStateFilter && dashboardDistrictFilter && 
+                           ((INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Urban"]) || []).concat(
+                           (INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Rural"]) || []
+                           ).map(area => (
+                          <option key={area} value={area} className="bg-[var(--color-bg)]">{area}</option>
+                        ))}
+                      </select>
+
+                      <select 
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
+                        value={dashboardDistrictFilter}
+                        onChange={(e) => setDashboardDistrictFilter(e.target.value)}
+                        disabled={!dashboardStateFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Districts</option>
+                        {dashboardStateFilter && Object.keys(INDIAN_STATES[dashboardStateFilter] || {}).map(district => (
+                          <option key={district} value={district} className="bg-[var(--color-bg)]">{district}</option>
+                        ))}
+                      </select>
+
                       <select 
                         value={adminRoleFilter}
                         onChange={(e) => setAdminRoleFilter(e.target.value)}
@@ -5395,6 +5455,60 @@ export default function App() {
 
               {adminSubView === 'dashboard' ? (
                 <>
+                  
+                  <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="flex-1">
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('State Filter')}</label>
+                      <select 
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white appearance-none focus:outline-none focus:border-emerald-500 transition-colors"
+                        value={dashboardStateFilter}
+                        onChange={(e) => {
+                          setDashboardStateFilter(e.target.value);
+                          setDashboardDistrictFilter('');
+                          setDashboardLocalAreaFilter('');
+                        }}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All States</option>
+                        {Object.keys(INDIAN_STATES).map(state => (
+                          <option key={state} value={state} className="bg-[var(--color-bg)]">{state}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('District Filter')}</label>
+                      <select 
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white appearance-none focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
+                        value={dashboardDistrictFilter}
+                        onChange={(e) => {
+                           setDashboardDistrictFilter(e.target.value);
+                           setDashboardLocalAreaFilter('');
+                        }}
+                        disabled={!dashboardStateFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Districts</option>
+                        {dashboardStateFilter && Object.keys(INDIAN_STATES[dashboardStateFilter] || {}).map(district => (
+                          <option key={district} value={district} className="bg-[var(--color-bg)]">{district}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('City/Village Filter')}</label>
+                      <select 
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white appearance-none focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
+                        value={dashboardLocalAreaFilter}
+                        onChange={(e) => setDashboardLocalAreaFilter(e.target.value)}
+                        disabled={!dashboardDistrictFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Cities/Villages</option>
+                        {dashboardStateFilter && dashboardDistrictFilter && 
+                           ((INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Urban"]) || []).concat(
+                           (INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Rural"]) || []
+                           ).map(area => (
+                          <option key={area} value={area} className="bg-[var(--color-bg)]">{area}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
@@ -5448,121 +5562,29 @@ export default function App() {
                             </div>
                           ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                              <AreaChart data={trendsData}>
+                              <AreaChart data={trendsData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <defs>
-                                  <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                  </linearGradient>
+                                  <linearGradient id="colorWaste" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
                                     <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                                   </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                                <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                                <XAxis dataKey="month" stroke="#ffffff40" />
+                                <YAxis stroke="#ffffff40" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                                 <Tooltip 
-                                  contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }}
-                                  itemStyle={{ color: '#10b981' }}
+                                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#ffffff20', color: '#fff' }}
+                                  itemStyle={{ color: '#fff' }}
                                 />
-                                <Area type="monotone" dataKey="weight" stroke="#10b981" fillOpacity={1} fill="url(#colorWeight)" strokeWidth={3} />
+                                <Area type="monotone" dataKey="new_users" stroke="#3b82f6" fillOpacity={1} fill="url(#colorUsers)" />
+                                <Area type="monotone" dataKey="waste_collected_tons" stroke="#10b981" fillOpacity={1} fill="url(#colorWaste)" />
                               </AreaChart>
                             </ResponsiveContainer>
                           )}
-                        </div>
-                      </Card>
-
-                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                          <Sprout size={80} className="text-emerald-400" />
-                        </div>
-                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
-                          <Sprout className="text-emerald-400" size={20} />
-                          {t('Environmental Impact')}
-                        </h3>
-                        <div className="space-y-6 relative z-10">
-                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5 relative group">
-                            <div>
-                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Methane Avoided')}</p>
-                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.methane_avoided_kg} kg</p>
-                            </div>
-                            <Zap className="text-yellow-400/40" size={24} />
-                            <button 
-                              onClick={() => setView('blockchain')}
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
-                              title="Verify on Blockchain"
-                            >
-                              <Cpu size={12} />
-                            </button>
-                          </div>
-                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
-                            <div>
-                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Water Saved')}</p>
-                              <p className="text-2xl font-bold text-blue-400">{comprehensiveMetrics.environmental.water_saved_liters} L</p>
-                            </div>
-                            <Globe className="text-blue-400/40" size={24} />
-                          </div>
-                          <div className="flex justify-between items-center p-4 bg-black/20 rounded-xl border border-white/5">
-                            <div>
-                              <p className="text-white/40 text-xs uppercase tracking-widest">{t('Trees Equivalent')}</p>
-                              <p className="text-2xl font-bold text-emerald-400">{comprehensiveMetrics.environmental.trees_equivalent} {t('Trees')}</p>
-                            </div>
-                            <Leaf className="text-emerald-400/40" size={24} />
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
-                  )}
-
-                  {comprehensiveMetrics && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                          <Scale size={80} className="text-amber-400" />
-                        </div>
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
-                          <Scale className="text-amber-400" size={18} />
-                          {t('Economic Efficiency')}
-                        </h3>
-                        <div className="space-y-4 relative z-10">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-white/40">{t('Avg Price / kg')}</span>
-                            <span className="font-mono">₹{comprehensiveMetrics.economic.avg_price_per_kg}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-white/40">{t('Govt Cost Savings')}</span>
-                            <span className="font-mono text-emerald-400">₹{comprehensiveMetrics.economic.govt_cost_savings}</span>
-                          </div>
-                          <div className="pt-4 border-t border-white/5">
-                            <p className="text-xs text-white/40 leading-relaxed italic">
-                              {t('* Government savings calculated based on avoided landfill management and environmental remediation costs.')}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-
-                      <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                          <Activity size={80} className="text-cyan-400" />
-                        </div>
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
-                          <Activity className="text-cyan-400" size={18} />
-                          {t('Operational Health')}
-                        </h3>
-                        <div className="space-y-4 relative z-10">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-white/40">{t('Processing Efficiency')}</span>
-                            <span className="font-mono">{comprehensiveMetrics.operational.processing_efficiency}%</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-white/40">{t('MRV Rejection Rate')}</span>
-                            <span className={`font-mono ${comprehensiveMetrics.operational.rejection_rate > 10 ? 'text-red-400' : 'text-emerald-400'}`}>
-                              {comprehensiveMetrics.operational.rejection_rate}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-white/5 rounded-full h-2 mt-4">
-                            <div 
-                              className="bg-cyan-500 h-2 rounded-full transition-all duration-1000" 
-                              style={{ width: `${comprehensiveMetrics.operational.processing_efficiency}%` }}
-                            ></div>
-                          </div>
                         </div>
                       </Card>
 
