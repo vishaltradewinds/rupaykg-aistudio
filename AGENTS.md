@@ -58,17 +58,13 @@ to enable or disable functionality.
 
 ---
 
-# Core Platform Principle: Dual Operating Modes
+# Dual Operating Modes
 
-RupayKg is **not exclusively an Urban Local Body (ULB) platform**.
+The platform must support two primary operating modes.
 
-It is a **Unified Circular Economy Operating System** designed to support **both Urban and Rural governance models** from a single codebase.
+## Urban
 
-The platform must operate in two primary modes:
-
-## Mode 1: Urban
-
-Designed for:
+For:
 
 * Municipal Corporations
 * Municipal Councils
@@ -77,301 +73,80 @@ Designed for:
 * Cantonment Boards
 * Industrial Townships
 * Development Authorities
-* Special Economic Zones
 
-Capabilities include:
+Modules include:
 
-* Door-to-door collection
-* Ward management
-* Smart bins
-* MRFs
-* Transfer stations
-* Compost plants
+* Ward Management
+* Door-to-Door Collection
+* Smart Bins
+* Street Sweeping
+* MRF
+* Transfer Stations
+* Compost Plants
 * Biomethanation
 * RDF
-* Waste-to-energy
+* Waste-to-Energy
 * Landfills
-* Legacy dumpsites
-* Street sweeping
-* Public sanitation
+* Legacy Dumpsites
 * Urban GIS
-* Carbon accounting
+* Urban Carbon
 
 ---
 
-## Mode 2: Rural
+## Rural
 
-Designed for:
+For:
 
 * Gram Panchayats
-* Village Clusters
 * Blocks
 * District Panchayats
 * FPOs
-* Cooperatives
 * SHGs
-* Rural enterprises
-* Farmer Producer Companies
+* Cooperatives
+* Farmer Groups
+* Rural Enterprises
 
-Capabilities include:
+Modules include:
 
-* Biomass aggregation
-* Crop residue management
-* Gobar collection
+* Biomass Aggregation
+* Crop Residue
+* Gobar Collection
 * Composting
 * Vermicomposting
+* Biochar
 * Biogas
 * Bio-CNG
-* Biochar
-* Plastic collection
-* Village recycling
-* Rural logistics
-* Watershed waste management
-* Carbon farming
-* Community resource centres
-* Village GIS
-
----
-
-# Runtime Mode Selection
-
-The application must support runtime switching.
-
-During onboarding the administrator selects:
-
-```
-Organization Type
-
-○ Urban
-
-○ Rural
-```
-
-The platform automatically enables the appropriate modules.
-
----
-
-# Shared Core
-
-Both modes share:
-
-* Authentication
-* Marketplace
-* GIS
-* AI
-* Carbon Engine
-* MRV
-* Logistics
-* Payments
-* Notifications
-* Documents
-* Reports
-* Dashboards
-* Analytics
-
-Only the domain modules differ.
-
----
-
-# Urban Modules
-
-Enable only when Urban mode is active:
-
-* Ward Management
-* Municipal Vehicles
-* Door-to-door Collection
-* Transfer Stations
-* Street Sweeping
-* Smart Bins
-* Public Toilets
-* Landfill Management
-* C&D Waste
-* Sanitary Waste
-* Urban EPR
-* MRF Operations
-
----
-
-# Rural Modules
-
-Enable only when Rural mode is active:
-
-* Village Registry
-* Panchayat Registry
-* Biomass Collection
-* Crop Residue
-* Gobar Economy
-* Compost Clusters
-* Biochar
-* Community Biogas
-* FPO Marketplace
-* SHG Operations
 * Village Resource Centres
-* Agri Waste
-* Livestock Waste
-* Water Body Cleanup
-* Rural Carbon Projects
-
----
-
-# Adaptive Dashboard
-
-The dashboard must automatically change.
-
-Example:
-
-Urban Login
-
-```
-Municipal Dashboard
-
-Waste Collected
-
-Segregation
-
-Vehicles
-
-Ward Performance
-
-MRF
-
-Landfill
-
-Carbon
-```
-
-Rural Login
-
-```
-Village Dashboard
-
-Biomass
-
-Crop Residue
-
-Compost
-
-Biochar
-
-Village Collection
-
-Carbon Farming
-
-FPO Marketplace
-```
-
----
-
-# GIS Must Also Switch
-
-Urban
-
-```
-State
-
-↓
-
-City
-
-↓
-
-Zone
-
-↓
-
-Ward
-
-↓
-
-Street
-```
-
-Rural
-
-```
-State
-
-↓
-
-District
-
-↓
-
-Block
-
-↓
-
-Gram Panchayat
-
-↓
-
-Village
-
-↓
-
-Farm Cluster
-```
-
----
-
-# AI Must Understand Context
-
-Urban AI
-
-* Optimize collection routes
-* Predict waste generation
-* Monitor MRF performance
-* Improve segregation
-
-Rural AI
-
-* Predict biomass availability
-* Recommend composting methods
-* Estimate carbon sequestration
-* Optimize aggregation routes
-* Support carbon farming projects
-
----
-
-# One Codebase
-
-**Do not create separate Urban and Rural applications.**
-
-The platform must use:
-
-* Feature flags
-* Module registry
-* Configuration-driven navigation
-* Role-based access control
-* Organization profiles
-
-to enable or disable functionality dynamically.
+* Plastic Collection
+* Rural Logistics
+* Water Body Restoration
+* Carbon Farming
 
 ---
 
 # Governance Profile Engine
 
-Every organization type activates a different combination of modules from the same platform. For example:
+Instead of hardcoding Urban/Rural logic, support configurable organization profiles such as:
 
-| Organization                               | Profile          |
-| ------------------------------------------ | ---------------- |
-| Municipal Corporation                      | Urban            |
-| Nagar Panchayat                            | Urban Lite       |
-| Gram Panchayat                             | Rural            |
-| District Administration                    | District         |
-| State Government                           | State            |
-| Smart City SPV                             | Smart City       |
-| Industrial Park                            | Industrial       |
-| SEZ                                        | Industrial       |
-| Cement Plant                               | Industry         |
-| Recycler                                   | Recycler         |
-| Producer Responsibility Organization (PRO) | EPR              |
-| Farmer Producer Organization (FPO)         | Agriculture      |
-| Cooperative                                | Rural Enterprise |
-| NGO                                        | Community        |
-| CSR Program                                | CSR              |
+* Municipal Corporation
+* Municipal Council
+* Nagar Panchayat
+* Gram Panchayat
+* District Administration
+* State Government
+* Smart City SPV
+* Industrial Park
+* SEZ
+* Industry
+* Recycler
+* PRO
+* FPO
+* Cooperative
+* NGO
+* CSR Program
+* Carbon Project Developer
 
-This profile-based architecture is more future-proof than a simple Urban/Rural toggle because it lets the platform grow to support additional sectors without creating forks in the codebase.
+Each profile enables only the required modules while sharing the same underlying platform.
 
 ---
 
