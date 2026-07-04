@@ -1120,7 +1120,7 @@ async function startServer() {
     "/api/mrv/verify",
     auth(["regulator", "state_admin", "super_admin"]),
     async (req: any, res) => {
-      const { record_id, status } = req.body; // status: 'verified' or 'rejected'
+      const { record_id, status, ccts_sector, icm_methodology_id, acva_id } = req.body; // status: 'verified' or 'rejected'
       const record = records.find((r) => r.id === record_id);
       if (!record) return res.status(404).json({ error: "Record not found" });
       if (record.mrv_status !== "pending")
@@ -1148,6 +1148,10 @@ async function startServer() {
             req.user.id,
           );
         record.registry_serial_number = registrySerialNumber;
+        record.ccts_sector = ccts_sector || 'Waste Sector';
+        record.icm_methodology_id = icm_methodology_id || 'ICM-WM-001';
+        record.acva_id = acva_id || 'ACVA-BEE-DEFAULT';
+        record.verification_standard = 'ICM';
 
         // Update Carbon Event status to verified
         const carbonEvent = carbonEvents.find(

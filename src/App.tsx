@@ -555,6 +555,7 @@ export default function App() {
   const [ecoTips, setEcoTips] = useState<string[]>([]);
   const [forecast, setForecast] = useState<string>('');
   const [mrvRiskAssessments, setMrvRiskAssessments] = useState<Record<string, { risk_score: number, explanation: string }>>({});
+  const [icmComplianceData, setIcmComplianceData] = useState<Record<string, { ccts_sector: string, icm_methodology_id: string, acva_id: string }>>({});
   const [carbonDashboard, setCarbonDashboard] = useState<any>(null);
   const [registryCertificates, setRegistryCertificates] = useState<any[]>([]);
   const [marketOrderBook, setMarketOrderBook] = useState<any[]>([]);
@@ -1512,7 +1513,13 @@ export default function App() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ record_id: recordId, status })
+        body: JSON.stringify({ 
+          record_id: recordId, 
+          status,
+          ccts_sector: icmComplianceData[recordId]?.ccts_sector || 'Waste Management',
+          icm_methodology_id: icmComplianceData[recordId]?.icm_methodology_id || 'ICM-WM-001',
+          acva_id: icmComplianceData[recordId]?.acva_id || 'ACVA-DEFAULT'
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'MRV Operation failed');
@@ -5296,6 +5303,48 @@ export default function App() {
                             </div>
                           )}
 
+                          {/* ICM Compliance Section */}
+                          <div className="mb-6 p-4 rounded-xl border bg-black/40 border-emerald-500/30">
+                            <p className="text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1 text-emerald-400">
+                              <ShieldCheck size={12} />
+                              Indian Carbon Market (ICM) Compliance
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-[10px] uppercase text-white/40 mb-1">CCTS Sector</label>
+                                <select 
+                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white"
+                                  value={icmComplianceData[record.id]?.ccts_sector || 'Waste Management'}
+                                  onChange={(e) => setIcmComplianceData(prev => ({...prev, [record.id]: {...(prev[record.id] || { ccts_sector: 'Waste Management', icm_methodology_id: 'ICM-WM-001', acva_id: 'ACVA-BEE-001' }), ccts_sector: e.target.value}}))}
+                                >
+                                  <option value="Waste Management">Waste Management</option>
+                                  <option value="Biomass/Agriculture">Biomass/Agriculture</option>
+                                  <option value="Energy Efficiency">Energy Efficiency</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] uppercase text-white/40 mb-1">ICM Methodology</label>
+                                <input 
+                                  type="text" 
+                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white"
+                                  placeholder="e.g. ICM-WM-001"
+                                  value={icmComplianceData[record.id]?.icm_methodology_id || 'ICM-WM-001'}
+                                  onChange={(e) => setIcmComplianceData(prev => ({...prev, [record.id]: {...(prev[record.id] || { ccts_sector: 'Waste Management', icm_methodology_id: 'ICM-WM-001', acva_id: 'ACVA-BEE-001' }), icm_methodology_id: e.target.value}}))}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] uppercase text-white/40 mb-1">ACVA ID</label>
+                                <input 
+                                  type="text" 
+                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white"
+                                  placeholder="Your ACVA ID"
+                                  value={icmComplianceData[record.id]?.acva_id || 'ACVA-BEE-001'}
+                                  onChange={(e) => setIcmComplianceData(prev => ({...prev, [record.id]: {...(prev[record.id] || { ccts_sector: 'Waste Management', icm_methodology_id: 'ICM-WM-001', acva_id: 'ACVA-BEE-001' }), acva_id: e.target.value}}))}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          
                           <div className="flex gap-3">
                             <button 
                               onClick={() => handleAssessRisk(record)}
