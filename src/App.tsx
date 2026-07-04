@@ -2307,7 +2307,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">{t('Select State')}</option>
                         {regStates.map(st => (
-                          <option key={st.state_lgd_code} value={st.state_name} className="bg-[var(--color-bg)]">
+                          <option key={`reg-state-${st.state_lgd_code}-${st.state_name}`} value={st.state_name} className="bg-[var(--color-bg)]">
                             {st.state_name}
                           </option>
                         ))}
@@ -2324,7 +2324,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">{t('Select District')}</option>
                         {regDistricts.map(ds => (
-                          <option key={ds.district_lgd_code} value={ds.district_name} className="bg-[var(--color-bg)]">
+                          <option key={`reg-dist-${ds.district_lgd_code}-${ds.district_name}`} value={ds.district_name} className="bg-[var(--color-bg)]">
                             {ds.district_name}
                           </option>
                         ))}
@@ -2344,7 +2344,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">{t('Select Sub-District')}</option>
                         {regSubdistricts.map(sd => (
-                          <option key={sd.subdistrict_lgd_code} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">
+                          <option key={`reg-subdist-${sd.subdistrict_lgd_code}-${sd.subdistrict_name}`} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">
                             {sd.subdistrict_name}
                           </option>
                         ))}
@@ -2361,7 +2361,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">{t('Select Local Body/Ward')}</option>
                         {regLocalbodies.map(lb => (
-                          <option key={lb.local_body_lgd_code} value={lb.local_body_name} className="bg-[var(--color-bg)]">
+                          <option key={`reg-lb-${lb.local_body_lgd_code}-${lb.local_body_name}`} value={lb.local_body_name} className="bg-[var(--color-bg)]">
                             {lb.local_body_name} ({lb.local_body_type})
                           </option>
                         ))}
@@ -4133,7 +4133,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All States</option>
                         {filterStates.map(st => (
-                          <option key={st.state_lgd_code} value={st.state_name} className="bg-[var(--color-bg)]">{st.state_name}</option>
+                          <option key={`filter1-state-${st.state_lgd_code}-${st.state_name}`} value={st.state_name} className="bg-[var(--color-bg)]">{st.state_name}</option>
                         ))}
                       </select>
                       <select 
@@ -4144,7 +4144,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Districts</option>
                         {filterDistricts.map(ds => (
-                          <option key={ds.district_lgd_code} value={ds.district_name} className="bg-[var(--color-bg)]">{ds.district_name}</option>
+                          <option key={`filter1-dist-${ds.district_lgd_code}-${ds.district_name}`} value={ds.district_name} className="bg-[var(--color-bg)]">{ds.district_name}</option>
                         ))}
                       </select>
                       <select 
@@ -4155,7 +4155,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Sub-Districts</option>
                         {filterSubdistricts.map(sd => (
-                          <option key={sd.subdistrict_lgd_code} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">{sd.subdistrict_name}</option>
+                          <option key={`filter1-subdist-${sd.subdistrict_lgd_code}-${sd.subdistrict_name}`} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">{sd.subdistrict_name}</option>
                         ))}
                       </select>
                       <select 
@@ -4166,7 +4166,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Wards/GPs</option>
                         {filterLocalbodies.map(lb => (
-                          <option key={lb.local_body_lgd_code} value={lb.local_body_name} className="bg-[var(--color-bg)]">{lb.local_body_name} ({lb.local_body_type})</option>
+                          <option key={`filter1-lb-${lb.local_body_lgd_code}-${lb.local_body_name}`} value={lb.local_body_name} className="bg-[var(--color-bg)]">{lb.local_body_name} ({lb.local_body_type})</option>
                         ))}
                       </select>
 
@@ -5795,7 +5795,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All States</option>
                         {filterStates.map(st => (
-                          <option key={st.state_lgd_code} value={st.state_name} className="bg-[var(--color-bg)]">{st.state_name}</option>
+                          <option key={`filter2-state-${st.state_lgd_code}-${st.state_name}`} value={st.state_name} className="bg-[var(--color-bg)]">{st.state_name}</option>
                         ))}
                       </select>
                     </div>
@@ -5809,7 +5809,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Districts</option>
                         {filterDistricts.map(ds => (
-                          <option key={ds.district_lgd_code} value={ds.district_name} className="bg-[var(--color-bg)]">{ds.district_name}</option>
+                          <option key={`filter2-dist-${ds.district_lgd_code}-${ds.district_name}`} value={ds.district_name} className="bg-[var(--color-bg)]">{ds.district_name}</option>
                         ))}
                       </select>
                     </div>
@@ -5823,7 +5823,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Sub-Districts</option>
                         {filterSubdistricts.map(sd => (
-                          <option key={sd.subdistrict_lgd_code} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">{sd.subdistrict_name}</option>
+                          <option key={`filter2-subdist-${sd.subdistrict_lgd_code}-${sd.subdistrict_name}`} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">{sd.subdistrict_name}</option>
                         ))}
                       </select>
                     </div>
@@ -5837,7 +5837,7 @@ export default function App() {
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Wards/GPs</option>
                         {filterLocalbodies.map(lb => (
-                          <option key={lb.local_body_lgd_code} value={lb.local_body_name} className="bg-[var(--color-bg)]">{lb.local_body_name} ({lb.local_body_type})</option>
+                          <option key={`filter2-lb-${lb.local_body_lgd_code}-${lb.local_body_name}`} value={lb.local_body_name} className="bg-[var(--color-bg)]">{lb.local_body_name} ({lb.local_body_type})</option>
                         ))}
                       </select>
                     </div>

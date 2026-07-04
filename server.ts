@@ -66,39 +66,45 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const stateHash = hashCode(state || 'State');
   const districtHash = hashCode(district || 'District');
   const areaHash = hashCode(localArea || 'Area');
-  const subdistrictHash = hashCode(subdistrict || (district ? `${district} Subdistrict` : 'Subdistrict'));
 
-  // LGD state codes range from 1 to 37 in India
-  const stateCode = (stateHash % 37) + 1;
-  // District codes are usually 3 digits
-  const districtCode = 100 + (districtHash % 800);
-  // Subdistrict codes are usually 4 digits
-  const subdistrictCode = 3000 + (subdistrictHash % 2000);
-  // Local Body codes are usually 6 digits
-  const localBodyCode = 200000 + (districtHash % 99999);
-  // Village / Ward codes
-  const wardOrVillageCode = context === 'Rural' || context === 'rural'
-    ? 500000 + (areaHash % 150000) // Village LGD code
-    : 900000 + (areaHash % 99999);  // Ward LGD code
+  const statesList = Object.keys(INDIAN_STATES).sort();
+  const stateIndex = statesList.indexOf(state);
+  const stateCode = stateIndex !== -1 ? (stateIndex + 1) : ((stateHash % 37) + 1);
 
-  const localBodyType = context === 'Rural' || context === 'rural' ? 'Gram Panchayat' : 'Municipal Corporation';
-  const localBodyName = context === 'Rural' || context === 'rural'
+  const baseDistrictCode = stateCode * 1000;
+  const districtsOfState = state ? INDIAN_STATES[state] : null;
+  const districtList = districtsOfState ? Object.keys(districtsOfState).sort() : [];
+  const districtIndex = districtList.indexOf(district);
+  const districtCode = districtIndex !== -1 ? (baseDistrictCode + districtIndex + 1) : (100 + (districtHash % 800));
+
+  const isRural = context === 'Rural' || context === 'rural' || (subdistrict && subdistrict.toLowerCase().includes('rural'));
+  const subdistrictCode = districtCode * 10 + (isRural ? 2 : 1);
+
+  const districtData = districtsOfState && district ? districtsOfState[district] : null;
+  const areasList = districtData ? (isRural ? (districtData.Rural || []) : (districtData.Urban || [])).slice().sort() : [];
+  const areaIndex = areasList.indexOf(localArea);
+  const wardOrVillageCode = areaIndex !== -1 ? (subdistrictCode * 100 + areaIndex + 1) : ((isRural ? 500000 : 900000) + (areaHash % 99999));
+
+  const localBodyCode = wardOrVillageCode;
+
+  const localBodyType = isRural ? 'Gram Panchayat' : 'Municipal Corporation';
+  const localBodyName = isRural
     ? `${localArea} Gram Panchayat`
-    : `${district} Municipal Corporation`;
+    : `${district || "Visakhapatnam"} Municipal Corporation`;
 
   return {
     state_name: state || "Andhra Pradesh",
     state_lgd_code: stateCode,
     district_name: district || "Visakhapatnam",
     district_lgd_code: districtCode,
-    subdistrict_name: subdistrict || (context === 'Rural' || context === 'rural' ? `${district || "Visakhapatnam"} Block (Rural)` : `${district || "Visakhapatnam"} Tehsil (Urban)`),
+    subdistrict_name: subdistrict || (isRural ? `${district || "Visakhapatnam"} Block (Rural)` : `${district || "Visakhapatnam"} Tehsil (Urban)`),
     subdistrict_lgd_code: subdistrictCode,
     local_body_name: localBodyName,
     local_body_lgd_code: localBodyCode,
     local_body_type: localBodyType,
     ward_or_village_name: localArea || "Gajuwaka Ward 1",
     ward_or_village_lgd_code: wardOrVillageCode,
-    census_2011_code: (context === 'Rural' || context === 'rural') ? (600000 + (areaHash % 99999)) : null,
+    census_2011_code: isRural ? (600000 + (areaHash % 99999)) : null,
     is_lgd_verified: true,
     verification_source: "Ministry of Panchayati Raj (lgdirectory.gov.in)",
     last_synced_at: new Date().toISOString(),
@@ -1347,17 +1353,11 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   // ---------------- LGD ROUTES ----------------
   app.get("/api/lgd/states", (req, res) => {
-    const getHash = (str: string) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      return Math.abs(hash);
-    };
-    const states = Object.keys(INDIAN_STATES).map(state => ({
+    const statesList = Object.keys(INDIAN_STATES).sort();
+    const states = statesList.map((state, index) => ({
       state_name: state,
-      state_lgd_code: (getHash(state) % 36) + 1,
-    })).sort((a, b) => a.state_name.localeCompare(b.state_name));
+      state_lgd_code: index + 1,
+    }));
     res.json(states);
   });
 
@@ -1366,42 +1366,45 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     if (!state) return res.status(400).json({ error: "State parameter is required" });
     const districtsOfState = INDIAN_STATES[state as string];
     if (!districtsOfState) return res.json([]);
-    const getHash = (str: string) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      return Math.abs(hash);
-    };
-    const districts = Object.keys(districtsOfState).map(district => ({
+
+    const statesList = Object.keys(INDIAN_STATES).sort();
+    const stateIndex = statesList.indexOf(state as string);
+    const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
+    const baseDistrictCode = stateCode * 1000;
+
+    const districts = Object.keys(districtsOfState).sort().map((district, index) => ({
       district_name: district,
-      district_lgd_code: 100 + (getHash(district) % 600),
+      district_lgd_code: baseDistrictCode + index + 1,
       state_name: state as string,
-    })).sort((a, b) => a.district_name.localeCompare(b.district_name));
+    }));
     res.json(districts);
   });
 
   app.get("/api/lgd/subdistricts", (req, res) => {
     const { state, district } = req.query;
     if (!state || !district) return res.status(400).json({ error: "State and district parameters are required" });
-    const getHash = (str: string) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      return Math.abs(hash);
-    };
+
+    const statesList = Object.keys(INDIAN_STATES).sort();
+    const stateIndex = statesList.indexOf(state as string);
+    const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
+    const baseDistrictCode = stateCode * 1000;
+
+    const districtsOfState = INDIAN_STATES[state as string];
+    const districtList = districtsOfState ? Object.keys(districtsOfState).sort() : [];
+    const districtIndex = districtList.indexOf(district as string);
+    const districtCode = districtIndex !== -1 ? (baseDistrictCode + districtIndex + 1) : 101;
+
     // Generate subdistricts for a district
     const subdistricts = [
       {
         subdistrict_name: `${district} Tehsil (Urban)`,
-        subdistrict_lgd_code: 3000 + (getHash((district as string) + "Urban") % 2000),
+        subdistrict_lgd_code: districtCode * 10 + 1,
         district_name: district as string,
         state_name: state as string,
       },
       {
         subdistrict_name: `${district} Block (Rural)`,
-        subdistrict_lgd_code: 5000 + (getHash((district as string) + "Rural") % 2000),
+        subdistrict_lgd_code: districtCode * 10 + 2,
         district_name: district as string,
         state_name: state as string,
       }
@@ -1419,24 +1422,29 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     const districtData = districtsOfState[district as string];
     if (!districtData) return res.json([]);
 
-    const isUrban = (subdistrict as string).includes("(Urban)");
-    const areas = isUrban ? (districtData.Urban || []) : (districtData.Rural || []);
-    const getHash = (str: string) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      return Math.abs(hash);
-    };
+    const statesList = Object.keys(INDIAN_STATES).sort();
+    const stateIndex = statesList.indexOf(state as string);
+    const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
+    const baseDistrictCode = stateCode * 1000;
 
-    const localbodies = areas.map(area => ({
+    const districtList = Object.keys(districtsOfState).sort();
+    const districtIndex = districtList.indexOf(district as string);
+    const districtCode = districtIndex !== -1 ? (baseDistrictCode + districtIndex + 1) : 101;
+
+    const isUrban = !(subdistrict as string).includes("(Rural)") && !(subdistrict as string).toLowerCase().includes("rural");
+    const subdistrictCode = districtCode * 10 + (isUrban ? 1 : 2);
+
+    const areas = isUrban ? (districtData.Urban || []) : (districtData.Rural || []);
+    const sortedAreas = areas.slice().sort();
+
+    const localbodies = sortedAreas.map((area, index) => ({
       local_body_name: area,
-      local_body_lgd_code: (isUrban ? 900000 : 500000) + (getHash(area) % 99999),
+      local_body_lgd_code: subdistrictCode * 100 + index + 1,
       local_body_type: isUrban ? 'Ward' : 'Gram Panchayat',
       subdistrict_name: subdistrict as string,
       district_name: district as string,
       state_name: state as string,
-    })).sort((a, b) => a.local_body_name.localeCompare(b.local_body_name));
+    }));
 
     res.json(localbodies);
   });
