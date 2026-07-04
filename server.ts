@@ -18,6 +18,7 @@ import { CCCRegistryService } from "./src/services/cccRegistryService";
 import { generateCarbonEvent } from "./src/services/carbonEngine";
 import { VCService } from "./src/services/vcService";
 import { GuardianService } from "./src/services/guardianService";
+import { ICMComplianceService, ICM_METHODOLOGIES, ICM_CCTS_SECTORS } from "./src/services/icmComplianceService";
 
 import { hedera } from "./services/hedera-service/index";
 import { WalletEngine } from "./services/wallet-engine/logic";
@@ -526,6 +527,26 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const carbonProjects: any[] = [];
   const projectDesignDocuments: any[] = [];
   const methodologyLibrary: any[] = [];
+  
+  // Seed with ICM methodologies dynamically
+  for (const sector of ICM_CCTS_SECTORS) {
+    const list = ICM_METHODOLOGIES[sector];
+    if (list) {
+      for (const m of list) {
+        methodologyLibrary.push({
+          id: m.methodologyId,
+          name: m.name,
+          sector: m.sector,
+          description: m.description,
+          standards_body: "BEE (Bureau of Energy Efficiency)",
+          country: "India",
+          version: "v2.1",
+          status: "active"
+        });
+      }
+    }
+  }
+
   const orderBook: any[] = [];
 
   function calculateHash(data: any) {
@@ -1198,6 +1219,18 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           .status(400)
           .json({ error: "Waste must be processed before MRV verification" });
 
+      if (status === "verified") {
+        const complianceResult = ICMComplianceService.validate(
+          ccts_sector,
+          icm_methodology_id,
+          acva_id,
+          record.waste_type
+        );
+        if (!complianceResult.isValid) {
+          return res.status(400).json({ error: `ICM Compliance Error: ${complianceResult.error}` });
+        }
+      }
+
       record.mrv_status = status;
       record.mrv_verified_by = req.user.id;
       record.mrv_verified_at = new Date().toISOString();
@@ -1225,9 +1258,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         record.is_lgd_verified = true;
         
         record.registry_serial_number = registrySerialNumber;
-        record.ccts_sector = ccts_sector || 'Waste Sector';
-        record.icm_methodology_id = icm_methodology_id || 'ICM-WM-001';
-        record.acva_id = acva_id || 'ACVA-BEE-DEFAULT';
+        record.ccts_sector = ccts_sector;
+        record.icm_methodology_id = icm_methodology_id;
+        record.acva_id = acva_id;
         record.verification_standard = 'ICM';
 
         // Update Carbon Event status to verified

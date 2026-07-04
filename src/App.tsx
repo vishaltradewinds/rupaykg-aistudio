@@ -57,6 +57,7 @@ import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
 import ReactMarkdown from 'react-markdown';
 import { WASTE_TYPES, WASTE_CATEGORIES, WasteType, INDIAN_STATES } from './constants';
+import { ICM_CCTS_SECTORS, ICM_METHODOLOGIES } from './services/icmComplianceService';
 
 import { Chatbot } from './components/Chatbot';
 
@@ -414,7 +415,9 @@ export default function App() {
     role: 'citizen',
     organization_name: '',
     district: '',
-    state: ''
+    state: '',
+    subdistrict: '',
+    local_area: ''
   });
   const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: 'Rice', double_counting_declaration: false });
   const [farmerData, setFarmerData] = useState({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
@@ -1640,10 +1643,52 @@ export default function App() {
     }
   };
 
+  const getIcmComplianceValues = (record: any) => {
+    if (icmComplianceData[record.id]) {
+      return icmComplianceData[record.id];
+    }
+    
+    // Suggest based on waste type
+    const wasteType = record.waste_type || '';
+    const context = record.context || 'urban';
+    
+    let sector = 'Waste Management';
+    let methodologyId = 'ICM-WM-001';
+    
+    if (['Municipal Organic Waste', 'Food & Kitchen Waste', 'Garden & Leaf Litter', 'Livestock Manure'].includes(wasteType)) {
+      if (context === 'rural') {
+        sector = 'Biomass/Agriculture';
+        methodologyId = 'ICM-AG-004';
+      } else {
+        sector = 'Waste Management';
+        methodologyId = 'ICM-WM-001';
+      }
+    } else if (['Crop Residue / Paddy Straw', 'Biomass Aggregation', 'Coconut Shells / Husk', 'Wood & Forestry Biomass'].includes(wasteType)) {
+      sector = 'Biomass/Agriculture';
+      methodologyId = 'ICM-AG-001';
+    } else if (['Plastic Waste', 'Multi-Layered Plastic', 'Mixed Municipal Dry Waste', 'Textile Waste', 'Paper Waste'].includes(wasteType)) {
+      sector = 'Waste Management';
+      methodologyId = 'ICM-WM-003';
+    }
+    
+    return {
+      ccts_sector: sector,
+      icm_methodology_id: methodologyId,
+      acva_id: 'ACVA-BEE-001'
+    };
+  };
+
   const handleMRVAction = async (recordId: string, status: 'verified' | 'rejected') => {
     setLoading(true);
     setMessage(null);
     try {
+      const record = mrvRecords.find((r: any) => r.id === recordId);
+      const compliance = record ? getIcmComplianceValues(record) : {
+        ccts_sector: icmComplianceData[recordId]?.ccts_sector || 'Waste Management',
+        icm_methodology_id: icmComplianceData[recordId]?.icm_methodology_id || 'ICM-WM-001',
+        acva_id: icmComplianceData[recordId]?.acva_id || 'ACVA-BEE-001'
+      };
+
       const res = await fetch('/api/mrv/verify', {
         method: 'POST',
         headers: { 
@@ -1653,9 +1698,9 @@ export default function App() {
         body: JSON.stringify({ 
           record_id: recordId, 
           status,
-          ccts_sector: icmComplianceData[recordId]?.ccts_sector || 'Waste Management',
-          icm_methodology_id: icmComplianceData[recordId]?.icm_methodology_id || 'ICM-WM-001',
-          acva_id: icmComplianceData[recordId]?.acva_id || 'ACVA-DEFAULT'
+          ccts_sector: compliance.ccts_sector,
+          icm_methodology_id: compliance.icm_methodology_id,
+          acva_id: compliance.acva_id
         })
       });
       const data = await res.json();
@@ -5487,41 +5532,96 @@ export default function App() {
                           <div className="mb-6 p-4 rounded-xl border bg-black/40 border-emerald-500/30">
                             <p className="text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1 text-emerald-400">
                               <ShieldCheck size={12} />
-                              Indian Carbon Market (ICM) Compliance
+                              Indian Carbon Market (ICM) Compliance Module
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                               <div>
                                 <label className="block text-[10px] uppercase text-white/40 mb-1">CCTS Sector</label>
                                 <select 
-                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white"
-                                  value={icmComplianceData[record.id]?.ccts_sector || 'Waste Management'}
-                                  onChange={(e) => setIcmComplianceData(prev => ({...prev, [record.id]: {...(prev[record.id] || { ccts_sector: 'Waste Management', icm_methodology_id: 'ICM-WM-001', acva_id: 'ACVA-BEE-001' }), ccts_sector: e.target.value}}))}
+                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                                  value={getIcmComplianceValues(record).ccts_sector}
+                                  onChange={(e) => {
+                                    const nextSector = e.target.value as any;
+                                    const defaultMethodology = ICM_METHODOLOGIES[nextSector]?.[0]?.methodologyId || '';
+                                    setIcmComplianceData(prev => ({
+                                      ...prev,
+                                      [record.id]: {
+                                        ...(prev[record.id] || getIcmComplianceValues(record)),
+                                        ccts_sector: nextSector,
+                                        icm_methodology_id: defaultMethodology
+                                      }
+                                    }));
+                                  }}
                                 >
-                                  <option value="Waste Management">Waste Management</option>
-                                  <option value="Biomass/Agriculture">Biomass/Agriculture</option>
-                                  <option value="Energy Efficiency">Energy Efficiency</option>
+                                  {ICM_CCTS_SECTORS.map(sec => (
+                                    <option key={sec} value={sec} className="bg-[var(--color-bg)] text-white">{sec}</option>
+                                  ))}
                                 </select>
                               </div>
                               <div>
                                 <label className="block text-[10px] uppercase text-white/40 mb-1">ICM Methodology</label>
-                                <input 
-                                  type="text" 
-                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white"
-                                  placeholder="e.g. ICM-WM-001"
-                                  value={icmComplianceData[record.id]?.icm_methodology_id || 'ICM-WM-001'}
-                                  onChange={(e) => setIcmComplianceData(prev => ({...prev, [record.id]: {...(prev[record.id] || { ccts_sector: 'Waste Management', icm_methodology_id: 'ICM-WM-001', acva_id: 'ACVA-BEE-001' }), icm_methodology_id: e.target.value}}))}
-                                />
+                                <select 
+                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                                  value={getIcmComplianceValues(record).icm_methodology_id}
+                                  onChange={(e) => setIcmComplianceData(prev => ({
+                                    ...prev,
+                                    [record.id]: {
+                                      ...(prev[record.id] || getIcmComplianceValues(record)),
+                                      icm_methodology_id: e.target.value
+                                    }
+                                  }))}
+                                >
+                                  {(ICM_METHODOLOGIES[getIcmComplianceValues(record).ccts_sector as keyof typeof ICM_METHODOLOGIES] || []).map(m => (
+                                    <option key={m.methodologyId} value={m.methodologyId} className="bg-[var(--color-bg)] text-white">
+                                      {m.methodologyId} ({m.name})
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                               <div>
                                 <label className="block text-[10px] uppercase text-white/40 mb-1">ACVA ID</label>
                                 <input 
                                   type="text" 
-                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white"
-                                  placeholder="Your ACVA ID"
-                                  value={icmComplianceData[record.id]?.acva_id || 'ACVA-BEE-001'}
-                                  onChange={(e) => setIcmComplianceData(prev => ({...prev, [record.id]: {...(prev[record.id] || { ccts_sector: 'Waste Management', icm_methodology_id: 'ICM-WM-001', acva_id: 'ACVA-BEE-001' }), acva_id: e.target.value}}))}
+                                  className={`w-full bg-black/50 border rounded-lg p-2 text-sm text-white focus:outline-none ${
+                                    /^ACVA-(BEE-)?[A-Z0-9]{3,8}$/i.test(getIcmComplianceValues(record).acva_id) 
+                                      ? 'border-emerald-500/40 focus:border-emerald-500' 
+                                      : 'border-red-500/40 focus:border-red-500'
+                                  }`}
+                                  placeholder="Your ACVA ID (e.g. ACVA-BEE-001)"
+                                  value={getIcmComplianceValues(record).acva_id}
+                                  onChange={(e) => setIcmComplianceData(prev => ({
+                                    ...prev,
+                                    [record.id]: {
+                                      ...(prev[record.id] || getIcmComplianceValues(record)),
+                                      acva_id: e.target.value
+                                    }
+                                  }))}
                                 />
                               </div>
+                            </div>
+                            {/* In-context methodology details */}
+                            <div className="mt-3 pt-3 border-t border-white/5 flex flex-col gap-1.5">
+                              {(() => {
+                                const vals = getIcmComplianceValues(record);
+                                const sectorMethods = ICM_METHODOLOGIES[vals.ccts_sector as keyof typeof ICM_METHODOLOGIES] || [];
+                                const currentMethod = sectorMethods.find(m => m.methodologyId === vals.icm_methodology_id);
+                                const acvaValid = /^ACVA-(BEE-)?[A-Z0-9]{3,8}$/i.test(vals.acva_id);
+                                return (
+                                  <>
+                                    {currentMethod && (
+                                      <div>
+                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Methodology Standard: </span>
+                                        <span className="text-[11px] text-white/80">{currentMethod.name} — {currentMethod.description}</span>
+                                      </div>
+                                    )}
+                                    {!acvaValid && (
+                                      <p className="text-[10px] text-red-400 font-semibold flex items-center gap-1 mt-1">
+                                        <AlertTriangle size={10} /> Valid ACVA ID (Format: ACVA-BEE-XXX) is required for national carbon registration.
+                                      </p>
+                                    )}
+                                  </>
+                                );
+                              })()}
                             </div>
                           </div>
                           
