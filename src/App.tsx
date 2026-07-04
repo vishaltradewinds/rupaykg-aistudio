@@ -58,6 +58,7 @@ import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, L
 import ReactMarkdown from 'react-markdown';
 import { WASTE_TYPES, WASTE_CATEGORIES, WasteType, INDIAN_STATES } from './constants';
 import { ICM_CCTS_SECTORS, ICM_METHODOLOGIES } from './services/icmComplianceService';
+import { safeFetchLgdJson } from './services/lgdService';
 
 import { Chatbot } from './components/Chatbot';
 
@@ -505,7 +506,15 @@ export default function App() {
         });
         
         if (res.ok) {
-          const data = await res.json();
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Received non-JSON response (likely HTML fallback)");
+          }
+          const text = await res.text();
+          if (text.trim().startsWith("<")) {
+            throw new Error("Received HTML content instead of JSON");
+          }
+          const data = JSON.parse(text);
           if (isMounted) {
             setPublicImpact(data);
             retryCount = 0; // Reset on success
@@ -614,121 +623,201 @@ export default function App() {
 
   // LGD Fetching Logic (Registration)
   useEffect(() => {
-    fetch('/api/lgd/states')
-      .then(res => res.json())
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>('/api/lgd/states', controller.signal)
       .then(data => {
         if (Array.isArray(data)) {
           setRegStates(data);
           setFilterStates(data);
         }
       })
-      .catch(err => console.error('Error fetching LGD states:', err));
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching LGD states:', err);
+        }
+      });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
-    if (formData.state) {
-      fetch(`/api/lgd/districts?state=${encodeURIComponent(formData.state)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setRegDistricts(data);
-          }
-        })
-        .catch(err => console.error('Error fetching reg districts:', err));
-    } else {
+    if (!formData.state) {
       setRegDistricts([]);
+      setRegSubdistricts([]);
+      setRegLocalbodies([]);
+      setFormData(prev => ({ ...prev, district: '', subdistrict: '', local_area: '' }));
+      return;
     }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(`/api/lgd/districts?state=${encodeURIComponent(formData.state)}`, controller.signal)
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRegDistricts(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching reg districts:', err);
+        }
+      });
+
     setFormData(prev => ({ ...prev, district: '', subdistrict: '', local_area: '' }));
     setRegSubdistricts([]);
     setRegLocalbodies([]);
+
+    return () => controller.abort();
   }, [formData.state]);
 
   useEffect(() => {
-    if (formData.state && formData.district) {
-      fetch(`/api/lgd/subdistricts?state=${encodeURIComponent(formData.state)}&district=${encodeURIComponent(formData.district)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setRegSubdistricts(data);
-          }
-        })
-        .catch(err => console.error('Error fetching reg subdistricts:', err));
-    } else {
+    if (!formData.state || !formData.district) {
       setRegSubdistricts([]);
+      setRegLocalbodies([]);
+      setFormData(prev => ({ ...prev, subdistrict: '', local_area: '' }));
+      return;
     }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(
+      `/api/lgd/subdistricts?state=${encodeURIComponent(formData.state)}&district=${encodeURIComponent(formData.district)}`,
+      controller.signal
+    )
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRegSubdistricts(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching reg subdistricts:', err);
+        }
+      });
+
     setFormData(prev => ({ ...prev, subdistrict: '', local_area: '' }));
     setRegLocalbodies([]);
+
+    return () => controller.abort();
   }, [formData.district]);
 
   useEffect(() => {
-    if (formData.state && formData.district && formData.subdistrict) {
-      fetch(`/api/lgd/localbodies?state=${encodeURIComponent(formData.state)}&district=${encodeURIComponent(formData.district)}&subdistrict=${encodeURIComponent(formData.subdistrict)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setRegLocalbodies(data);
-          }
-        })
-        .catch(err => console.error('Error fetching reg local bodies:', err));
-    } else {
+    if (!formData.state || !formData.district || !formData.subdistrict) {
       setRegLocalbodies([]);
+      setFormData(prev => ({ ...prev, local_area: '' }));
+      return;
     }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(
+      `/api/lgd/localbodies?state=${encodeURIComponent(formData.state)}&district=${encodeURIComponent(formData.district)}&subdistrict=${encodeURIComponent(formData.subdistrict)}`,
+      controller.signal
+    )
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRegLocalbodies(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching reg local bodies:', err);
+        }
+      });
+
     setFormData(prev => ({ ...prev, local_area: '' }));
+
+    return () => controller.abort();
   }, [formData.subdistrict]);
 
   // LGD Fetching Logic (Dashboard Filters)
   useEffect(() => {
-    if (dashboardStateFilter) {
-      fetch(`/api/lgd/districts?state=${encodeURIComponent(dashboardStateFilter)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setFilterDistricts(data);
-          }
-        })
-        .catch(err => console.error('Error fetching filter districts:', err));
-    } else {
+    if (!dashboardStateFilter) {
       setFilterDistricts([]);
+      setFilterSubdistricts([]);
+      setFilterLocalbodies([]);
+      setDashboardDistrictFilter('');
+      setDashboardSubdistrictFilter('');
+      setDashboardLocalAreaFilter('');
+      return;
     }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(`/api/lgd/districts?state=${encodeURIComponent(dashboardStateFilter)}`, controller.signal)
+      .then(data => {
+        if (Array.isArray(data)) {
+          setFilterDistricts(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching filter districts:', err);
+        }
+      });
+
     setDashboardDistrictFilter('');
     setDashboardSubdistrictFilter('');
     setDashboardLocalAreaFilter('');
     setFilterSubdistricts([]);
     setFilterLocalbodies([]);
+
+    return () => controller.abort();
   }, [dashboardStateFilter]);
 
   useEffect(() => {
-    if (dashboardStateFilter && dashboardDistrictFilter) {
-      fetch(`/api/lgd/subdistricts?state=${encodeURIComponent(dashboardStateFilter)}&district=${encodeURIComponent(dashboardDistrictFilter)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setFilterSubdistricts(data);
-          }
-        })
-        .catch(err => console.error('Error fetching filter subdistricts:', err));
-    } else {
+    if (!dashboardStateFilter || !dashboardDistrictFilter) {
       setFilterSubdistricts([]);
+      setFilterLocalbodies([]);
+      setDashboardSubdistrictFilter('');
+      setDashboardLocalAreaFilter('');
+      return;
     }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(
+      `/api/lgd/subdistricts?state=${encodeURIComponent(dashboardStateFilter)}&district=${encodeURIComponent(dashboardDistrictFilter)}`,
+      controller.signal
+    )
+      .then(data => {
+        if (Array.isArray(data)) {
+          setFilterSubdistricts(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching filter subdistricts:', err);
+        }
+      });
+
     setDashboardSubdistrictFilter('');
     setDashboardLocalAreaFilter('');
     setFilterLocalbodies([]);
+
+    return () => controller.abort();
   }, [dashboardDistrictFilter]);
 
   useEffect(() => {
-    if (dashboardStateFilter && dashboardDistrictFilter && dashboardSubdistrictFilter) {
-      fetch(`/api/lgd/localbodies?state=${encodeURIComponent(dashboardStateFilter)}&district=${encodeURIComponent(dashboardDistrictFilter)}&subdistrict=${encodeURIComponent(dashboardSubdistrictFilter)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setFilterLocalbodies(data);
-          }
-        })
-        .catch(err => console.error('Error fetching filter local bodies:', err));
-    } else {
+    if (!dashboardStateFilter || !dashboardDistrictFilter || !dashboardSubdistrictFilter) {
       setFilterLocalbodies([]);
+      setDashboardLocalAreaFilter('');
+      return;
     }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(
+      `/api/lgd/localbodies?state=${encodeURIComponent(dashboardStateFilter)}&district=${encodeURIComponent(dashboardDistrictFilter)}&subdistrict=${encodeURIComponent(dashboardSubdistrictFilter)}`,
+      controller.signal
+    )
+      .then(data => {
+        if (Array.isArray(data)) {
+          setFilterLocalbodies(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching filter local bodies:', err);
+        }
+      });
+
     setDashboardLocalAreaFilter('');
+
+    return () => controller.abort();
   }, [dashboardSubdistrictFilter]);
 
   useEffect(() => {
