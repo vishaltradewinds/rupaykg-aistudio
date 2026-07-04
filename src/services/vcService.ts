@@ -78,7 +78,13 @@ export class VCService {
           "auditability": "Full Stakeholder Chain Verification",
           "icm_methodology_id": record.icm_methodology_id || undefined,
           "ccts_sector": record.ccts_sector || undefined,
-          "acva_id": record.acva_id || undefined
+          "acva_id": record.acva_id || undefined,
+          "lgd_state_code": record.lgd_state_code || undefined,
+          "lgd_district_code": record.lgd_district_code || undefined,
+          "lgd_local_body_code": record.lgd_local_body_code || undefined,
+          "lgd_ward_or_village_code": record.lgd_ward_or_village_code || undefined,
+          "lgd_local_body_name": record.lgd_local_body_name || undefined,
+          "lgd_local_body_type": record.lgd_local_body_type || undefined
         }
       }
     };

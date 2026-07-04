@@ -399,7 +399,12 @@ export default function App() {
     notes: ''
   });
   const [pilotOnboardFormData, setPilotOnboardFormData] = useState({ name: '', role: 'collector', phone: '', location: '' });
-  const [pilotSubView, setPilotSubView] = useState<'dashboard' | 'log' | 'onboard' | 'playbook' | 'reports' | 'whatsapp'>('dashboard');
+  const [pilotSubView, setPilotSubView] = useState<'dashboard' | 'log' | 'onboard' | 'playbook' | 'reports' | 'whatsapp' | 'lgd'>('dashboard');
+  const [lgdState, setLgdState] = useState('');
+  const [lgdDistrict, setLgdDistrict] = useState('');
+  const [lgdMode, setLgdMode] = useState<'Urban' | 'Rural'>('Urban');
+  const [lgdArea, setLgdArea] = useState('');
+  const [lgdInfoResult, setLgdInfoResult] = useState<any>(null);
   
   // Form States
   const [formData, setFormData] = useState({ 
@@ -446,7 +451,20 @@ export default function App() {
   const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
   const [dashboardStateFilter, setDashboardStateFilter] = useState<string>('');
   const [dashboardDistrictFilter, setDashboardDistrictFilter] = useState<string>('');
+  const [dashboardSubdistrictFilter, setDashboardSubdistrictFilter] = useState<string>('');
   const [dashboardLocalAreaFilter, setDashboardLocalAreaFilter] = useState<string>('');
+  
+  // LGD Lists States for Registration and Filters
+  const [regStates, setRegStates] = useState<any[]>([]);
+  const [regDistricts, setRegDistricts] = useState<any[]>([]);
+  const [regSubdistricts, setRegSubdistricts] = useState<any[]>([]);
+  const [regLocalbodies, setRegLocalbodies] = useState<any[]>([]);
+
+  const [filterStates, setFilterStates] = useState<any[]>([]);
+  const [filterDistricts, setFilterDistricts] = useState<any[]>([]);
+  const [filterSubdistricts, setFilterSubdistricts] = useState<any[]>([]);
+  const [filterLocalbodies, setFilterLocalbodies] = useState<any[]>([]);
+
   const [publicImpact, setPublicImpact] = useState<any>(null);
 
   // --- MULTI-GENERATOR ENTERPRISE STATE HOOKS ---
@@ -591,6 +609,125 @@ export default function App() {
     fetchConfig();
   }, []);
 
+  // LGD Fetching Logic (Registration)
+  useEffect(() => {
+    fetch('/api/lgd/states')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRegStates(data);
+          setFilterStates(data);
+        }
+      })
+      .catch(err => console.error('Error fetching LGD states:', err));
+  }, []);
+
+  useEffect(() => {
+    if (formData.state) {
+      fetch(`/api/lgd/districts?state=${encodeURIComponent(formData.state)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setRegDistricts(data);
+          }
+        })
+        .catch(err => console.error('Error fetching reg districts:', err));
+    } else {
+      setRegDistricts([]);
+    }
+    setFormData(prev => ({ ...prev, district: '', subdistrict: '', local_area: '' }));
+    setRegSubdistricts([]);
+    setRegLocalbodies([]);
+  }, [formData.state]);
+
+  useEffect(() => {
+    if (formData.state && formData.district) {
+      fetch(`/api/lgd/subdistricts?state=${encodeURIComponent(formData.state)}&district=${encodeURIComponent(formData.district)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setRegSubdistricts(data);
+          }
+        })
+        .catch(err => console.error('Error fetching reg subdistricts:', err));
+    } else {
+      setRegSubdistricts([]);
+    }
+    setFormData(prev => ({ ...prev, subdistrict: '', local_area: '' }));
+    setRegLocalbodies([]);
+  }, [formData.district]);
+
+  useEffect(() => {
+    if (formData.state && formData.district && formData.subdistrict) {
+      fetch(`/api/lgd/localbodies?state=${encodeURIComponent(formData.state)}&district=${encodeURIComponent(formData.district)}&subdistrict=${encodeURIComponent(formData.subdistrict)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setRegLocalbodies(data);
+          }
+        })
+        .catch(err => console.error('Error fetching reg local bodies:', err));
+    } else {
+      setRegLocalbodies([]);
+    }
+    setFormData(prev => ({ ...prev, local_area: '' }));
+  }, [formData.subdistrict]);
+
+  // LGD Fetching Logic (Dashboard Filters)
+  useEffect(() => {
+    if (dashboardStateFilter) {
+      fetch(`/api/lgd/districts?state=${encodeURIComponent(dashboardStateFilter)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setFilterDistricts(data);
+          }
+        })
+        .catch(err => console.error('Error fetching filter districts:', err));
+    } else {
+      setFilterDistricts([]);
+    }
+    setDashboardDistrictFilter('');
+    setDashboardSubdistrictFilter('');
+    setDashboardLocalAreaFilter('');
+    setFilterSubdistricts([]);
+    setFilterLocalbodies([]);
+  }, [dashboardStateFilter]);
+
+  useEffect(() => {
+    if (dashboardStateFilter && dashboardDistrictFilter) {
+      fetch(`/api/lgd/subdistricts?state=${encodeURIComponent(dashboardStateFilter)}&district=${encodeURIComponent(dashboardDistrictFilter)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setFilterSubdistricts(data);
+          }
+        })
+        .catch(err => console.error('Error fetching filter subdistricts:', err));
+    } else {
+      setFilterSubdistricts([]);
+    }
+    setDashboardSubdistrictFilter('');
+    setDashboardLocalAreaFilter('');
+    setFilterLocalbodies([]);
+  }, [dashboardDistrictFilter]);
+
+  useEffect(() => {
+    if (dashboardStateFilter && dashboardDistrictFilter && dashboardSubdistrictFilter) {
+      fetch(`/api/lgd/localbodies?state=${encodeURIComponent(dashboardStateFilter)}&district=${encodeURIComponent(dashboardDistrictFilter)}&subdistrict=${encodeURIComponent(dashboardSubdistrictFilter)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setFilterLocalbodies(data);
+          }
+        })
+        .catch(err => console.error('Error fetching filter local bodies:', err));
+    } else {
+      setFilterLocalbodies([]);
+    }
+    setDashboardLocalAreaFilter('');
+  }, [dashboardSubdistrictFilter]);
+
   useEffect(() => {
     if (token) {
       fetchUserData();
@@ -599,7 +736,7 @@ export default function App() {
       const interval = setInterval(fetchUserData, 5000);
       return () => clearInterval(interval);
     }
-  }, [token, adminRoleFilter, operatingContext, adminSubView, dashboardStateFilter, dashboardDistrictFilter, dashboardLocalAreaFilter]);
+  }, [token, adminRoleFilter, operatingContext, adminSubView, dashboardStateFilter, dashboardDistrictFilter, dashboardSubdistrictFilter, dashboardLocalAreaFilter]);
 
   useEffect(() => {
     const checkDbStatus = async () => {
@@ -998,7 +1135,7 @@ export default function App() {
 
       // Fetch KPI stats for aggregators and admins
       if (['aggregator', 'super_admin', 'state_admin', 'municipal_admin'].includes(currentUser?.role || '')) {
-        const kpiRes = await fetch(`/api/dashboard/kpi?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const kpiRes = await fetch(`/api/dashboard/kpi?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) {
           const kpiData = await kpiRes.json();
           setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_ccc_amount_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
@@ -1090,16 +1227,16 @@ export default function App() {
       }
 
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
-        const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) setAdminKpi(await kpiRes.json());
 
-        const fraudRes = await fetch(`/api/admin/fraud-map?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const fraudRes = await fetch(`/api/admin/fraud-map?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (fraudRes.ok) {
           const fraudData = await fraudRes.json();
           setFraudMap(fraudData.flagged_events);
         }
 
-        const trendsRes = await fetch(`/api/analytics/trends?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const trendsRes = await fetch(`/api/analytics/trends?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (trendsRes.ok) setTrendsData(await trendsRes.json());
       }
 
@@ -2116,26 +2253,74 @@ export default function App() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('District')}</label>
-                      <input 
-                        type="text" 
-                        required
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                        placeholder="Pune"
-                        value={formData.district}
-                        onChange={e => setFormData({...formData, district: e.target.value})}
-                      />
-                    </div>
-                    <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('State')}</label>
-                      <input 
-                        type="text" 
+                      <select 
                         required
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                        placeholder="Maharashtra"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors text-white"
                         value={formData.state}
                         onChange={e => setFormData({...formData, state: e.target.value})}
-                      />
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">{t('Select State')}</option>
+                        {regStates.map(st => (
+                          <option key={st.state_lgd_code} value={st.state_name} className="bg-[var(--color-bg)]">
+                            {st.state_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('District')}</label>
+                      <select 
+                        required
+                        disabled={!formData.state}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors text-white disabled:opacity-50"
+                        value={formData.district}
+                        onChange={e => setFormData({...formData, district: e.target.value})}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">{t('Select District')}</option>
+                        {regDistricts.map(ds => (
+                          <option key={ds.district_lgd_code} value={ds.district_name} className="bg-[var(--color-bg)]">
+                            {ds.district_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Sub-District')}</label>
+                      <select 
+                        required
+                        disabled={!formData.district}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors text-white disabled:opacity-50"
+                        value={formData.subdistrict}
+                        onChange={e => setFormData({...formData, subdistrict: e.target.value})}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">{t('Select Sub-District')}</option>
+                        {regSubdistricts.map(sd => (
+                          <option key={sd.subdistrict_lgd_code} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">
+                            {sd.subdistrict_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Local Body / Ward')}</label>
+                      <select 
+                        required
+                        disabled={!formData.subdistrict}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500/50 transition-colors text-white disabled:opacity-50"
+                        value={formData.local_area}
+                        onChange={e => setFormData({...formData, local_area: e.target.value})}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">{t('Select Local Body/Ward')}</option>
+                        {regLocalbodies.map(lb => (
+                          <option key={lb.local_body_lgd_code} value={lb.local_body_name} className="bg-[var(--color-bg)]">
+                            {lb.local_body_name} ({lb.local_body_type})
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </>
@@ -2476,6 +2661,13 @@ export default function App() {
           >
             <FileText size={14} />
             {t('Reports')}
+          </button>
+          <button 
+            onClick={() => setPilotSubView('lgd')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${pilotSubView === 'lgd' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Map size={14} />
+            {t('LGD Registry')}
           </button>
         </div>
 
@@ -3878,61 +4070,27 @@ export default function App() {
 
               {['state_admin', 'municipal_admin', 'super_admin', 'regulator'].includes(user?.role || '') && adminStats && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
                       <Activity size={18} className="text-emerald-400" />
                       {t('Platform Statistics')}
                     </h3>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex flex-wrap gap-2 items-center">
                       <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold ${dbStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
                         <Database size={16} />
                         {dbStatus?.status === 'connected' ? t('Live Database Connected') : t('In-Memory Mode')}
                       </div>
                       
-                      
                       <select 
                         className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white"
                         value={dashboardStateFilter}
-                        onChange={(e) => {
-                          setDashboardStateFilter(e.target.value);
-                          setDashboardDistrictFilter('');
-                          setDashboardLocalAreaFilter('');
-                        }}
+                        onChange={(e) => setDashboardStateFilter(e.target.value)}
                       >
                         <option value="" className="bg-[var(--color-bg)]">All States</option>
-                        {Object.keys(INDIAN_STATES).map(state => (
-                          <option key={state} value={state} className="bg-[var(--color-bg)]">{state}</option>
+                        {filterStates.map(st => (
+                          <option key={st.state_lgd_code} value={st.state_name} className="bg-[var(--color-bg)]">{st.state_name}</option>
                         ))}
                       </select>
-                      <select 
-                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
-                        value={dashboardDistrictFilter}
-                        onChange={(e) => {
-                           setDashboardDistrictFilter(e.target.value);
-                           setDashboardLocalAreaFilter('');
-                        }}
-                        disabled={!dashboardStateFilter}
-                      >
-                        <option value="" className="bg-[var(--color-bg)]">All Districts</option>
-                        {dashboardStateFilter && Object.keys(INDIAN_STATES[dashboardStateFilter] || {}).map(district => (
-                          <option key={district} value={district} className="bg-[var(--color-bg)]">{district}</option>
-                        ))}
-                      </select>
-                      <select 
-                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
-                        value={dashboardLocalAreaFilter}
-                        onChange={(e) => setDashboardLocalAreaFilter(e.target.value)}
-                        disabled={!dashboardDistrictFilter}
-                      >
-                        <option value="" className="bg-[var(--color-bg)]">All Cities/Villages</option>
-                        {dashboardStateFilter && dashboardDistrictFilter && 
-                           ((INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Urban"]) || []).concat(
-                           (INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Rural"]) || []
-                           ).map(area => (
-                          <option key={area} value={area} className="bg-[var(--color-bg)]">{area}</option>
-                        ))}
-                      </select>
-
                       <select 
                         className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
                         value={dashboardDistrictFilter}
@@ -3940,8 +4098,30 @@ export default function App() {
                         disabled={!dashboardStateFilter}
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Districts</option>
-                        {dashboardStateFilter && Object.keys(INDIAN_STATES[dashboardStateFilter] || {}).map(district => (
-                          <option key={district} value={district} className="bg-[var(--color-bg)]">{district}</option>
+                        {filterDistricts.map(ds => (
+                          <option key={ds.district_lgd_code} value={ds.district_name} className="bg-[var(--color-bg)]">{ds.district_name}</option>
+                        ))}
+                      </select>
+                      <select 
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
+                        value={dashboardSubdistrictFilter}
+                        onChange={(e) => setDashboardSubdistrictFilter(e.target.value)}
+                        disabled={!dashboardDistrictFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Sub-Districts</option>
+                        {filterSubdistricts.map(sd => (
+                          <option key={sd.subdistrict_lgd_code} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">{sd.subdistrict_name}</option>
+                        ))}
+                      </select>
+                      <select 
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 text-white disabled:opacity-50"
+                        value={dashboardLocalAreaFilter}
+                        onChange={(e) => setDashboardLocalAreaFilter(e.target.value)}
+                        disabled={!dashboardSubdistrictFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Wards/GPs</option>
+                        {filterLocalbodies.map(lb => (
+                          <option key={lb.local_body_lgd_code} value={lb.local_body_name} className="bg-[var(--color-bg)]">{lb.local_body_name} ({lb.local_body_type})</option>
                         ))}
                       </select>
 
@@ -5505,55 +5685,59 @@ export default function App() {
               {adminSubView === 'dashboard' ? (
                 <>
                   
-                  <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="flex-1">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('State Filter')}</label>
                       <select 
-                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white appearance-none focus:outline-none focus:border-emerald-500 transition-colors"
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-emerald-500 transition-colors"
                         value={dashboardStateFilter}
-                        onChange={(e) => {
-                          setDashboardStateFilter(e.target.value);
-                          setDashboardDistrictFilter('');
-                          setDashboardLocalAreaFilter('');
-                        }}
+                        onChange={(e) => setDashboardStateFilter(e.target.value)}
                       >
                         <option value="" className="bg-[var(--color-bg)]">All States</option>
-                        {Object.keys(INDIAN_STATES).map(state => (
-                          <option key={state} value={state} className="bg-[var(--color-bg)]">{state}</option>
+                        {filterStates.map(st => (
+                          <option key={st.state_lgd_code} value={st.state_name} className="bg-[var(--color-bg)]">{st.state_name}</option>
                         ))}
                       </select>
                     </div>
-                    <div className="flex-1">
+                    <div>
                       <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('District Filter')}</label>
                       <select 
-                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white appearance-none focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
                         value={dashboardDistrictFilter}
-                        onChange={(e) => {
-                           setDashboardDistrictFilter(e.target.value);
-                           setDashboardLocalAreaFilter('');
-                        }}
+                        onChange={(e) => setDashboardDistrictFilter(e.target.value)}
                         disabled={!dashboardStateFilter}
                       >
                         <option value="" className="bg-[var(--color-bg)]">All Districts</option>
-                        {dashboardStateFilter && Object.keys(INDIAN_STATES[dashboardStateFilter] || {}).map(district => (
-                          <option key={district} value={district} className="bg-[var(--color-bg)]">{district}</option>
+                        {filterDistricts.map(ds => (
+                          <option key={ds.district_lgd_code} value={ds.district_name} className="bg-[var(--color-bg)]">{ds.district_name}</option>
                         ))}
                       </select>
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('City/Village Filter')}</label>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('Sub-District Filter')}</label>
                       <select 
-                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white appearance-none focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
-                        value={dashboardLocalAreaFilter}
-                        onChange={(e) => setDashboardLocalAreaFilter(e.target.value)}
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
+                        value={dashboardSubdistrictFilter}
+                        onChange={(e) => setDashboardSubdistrictFilter(e.target.value)}
                         disabled={!dashboardDistrictFilter}
                       >
-                        <option value="" className="bg-[var(--color-bg)]">All Cities/Villages</option>
-                        {dashboardStateFilter && dashboardDistrictFilter && 
-                           ((INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Urban"]) || []).concat(
-                           (INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter] && INDIAN_STATES[dashboardStateFilter][dashboardDistrictFilter]["Rural"]) || []
-                           ).map(area => (
-                          <option key={area} value={area} className="bg-[var(--color-bg)]">{area}</option>
+                        <option value="" className="bg-[var(--color-bg)]">All Sub-Districts</option>
+                        {filterSubdistricts.map(sd => (
+                          <option key={sd.subdistrict_lgd_code} value={sd.subdistrict_name} className="bg-[var(--color-bg)]">{sd.subdistrict_name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/40 mb-1.5 ml-1">{t('GP / Ward Filter')}</label>
+                      <select 
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
+                        value={dashboardLocalAreaFilter}
+                        onChange={(e) => setDashboardLocalAreaFilter(e.target.value)}
+                        disabled={!dashboardSubdistrictFilter}
+                      >
+                        <option value="" className="bg-[var(--color-bg)]">All Wards/GPs</option>
+                        {filterLocalbodies.map(lb => (
+                          <option key={lb.local_body_lgd_code} value={lb.local_body_name} className="bg-[var(--color-bg)]">{lb.local_body_name} ({lb.local_body_type})</option>
                         ))}
                       </select>
                     </div>
