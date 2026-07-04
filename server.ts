@@ -499,10 +499,16 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           else if (type === "carbon") u = users.find(user => user.id === (item.stakeholder_chain ? item.stakeholder_chain[0] : null));
           
           const itemVillage = item.village;
+          const itemLocalArea = item.local_area || item.ward;
           const userCity = u ? u.city : null;
           const userVillage = u ? u.village : null;
+          const userLocalArea = u ? (u.local_area || u.village || u.city) : null;
           
-          return itemVillage === extraFilters.local_area || userCity === extraFilters.local_area || userVillage === extraFilters.local_area;
+          return itemVillage === extraFilters.local_area || 
+                 itemLocalArea === extraFilters.local_area ||
+                 userCity === extraFilters.local_area || 
+                 userVillage === extraFilters.local_area ||
+                 userLocalArea === extraFilters.local_area;
         });
       }
     }
