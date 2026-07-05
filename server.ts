@@ -1489,10 +1489,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json(districts);
   });
 
-  app.get("/api/lgd/subdistricts", (req, res) => {
+  app.get("/api/lgd/subdistricts", async (req, res) => {
     const { state, district } = req.query;
     if (!state || !district) return res.status(400).json({ error: "State and district parameters are required" });
-    const subdistricts = getLgdSubdistricts(state as string, district as string);
+    const subdistricts = await getLgdSubdistricts(state as string, district as string);
     res.json(subdistricts);
   });
 
