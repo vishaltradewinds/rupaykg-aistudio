@@ -22,6 +22,7 @@ import {
   Globe,
   ArrowRight,
   ShieldCheck,
+  ShieldAlert,
   Truck,
   Factory,
   Sprout,
@@ -604,6 +605,21 @@ export default function App() {
   const [marketOrderBook, setMarketOrderBook] = useState<any[]>([]);
   const [offsetProjects, setOffsetProjects] = useState<any[]>([]);
   const [methodologies, setMethodologies] = useState<any[]>([]);
+  const [selectedPddDoc, setSelectedPddDoc] = useState<any>(null);
+  const [showRegisterProjectModal, setShowRegisterProjectModal] = useState(false);
+  const [showMintCccModal, setShowMintCccModal] = useState<any>(null); // holds project to mint for
+  const [newProjectForm, setNewProjectForm] = useState({
+    title: '',
+    description: '',
+    project_type: 'MSW Diversion',
+    location: '',
+    methodology_id: 'ICM-WM-001'
+  });
+  const [mintCccForm, setMintCccForm] = useState({
+    amount_kg: '1000',
+    waste_type: 'MSW',
+    sector: 'Waste Management'
+  });
   const [selectedVC, setSelectedVC] = useState<any>(null);
   const [guardianReport, setGuardianReport] = useState<string>('');
   const [ledgerQuery, setLedgerQuery] = useState<string>('');
@@ -1484,9 +1500,8 @@ export default function App() {
   const handleViewVC = async (recordId: string) => {
     setLoading(true);
     try {
-      const storedToken = localStorage.getItem('token');
       const res = await fetch(`/api/carbon/vc/${recordId}`, {
-        headers: { 'Authorization': `Bearer ${storedToken}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const vc = await res.json();
@@ -1506,12 +1521,11 @@ export default function App() {
     setLoading(true);
     setGuardianReport('');
     try {
-      const storedToken = localStorage.getItem('token');
       const res = await fetch('/api/carbon/guardian/ai-analyze', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${storedToken}` 
+          'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({ vcId })
       });
@@ -1528,12 +1542,11 @@ export default function App() {
     if (!ledgerQuery) return;
     setLoading(true);
     try {
-      const storedToken = localStorage.getItem('token');
       const res = await fetch('/api/carbon/guardian/ledger-query', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${storedToken}` 
+          'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({ query: ledgerQuery })
       });
@@ -2634,6 +2647,126 @@ export default function App() {
   }
 
   const renderOffsetProjectsCenter = () => {
+    // Function to handle opening and fetching PDD details
+    const handleViewPdd = async (projId: string) => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/offset-projects/${projId}/pdd`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSelectedPddDoc(data);
+        } else {
+          alert('No PDD has been generated for this project yet. Click "Generate PDD & Submit" first.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Failed to retrieve Project Design Document.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Function to handle project registration
+    const handleRegisterProject = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        setLoading(true);
+        const res = await fetch('/api/offset-projects/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(newProjectForm)
+        });
+        if (res.ok) {
+          alert('Offset Project Registered successfully under the ICM framework! You can now generate its AI-backed PDD.');
+          setShowRegisterProjectModal(false);
+          // Reset form
+          setNewProjectForm({
+            title: '',
+            description: '',
+            project_type: 'MSW Diversion',
+            location: '',
+            methodology_id: 'ICM-WM-001'
+          });
+          // Refetch projects
+          const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (updated.ok) setOffsetProjects(await updated.json());
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Failed to register project.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred during project registration.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Function to handle validation approval
+    const handleApproveProject = async (projId: string) => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/offset-projects/${projId}/approve`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          alert('Project officially registered and validated under the national ICM CCTS registry!');
+          // Refetch projects
+          const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (updated.ok) setOffsetProjects(await updated.json());
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Function to handle minting credit certificates
+    const handleMintCcc = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!showMintCccModal) return;
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/offset-projects/${showMintCccModal.id}/mint`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            amount_kg: mintCccForm.amount_kg,
+            waste_type: mintCccForm.waste_type,
+            sector: mintCccForm.sector
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          alert(`Carbon Credit Certificates (CCCs) successfully minted! Serial: ${data.certificate.id}. Distributed to developer wallet.`);
+          setShowMintCccModal(null);
+          // Refetch offset projects & registry certificates
+          const [projRes, regRes] = await Promise.all([
+            fetch(`/api/offset-projects`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } })
+          ]);
+          if (projRes.ok) setOffsetProjects(await projRes.json());
+          if (regRes.ok) setRegistryCertificates(await regRes.json());
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const isRegulator = user?.role === 'regulator' || user?.role === 'super_admin';
+
     return (
       <motion.div 
         key="offset_projects_center"
@@ -2642,8 +2775,12 @@ export default function App() {
         exit={{ opacity: 0, y: -20 }}
         className="space-y-6"
       >
+        {/* Hero Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 bg-gradient-to-r from-emerald-950/40 to-blue-950/40 border border-emerald-500/20 rounded-2xl relative overflow-hidden">
           <div className="relative z-10">
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1 block">
+              {t('Indian Carbon Market (ICM) Compliance')}
+            </span>
             <h2 className="text-2xl font-bold flex items-center gap-2 text-white">
               <Sprout className="text-emerald-400" />
               {t('Offset Project Infrastructure')}
@@ -2652,86 +2789,162 @@ export default function App() {
           </div>
           <button 
              className="px-4 py-2 mt-4 md:mt-0 bg-emerald-500 hover:bg-emerald-400 text-black font-bold uppercase tracking-widest rounded transition-colors flex items-center gap-2"
-             onClick={async () => {
-               const title = prompt('Project Title:', 'Municipal Landfill Diversion Program Phase 1');
-               const desc = prompt('Project Description:', 'Aggregating municipal solid waste to divert from landfill footprint.');
-               const type = prompt('Project Type (e.g. MSW, Biomass, Methane):', 'MSW Diversion');
-               if (title && type) {
-                  const res = await fetch('/api/offset-projects/register', {
-                     method: 'POST',
-                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                     body: JSON.stringify({ title, description: desc, project_type: type })
-                  });
-                  if (res.ok) {
-                     alert('Project Registered! Fetching details...');
-                     const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
-                     if (updated.ok) setOffsetProjects(await updated.json());
-                  }
-               }
-             }}
+             onClick={() => setShowRegisterProjectModal(true)}
           >
              <Plus size={16} /> {t('New Project')}
           </button>
         </div>
 
+        {/* Auditor & Regulator Panel (Conditional) */}
+        {isRegulator && (
+          <Card className="p-6 border-amber-500/20 bg-amber-500/5 relative overflow-hidden bg-black">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full filter blur-3xl pointer-events-none" />
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2 text-amber-400">
+              <ShieldAlert size={20} className="text-amber-400" />
+              {t('ACVA Auditor & BEE Regulator Workspace')}
+            </h3>
+            <p className="text-xs text-white/60 mb-4">
+              {t('Review submitted Project Design Documents (PDDs) under CERC standards, perform compliance audits, approve project registrations, and mint sovereign-grade CCTS Certificates.')}
+            </p>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              {offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').length === 0 ? (
+                <p className="text-white/40 text-sm italic">{t('No active projects awaiting review or registered in registry.')}</p>
+              ) : (
+                offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').map(proj => (
+                  <div key={proj.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded ${proj.status === 'registered' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                          {proj.status === 'registered' ? 'Registered' : 'Under ACVA Review'}
+                        </span>
+                        <span className="text-xs text-white/40">ID: {proj.id}</span>
+                      </div>
+                      <h4 className="font-bold text-white">{proj.title}</h4>
+                      <p className="text-xs text-white/50">{proj.description}</p>
+                      <p className="text-[11px] font-mono text-emerald-400 mt-1">Type: {proj.project_type} | Location: {proj.location}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => handleViewPdd(proj.id)}
+                        className="px-3 py-1.5 bg-white/10 text-white hover:bg-white/20 rounded text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1"
+                      >
+                        <FileText size={14} /> {t('Review PDD')}
+                      </button>
+                      {proj.status === 'validation' && (
+                        <button
+                          onClick={() => handleApproveProject(proj.id)}
+                          className="px-3 py-1.5 bg-emerald-500 text-black hover:bg-emerald-400 rounded text-xs font-bold uppercase tracking-wider transition-colors"
+                        >
+                          {t('Validate & Approve')}
+                        </button>
+                      )}
+                      {proj.status === 'registered' && (
+                        <button
+                          onClick={() => {
+                            setShowMintCccModal(proj);
+                            setMintCccForm({
+                              amount_kg: '5000',
+                              waste_type: proj.project_type.includes('Biomass') ? 'Agricultural Residue' : 'MSW',
+                              sector: proj.project_type.includes('Biomass') ? 'Biomass/Agriculture' : 'Waste Management'
+                            });
+                          }}
+                          className="px-3 py-1.5 bg-blue-500 text-white hover:bg-blue-400 rounded text-xs font-bold uppercase tracking-wider transition-colors"
+                        >
+                          {t('Mint CCC Credits')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* My Offset Projects Card */}
           <Card className="p-6 border-white/5 bg-white/5">
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
               <ClipboardList className="text-emerald-400" size={20} />
               {t('My Offset Projects')}
             </h3>
-            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2">
               {offsetProjects.length === 0 ? (
                 <p className="text-white/40 text-sm">{t('No offset projects registered.')}</p>
               ) : (
                 offsetProjects.map(proj => (
-                  <div key={proj.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex flex-col justify-between">
+                  <div key={proj.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex flex-col justify-between gap-4">
                     <div>
-                      <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-1 block">{proj.status}</span>
+                      <div className="flex justify-between items-start mb-1">
+                        <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded ${
+                          proj.status === 'registered' ? 'bg-emerald-500/20 text-emerald-400' :
+                          proj.status === 'validation' ? 'bg-amber-500/20 text-amber-400' : 'bg-white/10 text-white/60'
+                        }`}>
+                          {proj.status === 'draft_pdd' ? 'Draft PDD' : proj.status === 'validation' ? 'In Validation' : 'Registered'}
+                        </span>
+                        <span className="font-mono text-[10px] text-white/30">{proj.id}</span>
+                      </div>
                       <h4 className="font-bold text-white text-lg">{proj.title}</h4>
-                      <p className="font-mono text-xs text-white/50">{proj.id}</p>
-                      <p className="text-sm text-white/60 mt-2">{proj.description}</p>
+                      <p className="text-xs text-white/50 mt-1">Location: {proj.location || 'India'} | Type: {proj.project_type}</p>
+                      <p className="text-sm text-white/70 mt-2">{proj.description}</p>
                     </div>
-                    {proj.status === 'draft_pdd' && (
-                      <button 
-                        className="mt-4 px-3 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded text-xs font-bold uppercase tracking-widest transition-colors"
-                        onClick={async () => {
-                           setLoading(true);
-                           const draftRes = await fetch('/api/offset-projects/generate-pdd', {
-                             method: 'POST',
-                             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                             body: JSON.stringify({ project_type: proj.project_type, location: proj.location })
-                           });
-                           if (draftRes.ok) {
-                             const pdd = await draftRes.json();
-                             const subRes = await fetch(`/api/offset-projects/${proj.id}/pdd`, {
+                    
+                    <div className="flex gap-2">
+                      {proj.status === 'draft_pdd' && (
+                        <button 
+                          className="w-full py-2 bg-emerald-500 text-black hover:bg-emerald-400 rounded text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                          onClick={async () => {
+                             setLoading(true);
+                             const draftRes = await fetch('/api/offset-projects/generate-pdd', {
                                method: 'POST',
                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                               body: JSON.stringify(pdd)
+                               body: JSON.stringify({ 
+                                 title: proj.title, 
+                                 description: proj.description, 
+                                 project_type: proj.project_type, 
+                                 location: proj.location || 'India' 
+                               })
                              });
-                             if (subRes.ok) alert('PDD Generated & Submitted for Validation!');
-                             
-                             const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
-                             if (updated.ok) setOffsetProjects(await updated.json());
-                           }
-                           setLoading(false);
-                        }}
-                      >
-                        {t('Generate PDD & Submit')}
-                      </button>
-                    )}
+                             if (draftRes.ok) {
+                               const pdd = await draftRes.json();
+                               const subRes = await fetch(`/api/offset-projects/${proj.id}/pdd`, {
+                                 method: 'POST',
+                                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                 body: JSON.stringify(pdd)
+                               });
+                               if (subRes.ok) alert('PDD Successfully Generated by Guardian AI and Submitted for Validation!');
+                               
+                               const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
+                               if (updated.ok) setOffsetProjects(await updated.json());
+                             }
+                             setLoading(false);
+                          }}
+                        >
+                          <FileText size={14} /> {t('Generate AI PDD & Submit')}
+                        </button>
+                      )}
+                      {(proj.status === 'validation' || proj.status === 'registered') && (
+                        <button
+                          onClick={() => handleViewPdd(proj.id)}
+                          className="w-full py-2 bg-white/10 text-white hover:bg-white/20 border border-white/5 rounded text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                        >
+                          <FileText size={14} /> {t('View Generated PDD')}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))
               )}
             </div>
           </Card>
 
+          {/* Approved Methodologies */}
           <Card className="p-6 border-white/5 bg-white/5">
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
               <BookOpen className="text-blue-400" size={20} />
-              {t('Approved Methodologies')}
+              {t('Approved BEE Methodologies')}
             </h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2">
               {methodologies.length === 0 ? (
                 <p className="text-white/40 text-sm">{t('Loading methodologies...')}</p>
               ) : (
@@ -2739,13 +2952,243 @@ export default function App() {
                   <div key={meth.id} className="p-4 bg-black/40 border border-white/5 rounded-xl">
                     <span className="text-[10px] uppercase tracking-widest text-blue-400 font-bold block mb-1">{meth.sector} Sector</span>
                     <h4 className="font-bold text-white text-sm">{meth.name}</h4>
-                    <p className="text-xs text-white/50">{meth.id} v{meth.version}</p>
+                    <p className="text-xs text-white/60 mt-1">{meth.description}</p>
+                    <p className="text-[10px] font-mono text-white/40 mt-2">ID: {meth.id} | Standards: {meth.standards_body} | Version: {meth.version}</p>
                   </div>
                 ))
               )}
             </div>
           </Card>
         </div>
+
+        {/* Modal: Register Project */}
+        {showRegisterProjectModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-emerald-500/10 to-transparent">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Sprout className="text-emerald-400" />
+                  {t('Register New ICM Offset Project')}
+                </h3>
+                <button 
+                  onClick={() => setShowRegisterProjectModal(false)}
+                  className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <form onSubmit={handleRegisterProject} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Project Title')}</label>
+                  <input 
+                    type="text" 
+                    required
+                    placeholder="e.g. Municipal Solid Waste Biogasification Plant"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    value={newProjectForm.title}
+                    onChange={e => setNewProjectForm({...newProjectForm, title: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Description')}</label>
+                  <textarea 
+                    rows={3}
+                    required
+                    placeholder="Describe how your project diverts waste or processes biomass to reduce greenhouse gas emissions..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-emerald-500 focus:outline-none resize-none"
+                    value={newProjectForm.description}
+                    onChange={e => setNewProjectForm({...newProjectForm, description: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Project Type')}</label>
+                    <select
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-emerald-500 focus:outline-none"
+                      value={newProjectForm.project_type}
+                      onChange={e => setNewProjectForm({...newProjectForm, project_type: e.target.value})}
+                    >
+                      <option value="MSW Diversion">MSW Diversion</option>
+                      <option value="Biomass Power">Biomass Power</option>
+                      <option value="Methane Abatement">Methane Abatement</option>
+                      <option value="Composting Facility">Composting Facility</option>
+                      <option value="Biochar Production">Biochar Production</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Location / District')}</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. Pune District, Maharashtra"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-emerald-500 focus:outline-none"
+                      value={newProjectForm.location}
+                      onChange={e => setNewProjectForm({...newProjectForm, location: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Linked BEE Methodology')}</label>
+                  <select
+                    className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    value={newProjectForm.methodology_id}
+                    onChange={e => setNewProjectForm({...newProjectForm, methodology_id: e.target.value})}
+                  >
+                    {methodologies.map(m => (
+                      <option key={m.id} value={m.id}>{m.id} - {m.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="pt-2">
+                  <button 
+                    type="submit"
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold uppercase tracking-wider py-3 rounded-xl transition-colors"
+                  >
+                    {t('Register Project')}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Modal: View Generated PDD Document */}
+        {selectedPddDoc && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-emerald-500/10 to-transparent">
+                <div className="flex items-center gap-2">
+                  <FileText className="text-emerald-400" />
+                  <div>
+                    <h3 className="text-lg font-bold text-white">{t('Project Design Document (PDD)')}</h3>
+                    <p className="text-[10px] uppercase text-emerald-400 font-mono tracking-widest">{selectedPddDoc.status || 'APPROVED'}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedPddDoc(null)}
+                  className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh] text-sm text-white/80">
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1">{t('1. Executive Summary')}</h4>
+                  <p className="bg-white/5 p-4 rounded-xl border border-white/5 leading-relaxed">{selectedPddDoc.executiveSummary}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1">{t('2. Baseline Scenario')}</h4>
+                  <p className="bg-white/5 p-4 rounded-xl border border-white/5 leading-relaxed">{selectedPddDoc.baselineScenario}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1">{t('3. Additionality Analysis')}</h4>
+                  <p className="bg-white/5 p-4 rounded-xl border border-white/5 leading-relaxed">{selectedPddDoc.additionality}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1">{t('4. Monitoring & Verification Plan (MRV)')}</h4>
+                  <p className="bg-white/5 p-4 rounded-xl border border-white/5 leading-relaxed">{selectedPddDoc.monitoringPlan}</p>
+                </div>
+                {selectedPddDoc.estimatedEmissionReductions && (
+                  <div>
+                    <h4 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1">{t('5. Estimated Emission Reductions')}</h4>
+                    <p className="bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 leading-relaxed text-emerald-300 font-medium">{selectedPddDoc.estimatedEmissionReductions}</p>
+                  </div>
+                )}
+                <div className="flex justify-between text-[11px] text-white/40 border-t border-white/5 pt-4">
+                  <span>PDD ID: {selectedPddDoc.id}</span>
+                  <span>Submitted At: {new Date(selectedPddDoc.submitted_at || selectedPddDoc.created_at || '').toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="p-4 bg-black/40 border-t border-white/5 flex justify-end">
+                <button 
+                  onClick={() => setSelectedPddDoc(null)}
+                  className="px-6 py-2 bg-white text-black font-bold uppercase text-xs tracking-wider rounded-lg hover:bg-white/90 transition-colors"
+                >
+                  {t('Close')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Modal: Mint Carbon Credits */}
+        {showMintCccModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-blue-500/10 to-transparent">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <BookOpen className="text-blue-400" />
+                  {t('Mint Sovereign CCTS Credits')}
+                </h3>
+                <button 
+                  onClick={() => setShowMintCccModal(null)}
+                  className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <form onSubmit={handleMintCcc} className="p-6 space-y-4">
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                  <p className="text-xs text-blue-300 font-medium">Project: {showMintCccModal.title}</p>
+                  <p className="text-[10px] text-white/40 mt-1">Owner ID: {showMintCccModal.owner_id}</p>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Carbon Reduced (kg CO₂e)')}</label>
+                  <input 
+                    type="number" 
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                    value={mintCccForm.amount_kg}
+                    onChange={e => setMintCccForm({...mintCccForm, amount_kg: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('CCTS Sector')}</label>
+                  <select
+                    className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                    value={mintCccForm.sector}
+                    onChange={e => setMintCccForm({...mintCccForm, sector: e.target.value})}
+                  >
+                    <option value="Waste Management">Waste Management</option>
+                    <option value="Biomass/Agriculture">Biomass/Agriculture</option>
+                    <option value="Renewable Energy">Renewable Energy</option>
+                    <option value="Energy Efficiency">Energy Efficiency</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Waste Type')}</label>
+                  <input 
+                    type="text" 
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                    value={mintCccForm.waste_type}
+                    onChange={e => setMintCccForm({...mintCccForm, waste_type: e.target.value})}
+                  />
+                </div>
+                <div className="pt-2">
+                  <button 
+                    type="submit"
+                    className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold uppercase tracking-wider py-3 rounded-xl transition-colors"
+                  >
+                    {t('Mint & Issue Credits')}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
       </motion.div>
     );
   };
@@ -3050,7 +3493,7 @@ export default function App() {
                     method: 'POST',
                     headers: { 
                       'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(pilotFormData)
                   });
@@ -3219,7 +3662,7 @@ export default function App() {
                     method: 'POST',
                     headers: { 
                       'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(pilotOnboardFormData)
                   });

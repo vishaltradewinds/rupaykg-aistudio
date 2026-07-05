@@ -11,6 +11,7 @@ export default defineConfig(({mode}) => {
       react(), 
       tailwindcss(),
       VitePWA({
+        disable: mode === 'development',
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg'],
         workbox: {

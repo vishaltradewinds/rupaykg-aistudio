@@ -3089,16 +3089,16 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   // ========================================================
 
   app.post("/api/offset-projects/register", auth(), (req: any, res) => {
-    const { title, description, project_type, location } = req.body;
+    const { title, description, project_type, location, methodology_id } = req.body;
     const project = {
       id: "PROJ-" + crypto.randomBytes(4).toString("hex").toUpperCase(),
       title,
       description,
       project_type,
-      location,
+      location: location || "India",
       owner_id: req.user.id,
       status: "draft_pdd", // Draft PDD -> Validation -> Registered
-      methodology_id: req.body.methodology_id || null,
+      methodology_id: methodology_id || req.body.methodology_id || null,
       created_at: new Date().toISOString()
     };
     carbonProjects.push(project);
@@ -3130,22 +3130,119 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json({ message: "PDD submitted for validation", pdd });
   });
 
+  app.get("/api/offset-projects/:projectId/pdd", auth(), (req: any, res) => {
+    const pdd = projectDesignDocuments.find(p => p.project_id === req.params.projectId);
+    if (!pdd) return res.status(404).json({ error: "PDD not found for this project." });
+    res.json(pdd);
+  });
+
+  app.post("/api/offset-projects/:projectId/approve", auth(["super_admin", "regulator"]), (req: any, res) => {
+    const proj = carbonProjects.find(p => p.id === req.params.projectId);
+    if (!proj) return res.status(404).json({ error: "Project not found." });
+    
+    proj.status = "registered";
+    
+    // Also update the PDD status
+    const pdd = projectDesignDocuments.find(p => p.project_id === req.params.projectId);
+    if (pdd) pdd.status = "approved";
+
+    res.json({ message: "Project officially registered in Indian Carbon Market CCTS registry!", project: proj });
+  });
+
+  app.post("/api/offset-projects/:projectId/mint", auth(["super_admin", "regulator"]), (req: any, res) => {
+    const { amount_kg, waste_type, sector } = req.body;
+    const proj = carbonProjects.find(p => p.id === req.params.projectId);
+    if (!proj) return res.status(404).json({ error: "Project not found." });
+    
+    const serialNumber = `IN-CCTS-${(sector || "WM").substring(0, 2).toUpperCase()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+    
+    // Add to cccCertificates
+    const newCert = {
+      id: serialNumber,
+      carbon_event_id: null,
+      project_id: proj.id,
+      owner_id: proj.owner_id, // Give to the project developer!
+      industry_sector: sector || "Waste Management",
+      waste_type: waste_type || "MSW",
+      net_carbon_reduction_kg_co2e: parseFloat(amount_kg) || 1000,
+      hierarchy_status: "BEE_REGISTERED",
+      status: "active",
+      issued_at: new Date().toISOString()
+    };
+    
+    cccCertificates.push(newCert);
+    
+    res.json({ message: "Carbon Credit Certificates (CCCs) successfully minted and distributed to developer's ledger wallet!", certificate: newCert });
+  });
+
   app.get("/api/offset-projects/methodologies", auth(), (req, res) => {
     res.json(methodologyLibrary);
   });
 
   app.post("/api/offset-projects/generate-pdd", auth(), async (req: any, res: any) => {
+    const { title, description, project_type, location } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    // Fallback static professional draft
+    const fallbackDraft = {
+       executiveSummary: `This project, "${title || "Municipal Waste Diversion"}", aims to implement advanced ${project_type || "waste mitigation"} in ${location || "India"}. By intercepting and processing municipal solid waste or biomass before open decay or combustion occurs, the project directly supports India's National CCTS framework under the Indian Carbon Market.`,
+       baselineScenario: `Without this project, municipal solid waste and agricultural residue would continue to be disposed of in unmanaged landfills or subjected to uncontrolled open burning. This baseline scenario leads to high anaerobic decomposition, generating significant methane (CH₄) emissions and carbon dioxide (CO₂) release.`,
+       additionality: "The project demonstrates robust additionality as it incurs high upfront capital expenditures for recycling, composting, and logistics infrastructure. These costs, combined with low commodity market prices for recycled inputs, present significant financial barriers. Carbon finance from the ICM CCTS offset mechanism is critical to bridge the viability gap.",
+       monitoringPlan: "All incoming and outgoing waste/biomass streams are continuously tracked via digital weighbridges with encrypted IoT data uploads. Collection trucks are monitored in real-time using GPS sensors. Satellite and drone imaging provide remote verification of raw material flows, and accredited external ACVA auditors conduct quarterly site inspections and verification.",
+       estimatedEmissionReductions: "Based on standard BEE/CCTS methodologies, the project is estimated to achieve a net greenhouse gas emission reduction of approximately 3,500 metric tons of CO₂e per annum, generating an equivalent volume of tradable Carbon Credit Certificates (CCCs)."
+    };
+
+    if (!apiKey) {
+      return res.json(fallbackDraft);
+    }
+
     try {
-       // Initial PDD Draft generation based on project details
-       const pddDraft = {
-          executiveSummary: `This project aims to implement ${req.body.project_type || "waste mitigation"} in ${req.body.location || "the region"}.`,
-          baselineScenario: "Continued disposal of waste in unmanaged landfills causing methane emissions.",
-          additionality: "The project relies on carbon finance to overcome implementation barriers.",
-          monitoringPlan: "Daily weighbridge records and monthly AI contamination sampling."
-       };
-       res.json(pddDraft);
+      const client = new GoogleGenAI({
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            "User-Agent": "aistudio-build",
+          },
+        },
+      });
+
+      const modelName = "gemini-3.5-flash";
+      const prompt = `You are an expert carbon market architect writing a Project Design Document (PDD) for a project registering under India's Indian Carbon Market (ICM) and CCTS framework.
+Generate a detailed, highly professional PDD for the following project:
+Title: ${title || "Circular Waste Mitigation Project"}
+Description: ${description || "Diverting waste to reduce greenhouse emissions"}
+Project Type: ${project_type || "Waste Management"}
+Location: ${location || "India"}
+
+Please output your response as a valid, parsable JSON object (NOT markdown, just the JSON block) matching this schema EXACTLY:
+{
+  "executiveSummary": "A comprehensive summary of the project's purpose, stakeholders, and strategic alignment with ICM CCTS (approx 100-150 words).",
+  "baselineScenario": "Detailed description of what would happen without this project (e.g., waste rotting in landfills, stubble burning) and why it causes high greenhouse gas emissions.",
+  "additionality": "Justification of why this project is 'additional' - explaining why it cannot be implemented without carbon credit finance and the structural/financial barriers it overcomes.",
+  "monitoringPlan": "Step-by-step rigorous Measurement, Reporting, and Verification (MRV) protocol, including specific IoT devices (weighbridges, GPS tracking), satellite verification, and frequency of audits.",
+  "estimatedEmissionReductions": "A professional paragraph detailing the calculated baseline emissions, project emissions, leakage, and estimated net carbon credit certificates (CCCs) generated per year."
+}
+
+Ensure the response contains ONLY the pure JSON object, without any markdown backticks or formatting, so that it can be parsed with JSON.parse().`;
+
+      const response = await client.models.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      const text = response.text;
+      if (text) {
+        const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        const generatedPdd = JSON.parse(cleanedText);
+        return res.json(generatedPdd);
+      }
+      return res.json(fallbackDraft);
     } catch (e: any) {
-       res.status(500).json({ error: e.message });
+      console.error("Gemini PDD generation error:", e);
+      return res.json(fallbackDraft);
     }
   });
 
