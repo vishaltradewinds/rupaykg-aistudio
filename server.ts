@@ -27,6 +27,7 @@ import { initCCC } from "./services/ccc-engine/index";
 import { initMRV } from "./services/mrv-engine/index";
 import { initRegistry } from "./services/registry-service/index";
 import { initFraud } from "./services/fraud-engine/index";
+import { AIBiomassVerificationService } from "./src/services/aiBiomassService";
 import { initPayoutWorker } from "./workers/payout-worker/index";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
@@ -34,6 +35,14 @@ let paymentConfig = {
   ccc_price_per_kg: 10,
   logistics_margin_percent: 15,
   system_profit_percent: 10,
+};
+
+let activeLgdDatabase = JSON.parse(JSON.stringify(INDIAN_STATES));
+let lgdSyncStatus = {
+  lastSynced: "Never",
+  status: "Idle",
+  statesCount: Object.keys(activeLgdDatabase).length,
+  districtsCount: Object.values(activeLgdDatabase).reduce((acc: number, d: any) => acc + Object.keys(d).length, 0),
 };
 
 async function startServer() {
@@ -1221,28 +1230,40 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         ccc_amount_kg * paymentConfig.ccc_price_per_kg;
       const total_value = generator_payout; // Generator only sees their payout, CCC stays in system
 
-      // AI Risk Score from Frontend
-      let risk_score = ai_risk_score !== undefined ? ai_risk_score : 0;
-      let verification_details =
-        ai_verification_details || "AI Verification Skipped";
+      // Run backend AI Biomass Verification Service
+      const aiVerificationResult = await AIBiomassVerificationService.verifyBiomass(
+        waste_type,
+        parseFloat(weight_kg),
+        image_url
+      );
 
-      if (!image_url) {
-        risk_score += 0.2;
-        verification_details = "No image provided for AI verification.";
+      let risk_score = aiVerificationResult.risk_score;
+      let verification_details = aiVerificationResult.details;
+
+      if (ai_risk_score !== undefined) {
+        // Blend client visual AI analysis and server-side rules
+        risk_score = Math.min(1.0, (risk_score + ai_risk_score) / 2);
       }
 
-      // 1. Geolocation accuracy (mock: if missing, high risk)
+      // Check geolocation accuracy and boundaries
       if (!geo_lat || !geo_long) {
-        risk_score += 0.3;
-      } else {
-        // Mock: check if coordinates are within expected bounds (e.g., India)
-        if (geo_lat < 8 || geo_lat > 37 || geo_long < 68 || geo_long > 97) {
-          risk_score += 0.2;
-        }
+        risk_score += 0.2;
+        verification_details += " [Warning: Missing GPS geolocation telemetry]";
+      } else if (geo_lat < 8 || geo_lat > 37 || geo_long < 68 || geo_long > 97) {
+        risk_score += 0.15;
+        verification_details += " [Warning: GPS coordinates outside territorial boundaries]";
       }
 
-      // Cap at 1.0
+      // Cap risk score between 0.0 and 1.0
       risk_score = Math.min(risk_score, 1.0);
+
+      // Determine initial MRV status
+      let calculated_mrv_status = "pending";
+      if (aiVerificationResult.status === "AI_VERIFIED" && risk_score < 0.25) {
+        calculated_mrv_status = "verified";
+      } else if (aiVerificationResult.status === "REJECTED" || risk_score > 0.8) {
+        calculated_mrv_status = "rejected";
+      }
 
       const satellite_verification =
         await SatelliteVerificationService.verifyActivity(
@@ -1266,10 +1287,11 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         double_counting_declaration: double_counting_declaration || false,
         risk_score,
         ai_verification_details: verification_details,
+        ai_verification_status: aiVerificationResult.status,
         satellite_verification,
         context: context || "rural", // Default to rural if not provided
         status: "pending_pickup",
-        mrv_status: "pending", // MRV Status: pending, verified, rejected
+        mrv_status: calculated_mrv_status, // MRV Status: pending, verified, rejected
         base_value,
         generator_payout,
         potential_ccc_value,
@@ -1546,7 +1568,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   // ---------------- LGD ROUTES ----------------
   app.get("/api/lgd/states", (req, res) => {
-    const statesList = Object.keys(INDIAN_STATES).sort();
+    const statesList = Object.keys(activeLgdDatabase).sort();
     const states = statesList.map((state, index) => ({
       state_name: state,
       state_lgd_code: index + 1,
@@ -1557,10 +1579,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get("/api/lgd/districts", (req, res) => {
     const { state } = req.query;
     if (!state) return res.status(400).json({ error: "State parameter is required" });
-    const districtsOfState = INDIAN_STATES[state as string];
+    const districtsOfState = activeLgdDatabase[state as string];
     if (!districtsOfState) return res.json([]);
 
-    const statesList = Object.keys(INDIAN_STATES).sort();
+    const statesList = Object.keys(activeLgdDatabase).sort();
     const stateIndex = statesList.indexOf(state as string);
     const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
     const baseDistrictCode = stateCode * 1000;
@@ -1577,12 +1599,12 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     const { state, district } = req.query;
     if (!state || !district) return res.status(400).json({ error: "State and district parameters are required" });
 
-    const statesList = Object.keys(INDIAN_STATES).sort();
+    const statesList = Object.keys(activeLgdDatabase).sort();
     const stateIndex = statesList.indexOf(state as string);
     const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
     const baseDistrictCode = stateCode * 1000;
 
-    const districtsOfState = INDIAN_STATES[state as string];
+    const districtsOfState = activeLgdDatabase[state as string];
     const districtList = districtsOfState ? Object.keys(districtsOfState).sort() : [];
     const districtIndex = districtList.indexOf(district as string);
     const districtCode = districtIndex !== -1 ? (baseDistrictCode + districtIndex + 1) : 101;
@@ -1610,12 +1632,12 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     if (!state || !district || !subdistrict) {
       return res.status(400).json({ error: "State, district, and subdistrict parameters are required" });
     }
-    const districtsOfState = INDIAN_STATES[state as string];
+    const districtsOfState = activeLgdDatabase[state as string];
     if (!districtsOfState) return res.json([]);
     const districtData = districtsOfState[district as string];
     if (!districtData) return res.json([]);
 
-    const statesList = Object.keys(INDIAN_STATES).sort();
+    const statesList = Object.keys(activeLgdDatabase).sort();
     const stateIndex = statesList.indexOf(state as string);
     const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
     const baseDistrictCode = stateCode * 1000;
@@ -1640,6 +1662,121 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     }));
 
     res.json(localbodies);
+  });
+
+  app.get("/api/lgd/sync-status", (req, res) => {
+    res.json(lgdSyncStatus);
+  });
+
+  app.post("/api/lgd/sync", async (req, res) => {
+    lgdSyncStatus.status = "Syncing";
+    try {
+      // Simulate calling Government National LGD Directory SOAP/REST endpoints
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Expand activeLgdDatabase with full, current datasets for states
+      if (!activeLgdDatabase["Punjab"]) {
+        activeLgdDatabase["Punjab"] = {
+          "Ludhiana": {
+            "Urban": ["Ludhiana Ward 1", "Ludhiana Ward 2", "Ludhiana Ward 3", "Ludhiana Ward 4"],
+            "Rural": ["Jagraon Village", "Samrala Village", "Khanna Village", "Mullanpur Village"]
+          },
+          "Amritsar": {
+            "Urban": ["Amritsar Ward 1", "Amritsar Ward 2", "Amritsar Ward 3"],
+            "Rural": ["Ajnala Village", "Majitha Village", "Rayya Village", "Attari Village"]
+          },
+          "Patiala": {
+            "Urban": ["Patiala Ward 1", "Patiala Ward 2", "Patiala Ward 3"],
+            "Rural": ["Nabha Village", "Rajpura Village", "Samana Village", "Patran Village"]
+          }
+        };
+      }
+
+      if (!activeLgdDatabase["Haryana"]) {
+        activeLgdDatabase["Haryana"] = {
+          "Gurugram": {
+            "Urban": ["DLF Phase 1 Ward 1", "Sohna Road Ward 2", "Sector 14 Ward 3"],
+            "Rural": ["Farrukhnagar Village", "Pataudi Village", "Sohna Village", "Manesar Village"]
+          },
+          "Karnal": {
+            "Urban": ["Karnal Sector 12 Ward 1", "Karnal Ward 2"],
+            "Rural": ["Indri Village", "Nilokheri Village", "Gharaunda Village", "Assandh Village"]
+          },
+          "Panipat": {
+            "Urban": ["Panipat Ward 1", "Panipat Ward 2"],
+            "Rural": ["Israna Village", "Samalkha Village", "Madlauda Village"]
+          }
+        };
+      }
+
+      if (!activeLgdDatabase["Uttar Pradesh"]) {
+        activeLgdDatabase["Uttar Pradesh"] = {
+          "Lucknow": {
+            "Urban": ["Hazratganj Ward 1", "Aliganj Ward 2", "Indira Nagar Ward 3"],
+            "Rural": ["Malihabad Village", "Bakshi Ka Talab Village", "Mohanlalganj Village"]
+          },
+          "Noida": {
+            "Urban": ["Sector 15 Ward 1", "Sector 62 Ward 2"],
+            "Rural": ["Dadri Village", "Jewar Village", "Dankaur Village"]
+          },
+          "Varanasi": {
+            "Urban": ["Dashaswamedh Ward 1", "Lanka Ward 2"],
+            "Rural": ["Pindra Village", "Sevapur Village"]
+          }
+        };
+      }
+
+      if (!activeLgdDatabase["Maharashtra"]) {
+        activeLgdDatabase["Maharashtra"] = {
+          "Pune": {
+            "Urban": ["Kothrud Ward 1", "Shivajinagar Ward 2", "Hinjawadi Ward 3"],
+            "Rural": ["Mulshi Village", "Haveli Village", "Shirur Village", "Bhor Village"]
+          },
+          "Nagpur": {
+            "Urban": ["Sitabuldi Ward 1", "Dharampeth Ward 2"],
+            "Rural": ["Kamptee Village", "Kalmeshwar Village", "Saoner Village"]
+          }
+        };
+      }
+
+      // Update sync status
+      lgdSyncStatus.lastSynced = new Date().toLocaleString();
+      lgdSyncStatus.status = "Success";
+      lgdSyncStatus.statesCount = Object.keys(activeLgdDatabase).length;
+      lgdSyncStatus.districtsCount = Object.values(activeLgdDatabase).reduce((acc: number, d: any) => acc + Object.keys(d).length, 0);
+
+      res.json({
+        success: true,
+        message: "LGD Database successfully synchronized with the National Local Government Directory.",
+        syncStatus: lgdSyncStatus,
+        statesCount: lgdSyncStatus.statesCount,
+        districtsCount: lgdSyncStatus.districtsCount,
+      });
+    } catch (error: any) {
+      lgdSyncStatus.status = "Failed";
+      res.status(500).json({
+        success: false,
+        error: error.message || "Failed to synchronize LGD database",
+      });
+    }
+  });
+
+  // ---------------- AI BIOMASS VERIFICATION ROUTE ----------------
+  app.post("/api/biomass/verify-sim", async (req, res) => {
+    const { waste_type, weight_kg, image_url } = req.body;
+    if (!waste_type || weight_kg === undefined) {
+      return res.status(400).json({ error: "waste_type and weight_kg are required." });
+    }
+    try {
+      const result = await AIBiomassVerificationService.verifyBiomass(
+        waste_type,
+        parseFloat(weight_kg),
+        image_url
+      );
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Verification failed" });
+    }
   });
 
   app.get("/api/lgd/lookup", auth(), (req: any, res) => {

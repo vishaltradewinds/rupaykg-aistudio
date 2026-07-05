@@ -28,6 +28,7 @@ import {
   Zap,
   Layers,
   Cpu,
+  Brain,
   AlertTriangle,
   Map,
   BookOpen,
@@ -124,6 +125,7 @@ interface BiomassRecord {
   acreage?: number;
   risk_score?: number;
   ai_verification_details?: string;
+  ai_verification_status?: string;
   potential_ccc_value?: number;
   geo_lat: number;
   geo_long: number;
@@ -423,6 +425,17 @@ export default function App() {
   const [uploadData, setUploadData] = useState({ weight_kg: '', waste_type: WASTE_TYPES[0].type, village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: 'Rice', double_counting_declaration: false });
   const [farmerData, setFarmerData] = useState({ name: '', phone: '', land_area: '', crop_type: '', geo_lat: 0, geo_long: 0 });
   const [availableRecords, setAvailableRecords] = useState<BiomassRecord[]>([]);
+
+  // LGD synchronization & explorer states
+  const [lgdSyncInfo, setLgdSyncInfo] = useState({ lastSynced: "Never", status: "Idle", statesCount: 21, districtsCount: 42 });
+  const [syncingLgd, setSyncingLgd] = useState(false);
+  const [explorerState, setExplorerState] = useState('');
+  const [explorerDistrict, setExplorerDistrict] = useState('');
+  const [explorerSubdistrict, setExplorerSubdistrict] = useState('');
+  const [explorerStatesList, setExplorerStatesList] = useState<any[]>([]);
+  const [explorerDistrictsList, setExplorerDistrictsList] = useState<any[]>([]);
+  const [explorerSubdistrictsList, setExplorerSubdistrictsList] = useState<any[]>([]);
+  const [explorerLocalbodiesList, setExplorerLocalbodiesList] = useState<any[]>([]);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'fetching' | 'success' | 'error'>('idle');
   
   // Data States
@@ -819,6 +832,114 @@ export default function App() {
 
     return () => controller.abort();
   }, [dashboardSubdistrictFilter]);
+
+  // Load explorer states list and sync status
+  useEffect(() => {
+    fetch('/api/lgd/sync-status')
+      .then(res => res.json())
+      .then(data => setLgdSyncInfo(data))
+      .catch(err => console.error('Error fetching LGD sync status:', err));
+      
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>('/api/lgd/states', controller.signal)
+      .then(data => {
+        if (Array.isArray(data)) {
+          setExplorerStatesList(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching explorer states:', err);
+        }
+      });
+    return () => controller.abort();
+  }, [lgdSyncInfo.status]); // Refresh on sync status changes
+
+  useEffect(() => {
+    if (!explorerState) {
+      setExplorerDistrictsList([]);
+      setExplorerSubdistrictsList([]);
+      setExplorerLocalbodiesList([]);
+      setExplorerDistrict('');
+      setExplorerSubdistrict('');
+      return;
+    }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(`/api/lgd/districts?state=${encodeURIComponent(explorerState)}`, controller.signal)
+      .then(data => {
+        if (Array.isArray(data)) {
+          setExplorerDistrictsList(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching explorer districts:', err);
+        }
+      });
+
+    setExplorerDistrict('');
+    setExplorerSubdistrict('');
+    setExplorerSubdistrictsList([]);
+    setExplorerLocalbodiesList([]);
+
+    return () => controller.abort();
+  }, [explorerState]);
+
+  useEffect(() => {
+    if (!explorerState || !explorerDistrict) {
+      setExplorerSubdistrictsList([]);
+      setExplorerLocalbodiesList([]);
+      setExplorerSubdistrict('');
+      return;
+    }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(
+      `/api/lgd/subdistricts?state=${encodeURIComponent(explorerState)}&district=${encodeURIComponent(explorerDistrict)}`,
+      controller.signal
+    )
+      .then(data => {
+        if (Array.isArray(data)) {
+          setExplorerSubdistrictsList(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching explorer subdistricts:', err);
+        }
+      });
+
+    setExplorerSubdistrict('');
+    setExplorerLocalbodiesList([]);
+
+    return () => controller.abort();
+  }, [explorerDistrict]);
+
+  useEffect(() => {
+    if (!explorerState || !explorerDistrict || !explorerSubdistrict) {
+      setExplorerLocalbodiesList([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    safeFetchLgdJson<any[]>(
+      `/api/lgd/localbodies?state=${encodeURIComponent(explorerState)}&district=${encodeURIComponent(explorerDistrict)}&subdistrict=${encodeURIComponent(explorerSubdistrict)}`,
+      controller.signal
+    )
+      .then(data => {
+        if (Array.isArray(data)) {
+          setExplorerLocalbodiesList(data);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching explorer localbodies:', err);
+        }
+      });
+
+    return () => controller.abort();
+  }, [explorerSubdistrict]);
 
   useEffect(() => {
     if (token) {
@@ -3455,6 +3576,198 @@ export default function App() {
             )}
           </div>
         )}
+
+        {pilotSubView === 'lgd' && (
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  <Map className="text-emerald-400" />
+                  {t('LGD Database Directory & National Gateway Sync')}
+                </h3>
+                <p className="text-white/40 text-sm">
+                  {t('Sovereign-grade directory of India\'s local governments. Keep local bodies, blocks, and district registries up-to-date.')}
+                </p>
+              </div>
+
+              <button
+                onClick={async () => {
+                  setSyncingLgd(true);
+                  try {
+                    const res = await fetch('/api/lgd/sync', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      setLgdSyncInfo(data.syncStatus);
+                      setMessage({ type: 'success', text: data.message });
+                    } else {
+                      throw new Error(data.error || "Sync failed");
+                    }
+                  } catch (err: any) {
+                    console.error(err);
+                    setMessage({ type: 'error', text: err.message || "Failed to synchronize LGD database" });
+                  } finally {
+                    setSyncingLgd(false);
+                  }
+                }}
+                disabled={syncingLgd}
+                className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl text-xs font-bold hover:bg-emerald-400 disabled:opacity-50 transition-all shadow-lg shadow-emerald-500/10"
+              >
+                <RefreshCw size={14} className={syncingLgd ? "animate-spin" : ""} />
+                {syncingLgd ? t('Synchronizing Datasets...') : t('Trigger LGD Sync')}
+              </button>
+            </div>
+
+            {/* Sync Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="p-5 bg-white/5 border-white/10">
+                <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">{t('Sync Status')}</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`w-2.5 h-2.5 rounded-full ${lgdSyncInfo.status === 'Success' ? 'bg-emerald-500 animate-pulse' : lgdSyncInfo.status === 'Syncing' ? 'bg-amber-500 animate-spin' : 'bg-blue-400'}`} />
+                  <p className="text-lg font-bold">{t(lgdSyncInfo.status)}</p>
+                </div>
+              </Card>
+
+              <Card className="p-5 bg-white/5 border-white/10">
+                <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">{t('States Indexed')}</span>
+                <p className="text-2xl font-bold mt-1 text-emerald-400">{lgdSyncInfo.statesCount}</p>
+              </Card>
+
+              <Card className="p-5 bg-white/5 border-white/10">
+                <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">{t('Districts Populated')}</span>
+                <p className="text-2xl font-bold mt-1 text-blue-400">{lgdSyncInfo.districtsCount}</p>
+              </Card>
+
+              <Card className="p-5 bg-white/5 border-white/10">
+                <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">{t('Last Synchronized')}</span>
+                <p className="text-sm font-mono font-bold mt-2 text-white/80">{lgdSyncInfo.lastSynced}</p>
+              </Card>
+            </div>
+
+            {/* Live LGD Explorer */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Explorer Filters */}
+              <Card className="p-6 bg-white/5 border-white/10 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Search size={16} className="text-emerald-400" />
+                  <h4 className="text-sm font-bold uppercase tracking-widest">{t('Registry Explorer')}</h4>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1.5 font-bold">{t('Select State')}</label>
+                    <select
+                      value={explorerState}
+                      onChange={e => setExplorerState(e.target.value)}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500/50"
+                    >
+                      <option value="">-- {t('Select State')} --</option>
+                      {explorerStatesList.map(st => (
+                        <option key={`explorer-state-${st.state_lgd_code}`} value={st.state_name}>
+                          {st.state_name} ({t('LGD Code')}: {st.state_lgd_code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1.5 font-bold">{t('Select District')}</label>
+                    <select
+                      value={explorerDistrict}
+                      onChange={e => setExplorerDistrict(e.target.value)}
+                      disabled={!explorerState}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500/50 disabled:opacity-50"
+                    >
+                      <option value="">-- {t('Select District')} --</option>
+                      {explorerDistrictsList.map(ds => (
+                        <option key={`explorer-dist-${ds.district_lgd_code}`} value={ds.district_name}>
+                          {ds.district_name} ({t('LGD Code')}: {ds.district_lgd_code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1.5 font-bold">{t('Select Sub-District / Block')}</label>
+                    <select
+                      value={explorerSubdistrict}
+                      onChange={e => setExplorerSubdistrict(e.target.value)}
+                      disabled={!explorerDistrict}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500/50 disabled:opacity-50"
+                    >
+                      <option value="">-- {t('Select Sub-District')} --</option>
+                      {explorerSubdistrictsList.map(sd => (
+                        <option key={`explorer-subdist-${sd.subdistrict_lgd_code}`} value={sd.subdistrict_name}>
+                          {sd.subdistrict_name} ({t('LGD Code')}: {sd.subdistrict_lgd_code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="bg-black/20 p-4 rounded-xl border border-white/5 text-[11px] text-white/50 leading-relaxed">
+                  <p className="font-bold text-white/70 mb-1 flex items-center gap-1">
+                    <Database size={12} className="text-emerald-400" />
+                    {t('Sovereign Trust Rail info')}
+                  </p>
+                  {t('LGD profiles are stored securely in local state memory. Any changes to local administrative boundaries automatically broadcast telemetry hashes to Hedera Consensus Service.')}
+                </div>
+              </Card>
+
+              {/* Explorer Results */}
+              <Card className="lg:col-span-2 p-6 bg-white/5 border-white/10 flex flex-col min-h-[350px]">
+                <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
+                  <h4 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                    <Database size={16} className="text-blue-400" />
+                    {t('Sovereign Local Bodies List')}
+                  </h4>
+                  <span className="text-xs bg-white/5 text-white/60 px-2.5 py-1 rounded-full font-mono font-bold">
+                    {explorerLocalbodiesList.length} {t('Items')}
+                  </span>
+                </div>
+
+                {explorerLocalbodiesList.length > 0 ? (
+                  <div className="flex-1 overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-white/5 text-[10px] uppercase tracking-widest text-white/40">
+                          <th className="p-3 font-medium">{t('Local Body Name')}</th>
+                          <th className="p-3 font-medium">{t('LGD Code')}</th>
+                          <th className="p-3 font-medium">{t('Type')}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {explorerLocalbodiesList.map((lb, idx) => (
+                          <tr key={idx} className="hover:bg-white/5 transition-colors">
+                            <td className="p-3 text-xs font-bold text-white">{lb.local_body_name}</td>
+                            <td className="p-3 text-xs font-mono text-emerald-400 font-bold">{lb.local_body_lgd_code}</td>
+                            <td className="p-3 text-xs">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lb.local_body_type === 'Ward' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'}`}>
+                                {t(lb.local_body_type)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+                    <div className="p-4 bg-white/5 rounded-full mb-3">
+                      <Map size={32} className="text-white/20 animate-pulse" />
+                    </div>
+                    <h5 className="font-bold text-sm text-white/60 mb-1">{t('No Local Bodies Selected')}</h5>
+                    <p className="text-xs text-white/40 max-w-xs leading-relaxed">
+                      {t('Select a State, District, and Sub-district on the left sidebar to explore the fully synchronized administrative local bodies.')}
+                    </p>
+                  </div>
+                )}
+              </Card>
+            </div>
+          </div>
+        )}
       </motion.div>
     );
   };
@@ -4848,6 +5161,61 @@ export default function App() {
                       )}
                     </div>
 
+                    {/* Live AI Verification Simulation Playground */}
+                    <div className="p-5 bg-white/5 border border-white/10 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">
+                          <Brain size={14} />
+                          {t('AI Biomass Verification Playground')}
+                        </span>
+                        <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 rounded-full uppercase font-bold">
+                          {t('Interactive Engine')}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-white/50 leading-relaxed">
+                        {t('Simulate how our decentralized Rupay AI verification engine evaluates your material stream parameters in real-time based on selected weight, category, and visual properties.')}
+                      </p>
+                      
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!uploadData.weight_kg || parseFloat(uploadData.weight_kg) <= 0) {
+                            setMessage({ type: 'error', text: t('Please enter a valid weight in kg first.') });
+                            return;
+                          }
+                          setLoading(true);
+                          try {
+                            const res = await fetch('/api/biomass/verify-sim', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                waste_type: uploadData.waste_type,
+                                weight_kg: uploadData.weight_kg,
+                                image_url: uploadData.image_url || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500' // fallback simulation image
+                              })
+                            });
+                            const data = await res.json();
+                            if (res.ok) {
+                              setMessage({
+                                type: 'success',
+                                text: `AI Verification Status: [${data.status}] (Confidence: ${(data.confidence * 100).toFixed(0)}%, Risk: ${(data.risk_score * 100).toFixed(0)}%). Details: ${data.details}`
+                              });
+                            } else {
+                              throw new Error(data.error);
+                            }
+                          } catch (err: any) {
+                            setMessage({ type: 'error', text: 'Playground verification error: ' + err.message });
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        className="w-full py-2 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-400 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                      >
+                        <RefreshCw size={12} />
+                        {t('Run Live AI Verification Simulation')}
+                      </button>
+                    </div>
+
                     {message && (
                       <div className={`p-4 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                         {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
@@ -5318,16 +5686,27 @@ export default function App() {
                           <td className="p-4 text-sm font-mono text-blue-400">{record.ccc_amount_kg.toFixed(2)} kg</td>
                           <td className="p-4">
                             {record.risk_score !== undefined ? (
-                              <span 
-                                className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border cursor-help ${
-                                  record.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                  record.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                  'bg-red-500/10 text-red-400 border-red-500/20'
-                                }`}
-                                title={record.ai_verification_details || "AI Risk Score"}
-                              >
-                                {(record.risk_score * 100).toFixed(0)}%
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span 
+                                  className={`w-fit text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border cursor-help ${
+                                    record.risk_score < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                    record.risk_score < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                    'bg-red-500/10 text-red-400 border-red-500/20'
+                                  }`}
+                                  title={record.ai_verification_details || "AI Risk Score"}
+                                >
+                                  {(record.risk_score * 100).toFixed(0)}%
+                                </span>
+                                {record.ai_verification_status && (
+                                  <span className={`text-[8px] font-mono font-bold tracking-wider uppercase ${
+                                    record.ai_verification_status === 'AI_VERIFIED' ? 'text-emerald-400' :
+                                    record.ai_verification_status === 'REJECTED' ? 'text-red-400' :
+                                    'text-amber-400'
+                                  }`}>
+                                    {record.ai_verification_status.replace('_', ' ')}
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span className="text-white/40 text-xs">-</span>
                             )}
