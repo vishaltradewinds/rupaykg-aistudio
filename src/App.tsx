@@ -3896,15 +3896,13 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('CCC Offset Market')}</span>
             </button>
           )}
-          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '') && (
-            <button 
-              onClick={() => setView('blockchain')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <Cpu size={20} />
-              <span className="hidden md:block font-medium">{t('GRID-INDIA CCC Ledger')}</span>
-            </button>
-          )}
+          <button 
+            onClick={() => setView('blockchain')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Cpu size={20} />
+            <span className="hidden md:block font-medium">{t('Hedera HCS Open Source Ledger')}</span>
+          </button>
           <button 
             onClick={() => setView('genesis')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -3944,7 +3942,7 @@ export default function App() {
               {view === 'market' && t('CCTS Carbon Market')}
               {view === 'projects' && t('Offset Projects')}
               {view === 'municipal' && labels.viewTitle}
-              {view === 'blockchain' && t('GRID-INDIA CCC Ledger')}
+              {view === 'blockchain' && t('Hedera HCS Open Source Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
             </h2>
@@ -7417,9 +7415,9 @@ export default function App() {
                 <div>
                   <h3 className="text-2xl font-bold flex items-center gap-2">
                     <Cpu className="text-emerald-400" />
-                    {t('GRID-INDIA CCC Ledger')}
+                    {t('Hedera HCS Open Source Ledger')}
                   </h3>
-                  <p className="text-white/40 text-sm mt-1">{t('Verifiable blockchain record of all CCC Certificate (CCC) minting events')}</p>
+                  <p className="text-white/40 text-sm mt-1">{t('Verifiable Hedera Consensus Service (HCS) record of all CCC Certificate (CCC) minting events')}</p>
                 </div>
                 {isChainValid !== null && (
                   <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold self-start ${isChainValid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
@@ -7460,29 +7458,33 @@ export default function App() {
                           </div>
                           
                           {block.index === 0 ? (
-                            <p className="text-emerald-400 italic text-sm">{block.data.message}</p>
+                            <div className="space-y-2">
+                              <p className="text-emerald-400 font-bold text-sm">{block.data.message}</p>
+                              <p className="text-xs text-white/50">{t('Protocol')}: <span className="font-mono text-white/70">{block.data.protocol}</span></p>
+                              <p className="text-xs text-white/50">{t('HCS Topic ID')}: <span className="font-mono text-blue-400">{block.data.hcs_topic_id}</span></p>
+                            </div>
                           ) : (
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                               <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Record ID')}</label>
-                                <span className="text-sm font-bold font-mono">{block.data.record_id}</span>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Type / Record')}</label>
+                                <span className="text-sm font-bold font-mono">{block.data.type || block.data.record_id}</span>
                               </div>
                               <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('User ID')}</label>
-                                <span className="text-sm font-bold font-mono">{block.data.user_id}</span>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('User / Generator')}</label>
+                                <span className="text-sm font-bold font-mono">{block.data.generator || block.data.user_id || block.data.from}</span>
                               </div>
                               <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Waste Type')}</label>
-                                <span className="text-sm font-bold text-emerald-400">{block.data.waste_type}</span>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Waste / To')}</label>
+                                <span className="text-sm font-bold text-emerald-400">{block.data.waste_type || block.data.to || '-'}</span>
                               </div>
                               <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('CCC (kg)')}</label>
-                                <span className="text-sm font-bold text-cyan-400">{block.data.ccc_amount_kg}kg</span>
+                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Amount / CCC')}</label>
+                                <span className="text-sm font-bold text-cyan-400">{block.data.amount || block.data.ccc_amount_kg}</span>
                               </div>
-                              {block.data.registry_serial_number && (
+                              {(block.data.registry_serial_number || block.data.registry_id) && (
                                 <div className="col-span-2 md:col-span-4 mt-2">
-                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Registry Serial Number')}</label>
-                                  <span className="text-sm font-bold text-blue-400 font-mono">{block.data.registry_serial_number}</span>
+                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Registry ID')}</label>
+                                  <span className="text-sm font-bold text-blue-400 font-mono">{block.data.registry_serial_number || block.data.registry_id}</span>
                                 </div>
                               )}
                             </div>

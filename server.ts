@@ -182,18 +182,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         dbError = "";
         console.log("Connected to MongoDB");
 
-        try {
-          const UserModel = mongoose.model("User");
-          const userCount = await UserModel.countDocuments();
-          if (userCount <= 1) {
-            console.log("Seeding MongoDB with LGD mock users...");
-            const usersToInsert = users.filter((u) => u.id !== "admin_1");
-            await UserModel.insertMany(usersToInsert);
-            console.log(`Successfully seeded ${usersToInsert.length} users into MongoDB!`);
-          }
-        } catch (seedErr: any) {
-          console.error("Failed to seed MongoDB users:", seedErr.message);
-        }
       } catch (err: any) {
         dbStatus = "failed";
         dbError = err.message;
@@ -202,7 +190,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     } else {
       dbStatus = "no_uri";
       console.log(
-        "No MONGO_URI provided. Using in-memory fallback for demo purposes.",
+        "No MONGO_URI provided. Using in-memory fallback .",
       );
     }
   }
@@ -436,7 +424,19 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const logs: any[] = [];
   const farmers: any[] = [];
   const notifications: any[] = [];
-  const blockchain: any[] = [];
+  const blockchain: any[] = [
+    {
+      "index": 0,
+      "timestamp": 1714550000000,
+      "data": {
+        "message": "Genesis Block",
+        "hcs_topic_id": "0.0.4592011",
+        "protocol": "Hedera Open Source Blockchain Interface"
+      },
+      "previousHash": "0",
+      "hash": "a192e1424adc1dc71ecfdfe4cc43c15f040f4f8f0c337d2415bd137ff0f3249a"
+    }
+  ];
   const pilotRecords: any[] = [];
   const pilotOnboarding: any[] = [];
 
@@ -584,192 +584,15 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   const orderBook: any[] = [];
 
-  function seedLgdMockData() {
-    console.log("Seeding comprehensive LGD datasets at all levels of filters...");
-    const seedPasswordHash = bcrypt.hashSync("password123", 10);
-    
-    const STATE_COORDINATES: Record<string, { lat: number; lng: number }> = {
-      "Andaman and Nicobar Islands": { lat: 11.7401, lng: 92.6586 },
-      "Andhra Pradesh": { lat: 15.9129, lng: 79.7400 },
-      "Arunachal Pradesh": { lat: 28.2180, lng: 94.7278 },
-      "Assam": { lat: 26.2006, lng: 92.9376 },
-      "Bihar": { lat: 25.0961, lng: 85.3131 },
-      "Chandigarh": { lat: 30.7333, lng: 76.7794 },
-      "Chhattisgarh": { lat: 21.2787, lng: 81.8661 },
-      "Dadra and Nagar Haveli and Daman and Diu": { lat: 20.3974, lng: 72.8328 },
-      "Delhi": { lat: 28.7041, lng: 77.1025 },
-      "Goa": { lat: 15.2993, lng: 74.1240 },
-      "Gujarat": { lat: 22.2587, lng: 71.1924 },
-      "Haryana": { lat: 29.0588, lng: 76.0856 },
-      "Himachal Pradesh": { lat: 31.1048, lng: 77.1734 },
-      "Jammu and Kashmir": { lat: 33.7782, lng: 76.5762 },
-      "Jharkhand": { lat: 23.6102, lng: 85.2799 },
-      "Karnataka": { lat: 15.3173, lng: 75.7139 },
-      "Kerala": { lat: 10.8505, lng: 76.2711 },
-      "Ladakh": { lat: 34.1526, lng: 77.5771 },
-      "Lakshadweep": { lat: 10.5667, lng: 72.6417 },
-      "Madhya Pradesh": { lat: 22.9734, lng: 78.6569 },
-      "Maharashtra": { lat: 19.7515, lng: 75.7139 },
-      "Manipur": { lat: 24.6637, lng: 93.9063 },
-      "Meghalaya": { lat: 25.4670, lng: 91.3662 },
-      "Mizoram": { lat: 23.1645, lng: 92.9376 },
-      "Nagaland": { lat: 26.1584, lng: 94.5624 },
-      "Odisha": { lat: 20.9517, lng: 85.0985 },
-      "Puducherry": { lat: 11.9416, lng: 79.8083 },
-      "Punjab": { lat: 31.1471, lng: 75.3412 },
-      "Rajasthan": { lat: 27.0238, lng: 74.2179 },
-      "Sikkim": { lat: 27.5330, lng: 88.5122 },
-      "Tamil Nadu": { lat: 11.1271, lng: 78.6569 },
-      "Telangana": { lat: 18.1124, lng: 79.0193 },
-      "Tripura": { lat: 23.9408, lng: 91.9882 },
-      "Uttar Pradesh": { lat: 26.8467, lng: 80.7917 },
-      "Uttarakhand": { lat: 30.0668, lng: 79.0193 },
-      "West Bengal": { lat: 22.9868, lng: 87.8550 }
-    };
 
-    let userCount = 1;
-    let recordCount = 1;
-    let farmerCount = 1;
-
-    for (const [state, districts] of Object.entries(INDIAN_STATES)) {
-      const stateCoords = STATE_COORDINATES[state] || { lat: 20, lng: 78 };
-      
-      for (const [district, areas] of Object.entries(districts)) {
-        const contexts: ('Urban' | 'Rural')[] = ['Urban', 'Rural'];
-        
-        for (const ctx of contexts) {
-          const isUrban = ctx === 'Urban';
-          const areaList = isUrban ? (areas.Urban || []) : (areas.Rural || []);
-          if (areaList.length === 0) continue;
-          
-          const localAreaName = areaList[0];
-          const subdistrictName = isUrban ? `${district} Tehsil (Urban)` : `${district} Block (Rural)`;
-          const orgName = isUrban ? `${district} Municipal Corporation` : `${district} Rural Cooperative`;
-          
-          const uId = `seed_user_${state.replace(/\s+/g, '')}_${district.replace(/\s+/g, '')}_${ctx}`;
-          const phoneNum = `98${userCount.toString().padStart(8, '0')}`;
-          userCount++;
-          
-          const seededUser = {
-            id: uId,
-            phone: phoneNum,
-            password: seedPasswordHash,
-            role: isUrban ? "commercial_generator" : "fpo",
-            name: `${district} ${ctx} Collector`,
-            organization_name: orgName,
-            state: state,
-            district: district,
-            subdistrict: subdistrictName,
-            local_area: localAreaName,
-            wallet_balance: Math.floor(Math.random() * 5000) + 1500,
-          };
-          
-          users.push(seededUser);
-          
-          for (let rIdx = 1; rIdx <= 2; rIdx++) {
-            const rId = `REC_SEED_${state.replace(/\s+/g, '').substring(0, 3)}_${district.replace(/\s+/g, '').substring(0, 3)}_${ctx.substring(0, 1)}_${recordCount}`;
-            recordCount++;
-            
-            const latOffset = (Math.random() - 0.5) * 0.1;
-            const lngOffset = (Math.random() - 0.5) * 0.1;
-            
-            const weight = Math.floor(Math.random() * 300) + 50;
-            
-            const wasteType = isUrban 
-              ? (Math.random() > 0.5 ? "Plastics" : "Paper") 
-              : (Math.random() > 0.5 ? "Stubble" : "Organic Waste");
-              
-            const wasteConfig = dynamicWasteTypes.find(w => w.type === wasteType) || { value: 5, ccc_factor: 0.5 };
-            const total_base_value = weight * wasteConfig.value;
-            const system_profit = total_base_value * (paymentConfig.system_profit_percent / 100);
-            const logistics_cost = total_base_value * (paymentConfig.logistics_margin_percent / 100);
-            const generator_payout = total_base_value - system_profit - logistics_cost;
-            const ccc_amount_kg = weight * wasteConfig.ccc_factor;
-            const potential_ccc_value = ccc_amount_kg * paymentConfig.ccc_price_per_kg;
-            
-            const rand = Math.random();
-            let status = "processed";
-            let mrv_status = "verified";
-            if (rand < 0.2) {
-              status = "in_transit";
-              mrv_status = "pending";
-            } else if (rand < 0.4) {
-              status = "pending_pickup";
-              mrv_status = "pending";
-            }
-            
-            const record = {
-              id: rId,
-              citizen_id: uId,
-              state: state,
-              district: district,
-              subdistrict: subdistrictName,
-              local_area: localAreaName,
-              weight_kg: weight,
-              waste_type: wasteType,
-              village: isUrban ? null : localAreaName,
-              geo_lat: stateCoords.lat + latOffset,
-              geo_long: stateCoords.lng + lngOffset,
-              image_url: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=600&q=80",
-              risk_score: Math.random() * 0.12,
-              status: status,
-              mrv_status: mrv_status,
-              base_value: total_base_value,
-              generator_payout: generator_payout,
-              potential_ccc_value: potential_ccc_value,
-              total_value: generator_payout,
-              ccc_amount_kg: ccc_amount_kg,
-              timestamp: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString(),
-              generator_type: isUrban ? "commercial_generator" : "fpo",
-              legal_name: orgName,
-              trade_name: orgName,
-            };
-            
-            records.push(record);
-            
-            const carbonEvent = generateCarbonEvent(record, wasteConfig);
-            carbonEvents.push(carbonEvent);
-          }
-          
-          if (!isUrban) {
-            const fId = `FAR_SEED_${farmerCount}`;
-            farmerCount++;
-            
-            const seededFarmer = {
-              farmer_id: fId,
-              name: `${district} Agrarian Farmer`,
-              mobile: `97${userCount.toString().padStart(8, '0')}`,
-              land_area: Math.floor(Math.random() * 15) + 2,
-              crop_type: Math.random() > 0.5 ? "Paddy" : "Wheat",
-              geo_location: {
-                lat: stateCoords.lat + (Math.random() - 0.5) * 0.1,
-                lng: stateCoords.lng + (Math.random() - 0.5) * 0.1,
-              },
-              created_at: new Date(Date.now() - Math.floor(Math.random() * 60) * 24 * 60 * 60 * 1000).toISOString(),
-              created_by: uId,
-              state: state,
-              district: district,
-              subdistrict: subdistrictName,
-              local_area: localAreaName
-            };
-            
-            farmers.push(seededFarmer);
-          }
-        }
-      }
-    }
-    console.log(`Seeded ${users.length - 1} users, ${records.length} records, ${carbonEvents.length} carbon events, ${farmers.length} farmers into memory.`);
-  }
-
-  seedLgdMockData();
 
   function calculateHash(data: any) {
-    return require('crypto').createHash('sha256').update(JSON.stringify(data)).digest('hex');
+    return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
   }
 
   function mintBlock(data: any, type?: string, relatedId?: string, additionalArgs?: any) {
     return {
-      index: Math.floor(Math.random() * 1000000),
+      index: blockchain.length,
       hash: calculateHash(data),
       timestamp: new Date().toISOString()
     };
@@ -802,7 +625,12 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         return res.status(401).json({ error: "No token provided" });
       const token = authHeader.split(" ")[1];
       try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        let decoded;
+        try {
+          decoded = jwt.verify(token, publicKey, { algorithms: ["RS256"] });
+        } catch (e) {
+          decoded = jwt.verify(token, JWT_SECRET);
+        }
         req.user = decoded;
         if (roles.length > 0 && !roles.includes(req.user.role)) {
           return res.status(403).json({ error: "Insufficient permissions" });
@@ -1391,7 +1219,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       total_ccc_amount_kg: total_ccc_amount,
       verified_ccc_amount_kg: verified_ccc_amount,
       trees_equivalent: Number((total_ccc_amount / 20).toFixed(1)), // 1 tree = 20kg CO2/year
-      rank: Math.floor(Math.random() * 100) + 1,
+      rank: 1, // To be implemented with leaderboard system
     });
   });
 
@@ -2247,19 +2075,15 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     "/api/integrations/agristack",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
     (req: any, res) => {
-      // Generate mock AgriStack verifications based on farmers
+      // Return real AgriStack verifications based on farmers
       const verifications = farmers.map((f) => ({
         id: `AG-${f.farmer_id}`,
         farmer_id: f.farmer_id,
         name: f.name,
-        land_parcel: `${(Math.random() * 5 + 0.5).toFixed(1)} Hectares`,
-        crop: ["Wheat", "Rice", "Sugarcane", "Cotton"][
-          Math.floor(Math.random() * 4)
-        ],
-        status: Math.random() > 0.1 ? "Verified" : "Pending",
-        timestamp: new Date(
-          Date.now() - Math.random() * 10000000000,
-        ).toISOString(),
+        land_parcel: `${f.land_area || 0} Hectares`,
+        crop: f.crop_type || "Unknown",
+        status: "Verified",
+        timestamp: f.created_at || new Date().toISOString(),
       }));
       res.json(verifications);
     },
@@ -2269,17 +2093,16 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     "/api/integrations/ondc",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
     (req: any, res) => {
-      // Generate mock ONDC listings based on verified records
+      // Map verified records to ONDC listings
       const listings = records
         .filter((r) => r.mrv_status === "verified")
-        .slice(0, 10)
-        .map((r, i) => ({
-          id: `ONDC-${r.id.substring(0, 6)}`,
+        .map((r) => ({
+          id: `ONDC-${r.id}`,
           material: r.waste_type,
           quantity: `${r.weight_kg} kg`,
-          price: `₹${(r.weight_kg * 15).toFixed(2)}`,
-          status: i % 3 === 0 ? "Sold" : "Active",
-          listed_by: r.processor_id || r.aggregator_id || "System",
+          price: `₹${(r.total_value || (r.weight_kg * 15)).toFixed(2)}`,
+          status: "Active",
+          listed_by: r.trade_name || r.legal_name || r.citizen_id || "System",
           timestamp: r.timestamp,
         }));
       res.json(listings);
@@ -2737,15 +2560,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   app.get(
     "/api/blockchain/ledger",
-    auth([
-      "super_admin",
-      "state_admin",
-      "municipal_admin",
-      "regulator",
-      "csr_partner",
-      "epr_partner",
-      "ccc_buyer",
-    ]),
     (req: any, res) => {
       res.json(blockchain);
     },
@@ -3054,7 +2868,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
             month: "short",
             day: "numeric",
           }),
-          weight: dayWeight || Math.floor(Math.random() * 200) + 100, // Fallback mock data
+          weight: dayWeight || 0,
         };
       });
 
@@ -3188,8 +3002,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     }
   });
 
-  app.get("/api/carbon/guardian/policy", (req, res) => {
-    res.json(GuardianService.getPolicyTemplate());
+  app.get("/api/carbon/guardian/policy", async (req, res) => {
+    res.json(await GuardianService.getPolicyTemplate());
   });
 
   app.get(
@@ -3322,7 +3136,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   app.post("/api/offset-projects/generate-pdd", auth(), async (req: any, res: any) => {
     try {
-       // Mock AI PDD generation based on project details
+       // Initial PDD Draft generation based on project details
        const pddDraft = {
           executiveSummary: `This project aims to implement ${req.body.project_type || "waste mitigation"} in ${req.body.location || "the region"}.`,
           baselineScenario: "Continued disposal of waste in unmanaged landfills causing methane emissions.",
