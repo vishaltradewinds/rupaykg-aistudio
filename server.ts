@@ -29,6 +29,15 @@ import { initRegistry } from "./services/registry-service/index";
 import { initFraud } from "./services/fraud-engine/index";
 import { AIBiomassVerificationService } from "./src/services/aiBiomassService";
 import { initPayoutWorker } from "./workers/payout-worker/index";
+import {
+  initLgdDatabase,
+  getLgdStates,
+  getLgdDistricts,
+  getLgdSubdistricts,
+  getLgdLocalBodies,
+  getLgdSyncStatus,
+  syncLgdDatabase
+} from "./src/services/lgdDb";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -37,17 +46,10 @@ let paymentConfig = {
   system_profit_percent: 10,
 };
 
-let activeLgdDatabase = JSON.parse(JSON.stringify(INDIAN_STATES));
-let lgdSyncStatus = {
-  lastSynced: "Never",
-  status: "Idle",
-  statesCount: Object.keys(activeLgdDatabase).length,
-  districtsCount: Object.values(activeLgdDatabase).reduce((acc: number, d: any) => acc + Object.keys(d).length, 0),
-};
-
 async function startServer() {
   // --- Domain Service Orchestration ---
   initAuth();
+  initLgdDatabase();
   initCCC();
   initMRV();
   initRegistry();
@@ -1476,62 +1478,21 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   // ---------------- LGD ROUTES ----------------
   app.get("/api/lgd/states", (req, res) => {
-    const statesList = Object.keys(activeLgdDatabase).sort();
-    const states = statesList.map((state, index) => ({
-      state_name: state,
-      state_lgd_code: index + 1,
-    }));
+    const states = getLgdStates();
     res.json(states);
   });
 
   app.get("/api/lgd/districts", (req, res) => {
     const { state } = req.query;
     if (!state) return res.status(400).json({ error: "State parameter is required" });
-    const districtsOfState = activeLgdDatabase[state as string];
-    if (!districtsOfState) return res.json([]);
-
-    const statesList = Object.keys(activeLgdDatabase).sort();
-    const stateIndex = statesList.indexOf(state as string);
-    const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
-    const baseDistrictCode = stateCode * 1000;
-
-    const districts = Object.keys(districtsOfState).sort().map((district, index) => ({
-      district_name: district,
-      district_lgd_code: baseDistrictCode + index + 1,
-      state_name: state as string,
-    }));
+    const districts = getLgdDistricts(state as string);
     res.json(districts);
   });
 
   app.get("/api/lgd/subdistricts", (req, res) => {
     const { state, district } = req.query;
     if (!state || !district) return res.status(400).json({ error: "State and district parameters are required" });
-
-    const statesList = Object.keys(activeLgdDatabase).sort();
-    const stateIndex = statesList.indexOf(state as string);
-    const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
-    const baseDistrictCode = stateCode * 1000;
-
-    const districtsOfState = activeLgdDatabase[state as string];
-    const districtList = districtsOfState ? Object.keys(districtsOfState).sort() : [];
-    const districtIndex = districtList.indexOf(district as string);
-    const districtCode = districtIndex !== -1 ? (baseDistrictCode + districtIndex + 1) : 101;
-
-    // Generate subdistricts for a district
-    const subdistricts = [
-      {
-        subdistrict_name: `${district} Tehsil (Urban)`,
-        subdistrict_lgd_code: districtCode * 10 + 1,
-        district_name: district as string,
-        state_name: state as string,
-      },
-      {
-        subdistrict_name: `${district} Block (Rural)`,
-        subdistrict_lgd_code: districtCode * 10 + 2,
-        district_name: district as string,
-        state_name: state as string,
-      }
-    ];
+    const subdistricts = getLgdSubdistricts(state as string, district as string);
     res.json(subdistricts);
   });
 
@@ -1540,128 +1501,25 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     if (!state || !district || !subdistrict) {
       return res.status(400).json({ error: "State, district, and subdistrict parameters are required" });
     }
-    const districtsOfState = activeLgdDatabase[state as string];
-    if (!districtsOfState) return res.json([]);
-    const districtData = districtsOfState[district as string];
-    if (!districtData) return res.json([]);
-
-    const statesList = Object.keys(activeLgdDatabase).sort();
-    const stateIndex = statesList.indexOf(state as string);
-    const stateCode = stateIndex !== -1 ? (stateIndex + 1) : 37;
-    const baseDistrictCode = stateCode * 1000;
-
-    const districtList = Object.keys(districtsOfState).sort();
-    const districtIndex = districtList.indexOf(district as string);
-    const districtCode = districtIndex !== -1 ? (baseDistrictCode + districtIndex + 1) : 101;
-
-    const isUrban = !(subdistrict as string).includes("(Rural)") && !(subdistrict as string).toLowerCase().includes("rural");
-    const subdistrictCode = districtCode * 10 + (isUrban ? 1 : 2);
-
-    const areas = isUrban ? (districtData.Urban || []) : (districtData.Rural || []);
-    const sortedAreas = areas.slice().sort();
-
-    const localbodies = sortedAreas.map((area, index) => ({
-      local_body_name: area,
-      local_body_lgd_code: subdistrictCode * 100 + index + 1,
-      local_body_type: isUrban ? 'Ward' : 'Gram Panchayat',
-      subdistrict_name: subdistrict as string,
-      district_name: district as string,
-      state_name: state as string,
-    }));
-
+    const localbodies = getLgdLocalBodies(state as string, district as string, subdistrict as string);
     res.json(localbodies);
   });
 
   app.get("/api/lgd/sync-status", (req, res) => {
-    res.json(lgdSyncStatus);
+    res.json(getLgdSyncStatus());
   });
 
   app.post("/api/lgd/sync", async (req, res) => {
-    lgdSyncStatus.status = "Syncing";
     try {
-      // Simulate calling Government National LGD Directory SOAP/REST endpoints
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Expand activeLgdDatabase with full, current datasets for states
-      if (!activeLgdDatabase["Punjab"]) {
-        activeLgdDatabase["Punjab"] = {
-          "Ludhiana": {
-            "Urban": ["Ludhiana Ward 1", "Ludhiana Ward 2", "Ludhiana Ward 3", "Ludhiana Ward 4"],
-            "Rural": ["Jagraon Village", "Samrala Village", "Khanna Village", "Mullanpur Village"]
-          },
-          "Amritsar": {
-            "Urban": ["Amritsar Ward 1", "Amritsar Ward 2", "Amritsar Ward 3"],
-            "Rural": ["Ajnala Village", "Majitha Village", "Rayya Village", "Attari Village"]
-          },
-          "Patiala": {
-            "Urban": ["Patiala Ward 1", "Patiala Ward 2", "Patiala Ward 3"],
-            "Rural": ["Nabha Village", "Rajpura Village", "Samana Village", "Patran Village"]
-          }
-        };
-      }
-
-      if (!activeLgdDatabase["Haryana"]) {
-        activeLgdDatabase["Haryana"] = {
-          "Gurugram": {
-            "Urban": ["DLF Phase 1 Ward 1", "Sohna Road Ward 2", "Sector 14 Ward 3"],
-            "Rural": ["Farrukhnagar Village", "Pataudi Village", "Sohna Village", "Manesar Village"]
-          },
-          "Karnal": {
-            "Urban": ["Karnal Sector 12 Ward 1", "Karnal Ward 2"],
-            "Rural": ["Indri Village", "Nilokheri Village", "Gharaunda Village", "Assandh Village"]
-          },
-          "Panipat": {
-            "Urban": ["Panipat Ward 1", "Panipat Ward 2"],
-            "Rural": ["Israna Village", "Samalkha Village", "Madlauda Village"]
-          }
-        };
-      }
-
-      if (!activeLgdDatabase["Uttar Pradesh"]) {
-        activeLgdDatabase["Uttar Pradesh"] = {
-          "Lucknow": {
-            "Urban": ["Hazratganj Ward 1", "Aliganj Ward 2", "Indira Nagar Ward 3"],
-            "Rural": ["Malihabad Village", "Bakshi Ka Talab Village", "Mohanlalganj Village"]
-          },
-          "Noida": {
-            "Urban": ["Sector 15 Ward 1", "Sector 62 Ward 2"],
-            "Rural": ["Dadri Village", "Jewar Village", "Dankaur Village"]
-          },
-          "Varanasi": {
-            "Urban": ["Dashaswamedh Ward 1", "Lanka Ward 2"],
-            "Rural": ["Pindra Village", "Sevapur Village"]
-          }
-        };
-      }
-
-      if (!activeLgdDatabase["Maharashtra"]) {
-        activeLgdDatabase["Maharashtra"] = {
-          "Pune": {
-            "Urban": ["Kothrud Ward 1", "Shivajinagar Ward 2", "Hinjawadi Ward 3"],
-            "Rural": ["Mulshi Village", "Haveli Village", "Shirur Village", "Bhor Village"]
-          },
-          "Nagpur": {
-            "Urban": ["Sitabuldi Ward 1", "Dharampeth Ward 2"],
-            "Rural": ["Kamptee Village", "Kalmeshwar Village", "Saoner Village"]
-          }
-        };
-      }
-
-      // Update sync status
-      lgdSyncStatus.lastSynced = new Date().toLocaleString();
-      lgdSyncStatus.status = "Success";
-      lgdSyncStatus.statesCount = Object.keys(activeLgdDatabase).length;
-      lgdSyncStatus.districtsCount = Object.values(activeLgdDatabase).reduce((acc: number, d: any) => acc + Object.keys(d).length, 0);
-
+      const syncStatus = await syncLgdDatabase();
       res.json({
         success: true,
         message: "LGD Database successfully synchronized with the National Local Government Directory.",
-        syncStatus: lgdSyncStatus,
-        statesCount: lgdSyncStatus.statesCount,
-        districtsCount: lgdSyncStatus.districtsCount,
+        syncStatus,
+        statesCount: syncStatus.statesCount,
+        districtsCount: syncStatus.districtsCount,
       });
     } catch (error: any) {
-      lgdSyncStatus.status = "Failed";
       res.status(500).json({
         success: false,
         error: error.message || "Failed to synchronize LGD database",
