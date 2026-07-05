@@ -50,7 +50,8 @@ import {
   MessageSquare,
   Send,
   Calendar,
-  LineChart
+  LineChart,
+  CloudRain
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -606,6 +607,26 @@ export default function App() {
   const [offsetProjects, setOffsetProjects] = useState<any[]>([]);
   const [methodologies, setMethodologies] = useState<any[]>([]);
   const [selectedPddDoc, setSelectedPddDoc] = useState<any>(null);
+  const [greenBonds, setGreenBonds] = useState<any[]>([]);
+  const [dmrvSensors, setDmrvSensors] = useState<any[]>([]);
+  const [selectedProjectForDmrv, setSelectedProjectForDmrv] = useState<any>(null);
+  const [customTopicId, setCustomTopicId] = useState<string>('0.0.4592011');
+  const [hcsMessages, setHcsMessages] = useState<any[]>([]);
+  const [liveClimateTelemetry, setLiveClimateTelemetry] = useState<any>(null);
+  const [isFetchingClimate, setIsFetchingClimate] = useState<boolean>(false);
+  const [isFetchingHcs, setIsFetchingHcs] = useState<boolean>(false);
+  const [climateLatitude, setClimateLatitude] = useState<string>('18.5204');
+  const [climateLongitude, setClimateLongitude] = useState<string>('73.8567');
+  const [dmrvConsoleTab, setDmrvConsoleTab] = useState<'simulation' | 'climate' | 'hedera'>('simulation');
+  const [showIssueBondModal, setShowIssueBondModal] = useState<any>(null); // holds project to link bond for
+  const [newBondForm, setNewBondForm] = useState({
+    title: '',
+    target_amount: '5000000',
+    baseline_coupon: '8.0',
+    stepdown_coupon: '5.5',
+    mrv_target_co2_kg: '20000',
+    maturity_years: '5'
+  });
   const [showRegisterProjectModal, setShowRegisterProjectModal] = useState(false);
   const [showMintCccModal, setShowMintCccModal] = useState<any>(null); // holds project to mint for
   const [newProjectForm, setNewProjectForm] = useState({
@@ -1416,16 +1437,20 @@ export default function App() {
       
       // 10. Fetch CCTS Market Data & Offset Projects
       if (token) {
-        const [regRes, orderRes, projRes, methRes] = await Promise.all([
+        const [regRes, orderRes, projRes, methRes, bondRes, sensorRes] = await Promise.all([
           fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch(`/api/offset-projects`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/offset-projects/methodologies`, { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch(`/api/offset-projects/methodologies`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`/api/bonds`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`/api/dmrv/sensors`, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
         if (regRes.ok) setRegistryCertificates(await regRes.json());
         if (orderRes.ok) setMarketOrderBook(await orderRes.json());
         if (projRes.ok) setOffsetProjects(await projRes.json());
         if (methRes.ok) setMethodologies(await methRes.json());
+        if (bondRes.ok) setGreenBonds(await bondRes.json());
+        if (sensorRes.ok) setDmrvSensors(await sensorRes.json());
       }
 
       // 9b. Fetch Enterprise Generator specific profiles, contracts, compliance profiles, and schedules
@@ -2765,6 +2790,170 @@ export default function App() {
       }
     };
 
+    const handleIssueBond = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!showIssueBondModal) return;
+      try {
+        setLoading(true);
+        const res = await fetch('/api/bonds/issue', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            project_id: showIssueBondModal.id,
+            title: newBondForm.title || `${showIssueBondModal.title} Performance Debt`,
+            target_amount: newBondForm.target_amount,
+            baseline_coupon: newBondForm.baseline_coupon,
+            stepdown_coupon: newBondForm.stepdown_coupon,
+            mrv_target_co2_kg: newBondForm.mrv_target_co2_kg,
+            maturity_years: newBondForm.maturity_years
+          })
+        });
+        if (res.ok) {
+          alert('Performance-Linked Green Bond successfully issued! Linked to your offset project and deployed on-chain.');
+          setShowIssueBondModal(null);
+          // Reset form
+          setNewBondForm({
+            title: '',
+            target_amount: '5000000',
+            baseline_coupon: '8.0',
+            stepdown_coupon: '5.5',
+            mrv_target_co2_kg: '20000',
+            maturity_years: '5'
+          });
+          // Refetch bonds
+          const bondRes = await fetch('/api/bonds', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (bondRes.ok) setGreenBonds(await bondRes.json());
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Failed to issue bond.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred during bond issuance.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleInvestInBond = async (bondId: string) => {
+      const amount = prompt('Enter investment amount (INR):', '100000');
+      if (!amount || isNaN(Number(amount))) return;
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/bonds/${bondId}/invest`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ amount: Number(amount) })
+        });
+        if (res.ok) {
+          alert('Investment successfully completed! Your funds are locked in the project escrow and registered on Hedera.');
+          // Refetch bonds
+          const bondRes = await fetch('/api/bonds', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (bondRes.ok) setGreenBonds(await bondRes.json());
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleSimulateDmrv = async (projectId: string) => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/dmrv/simulate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            project_id: projectId,
+            additional_co2_kg: 2500
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          alert(`[dMRV Node Alert] ${data.message}\n` +
+                `• Added CO2e reduction: ${data.added_co2_kg} kg\n` +
+                `• Current progress: ${data.current_progress} / ${data.mrv_target} kg\n` +
+                `• Linked Bond Yield Coupon Rate: ${data.interest_rate_percent}%\n` +
+                `• Coupon Step-Down Achieved: ${data.target_achieved ? 'YES! 🎉 Interest rate minimized.' : 'NO (Awaiting target)'}`);
+          
+          // Refetch bonds
+          const bondRes = await fetch('/api/bonds', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (bondRes.ok) setGreenBonds(await bondRes.json());
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchLiveHcsStream = async (topicIdToFetch?: string) => {
+      const activeTopic = topicIdToFetch || customTopicId || '0.0.4592011';
+      try {
+        setIsFetchingHcs(true);
+        const res = await fetch(`/api/dmrv/hedera-stream/${activeTopic}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            setHcsMessages(data.live_messages || []);
+          } else {
+            console.warn('HCS fetch warning: Response was not JSON format.');
+          }
+        } else {
+          let errorMsg = 'Failed to fetch Hedera stream';
+          try {
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              const errData = await res.json();
+              errorMsg = errData.error || errorMsg;
+            }
+          } catch (_) {
+            // body was not JSON
+          }
+          console.warn('HCS fetch warning:', errorMsg);
+        }
+      } catch (err) {
+        console.error('Error fetching Hedera stream:', err);
+      } finally {
+        setIsFetchingHcs(false);
+      }
+    };
+
+    const fetchLiveClimateTelemetry = async (lat?: string, lng?: string) => {
+      const activeLat = lat || climateLatitude || '18.5204';
+      const activeLng = lng || climateLongitude || '73.8567';
+      try {
+        setIsFetchingClimate(true);
+        const res = await fetch(`/api/dmrv/climate-telemetry?latitude=${activeLat}&longitude=${activeLng}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            setLiveClimateTelemetry(data);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching climate telemetry:', err);
+      } finally {
+        setIsFetchingClimate(false);
+      }
+    };
+
     const isRegulator = user?.role === 'regulator' || user?.role === 'super_admin';
 
     return (
@@ -2960,6 +3149,503 @@ export default function App() {
             </div>
           </Card>
         </div>
+
+        {/* Evercity Interoperable dMRV & Sustainable Finance Hub */}
+        <div className="p-6 bg-gradient-to-br from-emerald-950/20 via-black/40 to-blue-950/20 border border-emerald-500/10 rounded-2xl space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-4">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 block mb-1">
+                Evercity Interoperability Module
+              </span>
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Cpu className="text-emerald-400" size={22} />
+                Digital MRV (dMRV) & Sustainable Finance Hub
+              </h3>
+              <p className="text-xs text-white/60 mt-0.5">
+                Launch performance-linked green debt, ingest IoT/Satellite telemetry over Hedera HCS, and trigger automated smart contract interest rate adjustments.
+              </p>
+            </div>
+            {offsetProjects.filter(p => p.status === 'registered').length > 0 && (
+              <button
+                onClick={() => {
+                  const regProj = offsetProjects.find(p => p.status === 'registered');
+                  setShowIssueBondModal(regProj || offsetProjects[0]);
+                  setNewBondForm({
+                    title: `${regProj?.title || 'Circular Project'} Green Bond`,
+                    target_amount: '5000000',
+                    baseline_coupon: '8.0',
+                    stepdown_coupon: '5.5',
+                    mrv_target_co2_kg: '20000',
+                    maturity_years: '5'
+                  });
+                }}
+                className="px-4 py-2 mt-4 md:mt-0 bg-blue-500 hover:bg-blue-400 text-white font-bold uppercase tracking-wider text-xs rounded transition-all flex items-center gap-1.5"
+              >
+                <Plus size={14} /> {t('Issue Performance Bond')}
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Sustainability-Linked Green Bonds */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <TrendingUp size={16} className="text-emerald-400" />
+                Active Sustainability-Linked Debt (SLLs / Green Bonds)
+              </h4>
+
+              {greenBonds.length === 0 ? (
+                <p className="text-xs text-white/40 italic">No green bonds registered under this registry profile.</p>
+              ) : (
+                greenBonds.map(bond => {
+                  const targetAchieved = bond.current_mrv_progress_co2_kg >= bond.mrv_target_co2_kg;
+                  const raisePercent = Math.min(100, (bond.raised_amount / bond.target_amount) * 100);
+                  const mrvPercent = Math.min(100, (bond.current_mrv_progress_co2_kg / bond.mrv_target_co2_kg) * 100);
+                  
+                  return (
+                    <div key={bond.id} className="p-5 bg-black/60 border border-white/5 rounded-xl space-y-4 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
+                      
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="text-[10px] font-mono text-white/40 uppercase">ID: {bond.id}</span>
+                          <h5 className="font-bold text-white text-md leading-snug">{bond.title}</h5>
+                          <p className="text-xs text-white/50">Issuer: {bond.issuer}</p>
+                        </div>
+                        <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded ${
+                          targetAchieved ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                        }`}>
+                          {targetAchieved ? 'Step-down Met' : 'Active'}
+                        </span>
+                      </div>
+
+                      {/* Yield info block */}
+                      <div className="grid grid-cols-3 gap-2 bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                        <div>
+                          <span className="block text-[9px] text-white/40 uppercase">Baseline Yield</span>
+                          <span className="text-sm font-bold text-white">{bond.baseline_coupon}%</span>
+                        </div>
+                        <div>
+                          <span className="block text-[9px] text-emerald-400 uppercase">Step-Down Yield</span>
+                          <span className="text-sm font-bold text-emerald-400">{bond.stepdown_coupon}%</span>
+                        </div>
+                        <div>
+                          <span className="block text-[9px] text-white/40 uppercase">Current Coupon</span>
+                          <span className={`text-sm font-bold ${targetAchieved ? 'text-emerald-400' : 'text-blue-400'}`}>
+                            {targetAchieved ? bond.stepdown_coupon : bond.baseline_coupon}%
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Capital Raised progress */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-white/40">Capital Raised:</span>
+                          <span className="text-white font-mono flex items-center gap-0.5">₹{bond.raised_amount.toLocaleString()} / ₹{bond.target_amount.toLocaleString()}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${raisePercent}%` }} />
+                        </div>
+                      </div>
+
+                      {/* dMRV Target progress */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-emerald-400/80 font-bold">dMRV Coupon Stepdown Progress:</span>
+                          <span className="text-white font-mono">{bond.current_mrv_progress_co2_kg.toLocaleString()} / {bond.mrv_target_co2_kg.toLocaleString()} kg CO₂e</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-500 ${targetAchieved ? 'bg-emerald-500' : 'bg-emerald-500/40'}`} style={{ width: `${mrvPercent}%` }} />
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2 pt-1">
+                        {bond.raised_amount < bond.target_amount && (
+                          <button
+                            onClick={() => handleInvestInBond(bond.id)}
+                            className="flex-1 py-2 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition-colors"
+                          >
+                            Invest in Bond
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setSelectedProjectForDmrv(offsetProjects.find(p => p.id === bond.project_id) || { id: bond.project_id, title: bond.title });
+                          }}
+                          className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/20 rounded-lg text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
+                        >
+                          <Activity size={12} /> View dMRV Consoles
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Live dMRV Telemetry & Satellite Ingestion Console */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <Activity size={16} className="text-emerald-400" />
+                Real-Time dMRV Ingestion & Hedera HCS Streams
+              </h4>
+
+              <div className="p-5 bg-black/60 border border-white/5 rounded-xl space-y-4">
+                {/* Tab Switcher */}
+                <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+                  <button
+                    onClick={() => setDmrvConsoleTab('simulation')}
+                    className={`py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                      dmrvConsoleTab === 'simulation' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    Simulators
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDmrvConsoleTab('climate');
+                      if (!liveClimateTelemetry) {
+                        fetchLiveClimateTelemetry();
+                      }
+                    }}
+                    className={`py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                      dmrvConsoleTab === 'climate' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    Live Air API
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDmrvConsoleTab('hedera');
+                      if (hcsMessages.length === 0) {
+                        fetchLiveHcsStream();
+                      }
+                    }}
+                    className={`py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                      dmrvConsoleTab === 'hedera' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    Hedera Ledger
+                  </button>
+                </div>
+
+                {/* Tab 1: Simulation */}
+                {dmrvConsoleTab === 'simulation' && (
+                  <div className="space-y-4 animate-fade-in text-left">
+                    <div>
+                      <label className="block text-[10px] uppercase text-white/40 mb-1.5">Select Project Node for Stream Simulation</label>
+                      <select
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:border-emerald-500 focus:outline-none"
+                        value={selectedProjectForDmrv?.id || selectedProjectForDmrv?.project_id || ''}
+                        onChange={(e) => {
+                          const proj = offsetProjects.find(p => p.id === e.target.value) || greenBonds.find(b => b.project_id === e.target.value);
+                          if (proj) setSelectedProjectForDmrv(proj);
+                        }}
+                      >
+                        <option value="" className="text-white/40">-- Select a Project Node --</option>
+                        {greenBonds.map(b => (
+                          <option key={b.project_id} value={b.project_id} className="text-white">
+                            {b.title} ({b.id})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedProjectForDmrv ? (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                            <Zap size={10} className="animate-pulse" /> Active Smart Telemetry Devices
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {dmrvSensors.map(sensor => (
+                              <div key={sensor.id} className="p-2.5 bg-white/5 rounded-lg border border-white/5 flex flex-col justify-between">
+                                <div>
+                                  <span className="text-[9px] text-white/30 font-mono block">{sensor.id}</span>
+                                  <span className="font-bold text-white text-[11px] block truncate">{sensor.name}</span>
+                                  <span className="text-[10px] text-white/50 block">{sensor.type}</span>
+                                </div>
+                                <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/5">
+                                  <span className="text-[10px] text-emerald-400 font-mono">{sensor.last_reading}</span>
+                                  <span className="text-[9px] text-white/40">🔋 {sensor.battery}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10 text-xs text-white/70 space-y-1.5">
+                          <p className="font-bold text-emerald-400 uppercase text-[10px]">On-Chain Open Ledgers Link</p>
+                          <p>All readings are cryptographically aggregated into Verifiable Credentials and broadcast over Hedera Consensus Service (HCS) topic ID <span className="font-mono text-emerald-300">0.0.4819432</span>.</p>
+                        </div>
+
+                        <button
+                          onClick={() => handleSimulateDmrv(selectedProjectForDmrv.project_id || selectedProjectForDmrv.id)}
+                          className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold uppercase tracking-wider text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+                        >
+                          <RefreshCw size={14} />
+                          Trigger Telemetry Signal (+2,500 kg CO₂e)
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-white/5 rounded-xl border border-white/5 text-white/40">
+                        <Cpu size={24} className="mx-auto mb-2 text-white/20" />
+                        <p className="text-xs">Please select a project node to initialize the real-time dMRV console.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab 2: Live Climate Satellite API */}
+                {dmrvConsoleTab === 'climate' && (
+                  <div className="space-y-4 animate-fade-in text-left">
+                    <p className="text-[11px] text-white/60">
+                      Query real-time atmospheric greenhouse gas concentration & fine particulates directly from Copernicus Sentinel-5P Atmosphere Ingestion pipeline.
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] uppercase text-white/40 mb-1">Target Latitude</label>
+                        <input
+                          type="text"
+                          className="w-full bg-[#141414] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs focus:border-emerald-500 focus:outline-none"
+                          value={climateLatitude}
+                          onChange={(e) => setClimateLatitude(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase text-white/40 mb-1">Target Longitude</label>
+                        <input
+                          type="text"
+                          className="w-full bg-[#141414] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs focus:border-emerald-500 focus:outline-none"
+                          value={climateLongitude}
+                          onChange={(e) => setClimateLongitude(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => fetchLiveClimateTelemetry()}
+                      disabled={isFetchingClimate}
+                      className="w-full py-2 bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-500/20 text-black font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center justify-center gap-1.5"
+                    >
+                      {isFetchingClimate ? (
+                        <>
+                          <RefreshCw size={12} className="animate-spin" /> Fetching Live Sat Telemetry...
+                        </>
+                      ) : (
+                        <>
+                          <CloudRain size={12} /> Pull Live Sentinel Telemetry
+                        </>
+                      )}
+                    </button>
+
+                    {liveClimateTelemetry && (
+                      <div className="space-y-2 border-t border-white/5 pt-3">
+                        <div className="flex justify-between items-center text-[10px]">
+                          <span className="text-emerald-400 font-bold uppercase tracking-wider">● Live Feed: Verified</span>
+                          <span className="text-white/40 font-mono">Timestamp: {new Date(liveClimateTelemetry.timestamp).toLocaleTimeString()}</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          {Object.entries(liveClimateTelemetry.metrics || {}).map(([key, item]: any) => (
+                            <div key={key} className="p-2 bg-white/5 rounded-lg border border-white/5">
+                              <span className="block text-[9px] text-white/40 truncate">{item.label}</span>
+                              <span className="text-sm font-bold text-white font-mono">{item.value.toFixed(1)} <span className="text-[9px] text-emerald-400 normal-case">{item.unit}</span></span>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-[9px] text-white/30 italic text-center">Data ingested globally over free Open-Meteo Air Quality proxies & Copernicus sentinel constellation.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab 3: Live Hedera HCS Ledger */}
+                {dmrvConsoleTab === 'hedera' && (
+                  <div className="space-y-4 animate-fade-in text-left">
+                    <p className="text-[11px] text-white/60">
+                      View raw cryptographic consensus telemetry events directly anchored on the public Hedera Hashgraph Network.
+                    </p>
+
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block text-[10px] uppercase text-white/40 mb-1">Hedera Topic ID</label>
+                        <input
+                          type="text"
+                          className="w-full bg-[#141414] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs focus:border-emerald-500 focus:outline-none"
+                          placeholder="0.0.4592011"
+                          value={customTopicId}
+                          onChange={(e) => setCustomTopicId(e.target.value)}
+                        />
+                      </div>
+                      <button
+                        onClick={() => fetchLiveHcsStream()}
+                        disabled={isFetchingHcs}
+                        style={{ height: '32px', marginTop: '19px' }}
+                        className="px-3 bg-blue-500 hover:bg-blue-400 disabled:bg-blue-500/20 text-white font-bold uppercase text-[10px] tracking-wider rounded-lg transition-all flex items-center gap-1"
+                      >
+                        {isFetchingHcs ? <RefreshCw size={11} className="animate-spin" /> : <Search size={11} />}
+                        Query
+                      </button>
+                    </div>
+
+                    {/* Scrolling Feed Logs */}
+                    <div className="bg-[#0b0b0b] border border-white/5 rounded-xl overflow-hidden">
+                      <div className="bg-white/5 px-3 py-1.5 border-b border-white/5 flex justify-between items-center">
+                        <span className="text-[9px] text-white/40 uppercase font-mono">Stream Feed Log</span>
+                        <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider animate-pulse flex items-center gap-1">
+                          ● Live {hcsMessages.length > 0 ? "Ledger" : "Polling"}
+                        </span>
+                      </div>
+
+                      <div className="p-1 max-h-[180px] overflow-y-auto font-mono text-[10px] space-y-1">
+                        {hcsMessages.length === 0 ? (
+                          <div className="text-center py-6 text-white/30 italic">
+                            No HCS ledger messages loaded. Click Query to stream live Hedera blocks.
+                          </div>
+                        ) : (
+                          hcsMessages.map((msg, idx) => (
+                            <div key={idx} className="p-2 bg-white/5 border border-white/5 rounded text-left">
+                              <div className="flex justify-between text-[9px] text-white/30 border-b border-white/5 pb-0.5 mb-1">
+                                <span>Seq #{msg.sequence_number}</span>
+                                <span>{msg.consensus_timestamp}</span>
+                              </div>
+                              <p className="text-white break-words">
+                                {typeof msg.payload === 'object' 
+                                  ? JSON.stringify(msg.payload) 
+                                  : msg.payload || 'Decrypted payload empty.'}
+                              </p>
+                              <div className="text-[8px] text-white/20 mt-1 truncate">
+                                Hash: {msg.running_hash}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[9px] text-white/40 block leading-tight">
+                      This queries official Hedera mirror node relays on mainnet/testnet. You can feed real topic IDs generated from Hedera Hashgraph or Guardian.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal: Issue Green Bond */}
+        {showIssueBondModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-blue-500/10 to-transparent">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <TrendingUp className="text-blue-400" />
+                  Issue Performance-Linked Green Bond
+                </h3>
+                <button 
+                  onClick={() => setShowIssueBondModal(null)}
+                  className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <form onSubmit={handleIssueBond} className="p-6 space-y-4">
+                <div>
+                  <p className="text-xs text-white/60 mb-2 text-left">
+                    Linking green debt directly to your approved project: <strong className="text-white">{showIssueBondModal.title}</strong>
+                  </p>
+                </div>
+                <div className="text-left">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Bond / Loan Title</label>
+                  <input 
+                    type="text" 
+                    required
+                    placeholder="e.g. Pune Methane Step-Down Bond"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                    value={newBondForm.title}
+                    onChange={e => setNewBondForm({...newBondForm, title: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-left">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Target Capital (INR)</label>
+                    <input 
+                      type="number" 
+                      required
+                      placeholder="e.g. 5000000"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                      value={newBondForm.target_amount}
+                      onChange={e => setNewBondForm({...newBondForm, target_amount: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Maturity (Years)</label>
+                    <input 
+                      type="number" 
+                      required
+                      placeholder="e.g. 5"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                      value={newBondForm.maturity_years}
+                      onChange={e => setNewBondForm({...newBondForm, maturity_years: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-left">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Baseline Yield (%)</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      required
+                      placeholder="e.g. 8.0"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                      value={newBondForm.baseline_coupon}
+                      onChange={e => setNewBondForm({...newBondForm, baseline_coupon: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Step-down Yield (%)</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      required
+                      placeholder="e.g. 5.5"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                      value={newBondForm.stepdown_coupon}
+                      onChange={e => setNewBondForm({...newBondForm, stepdown_coupon: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="text-left">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">dMRV Coupon Stepdown Target (kg CO₂e reduced)</label>
+                  <input 
+                    type="number" 
+                    required
+                    placeholder="e.g. 20000"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                    value={newBondForm.mrv_target_co2_kg}
+                    onChange={e => setNewBondForm({...newBondForm, mrv_target_co2_kg: e.target.value})}
+                  />
+                  <span className="text-[10px] text-white/40 block mt-1">If the project dMRV sensors confirm this emission reduction target is met, the coupon yield drops automatically.</span>
+                </div>
+                <div className="pt-2">
+                  <button 
+                    type="submit"
+                    className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold uppercase tracking-wider py-3 rounded-xl transition-colors"
+                  >
+                    Deploy Bond Smart Contract
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
 
         {/* Modal: Register Project */}
         {showRegisterProjectModal && (
