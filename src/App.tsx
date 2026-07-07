@@ -56,7 +56,9 @@ import {
   Lock,
   Server,
   Workflow,
-  FileCode
+  FileCode,
+  Upload,
+  FileUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -654,7 +656,9 @@ export default function App() {
     maturity_years: '5'
   });
   const [showRegisterProjectModal, setShowRegisterProjectModal] = useState(false);
-  const [showMintCccModal, setShowMintCccModal] = useState<any>(null); // holds project to mint for
+  const [showMrvDataModal, setShowMintCccModal] = useState<any>(null);
+  const [showImportPolicyModal, setShowImportPolicyModal] = useState(false);
+  const [importPolicyForm, setImportPolicyForm] = useState({ name: "", sector: "Waste Management", description: "", standards_body: "", version: "1.0", fileContent: "" }); // holds project to mint for
   const [newProjectForm, setNewProjectForm] = useState({
     title: '',
     description: '',
@@ -2255,10 +2259,13 @@ export default function App() {
           {/* Navigation */}
           <nav className="flex items-center justify-between p-6 md:px-12 border-b border-white/10 bg-[var(--color-bg)]/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500 rounded-xl text-black">
+              <div className="p-2 bg-emerald-500 rounded-xl text-black shadow-lg shadow-emerald-500/20">
                 <Leaf size={24} />
               </div>
-              <span className="text-xl font-bold tracking-tighter">RUPAYKG</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold tracking-tighter leading-none">RUPAYKG</span>
+                <span className="text-[9px] font-mono text-emerald-400 tracking-widest mt-1 uppercase">Circular Economy OS</span>
+              </div>
             </div>
             <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
               <a href="#features" className="hover:text-white transition-colors">{t('Features')}</a>
@@ -2314,13 +2321,13 @@ export default function App() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-8">
                 <Globe size={16} />
-                {t('Sovereign-Grade CCTS & Offset Market Infrastructure')}
+                {t('Waste Management • Resource Recovery • Digital MRV • ESG')}
               </div>
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 leading-[1.1]">
-                {t('Convert Every Kilogram of Waste into')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">{t('National Market Infrastructure')}</span>
+                {t("India's Circular Economy")} <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">{t('Operating System')}</span>
               </h1>
               <p className="text-xl text-white/60 mb-12 max-w-2xl mx-auto leading-relaxed">
-                {t('RupayKg is India’s comprehensive Environmental Financial Infrastructure platform, directly integrating local waste mitigation projects into national registry-compatible MRV architectures and carbon offset exchanges.')}
+                {t('A unified digital platform for municipalities, industries, and rural ecosystems to manage resource flows. Integrating Waste Management, Digital MRV, Carbon Accounting, EPR Compliance, ESG Reporting, and AI-driven Operational Intelligence.')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
@@ -2368,31 +2375,58 @@ export default function App() {
               viewport={{ once: true }}
               className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-32 relative z-10 scroll-mt-32"
             >
-              <Card className="bg-black/40">
-                <div className="p-3 bg-blue-500/20 text-blue-400 rounded-xl w-fit mb-6">
-                  <Activity size={24} />
+              <Card className="bg-black/40 hover:border-emerald-500/30 transition-colors group">
+                <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit mb-6 group-hover:bg-emerald-500/20 transition-colors">
+                  <RefreshCw size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{t('Multi-Rail Value Engine')}</h3>
+                <h3 className="text-xl font-bold mb-3">{t('Waste & Resource Recovery')}</h3>
                 <p className="text-white/50 leading-relaxed">
-                  {t('Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.')}
+                  {t('End-to-end traceability for municipal solid waste and agricultural biomass. Track collection, transport, and processing in real-time.')}
                 </p>
               </Card>
-              <Card className="bg-black/40">
-                <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl w-fit mb-6">
+              <Card className="bg-black/40 hover:border-blue-500/30 transition-colors group">
+                <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl w-fit mb-6 group-hover:bg-blue-500/20 transition-colors">
                   <ShieldCheck size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{t('AI-Verified Intake')}</h3>
+                <h3 className="text-xl font-bold mb-3">{t('Sovereign Digital MRV')}</h3>
                 <p className="text-white/50 leading-relaxed">
-                  {t('Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.')}
+                  {t('Automated measurement, reporting, and verification for carbon mitigation. Immutable audit trails with GPS, timestamp, and verifiable evidence.')}
                 </p>
               </Card>
-              <Card className="bg-black/40">
-                <div className="p-3 bg-purple-500/20 text-purple-400 rounded-xl w-fit mb-6">
-                  <TrendingUp size={24} />
+              <Card className="bg-black/40 hover:border-purple-500/30 transition-colors group">
+                <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl w-fit mb-6 group-hover:bg-purple-500/20 transition-colors">
+                  <Leaf size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{t('Rural Wealth Creation')}</h3>
+                <h3 className="text-xl font-bold mb-3">{t('Carbon Accounting')}</h3>
                 <p className="text-white/50 leading-relaxed">
-                  {t('Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.')}
+                  {t('Generate compliant project design documents and calculate emission reductions using standard methodologies (CCTS / BEE).')}
+                </p>
+              </Card>
+              <Card className="bg-black/40 hover:border-amber-500/30 transition-colors group">
+                <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl w-fit mb-6 group-hover:bg-amber-500/20 transition-colors">
+                  <Scale size={24} />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{t('EPR Compliance')}</h3>
+                <p className="text-white/50 leading-relaxed">
+                  {t('Streamlined Extended Producer Responsibility reporting. Connect producers with authorized recyclers to meet state and national mandates.')}
+                </p>
+              </Card>
+              <Card className="bg-black/40 hover:border-cyan-500/30 transition-colors group">
+                <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl w-fit mb-6 group-hover:bg-cyan-500/20 transition-colors">
+                  <BarChart3 size={24} />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{t('Enterprise ESG Reporting')}</h3>
+                <p className="text-white/50 leading-relaxed">
+                  {t('Generate comprehensive Scope 3 dashboards and sustainability impact reports for CSR contributors, boards, and regulatory bodies.')}
+                </p>
+              </Card>
+              <Card className="bg-black/40 hover:border-pink-500/30 transition-colors group">
+                <div className="p-3 bg-pink-500/10 text-pink-400 rounded-xl w-fit mb-6 group-hover:bg-pink-500/20 transition-colors">
+                  <Brain size={24} />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{t('AI-Driven Intelligence')}</h3>
+                <p className="text-white/50 leading-relaxed">
+                  {t('Machine learning for waste classification, anomaly detection in weighbridge data, and predictive carbon yield forecasting.')}
                 </p>
               </Card>
             </motion.div>
@@ -2424,7 +2458,7 @@ export default function App() {
                         { label: 'Total Weight', value: publicImpact ? `${(publicImpact.total_weight_kg / 1000).toFixed(1)}t` : '0t', icon: Scale, color: 'emerald' },
                         { label: 'CCC Offset', value: publicImpact ? `${(publicImpact.total_ccc_amount_kg / 1000).toFixed(1)}t` : '0t', icon: Globe, color: 'cyan' },
                         { label: 'Active Nodes', value: publicImpact ? publicImpact.active_nodes.toLocaleString() : '0', icon: Activity, color: 'blue' },
-                        { label: 'Value Minted', value: publicImpact ? `₹${(publicImpact.total_value / 1000000).toFixed(1)}M` : '₹0', icon: Wallet, color: 'purple' }
+                        { label: 'Verified Mitigation', value: publicImpact ? `₹${(publicImpact.total_value / 1000000).toFixed(1)}M` : '₹0', icon: Wallet, color: 'purple' }
                       ].map((stat) => (
                         <div key={stat.label} className="p-4 rounded-2xl bg-white/5 border border-white/5">
                           <stat.icon size={16} className={`text-${stat.color}-400 mb-2`} />
@@ -2509,7 +2543,7 @@ export default function App() {
                   { step: "01", title: t("Generate"), desc: t("Citizens collect agricultural, municipal, or industrial waste.") },
                   { step: "02", title: t("Aggregate"), desc: t("Aggregators verify, weigh, and transport waste to facilities.") },
                   { step: "03", title: t("Process"), desc: t("Recyclers convert waste into usable materials or energy.") },
-                  { step: "04", title: t("Mint Value"), desc: t("Smart contracts distribute funds across all 5 value rails.") }
+                  { step: "04", title: t("Generate Evidence"), desc: t("Smart contracts distribute funds across all 5 value rails.") }
                 ].map((item) => (
                   <div key={item.step} className="relative p-6 border border-white/10 rounded-2xl bg-white/5">
                     <div className="text-5xl font-bold text-white/10 mb-4 font-mono">{item.step}</div>
@@ -2592,9 +2626,12 @@ export default function App() {
                 <div className="p-1.5 bg-emerald-500 rounded-lg text-black">
                   <Leaf size={18} />
                 </div>
-                <span className="text-lg font-bold tracking-tighter">RUPAYKG</span>
+                <div className="flex flex-col">
+                  <span className="text-lg font-bold tracking-tighter leading-none">RUPAYKG</span>
+                  <span className="text-[8px] font-mono text-emerald-400 tracking-widest mt-1 uppercase">Circular Economy OS</span>
+                </div>
               </div>
-              <p className="text-white/40 text-sm">{t('© 2026 RupayKg Sovereign Digital MRV Infrastructure. All rights reserved.')}</p>
+              <p className="text-white/40 text-sm">{t('© 2026 RupayKg Digital Operating System. All rights reserved.')}</p>
               <div className="flex gap-4 text-sm text-white/40">
                 <a href="#" className="hover:text-white transition-colors">{t('Privacy')}</a>
                 <a href="#" className="hover:text-white transition-colors">{t('Terms')}</a>
@@ -2955,12 +2992,12 @@ export default function App() {
     };
 
     // Function to handle minting credit certificates
-    const handleMintCcc = async (e: React.FormEvent) => {
+    const handleCompileMrv = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!showMintCccModal) return;
+      if (!showMrvDataModal) return;
       try {
         setLoading(true);
-        const res = await fetch(`/api/offset-projects/${showMintCccModal.id}/mint`, {
+        const res = await fetch(`/api/offset-projects/${showMrvDataModal.id}/compile-mrv`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2974,7 +3011,7 @@ export default function App() {
         });
         if (res.ok) {
           const data = await res.json();
-          alert(`Carbon Credit Certificates (CCCs) successfully minted! Serial: ${data.certificate.id}. Distributed to developer wallet.`);
+          alert(`Verified MRV Audit Payload compiled! Serial: ${data.certificate.id}. Distributed to developer wallet.`);
           setShowMintCccModal(null);
           // Refetch offset projects & registry certificates
           const [projRes, regRes] = await Promise.all([
@@ -3196,7 +3233,7 @@ export default function App() {
                 {t('Registry Administration & Validation (ACVA)')}
               </h3>
               <p className="text-sm text-white/60 mb-6">
-                {t('Review submitted Project Design Documents (PDDs) under CERC standards, perform compliance audits, approve project registrations, and mint sovereign-grade CCTS Certificates.')}
+                {t('Review submitted Project Design Documents (PDDs) under CERC standards, perform compliance audits, approve project registrations, and prepare verified MRV records for CCTS issuance.')}
               </p>
               <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').length === 0 ? (
@@ -3244,7 +3281,7 @@ export default function App() {
                             }}
                             className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-500 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
                           >
-                            {t('Mint CCC Credits')}
+                            {t('Compile MRV Data')}
                           </button>
                         )}
                       </div>
@@ -3340,10 +3377,20 @@ export default function App() {
           <Card className="p-6 border-white/10 bg-black/40 backdrop-blur-md relative overflow-hidden">
             <div className="absolute top-0 right-0 p-32 bg-blue-500/5 blur-[100px] rounded-full pointer-events-none"></div>
             <div className="relative z-10">
-            <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
-              <BookOpen className="text-blue-400" size={24} />
-              {t('Approved BEE Methodologies')}
-            </h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <BookOpen className="text-blue-400" size={24} />
+                {t('Approved BEE Methodologies')}
+              </h3>
+              {(user?.role === 'super_admin' || user?.role === 'regulator') && (
+                <button
+                  onClick={() => setShowImportPolicyModal(true)}
+                  className="px-3 py-1.5 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5"
+                >
+                  <FileUp size={14} /> {t('Import Policy')}
+                </button>
+              )}
+            </div>
               <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                 {methodologies.length === 0 ? (
                   <p className="text-white/40 text-sm text-center py-8">{t('Loading methodologies...')}</p>
@@ -4023,8 +4070,170 @@ export default function App() {
           </div>
         )}
 
-        {/* Modal: Mint Carbon Credits */}
-        {showMintCccModal && (
+        {/* Modal: Import Policy / Methodology */}
+        {showImportPolicyModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden flex flex-col"
+            >
+              <div className="p-4 border-b border-white/10 flex justify-between items-center bg-blue-950/20">
+                <h3 className="font-bold text-lg flex items-center gap-2 text-white">
+                  <FileUp className="text-blue-400" />
+                  {t('Import Methodology Policy')}
+                </h3>
+                <button onClick={() => setShowImportPolicyModal(false)} className="text-white/50 hover:text-white transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-4 overflow-y-auto max-h-[70vh] custom-scrollbar">
+                <div>
+                  <p className="text-sm text-white/60 mb-4 leading-relaxed">
+                    Upload a .policy file or define standard climate tracking methodologies. Compiled rules and verifiable schema definitions are synced directly to the registry node.
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1">{t('Methodology Name')}</label>
+                    <input 
+                      type="text" 
+                      value={importPolicyForm.name}
+                      onChange={e => setImportPolicyForm({...importPolicyForm, name: e.target.value})}
+                      placeholder="e.g. ACM0022 Alternative Waste Treatment"
+                      className="w-full bg-black border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none transition-colors"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1">{t('Sector')}</label>
+                      <select 
+                        value={importPolicyForm.sector}
+                        onChange={e => setImportPolicyForm({...importPolicyForm, sector: e.target.value})}
+                        className="w-full bg-black border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none transition-colors"
+                      >
+                        <option value="Waste Management">Waste Management</option>
+                        <option value="Biomass/Agriculture">Biomass/Agriculture</option>
+                        <option value="Energy">Energy</option>
+                        <option value="Transport">Transport</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1">{t('Standards Body')}</label>
+                      <input 
+                        type="text" 
+                        value={importPolicyForm.standards_body}
+                        onChange={e => setImportPolicyForm({...importPolicyForm, standards_body: e.target.value})}
+                        placeholder="e.g. CERC / BEE"
+                        className="w-full bg-black border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1">{t('Description')}</label>
+                    <textarea 
+                      value={importPolicyForm.description}
+                      onChange={e => setImportPolicyForm({...importPolicyForm, description: e.target.value})}
+                      rows={3}
+                      placeholder="Methodology applicability conditions and baseline logic..."
+                      className="w-full bg-black border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none transition-colors resize-none"
+                    />
+                  </div>
+                  
+                  <div className="border border-dashed border-white/20 rounded-lg p-6 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors relative">
+                    <input 
+                      type="file" 
+                      accept=".policy,.json"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                           const reader = new FileReader();
+                           reader.onload = (evt) => {
+                              try {
+                                const parsed = JSON.parse(evt.target?.result as string);
+                                setImportPolicyForm({
+                                  ...importPolicyForm,
+                                  name: parsed.name || importPolicyForm.name,
+                                  sector: parsed.sector || importPolicyForm.sector,
+                                  description: parsed.description || importPolicyForm.description,
+                                  standards_body: parsed.standards_body || importPolicyForm.standards_body,
+                                  fileContent: JSON.stringify(parsed, null, 2)
+                                });
+                              } catch(err) {
+                                // Just store raw text if not json
+                                setImportPolicyForm({
+                                  ...importPolicyForm,
+                                  fileContent: evt.target?.result as string
+                                });
+                              }
+                           };
+                           reader.readAsText(file);
+                        }
+                      }}
+                    />
+                    <Upload className="text-white/40 mb-2" size={32} />
+                    <p className="text-sm font-bold text-white/70">Upload .policy File</p>
+                    <p className="text-xs text-white/40 mt-1">Drag and drop or click to browse</p>
+                  </div>
+                  
+                  {importPolicyForm.fileContent && (
+                    <div className="bg-black border border-white/10 rounded p-3">
+                      <p className="text-xs font-bold text-emerald-400 flex items-center gap-1 mb-2"><CheckCircle2 size={12}/> File Parsed Successfully</p>
+                      <pre className="text-[10px] text-white/60 font-mono overflow-hidden text-ellipsis whitespace-nowrap">
+                        {importPolicyForm.fileContent.substring(0, 150)}...
+                      </pre>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+              <div className="p-4 border-t border-white/10 bg-black flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowImportPolicyModal(false)}
+                  className="px-4 py-2 text-white/70 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"
+                >
+                  {t('Cancel')}
+                </button>
+                <button 
+                  disabled={!importPolicyForm.name || !importPolicyForm.description || loading}
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      const res = await fetch('/api/offset-projects/methodologies/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(importPolicyForm)
+                      });
+                      if (res.ok) {
+                        alert('Methodology Policy Successfully Compiled to Registry Node!');
+                        setShowImportPolicyModal(false);
+                        const updated = await fetch('/api/offset-projects/methodologies', { headers: { 'Authorization': `Bearer ${token}` } });
+                        if (updated.ok) setMethodologies(await updated.json());
+                        setImportPolicyForm({ name: "", sector: "Waste Management", description: "", standards_body: "", version: "1.0", fileContent: "" });
+                      } else {
+                        alert('Failed to import policy.');
+                      }
+                    } catch (e) {
+                      console.error(e);
+                    }
+                    setLoading(false);
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {loading ? <Loader2 size={14} className="animate-spin" /> : <Database size={14} />} 
+                  {t('Compile & Import')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        
+        {/* Modal: Compile MRV Data */}
+        {showMrvDataModal && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -4033,8 +4242,8 @@ export default function App() {
             >
               <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-blue-500/10 to-transparent">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <BookOpen className="text-blue-400" />
-                  {t('Mint Sovereign CCTS Credits')}
+                  <FileText className="text-blue-400" />
+                  {t('Compile MRV Audit Data')}
                 </h3>
                 <button 
                   onClick={() => setShowMintCccModal(null)}
@@ -4043,13 +4252,16 @@ export default function App() {
                   <X size={18} />
                 </button>
               </div>
-              <form onSubmit={handleMintCcc} className="p-6 space-y-4">
+              <form onSubmit={handleCompileMrv} className="p-6 space-y-4">
+                <p className="text-xs text-white/60">
+                  {t('Generate high-quality, verifiable project data mapped to approved CCTS methodologies. This data payload can be submitted to National Registries by project developers or authorized auditors.')}
+                </p>
                 <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                  <p className="text-xs text-blue-300 font-medium">Project: {showMintCccModal.title}</p>
-                  <p className="text-[10px] text-white/40 mt-1">Owner ID: {showMintCccModal.owner_id}</p>
+                  <p className="text-xs text-blue-300 font-medium">Project: {showMrvDataModal.title}</p>
+                  <p className="text-[10px] text-white/40 mt-1">Owner ID: {showMrvDataModal.owner_id}</p>
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Carbon Reduced (kg CO₂e)')}</label>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">{t('Total Volume Mitigated (kg CO₂e)')}</label>
                   <input 
                     type="number" 
                     required
@@ -4086,7 +4298,7 @@ export default function App() {
                     type="submit"
                     className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold uppercase tracking-wider py-3 rounded-xl transition-colors"
                   >
-                    {t('Mint & Issue Credits')}
+                    {t('Compile MRV & Prepare for Registry')}
                   </button>
                 </div>
               </form>
@@ -4116,19 +4328,19 @@ export default function App() {
             </div>
             <h2 className="text-3xl font-bold flex items-center gap-2 text-white">
               <LineChart className="text-emerald-400" />
-              {t('Indian Carbon Market (ICM) Exchange')}
+              {t('National Registry Interaction Hub')}
             </h2>
             <p className="text-white/70 mt-3 max-w-2xl text-sm leading-relaxed">
-              {t('National trading platform for Carbon Credit Certificates (CCCs) under the Carbon Credit Trading Scheme (CCTS). Trade high-quality offsets generated from verified circular economy projects (Biomass, Waste-to-Energy, MRF Diversion, Composting).')}
+              {t('RupayKg does not issue carbon credits. We provide the foundational MRV data platform that allows you to submit high-quality, fully verifiable project data and baseline calculations to independent validators and national registries (CCTS / BEE) for offset issuance.')}
             </p>
           </div>
           <div className="mt-6 md:mt-0 flex gap-4 relative z-10">
             <div className="px-6 py-4 bg-black/40 border border-emerald-500/20 rounded-xl flex flex-col items-center backdrop-blur-sm">
-              <span className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">{t('Active CCCs')}</span>
+              <span className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">{t('Verified Data Payloads')}</span>
               <span className="text-3xl font-mono text-white">{registryCertificates.filter(c => c.status === 'active' || c.status === 'Registry Ready').length}</span>
             </div>
             <div className="px-6 py-4 bg-black/40 border border-blue-500/20 rounded-xl flex flex-col items-center backdrop-blur-sm">
-              <span className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">{t('Open Orders')}</span>
+              <span className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">{t('Validation Requests')}</span>
               <span className="text-3xl font-mono text-white">{marketOrderBook.filter(o => o.status === 'open').length}</span>
             </div>
           </div>
@@ -4143,9 +4355,9 @@ export default function App() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                   <ShieldCheck className="text-emerald-400" size={24} />
-                  {t('My CCC Vault')}
+                  {t('Verified MRV Payload Vault')}
                 </h3>
-                <span className="text-xs text-white/50">{registryCertificates.length} Certificates</span>
+                <span className="text-xs text-white/50">{registryCertificates.length} Records</span>
               </div>
               
               <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -4153,7 +4365,7 @@ export default function App() {
                   <div className="text-center py-12 border border-dashed border-white/10 rounded-xl bg-white/5">
                     <ShieldCheck className="mx-auto text-white/20 mb-3" size={32} />
                     <p className="text-white/40 text-sm">{t('Your registry vault is currently empty.')}</p>
-                    <p className="text-white/30 text-xs mt-1">{t('Mint CCCs from your verified offset projects to populate your vault.')}</p>
+                    <p className="text-white/30 text-xs mt-1">{t('Compile MRV data from your verified projects to populate your vault.')}</p>
                   </div>
                 ) : (
                   registryCertificates.map(cert => (
@@ -4183,18 +4395,18 @@ export default function App() {
                           <button 
                             className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-blue-900/20"
                             onClick={async () => {
-                              const price = prompt('Enter selling price per ton (INR):', '500');
-                              if (price && !isNaN(Number(price))) {
+                              const confirm = window.confirm('Send this data payload to independent ACVA accredited auditors for verification?');
+                              if (confirm) {
                                 const res = await fetch('/api/market/orders', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                  body: JSON.stringify({ ccc_id: cert.id, price_per_ton: Number(price), order_type: 'sell' })
+                                  body: JSON.stringify({ ccc_id: cert.id, price_per_ton: 0, order_type: 'sell' })
                                 });
-                                if (res.ok) alert('Order placed!');
+                                if (res.ok) alert('Validation Request Submitted!');
                               }
                             }}
                           >
-                            {t('List for Sale')}
+                            {t('Request Validation')}
                           </button>
                         )}
                       </div>
@@ -4212,9 +4424,9 @@ export default function App() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                   <Activity className="text-blue-400" size={24} />
-                  {t('Live Power Exchange')}
+                  {t('Auditor / Validator Dashboard')}
                 </h3>
-                <span className="text-xs text-white/50">{marketOrderBook.filter(o => o.status === 'open').length} Active Orders</span>
+                <span className="text-xs text-white/50">{marketOrderBook.filter(o => o.status === 'open').length} Pending Audits</span>
               </div>
               
               <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -4241,31 +4453,34 @@ export default function App() {
                       
                       <div className="flex items-center justify-between mt-2 pt-4 border-t border-white/5">
                         <div>
-                          <p className="text-xs text-white/40 uppercase tracking-widest mb-1">Asking Price</p>
-                          <p className="text-2xl font-mono text-white">
-                            <span className="text-emerald-400 mr-1">₹</span>{order.price_per_ton} <span className="text-sm text-white/40">/ ton</span>
+                          <p className="text-xs text-white/40 uppercase tracking-widest mb-1">Status</p>
+                          <p className="text-lg font-bold text-white">
+                            <span className="text-blue-400 mr-1">●</span> {t('Awaiting Verification')}
                           </p>
                         </div>
                         
                         {order.user_id !== user?.id ? (
                           <button 
-                            className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2"
+                            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2"
                             onClick={async () => {
-                              const res = await fetch('/api/market/execute', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                body: JSON.stringify({ order_id: order.id })
-                              });
-                              if (res.ok) alert('Trade executed successfully!');
-                              else alert('Trade failed. Insufficient funds or order expired.');
+                              const confirm = window.confirm('Verify this data payload against BEE methodology and forward to National CCTS Registry?');
+                              if (confirm) {
+                                const res = await fetch('/api/market/execute', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                  body: JSON.stringify({ order_id: order.id })
+                                });
+                                if (res.ok) alert('Verified and Forwarded to CCTS Registry!');
+                                else alert('Action failed.');
+                              }
                             }}
                           >
-                            <ShoppingCart size={16} />
-                            {t('Buy CCC')}
+                            <CheckCircle2 size={16} />
+                            {t('Audit & Verify')}
                           </button>
                         ) : (
                           <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-xs text-white/40 font-medium">
-                            {t('Your Order')}
+                            {t('Your Request')}
                           </div>
                         )}
                       </div>
@@ -5207,10 +5422,13 @@ export default function App() {
       {/* Sidebar Navigation */}
       <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
         <div className="flex items-center gap-3 mb-12 px-2">
-          <div className="p-2 bg-emerald-500 rounded-xl text-black">
+          <div className="p-2 bg-emerald-500 rounded-xl text-black shadow-lg shadow-emerald-500/20">
             <Leaf size={24} />
           </div>
-          <span className="text-xl font-bold tracking-tighter hidden md:block">RUPAYKG</span>
+          <div>
+            <span className="text-xl font-bold tracking-tighter hidden md:block">RUPAYKG</span>
+            <span className="text-[9px] font-mono text-emerald-400 hidden md:block tracking-widest mt-0.5">CIRCULAR ECONOMY OS</span>
+          </div>
         </div>
 
         <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
@@ -5803,7 +6021,7 @@ export default function App() {
                           `--- OFFICIALLY VERIFIED SECURE TRUST TRACE ---\n` +
                           `Digital Ledger Authenticated: TRUE\n` +
                           `Ledger Root Hash Reference: HEDERA_GUARDIAN_TRUST_PROOFS\n` +
-                          `CCC Minter Agency Credit: MINTED BY RupayKg CARBON TRUST METRIC ENGINE\n`;
+                          `MRV Auditor Credit: VERIFIED BY RupayKg MRV ENGINE\n`;
                         const blob = new Blob([reportText], { type: 'text/plain' });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
@@ -6656,7 +6874,7 @@ export default function App() {
                       disabled={loading || !uploadData.double_counting_declaration}
                       className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50"
                     >
-                      {loading ? t('Processing...') : t('Confirm Intake & Mint Value')}
+                      {loading ? t('Processing...') : t('Confirm Intake & Generate Evidence')}
                     </button>
                   </form>
                 </Card>
@@ -7875,7 +8093,7 @@ export default function App() {
                         {t('CCC Pool Status')}
                       </h3>
                       <div className="flex flex-col items-center justify-center h-40 bg-black/40 rounded-xl border border-white/5 relative group">
-                        <p className="text-white/40 text-sm uppercase tracking-widest mb-2">{t('Total Minted CCC Units')}</p>
+                        <p className="text-white/40 text-sm uppercase tracking-widest mb-2">{t('Verified MRV Volume')}</p>
                         <p className="text-5xl font-mono text-cyan-400">{cccPool.total_ccc_units_minted?.toFixed(2) || 0} kg</p>
                         <button 
                           onClick={() => setView('blockchain')}
@@ -8725,7 +8943,7 @@ export default function App() {
                     <Scale className="text-emerald-400" /> {t('VI. Regulator Sovereignty')}
                   </h2>
                   <p className="text-white/70 text-sm leading-relaxed">
-                    {t('CCC issuance authority remains regulator-controlled. RupayKg does not independently mint CCCs. All CCCs must be event-traceable, registry-compatible, and align with national CCC governance frameworks.')}
+                    {t('Issuance authority remains regulator-controlled. RupayKg generates registry-ready MRV data but does not independently issue CCCs. All CCCs must be event-traceable, registry-compatible, and align with national CCC governance frameworks.')}
                   </p>
                 </Card>
 
@@ -8800,7 +9018,7 @@ export default function App() {
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article VI — Regulator Sovereignty')}</h4>
-                      <p>{t('CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.')}</p>
+                      <p>{t('Issuance authority shall remain under regulator control. RupayKg serves as the digital evidence layer.')}</p>
                     </div>
                     <div>
                       <h4 className="font-bold text-white mb-2">{t('Article VII — Digital Carbon MRV')}</h4>
@@ -8812,7 +9030,7 @@ export default function App() {
                 <div className="mt-12 pt-12 border-t border-white/10 text-center">
                   <p className="text-emerald-400 font-bold text-xl">{t('Institutional Identity')}</p>
                   <p className="text-white/40 mt-2 max-w-2xl mx-auto">
-                    {t('RupayKg is hereby defined as: A Sovereign Digital MRV Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.')}
+                    {t('RupayKg is hereby defined as: India\'s Circular Economy Operating System, a unified digital platform integrating Waste Management, Digital MRV, and Carbon Accounting under a single national architecture.')}
                   </p>
                 </div>
               </section>
@@ -8833,7 +9051,7 @@ export default function App() {
                     <Cpu className="text-emerald-400" />
                     {t('Hedera HCS Open Source Ledger')}
                   </h3>
-                  <p className="text-white/40 text-sm mt-1">{t('Verifiable Hedera Consensus Service (HCS) record of all CCC Certificate (CCC) minting events')}</p>
+                  <p className="text-white/40 text-sm mt-1">{t('Verifiable Hedera Consensus Service (HCS) record of all MRV verification events')}</p>
                 </div>
                 {isChainValid !== null && (
                   <div className={`px-4 py-2 rounded-full border flex items-center gap-2 text-sm font-bold self-start ${isChainValid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
@@ -9012,7 +9230,7 @@ export default function App() {
                         <Zap size={24} />
                       </div>
                       <div>
-                        <span className="text-[10px] uppercase text-white/40 block font-mono">Automated dMRV Mintings</span>
+                        <span className="text-[10px] uppercase text-white/40 block font-mono">Automated dMRV Verifications</span>
                         <span className="text-sm font-bold text-white block">
                           {guardianSubmissions.length} {t('Secured Audits')}
                         </span>
@@ -9067,7 +9285,7 @@ export default function App() {
                         <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block">Tier 4: Ledger</span>
                         <h5 className="font-bold text-xs text-white">Hedera DLT Network</h5>
                         <p className="text-[10px] text-white/50 leading-relaxed">
-                          Public trust ledger. Locks timestamps, topic sequence hashes (HCS), and mints verified tokens (HTS).
+                          Public trust ledger. Locks timestamps, topic sequence hashes (HCS), and registers verified payloads (HTS).
                         </p>
                       </div>
                     </div>
@@ -9226,7 +9444,7 @@ export default function App() {
                       <Card className="p-6 border-white/5 bg-white/5 space-y-4">
                         <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
                           <Zap size={12} className="text-emerald-400" />
-                          {t('Phase 3: Automated dMRV Submission & Token Minting')}
+                          {t('Phase 3: Automated dMRV Submission & Audit Trail')}
                         </h4>
 
                         <form onSubmit={handleProcessMrvDocument} className="space-y-4">
@@ -9306,7 +9524,7 @@ export default function App() {
                             className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5"
                           >
                             {isMrvProcessing ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-                            {t('Validate dMRV & Mint Hedera Assets')}
+                            {t('Validate dMRV & Register on HCS')}
                           </button>
                         </form>
 
@@ -9333,7 +9551,7 @@ export default function App() {
                                 <div><strong>HCS Seq Number:</strong> {recentMrvResult.hcsMessage.sequenceNumber}</div>
                                 <div className="truncate"><strong>Running Hash:</strong> {recentMrvResult.hcsMessage.runningHash}</div>
                                 <div><strong>Asset Type:</strong> {recentMrvResult.assetType}</div>
-                                <div><strong>Quantity Issued:</strong> <span className="font-bold text-cyan-400">{recentMrvResult.tokensMinted} Credits</span></div>
+                                <div><strong>Quantity Verified:</strong> <span className="font-bold text-cyan-400">{recentMrvResult.tokensMinted} Credits</span></div>
                               </div>
                             </motion.div>
                           )}

@@ -672,7 +672,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
   }
 
-  function mintBlock(data: any, type?: string, relatedId?: string, additionalArgs?: any) {
+  function appendBlock(data: any, type?: string, relatedId?: string, additionalArgs?: any) {
     const lastBlock = blockchain[blockchain.length - 1];
     const timestamp = Date.now();
     const newBlock = {
@@ -986,7 +986,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     
     const total_waste_kg = genRecords.reduce((acc, r) => acc + (r.weight_kg || r.weight || 0), 0);
     const total_value_rupees = genRecords.reduce((acc, r) => acc + (r.generator_payout || r.total_value || 0), 0);
-    const total_ccc_minted = genRecords.filter(r => r.mrv_status === 'verified').reduce((acc, r) => acc + (r.ccc_amount_kg || 0), 0);
+    const total_ccc_verified = genRecords.filter(r => r.mrv_status === 'verified').reduce((acc, r) => acc + (r.ccc_amount_kg || 0), 0);
     
     // Climate metrics calculations (carbon Engine-aligned)
     const carbon_co2e_avoided_kg = total_waste_kg * 1.83; // Baseline average reduction factor
@@ -998,7 +998,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       legal_name: gen.legal_name || "Facility",
       total_waste_kg,
       total_value_rupees,
-      total_ccc_minted,
+      total_ccc_verified,
       carbon_co2e_avoided_kg,
       diversion_rate,
       compliance_rating: 98,
@@ -1387,7 +1387,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       if (status === "verified") {
         const user = users.find((u) => u.id === record.citizen_id);
         
-        // System mints and earns the CCCs. 
+        // System registers and tracks verified MRV payloads. 
         // The Generator does not receive their carbon bonus, it stays in the system as system earnings.
         // Therefore, we skip crediting the citizen_id wallet.
 
@@ -1462,9 +1462,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           ccc_amount_kg: record.ccc_amount_kg,
           verified_by: req.user.id,
           registry_serial_number: registrySerialNumber,
-          event_type: "CCC_MINTING",
+          event_type: "MRV_VERIFICATION",
         };
-        const block = mintBlock(blockchainTx);
+        const block = appendBlock(blockchainTx);
         record.blockchain_hash = block.hash;
         record.blockchain_index = block.index;
 
@@ -2081,11 +2081,11 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         filteredRecords = filteredRecords.filter((r) => r.context === context);
       }
 
-      const total_minted = filteredRecords.reduce(
+      const total_verified = filteredRecords.reduce(
         (sum, r) => sum + (r.ccc_amount_kg || 0),
         0,
       );
-      res.json({ total_ccc_units_minted: total_minted });
+      res.json({ total_ccc_units_verified: total_verified });
     },
   );
 
@@ -2522,7 +2522,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       id: "policy-drec-100",
       policyName: "dREC Renewable Energy Tracking Policy v1.4",
       version: "1.4.0",
-      description: "Automated dREC tracking and minting methodology. Measures solar/wind MWh output to mint Renewable Energy Certificates.",
+      description: "Automated dREC tracking and verification methodology. Measures solar/wind MWh output to verify Renewable Energy Certificates.",
       status: "Active",
       schema: {
         solarPanelsInstalled: "number",
@@ -2655,20 +2655,20 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       return res.status(404).json({ error: `Policy ${policy_id} not found on this Guardian node.` });
     }
 
-    let carbonMintedKg = 0;
+    let carbonVerifiedKg = 0;
     let assetType = "Carbon Offset";
 
     if (policy_id.includes("drec") || policy.policyName.toLowerCase().includes("renewable") || policy.policyName.toLowerCase().includes("drec")) {
       const mwh = Number(document.megawattHoursGenerated || document.mwh || 0);
-      carbonMintedKg = mwh * 700;
+      carbonVerifiedKg = mwh * 700;
       assetType = "dREC Certificate";
     } else if (policy_id.includes("methane") || policy.policyName.toLowerCase().includes("methane") || policy.policyName.toLowerCase().includes("acm0022")) {
       const weight = Number(document.divertedWeightKg || document.weight_kg || 0);
-      carbonMintedKg = weight * 0.5;
+      carbonVerifiedKg = weight * 0.5;
       assetType = "Methane Avoidance Credit";
     } else {
       const val = Number(document.metricValue || document.value || 100);
-      carbonMintedKg = val * 1.2;
+      carbonVerifiedKg = val * 1.2;
     }
 
     const sequenceNumber = Math.floor(Math.random() * 100000) + 1000;
@@ -2685,7 +2685,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         blockId: block_id,
         assetType,
         document,
-        carbonMintedKg
+        carbonVerifiedKg
       },
       timestamp: new Date().toISOString()
     };
@@ -2695,39 +2695,39 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       user_id: guardianAuthority?.username || "EcoRegistryAdmin",
       waste_type: assetType,
       weight_kg: document.divertedWeightKg || document.solarPanelsInstalled || 0,
-      ccc_amount_kg: carbonMintedKg.toFixed(2),
+      ccc_amount_kg: carbonVerifiedKg.toFixed(2),
       verified_by: "Hedera Guardian Policy Engine",
       registry_serial_number: `HEDERA-GUARDIAN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
-      event_type: "GUARDIAN_MRV_MINT",
+      event_type: "GUARDIAN_MRV_VERIFICATION",
       hcs_sequence: sequenceNumber,
       hcs_running_hash: runningHash
     };
 
-    const mintedBlock = mintBlock(blockchainTx);
+    const appendedBlock = appendBlock(blockchainTx);
 
     const submission = {
       id: `sub-${crypto.randomBytes(6).toString('hex')}`,
       policyId: policy_id,
       blockId: block_id,
       document,
-      carbonMintedKg,
+      carbonVerifiedKg,
       assetType,
       hcsMessage: hcsMsg,
-      blockchainIndex: mintedBlock.index,
+      blockchainIndex: appendedBlock.index,
       timestamp: new Date().toISOString(),
-      status: "Verified & Minted"
+      status: "Verified & Registered"
     };
 
     guardianSubmissions.push(submission);
 
     res.json({
       success: true,
-      message: `MRV document successfully processed. Minted ${carbonMintedKg.toFixed(2)} carbon-offset equivalent tokens on Hedera network.`,
+      message: `MRV document successfully processed. Registered ${carbonVerifiedKg.toFixed(2)} kg CO2e verified mitigation on Hedera network.`,
       submission_id: submission.id,
       hcsMessage: hcsMsg,
-      blockchainIndex: mintedBlock.index,
+      blockchainIndex: appendedBlock.index,
       assetType,
-      tokensMinted: carbonMintedKg.toFixed(2)
+      tokensVerified: carbonVerifiedKg.toFixed(2)
     });
   });
 
@@ -3319,7 +3319,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json({ message: "Project officially registered in Indian Carbon Market CCTS registry!", project: proj });
   });
 
-  app.post("/api/offset-projects/:projectId/mint", auth(["super_admin", "regulator"]), (req: any, res) => {
+  app.post("/api/offset-projects/:projectId/compile-mrv", auth(["super_admin", "regulator"]), (req: any, res) => {
     const { amount_kg, waste_type, sector } = req.body;
     const proj = carbonProjects.find(p => p.id === req.params.projectId);
     if (!proj) return res.status(404).json({ error: "Project not found." });
@@ -3342,11 +3342,32 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     
     cccCertificates.push(newCert);
     
-    res.json({ message: "Carbon Credit Certificates (CCCs) successfully minted and distributed to developer's ledger wallet!", certificate: newCert });
+    res.json({ message: "Verified MRV Audit Payload successfully compiled and ready for National Registry submission!", certificate: newCert });
   });
 
   app.get("/api/offset-projects/methodologies", auth(), (req, res) => {
     res.json(methodologyLibrary);
+  });
+
+  app.post("/api/offset-projects/methodologies/import", auth(), (req, res) => {
+    const { name, sector, description, rules, standards_body, version } = req.body;
+    
+    if (!name || !sector || !description) {
+      return res.status(400).json({ error: "Missing required methodology fields" });
+    }
+
+    const newMethodology = {
+      id: `CERC-AM-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+      name,
+      sector,
+      description,
+      standards_body: standards_body || "Custom / Imported",
+      version: version || "1.0",
+      rules: rules || []
+    };
+
+    methodologyLibrary.push(newMethodology);
+    res.json({ message: "Methodology successfully compiled and synced to registry node.", methodology: newMethodology });
   });
 
   app.post("/api/offset-projects/generate-pdd", auth(), async (req: any, res: any) => {
@@ -3668,14 +3689,14 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
     const cert = cccCertificates.find(c => c.id === sellOrder.ccc_id);
     if (!cert) return res.status(404).json({ error: "Certificate not found." });
 
-    // Execute Trade
-    cert.owner_id = req.user.id;
-    cert.status = "active";
-    sellOrder.status = "executed";
-    sellOrder.buyer_id = req.user.id;
+    // Execute Verification & Transmission
+    cert.auditor_id = req.user.id;
+    cert.status = "VERIFIED_BY_ACVA";
+    sellOrder.status = "verified";
+    sellOrder.auditor_id = req.user.id;
     sellOrder.execution_time = new Date().toISOString();
 
-    res.json({ message: "Trade executed successfully", executed_order: sellOrder, certificate: cert });
+    res.json({ message: "Audit Completed and Payload Transmitted to CCTS Registry successfully", executed_order: sellOrder, certificate: cert });
   });
 
   app.post("/api/ai/generate", async (req: any, res: any) => {
