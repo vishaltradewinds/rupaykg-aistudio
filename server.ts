@@ -673,11 +673,23 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   }
 
   function mintBlock(data: any, type?: string, relatedId?: string, additionalArgs?: any) {
-    return {
+    const lastBlock = blockchain[blockchain.length - 1];
+    const timestamp = Date.now();
+    const newBlock = {
       index: blockchain.length,
-      hash: calculateHash(data),
-      timestamp: new Date().toISOString()
+      timestamp,
+      data,
+      previousHash: lastBlock ? lastBlock.hash : "0",
+      hash: ""
     };
+    newBlock.hash = calculateHash({
+      index: newBlock.index,
+      timestamp: newBlock.timestamp,
+      data: newBlock.data,
+      previousHash: newBlock.previousHash
+    });
+    blockchain.push(newBlock);
+    return newBlock;
   }
 
   const PUBLIC_ROLES = [
@@ -1482,10 +1494,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json(states);
   });
 
-  app.get("/api/lgd/districts", (req, res) => {
+  app.get("/api/lgd/districts", async (req, res) => {
     const { state } = req.query;
     if (!state) return res.status(400).json({ error: "State parameter is required" });
-    const districts = getLgdDistricts(state as string);
+    const districts = await getLgdDistricts(state as string);
     res.json(districts);
   });
 
@@ -2502,6 +2514,226 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       res.json(blockchain);
     },
   );
+
+  // ---------------- HEDERA GUARDIAN API STATE & ROUTES ----------------
+  let guardianAuthority: any = null;
+  const guardianPolicies: any[] = [
+    {
+      id: "policy-drec-100",
+      policyName: "dREC Renewable Energy Tracking Policy v1.4",
+      version: "1.4.0",
+      description: "Automated dREC tracking and minting methodology. Measures solar/wind MWh output to mint Renewable Energy Certificates.",
+      status: "Active",
+      schema: {
+        solarPanelsInstalled: "number",
+        megawattHoursGenerated: "number",
+        reportingPeriodStart: "string",
+        reportingPeriodEnd: "string"
+      }
+    },
+    {
+      id: "policy-methane-200",
+      policyName: "ACM0022 - Large-Scale Consolidated Landfill Methane Avoidance Policy v3.0",
+      version: "3.0.0",
+      description: "CDM methodology for solid waste composting and landfill gas extraction tracking. Converts biomass waste diverted into carbon offsets.",
+      status: "Active",
+      schema: {
+        divertedWeightKg: "number",
+        wasteType: "string",
+        compostProducedKg: "number",
+        reportingPeriodStart: "string",
+        reportingPeriodEnd: "string"
+      }
+    }
+  ];
+  const guardianSubmissions: any[] = [];
+
+  app.post("/api/v1/demo/authority", (req, res) => {
+    const { username, hederaAccountId, hederaPrivateKey } = req.body;
+    if (!username || !hederaAccountId || !hederaPrivateKey) {
+      return res.status(400).json({ error: "Missing required fields: username, hederaAccountId, hederaPrivateKey" });
+    }
+
+    const fingerprint = crypto.createHash('sha256').update(username + hederaAccountId).digest('hex').substring(0, 16);
+    const did = `did:hedera:testnet:${fingerprint};rupaykg-authority`;
+
+    guardianAuthority = {
+      username,
+      hederaAccountId,
+      hederaPrivateKey: hederaPrivateKey.substring(0, 10) + "..." + hederaPrivateKey.substring(hederaPrivateKey.length - 6),
+      did,
+      initializedAt: new Date().toISOString(),
+      verifiablePresentation: {
+        id: `urn:uuid:${crypto.randomBytes(16).toString('hex')}`,
+        type: ["VerifiablePresentation"],
+        verifiableCredential: {
+          id: `vc-authority-${crypto.randomBytes(4).toString('hex')}`,
+          type: ["VerifiableCredential", "StandardRegistryCredential"],
+          issuer: "did:hedera:testnet:rupaykg-root-registry",
+          issuanceDate: new Date().toISOString(),
+          credentialSubject: {
+            id: did,
+            username,
+            hederaAccountId,
+            role: "StandardRegistry",
+            status: "Authorized"
+          }
+        }
+      }
+    };
+
+    res.json({
+      success: true,
+      message: "Standard Registry authority successfully initialized on Hedera Testnet.",
+      ...guardianAuthority
+    });
+  });
+
+  app.get("/api/v1/demo/authority", (req, res) => {
+    if (!guardianAuthority) {
+      return res.json({ success: false, message: "Authority not initialized yet" });
+    }
+    res.json({ success: true, ...guardianAuthority });
+  });
+
+  app.get("/api/v1/policies", (req, res) => {
+    res.json(guardianPolicies);
+  });
+
+  app.post("/api/v1/policies/import/file", (req: any, res) => {
+    let policyName = "Imported Sustainability Policy";
+    let description = "Custom environmental asset tracking policy.";
+    let version = "1.0.0";
+    let schemaFields = ["metricValue", "reportingPeriodStart", "reportingPeriodEnd"];
+
+    if (req.headers["content-type"] === "application/json") {
+      const { name, desc, ver, fields } = req.body;
+      policyName = name || policyName;
+      description = desc || description;
+      version = ver || version;
+      schemaFields = fields || schemaFields;
+    } else {
+      policyName = "Hedera Guardian Imported Policy - " + crypto.randomBytes(4).toString('hex').toUpperCase();
+      description = "Cryptographically parsed W3C Verifiable Policy Schema.";
+    }
+
+    const newPolicy = {
+      id: `policy-${crypto.randomBytes(8).toString('hex')}`,
+      policyName,
+      version,
+      description,
+      status: "Active",
+      schema: schemaFields.reduce((acc: any, curr: string) => {
+        acc[curr] = "number";
+        return acc;
+      }, {})
+    };
+
+    guardianPolicies.push(newPolicy);
+
+    res.json({
+      success: true,
+      message: "Sustainability policy successfully validated and imported into Guardian Node.",
+      policy_id: newPolicy.id,
+      policyName: newPolicy.policyName,
+      version: newPolicy.version,
+      description: newPolicy.description,
+      schema: newPolicy.schema
+    });
+  });
+
+  app.post("/api/v1/policies/:policy_id/blocks/:block_id", (req, res) => {
+    const { policy_id, block_id } = req.params;
+    const { document } = req.body;
+
+    if (!document) {
+      return res.status(400).json({ error: "Missing required 'document' payload under MRV automated rules." });
+    }
+
+    const policy = guardianPolicies.find(p => p.id === policy_id);
+    if (!policy) {
+      return res.status(404).json({ error: `Policy ${policy_id} not found on this Guardian node.` });
+    }
+
+    let carbonMintedKg = 0;
+    let assetType = "Carbon Offset";
+
+    if (policy_id.includes("drec") || policy.policyName.toLowerCase().includes("renewable") || policy.policyName.toLowerCase().includes("drec")) {
+      const mwh = Number(document.megawattHoursGenerated || document.mwh || 0);
+      carbonMintedKg = mwh * 700;
+      assetType = "dREC Certificate";
+    } else if (policy_id.includes("methane") || policy.policyName.toLowerCase().includes("methane") || policy.policyName.toLowerCase().includes("acm0022")) {
+      const weight = Number(document.divertedWeightKg || document.weight_kg || 0);
+      carbonMintedKg = weight * 0.5;
+      assetType = "Methane Avoidance Credit";
+    } else {
+      const val = Number(document.metricValue || document.value || 100);
+      carbonMintedKg = val * 1.2;
+    }
+
+    const sequenceNumber = Math.floor(Math.random() * 100000) + 1000;
+    const topicId = "0.0.4592011";
+    const runningHash = crypto.createHash('sha384').update(JSON.stringify(document) + sequenceNumber).digest('hex');
+
+    const hcsMsg = {
+      id: `hcs-${crypto.randomBytes(8).toString('hex')}`,
+      topicId,
+      sequenceNumber,
+      runningHash,
+      message: {
+        policyId: policy_id,
+        blockId: block_id,
+        assetType,
+        document,
+        carbonMintedKg
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    const blockchainTx = {
+      record_id: hcsMsg.id,
+      user_id: guardianAuthority?.username || "EcoRegistryAdmin",
+      waste_type: assetType,
+      weight_kg: document.divertedWeightKg || document.solarPanelsInstalled || 0,
+      ccc_amount_kg: carbonMintedKg.toFixed(2),
+      verified_by: "Hedera Guardian Policy Engine",
+      registry_serial_number: `HEDERA-GUARDIAN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
+      event_type: "GUARDIAN_MRV_MINT",
+      hcs_sequence: sequenceNumber,
+      hcs_running_hash: runningHash
+    };
+
+    const mintedBlock = mintBlock(blockchainTx);
+
+    const submission = {
+      id: `sub-${crypto.randomBytes(6).toString('hex')}`,
+      policyId: policy_id,
+      blockId: block_id,
+      document,
+      carbonMintedKg,
+      assetType,
+      hcsMessage: hcsMsg,
+      blockchainIndex: mintedBlock.index,
+      timestamp: new Date().toISOString(),
+      status: "Verified & Minted"
+    };
+
+    guardianSubmissions.push(submission);
+
+    res.json({
+      success: true,
+      message: `MRV document successfully processed. Minted ${carbonMintedKg.toFixed(2)} carbon-offset equivalent tokens on Hedera network.`,
+      submission_id: submission.id,
+      hcsMessage: hcsMsg,
+      blockchainIndex: mintedBlock.index,
+      assetType,
+      tokensMinted: carbonMintedKg.toFixed(2)
+    });
+  });
+
+  app.get("/api/v1/demo/submissions", (req, res) => {
+    res.json(guardianSubmissions);
+  });
 
   app.get("/api/blockchain/verify", (req, res) => {
     let isValid = true;

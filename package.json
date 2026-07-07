@@ -12,7 +12,7 @@
     "start": "node dist/server.cjs"
   },
   "dependencies": {
-    "@google/genai": "^1.29.0",
+    "@google/genai": "^1.52.0",
     "@google/generative-ai": "^0.24.1",
     "@hashgraph/sdk": "^2.81.0",
     "@tailwindcss/vite": "^4.1.14",
@@ -20,7 +20,7 @@
     "@types/leaflet": "^1.9.21",
     "@vitalets/google-translate-api": "^9.2.1",
     "@vitejs/plugin-react": "^5.0.4",
-    "axios": "^1.13.6",
+    "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.4.1",
     "cors": "^2.8.6",

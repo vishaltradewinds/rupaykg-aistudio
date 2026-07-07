@@ -51,7 +51,12 @@ import {
   Send,
   Calendar,
   LineChart,
-  CloudRain
+  CloudRain,
+  Key,
+  Lock,
+  Server,
+  Workflow,
+  FileCode
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -383,6 +388,27 @@ export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
   const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects'>('dashboard');
   
+  // Hedera Guardian Portal State Variables
+  const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
+  const [guardianAuth, setGuardianAuth] = useState<any>(null);
+  const [guardianPolicies, setGuardianPolicies] = useState<any[]>([]);
+  const [guardianSubmissions, setGuardianSubmissions] = useState<any[]>([]);
+  const [authUsername, setAuthUsername] = useState('EcoRegistryAdmin');
+  const [authAccountId, setAuthAccountId] = useState('0.0.123456');
+  const [authPrivateKey, setAuthPrivateKey] = useState('302e020100300506032b657002010101738c6d1d2b83');
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [activePolicyId, setActivePolicyId] = useState('policy-drec-100');
+  const [newPolicyName, setNewPolicyName] = useState('');
+  const [newPolicyDesc, setNewPolicyDesc] = useState('');
+  const [newPolicyFields, setNewPolicyFields] = useState('divertedWeightKg,wasteType');
+  const [isImportLoading, setIsImportLoading] = useState(false);
+  const [drecPanels, setDrecPanels] = useState('150');
+  const [drecMwh, setDrecMwh] = useState('42.8');
+  const [methaneWeight, setMethaneWeight] = useState('5000');
+  const [methaneType, setMethaneType] = useState('Organic Waste');
+  const [isMrvProcessing, setIsMrvProcessing] = useState(false);
+  const [recentMrvResult, setRecentMrvResult] = useState<any>(null);
+  
   useEffect(() => {
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
@@ -647,28 +673,44 @@ export default function App() {
   const [ledgerResponse, setLedgerResponse] = useState<string>('');
 
   useEffect(() => {
+    let isMounted = true;
     const fetchConfig = async () => {
-      try {
-        const [wasteRes, paymentRes] = await Promise.all([
-          fetch('/api/waste-types'),
-          fetch('/api/payment-config')
-        ]);
-        
-        if (wasteRes.ok) {
-          const data = await wasteRes.json();
-          setWasteTypes(data);
-          setUploadData(prev => ({ ...prev, waste_type: data[0]?.type || prev.waste_type }));
+      let retries = 5;
+      let success = false;
+      while (retries > 0 && !success && isMounted) {
+        try {
+          const [wasteRes, paymentRes] = await Promise.all([
+            fetch('/api/waste-types'),
+            fetch('/api/payment-config')
+          ]);
+          
+          if (!isMounted) return;
+
+          if (wasteRes.ok && paymentRes.ok) {
+            const wasteData = await wasteRes.json();
+            const paymentData = await paymentRes.json();
+            setWasteTypes(wasteData);
+            setUploadData(prev => ({ ...prev, waste_type: wasteData[0]?.type || prev.waste_type }));
+            setPaymentConfig(paymentData);
+            success = true;
+          } else {
+            throw new Error('Non-ok response from configuration endpoints');
+          }
+        } catch (err) {
+          retries--;
+          if (retries > 0 && isMounted) {
+            const delay = Math.min(5000, 1000 * (5 - retries));
+            await new Promise(r => setTimeout(r, delay));
+          } else {
+            console.error("Failed to fetch configuration after multiple retries", err);
+          }
         }
-        
-        if (paymentRes.ok) {
-          const data = await paymentRes.json();
-          setPaymentConfig(data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch configuration", err);
       }
     };
     fetchConfig();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // LGD Fetching Logic (Registration)
@@ -989,19 +1031,46 @@ export default function App() {
   }, [token, adminRoleFilter, operatingContext, adminSubView, dashboardStateFilter, dashboardDistrictFilter, dashboardSubdistrictFilter, dashboardLocalAreaFilter]);
 
   useEffect(() => {
+    let isMounted = true;
     const checkDbStatus = async () => {
-      try {
-        const res = await fetch('/api/db-status');
-        if (res.ok) {
-          const data = await res.json();
-          setDbStatus(data);
+      let retries = 5;
+      let success = false;
+      while (retries > 0 && !success && isMounted) {
+        try {
+          const headers: Record<string, string> = {};
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+          const res = await fetch('/api/db-status', { headers });
+          
+          if (!isMounted) return;
+
+          if (res.ok) {
+            const data = await res.json();
+            setDbStatus(data);
+            success = true;
+          } else if (res.status === 401 || res.status === 403) {
+            // Authentic credentials issue - don't keep retrying as it will keep returning 401/403
+            success = true;
+          } else {
+            throw new Error(`DB status endpoint returned status: ${res.status}`);
+          }
+        } catch (err) {
+          retries--;
+          if (retries > 0 && isMounted) {
+            const delay = Math.min(5000, 1000 * (5 - retries));
+            await new Promise(r => setTimeout(r, delay));
+          } else {
+            console.error("Failed to fetch DB status", err);
+          }
         }
-      } catch (err) {
-        console.error("Failed to fetch DB status", err);
       }
     };
     checkDbStatus();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
 
   // Removed demo functions for live production environment
 
@@ -1199,8 +1268,140 @@ export default function App() {
     }
     if (view === 'blockchain') {
       fetchBlockchainLedger();
+      fetchGuardianData();
     }
   }, [view, user]);
+
+  const fetchGuardianData = async () => {
+    try {
+      const authRes = await fetch('/api/v1/demo/authority');
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        if (authData.success) {
+          setGuardianAuth(authData);
+        } else {
+          setGuardianAuth(null);
+        }
+      }
+      
+      const policiesRes = await fetch('/api/v1/policies');
+      if (policiesRes.ok) {
+        const policiesData = await policiesRes.json();
+        setGuardianPolicies(policiesData);
+      }
+      
+      const submissionsRes = await fetch('/api/v1/demo/submissions');
+      if (submissionsRes.ok) {
+        const subsData = await submissionsRes.json();
+        setGuardianSubmissions(subsData);
+      }
+    } catch (err) {
+      console.error("Failed to fetch Hedera Guardian status", err);
+    }
+  };
+
+  const handleInitializeAuthority = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsAuthLoading(true);
+    try {
+      const res = await fetch('/api/v1/demo/authority', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: authUsername,
+          hederaAccountId: authAccountId,
+          hederaPrivateKey: authPrivateKey
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGuardianAuth(data);
+        fetchBlockchainLedger();
+        fetchGuardianData();
+      }
+    } catch (err) {
+      console.error("Failed to initialize Standard Registry authority", err);
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleImportPolicy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPolicyName) return;
+    setIsImportLoading(true);
+    try {
+      const fields = newPolicyFields.split(',').map(f => f.trim());
+      const res = await fetch('/api/v1/policies/import/file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newPolicyName,
+          desc: newPolicyDesc,
+          ver: '1.0.0',
+          fields
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNewPolicyName('');
+        setNewPolicyDesc('');
+        await fetchGuardianData();
+      }
+    } catch (err) {
+      console.error("Failed to import policy", err);
+    } finally {
+      setIsImportLoading(false);
+    }
+  };
+
+  const handleProcessMrvDocument = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsMrvProcessing(true);
+    setRecentMrvResult(null);
+    try {
+      let documentPayload: any = {};
+      if (activePolicyId === 'policy-drec-100') {
+        documentPayload = {
+          solarPanelsInstalled: Number(drecPanels),
+          megawattHoursGenerated: Number(drecMwh),
+          reportingPeriodStart: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+          reportingPeriodEnd: new Date().toISOString()
+        };
+      } else if (activePolicyId === 'policy-methane-200') {
+        documentPayload = {
+          divertedWeightKg: Number(methaneWeight),
+          wasteType: methaneType,
+          reportingPeriodStart: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+          reportingPeriodEnd: new Date().toISOString()
+        };
+      } else {
+        const fields = newPolicyFields.split(',').map(f => f.trim());
+        fields.forEach(field => {
+          documentPayload[field] = 100;
+        });
+        documentPayload.reportingPeriodStart = new Date().toISOString();
+        documentPayload.reportingPeriodEnd = new Date().toISOString();
+      }
+
+      const block_id = `block-${Math.floor(Math.random() * 10000)}`;
+      const res = await fetch(`/api/v1/policies/${activePolicyId}/blocks/${block_id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document: documentPayload })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setRecentMrvResult(data);
+        await fetchGuardianData();
+        fetchBlockchainLedger();
+      }
+    } catch (err) {
+      console.error("Failed to process MRV Document", err);
+    } finally {
+      setIsMrvProcessing(false);
+    }
+  };
 
   const fetchBlockchainLedger = async () => {
     try {
@@ -2965,96 +3166,103 @@ export default function App() {
         className="space-y-6"
       >
         {/* Hero Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 bg-gradient-to-r from-emerald-950/40 to-blue-950/40 border border-emerald-500/20 rounded-2xl relative overflow-hidden">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-8 bg-gradient-to-r from-emerald-950/80 via-black to-blue-950/80 border border-emerald-500/20 rounded-2xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
           <div className="relative z-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1 block">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2 inline-block px-2 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
               {t('Indian Carbon Market (ICM) Compliance')}
             </span>
-            <h2 className="text-2xl font-bold flex items-center gap-2 text-white">
+            <h2 className="text-3xl font-bold flex items-center gap-2 text-white">
               <Sprout className="text-emerald-400" />
               {t('Offset Project Infrastructure')}
             </h2>
-            <p className="text-white/60 mt-1 max-w-2xl">{t('Register waste-to-carbon projects, generate AI-assisted Project Design Documents (PDDs), and connect to the CCTS Offset Mechanism.')}</p>
+            <p className="text-white/60 mt-2 max-w-2xl text-sm leading-relaxed">{t('Register waste-to-carbon projects (Biomass, MSW, Biogas, Composting), generate AI-assisted Project Design Documents (PDDs), and connect to the national CCTS Offset Mechanism.')}</p>
           </div>
           <button 
-             className="px-4 py-2 mt-4 md:mt-0 bg-emerald-500 hover:bg-emerald-400 text-black font-bold uppercase tracking-widest rounded transition-colors flex items-center gap-2"
+             className="px-6 py-3 mt-6 md:mt-0 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase tracking-widest rounded-lg transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2 relative z-10"
              onClick={() => setShowRegisterProjectModal(true)}
           >
-             <Plus size={16} /> {t('New Project')}
+             <Plus size={18} /> {t('New Project')}
           </button>
         </div>
 
         {/* Auditor & Regulator Panel (Conditional) */}
         {isRegulator && (
-          <Card className="p-6 border-amber-500/20 bg-amber-500/5 relative overflow-hidden bg-black">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full filter blur-3xl pointer-events-none" />
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-2 text-amber-400">
-              <ShieldAlert size={20} className="text-amber-400" />
-              {t('ACVA Auditor & BEE Regulator Workspace')}
-            </h3>
-            <p className="text-xs text-white/60 mb-4">
-              {t('Review submitted Project Design Documents (PDDs) under CERC standards, perform compliance audits, approve project registrations, and mint sovereign-grade CCTS Certificates.')}
-            </p>
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-              {offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').length === 0 ? (
-                <p className="text-white/40 text-sm italic">{t('No active projects awaiting review or registered in registry.')}</p>
-              ) : (
-                offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').map(proj => (
-                  <div key={proj.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded ${proj.status === 'registered' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                          {proj.status === 'registered' ? 'Registered' : 'Under ACVA Review'}
-                        </span>
-                        <span className="text-xs text-white/40">ID: {proj.id}</span>
-                      </div>
-                      <h4 className="font-bold text-white">{proj.title}</h4>
-                      <p className="text-xs text-white/50">{proj.description}</p>
-                      <p className="text-[11px] font-mono text-emerald-400 mt-1">Type: {proj.project_type} | Location: {proj.location}</p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() => handleViewPdd(proj.id)}
-                        className="px-3 py-1.5 bg-white/10 text-white hover:bg-white/20 rounded text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1"
-                      >
-                        <FileText size={14} /> {t('Review PDD')}
-                      </button>
-                      {proj.status === 'validation' && (
-                        <button
-                          onClick={() => handleApproveProject(proj.id)}
-                          className="px-3 py-1.5 bg-emerald-500 text-black hover:bg-emerald-400 rounded text-xs font-bold uppercase tracking-wider transition-colors"
-                        >
-                          {t('Validate & Approve')}
-                        </button>
-                      )}
-                      {proj.status === 'registered' && (
-                        <button
-                          onClick={() => {
-                            setShowMintCccModal(proj);
-                            setMintCccForm({
-                              amount_kg: '5000',
-                              waste_type: proj.project_type.includes('Biomass') ? 'Agricultural Residue' : 'MSW',
-                              sector: proj.project_type.includes('Biomass') ? 'Biomass/Agriculture' : 'Waste Management'
-                            });
-                          }}
-                          className="px-3 py-1.5 bg-blue-500 text-white hover:bg-blue-400 rounded text-xs font-bold uppercase tracking-wider transition-colors"
-                        >
-                          {t('Mint CCC Credits')}
-                        </button>
-                      )}
-                    </div>
+          <Card className="p-6 border-amber-500/20 bg-[#0f0f0f] relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-32 bg-amber-500/5 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10">
+              <h3 className="text-xl font-bold flex items-center gap-2 mb-2 text-amber-500">
+                <ShieldAlert size={24} className="text-amber-500" />
+                {t('Registry Administration & Validation (ACVA)')}
+              </h3>
+              <p className="text-sm text-white/60 mb-6">
+                {t('Review submitted Project Design Documents (PDDs) under CERC standards, perform compliance audits, approve project registrations, and mint sovereign-grade CCTS Certificates.')}
+              </p>
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').length === 0 ? (
+                  <div className="text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/5">
+                    <p className="text-white/40 text-sm italic">{t('No active projects awaiting review or registered in registry.')}</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').map(proj => (
+                    <div key={proj.id} className="p-5 bg-black border border-white/5 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border ${proj.status === 'registered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
+                            {proj.status === 'registered' ? 'Registered' : 'Under ACVA Review'}
+                          </span>
+                          <span className="text-xs text-white/40 bg-white/5 px-2 py-0.5 rounded">ID: {proj.id}</span>
+                        </div>
+                        <h4 className="font-bold text-white text-lg">{proj.title}</h4>
+                        <p className="text-xs text-white/50 my-1">{proj.description}</p>
+                        <p className="text-[11px] font-mono text-emerald-400 mt-2 bg-emerald-500/10 px-2 py-1 rounded inline-block">Type: {proj.project_type} | Location: {proj.location}</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          onClick={() => handleViewPdd(proj.id)}
+                          className="px-4 py-2 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2"
+                        >
+                          <FileText size={16} /> {t('Review PDD')}
+                        </button>
+                        {proj.status === 'validation' && (
+                          <button
+                            onClick={() => handleApproveProject(proj.id)}
+                            className="px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-500 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                          >
+                            {t('Validate & Approve')}
+                          </button>
+                        )}
+                        {proj.status === 'registered' && (
+                          <button
+                            onClick={() => {
+                              setShowMintCccModal(proj);
+                              setMintCccForm({
+                                amount_kg: '5000',
+                                waste_type: proj.project_type.includes('Biomass') ? 'Agricultural Residue' : 'MSW',
+                                sector: proj.project_type.includes('Biomass') ? 'Biomass/Agriculture' : 'Waste Management'
+                              });
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-500 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                          >
+                            {t('Mint CCC Credits')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </Card>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* My Offset Projects Card */}
-          <Card className="p-6 border-white/5 bg-white/5">
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
-              <ClipboardList className="text-emerald-400" size={20} />
+          <Card className="p-6 border-white/10 bg-black/40 backdrop-blur-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-32 bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10">
+            <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
+              <ClipboardList className="text-emerald-400" size={24} />
               {t('My Offset Projects')}
             </h3>
             <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2">
@@ -3081,7 +3289,7 @@ export default function App() {
                     <div className="flex gap-2">
                       {proj.status === 'draft_pdd' && (
                         <button 
-                          className="w-full py-2 bg-emerald-500 text-black hover:bg-emerald-400 rounded text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                          className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
                           onClick={async () => {
                              setLoading(true);
                              const draftRes = await fetch('/api/offset-projects/generate-pdd', {
@@ -3115,7 +3323,7 @@ export default function App() {
                       {(proj.status === 'validation' || proj.status === 'registered') && (
                         <button
                           onClick={() => handleViewPdd(proj.id)}
-                          className="w-full py-2 bg-white/10 text-white hover:bg-white/20 border border-white/5 rounded text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                          className="w-full py-2 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
                         >
                           <FileText size={14} /> {t('View Generated PDD')}
                         </button>
@@ -3125,27 +3333,37 @@ export default function App() {
                 ))
               )}
             </div>
+            </div>
           </Card>
 
           {/* Approved Methodologies */}
-          <Card className="p-6 border-white/5 bg-white/5">
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
-              <BookOpen className="text-blue-400" size={20} />
+          <Card className="p-6 border-white/10 bg-black/40 backdrop-blur-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-32 bg-blue-500/5 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10">
+            <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
+              <BookOpen className="text-blue-400" size={24} />
               {t('Approved BEE Methodologies')}
             </h3>
-            <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2">
-              {methodologies.length === 0 ? (
-                <p className="text-white/40 text-sm">{t('Loading methodologies...')}</p>
-              ) : (
-                methodologies.map(meth => (
-                  <div key={meth.id} className="p-4 bg-black/40 border border-white/5 rounded-xl">
-                    <span className="text-[10px] uppercase tracking-widest text-blue-400 font-bold block mb-1">{meth.sector} Sector</span>
-                    <h4 className="font-bold text-white text-sm">{meth.name}</h4>
-                    <p className="text-xs text-white/60 mt-1">{meth.description}</p>
-                    <p className="text-[10px] font-mono text-white/40 mt-2">ID: {meth.id} | Standards: {meth.standards_body} | Version: {meth.version}</p>
-                  </div>
-                ))
-              )}
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                {methodologies.length === 0 ? (
+                  <p className="text-white/40 text-sm text-center py-8">{t('Loading methodologies...')}</p>
+                ) : (
+                  methodologies.map(meth => (
+                    <div key={meth.id} className="p-5 bg-[#0f0f0f] border border-white/10 rounded-xl hover:border-blue-500/30 transition-all">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] uppercase tracking-widest text-blue-400 font-bold px-2 py-1 bg-blue-500/10 rounded border border-blue-500/20">{meth.sector} Sector</span>
+                        <span className="text-[10px] font-mono text-white/40 bg-black px-2 py-1 rounded">ID: {meth.id}</span>
+                      </div>
+                      <h4 className="font-bold text-white text-base mt-2">{meth.name}</h4>
+                      <p className="text-sm text-white/60 mt-2">{meth.description}</p>
+                      <div className="mt-4 pt-3 border-t border-white/5 flex gap-4">
+                        <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Std: <span className="text-white/70">{meth.standards_body}</span></p>
+                        <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Ver: <span className="text-white/70">{meth.version}</span></p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </Card>
         </div>
@@ -3888,104 +4106,173 @@ export default function App() {
         exit={{ opacity: 0, y: -20 }}
         className="space-y-6"
       >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 bg-gradient-to-r from-emerald-950/40 to-blue-950/40 border border-emerald-500/20 rounded-2xl relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-2xl font-bold flex items-center gap-2 text-white">
-              <LineChart className="text-emerald-400" />
-              {t('CERC Compliance & Offset Market')}
-            </h2>
-            <p className="text-white/60 mt-1 max-w-2xl">{t('National carbon certificate exchange and registry integration for compliance and offset mechanisms.')}</p>
-          </div>
-          <div className="mt-4 md:mt-0 flex gap-2">
-            <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold rounded-lg flex flex-col uppercase tracking-widest">
-              <span>{t('Active CCCs')}</span>
-              <span className="text-xl">{registryCertificates.filter(c => c.status === 'active' || c.status === 'Registry Ready').length}</span>
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-8 bg-gradient-to-br from-emerald-950/80 via-black to-blue-950/80 border border-emerald-500/20 rounded-2xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+          <div className="relative z-10 w-full md:w-2/3">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest rounded-full border border-emerald-500/30">ICM / CCTS Registry</span>
+              <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest rounded-full border border-blue-500/30">Live Exchange</span>
             </div>
-            <div className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-bold rounded-lg flex flex-col uppercase tracking-widest">
-              <span>{t('Open Orders')}</span>
-              <span className="text-xl">{marketOrderBook.filter(o => o.status === 'open').length}</span>
+            <h2 className="text-3xl font-bold flex items-center gap-2 text-white">
+              <LineChart className="text-emerald-400" />
+              {t('Indian Carbon Market (ICM) Exchange')}
+            </h2>
+            <p className="text-white/70 mt-3 max-w-2xl text-sm leading-relaxed">
+              {t('National trading platform for Carbon Credit Certificates (CCCs) under the Carbon Credit Trading Scheme (CCTS). Trade high-quality offsets generated from verified circular economy projects (Biomass, Waste-to-Energy, MRF Diversion, Composting).')}
+            </p>
+          </div>
+          <div className="mt-6 md:mt-0 flex gap-4 relative z-10">
+            <div className="px-6 py-4 bg-black/40 border border-emerald-500/20 rounded-xl flex flex-col items-center backdrop-blur-sm">
+              <span className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">{t('Active CCCs')}</span>
+              <span className="text-3xl font-mono text-white">{registryCertificates.filter(c => c.status === 'active' || c.status === 'Registry Ready').length}</span>
+            </div>
+            <div className="px-6 py-4 bg-black/40 border border-blue-500/20 rounded-xl flex flex-col items-center backdrop-blur-sm">
+              <span className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">{t('Open Orders')}</span>
+              <span className="text-3xl font-mono text-white">{marketOrderBook.filter(o => o.status === 'open').length}</span>
             </div>
           </div>
         </div>
 
+        {/* Exchange Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 border-white/5 bg-white/5">
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
-              <ShieldCheck className="text-emerald-400" size={20} />
-              {t('My Registry Vault')}
-            </h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-              {registryCertificates.length === 0 ? (
-                <p className="text-white/40 text-sm">{t('No certificates found in your registry account.')}</p>
-              ) : (
-                registryCertificates.map(cert => (
-                  <div key={cert.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center justify-between">
-                    <div>
-                      <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold">{cert.hierarchy_status || cert.status}</span>
-                      <p className="font-mono text-sm text-white/80">{cert.id.substring(0, 16)}...</p>
-                      <p className="text-xs text-white/40 mt-1">{cert.net_carbon_reduction_kg_co2e?.toFixed(1)} kg CO₂e</p>
-                    </div>
-                    {cert.status !== 'locked_for_trading' ? (
-                      <button 
-                        className="px-3 py-1 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded text-xs transition-colors"
-                        onClick={async () => {
-                          const price = prompt('Enter selling price per ton (INR):', '500');
-                          if (price && !isNaN(Number(price))) {
-                            const res = await fetch('/api/market/orders', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                              body: JSON.stringify({ ccc_id: cert.id, price_per_ton: Number(price), order_type: 'sell' })
-                            });
-                            if (res.ok) alert('Order placed!');
-                          }
-                        }}
-                      >
-                        {t('List on Exchange')}
-                      </button>
-                    ) : (
-                      <span className="text-xs text-amber-400 border border-amber-500/20 bg-amber-500/10 px-2 py-1 rounded">Listed</span>
-                    )}
+          {/* My Vault */}
+          <Card className="p-6 border-white/10 bg-black/40 backdrop-blur-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-32 bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <ShieldCheck className="text-emerald-400" size={24} />
+                  {t('My CCC Vault')}
+                </h3>
+                <span className="text-xs text-white/50">{registryCertificates.length} Certificates</span>
+              </div>
+              
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                {registryCertificates.length === 0 ? (
+                  <div className="text-center py-12 border border-dashed border-white/10 rounded-xl bg-white/5">
+                    <ShieldCheck className="mx-auto text-white/20 mb-3" size={32} />
+                    <p className="text-white/40 text-sm">{t('Your registry vault is currently empty.')}</p>
+                    <p className="text-white/30 text-xs mt-1">{t('Mint CCCs from your verified offset projects to populate your vault.')}</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  registryCertificates.map(cert => (
+                    <div key={cert.id} className="p-5 bg-[#0f0f0f] border border-white/10 rounded-xl hover:border-emerald-500/30 transition-all group">
+                      <div className="flex justify-between items-start mb-3">
+                        <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded border ${
+                          cert.status === 'locked_for_trading' 
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        }`}>
+                          {cert.status === 'locked_for_trading' ? 'Listed on Exchange' : 'Available in Vault'}
+                        </span>
+                        <span className="font-mono text-xs text-white/40 bg-black px-2 py-1 rounded">{cert.id.substring(0, 16)}...</span>
+                      </div>
+                      
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="text-2xl font-mono text-white mb-1">
+                            {cert.net_carbon_reduction_kg_co2e ? (cert.net_carbon_reduction_kg_co2e / 1000).toFixed(2) : 0} <span className="text-sm text-white/40">tCO₂e</span>
+                          </p>
+                          <p className="text-xs text-emerald-400/80 flex items-center gap-1">
+                            <CheckCircle size={12} /> {t('Verified & Registered')}
+                          </p>
+                        </div>
+                        
+                        {cert.status !== 'locked_for_trading' && (
+                          <button 
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-blue-900/20"
+                            onClick={async () => {
+                              const price = prompt('Enter selling price per ton (INR):', '500');
+                              if (price && !isNaN(Number(price))) {
+                                const res = await fetch('/api/market/orders', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                  body: JSON.stringify({ ccc_id: cert.id, price_per_ton: Number(price), order_type: 'sell' })
+                                });
+                                if (res.ok) alert('Order placed!');
+                              }
+                            }}
+                          >
+                            {t('List for Sale')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6 border-white/5 bg-white/5">
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
-              <Activity className="text-blue-400" size={20} />
-              {t('Power Exchange Orderbook')}
-            </h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-              {marketOrderBook.filter(o => o.status === 'open').length === 0 ? (
-                <p className="text-white/40 text-sm">{t('No open orders on the exchange.')}</p>
-              ) : (
-                marketOrderBook.filter(o => o.status === 'open').map(order => (
-                  <div key={order.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center justify-between">
-                    <div>
-                      <span className="text-xs uppercase tracking-widest text-blue-400 font-bold">{order.order_type} ORDER</span>
-                      <p className="font-mono text-sm text-white/80">{order.ccc_id ? order.ccc_id.substring(0, 16) + '...' : 'Market Buy'}</p>
-                      <p className="text-xs text-white/40 mt-1">₹{order.price_per_ton} / ton</p>
-                    </div>
-                    {order.user_id !== user?.id && (
-                      <button 
-                        className="px-3 py-1 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded text-xs transition-colors"
-                        onClick={async () => {
-                          const res = await fetch('/api/market/execute', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                            body: JSON.stringify({ order_id: order.id })
-                          });
-                          if (res.ok) alert('Trade executed successfully!');
-                          else alert('Trade failed');
-                        }}
-                      >
-                        {t('Execute')}
-                      </button>
-                    )}
+          {/* Market Orderbook */}
+          <Card className="p-6 border-white/10 bg-black/40 backdrop-blur-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-32 bg-blue-500/5 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <Activity className="text-blue-400" size={24} />
+                  {t('Live Power Exchange')}
+                </h3>
+                <span className="text-xs text-white/50">{marketOrderBook.filter(o => o.status === 'open').length} Active Orders</span>
+              </div>
+              
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                {marketOrderBook.filter(o => o.status === 'open').length === 0 ? (
+                  <div className="text-center py-12 border border-dashed border-white/10 rounded-xl bg-white/5">
+                    <Activity className="mx-auto text-white/20 mb-3" size={32} />
+                    <p className="text-white/40 text-sm">{t('The exchange is currently quiet.')}</p>
+                    <p className="text-white/30 text-xs mt-1">{t('No active sell orders are listed on the open market.')}</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  marketOrderBook.filter(o => o.status === 'open').map(order => (
+                    <div key={order.id} className="p-5 bg-[#0f0f0f] border border-white/10 rounded-xl hover:border-blue-500/30 transition-all group">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            {order.order_type}
+                          </span>
+                          <span className="text-xs text-white/50 bg-black px-2 py-1 rounded border border-white/5">
+                            {new Date(order.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <span className="font-mono text-xs text-white/40">{order.ccc_id ? order.ccc_id.substring(0, 12) + '...' : 'Market'}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-2 pt-4 border-t border-white/5">
+                        <div>
+                          <p className="text-xs text-white/40 uppercase tracking-widest mb-1">Asking Price</p>
+                          <p className="text-2xl font-mono text-white">
+                            <span className="text-emerald-400 mr-1">₹</span>{order.price_per_ton} <span className="text-sm text-white/40">/ ton</span>
+                          </p>
+                        </div>
+                        
+                        {order.user_id !== user?.id ? (
+                          <button 
+                            className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2"
+                            onClick={async () => {
+                              const res = await fetch('/api/market/execute', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify({ order_id: order.id })
+                              });
+                              if (res.ok) alert('Trade executed successfully!');
+                              else alert('Trade failed. Insufficient funds or order expired.');
+                            }}
+                          >
+                            <ShoppingCart size={16} />
+                            {t('Buy CCC')}
+                          </button>
+                        ) : (
+                          <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-xs text-white/40 font-medium">
+                            {t('Your Order')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </Card>
         </div>
@@ -8556,116 +8843,587 @@ export default function App() {
                 )}
               </div>
 
-              <div className="space-y-4">
-                {blockchainLedger.length === 0 ? (
-                  <Card className="p-12 text-center border-white/5 bg-white/5">
-                    <Cpu size={48} className="text-white/10 mx-auto mb-4" />
-                    <p className="text-white/40">{t('No blockchain records found.')}</p>
-                  </Card>
-                ) : (
-                  blockchainLedger.slice().reverse().map((block) => (
-                    <Card key={block.hash} className="p-6 border-white/5 bg-white/5 relative overflow-hidden group hover:border-emerald-500/30 transition-all">
-                      <div className="absolute top-0 right-0 p-4 text-[60px] font-black text-white/5 pointer-events-none group-hover:text-emerald-500/10 transition-colors">
-                        #{block.index}
-                      </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-                        <div className="space-y-4">
-                          <div>
-                            <label className="text-[10px] uppercase tracking-widest text-white/40">{t('Block Hash')}</label>
-                            <p className="font-mono text-[10px] text-emerald-400 break-all bg-black/20 p-2 rounded mt-1 border border-emerald-500/10">{block.hash}</p>
-                          </div>
-                          <div>
-                            <label className="text-[10px] uppercase tracking-widest text-white/40">{t('Previous Hash')}</label>
-                            <p className="font-mono text-[10px] text-white/40 break-all bg-black/10 p-2 rounded mt-1">{block.previousHash}</p>
-                          </div>
+              {/* Sub-navigation bar */}
+              <div className="flex border-b border-white/5 gap-6 mb-6">
+                <button
+                  onClick={() => setBlockchainSubTab('ledger')}
+                  className={`pb-4 text-sm font-bold border-b-2 transition-all ${
+                    blockchainSubTab === 'ledger' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-white/40 hover:text-white'
+                  }`}
+                >
+                  {t('Public Ledger Explorer')}
+                </button>
+                <button
+                  onClick={() => setBlockchainSubTab('guardian')}
+                  className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+                    blockchainSubTab === 'guardian' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-white/40 hover:text-white'
+                  }`}
+                >
+                  <Cpu size={14} className="animate-pulse text-emerald-400" />
+                  {t('Hedera Guardian Policy Portal')}
+                </button>
+              </div>
+
+              {blockchainSubTab === 'ledger' ? (
+                <div className="space-y-4">
+                  {blockchainLedger.length === 0 ? (
+                    <Card className="p-12 text-center border-white/5 bg-white/5">
+                      <Cpu size={48} className="text-white/10 mx-auto mb-4" />
+                      <p className="text-white/40">{t('No blockchain records found.')}</p>
+                    </Card>
+                  ) : (
+                    blockchainLedger.slice().reverse().map((block) => (
+                      <Card key={block.hash} className="p-6 border-white/5 bg-white/5 relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+                        <div className="absolute top-0 right-0 p-4 text-[60px] font-black text-white/5 pointer-events-none group-hover:text-emerald-500/10 transition-colors">
+                          #{block.index}
                         </div>
-                        
-                        <div className="lg:col-span-2 bg-white/5 rounded-xl p-4 border border-white/5">
-                          <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
-                            <span className="text-xs font-bold text-white/60 uppercase tracking-widest">{t('Transaction Data')}</span>
-                            <span className="text-[10px] text-white/40">{new Date(block.timestamp).toLocaleString()}</span>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-[10px] uppercase tracking-widest text-white/40">{t('Block Hash')}</label>
+                              <p className="font-mono text-[10px] text-emerald-400 break-all bg-black/20 p-2 rounded mt-1 border border-emerald-500/10">{block.hash}</p>
+                            </div>
+                            <div>
+                              <label className="text-[10px] uppercase tracking-widest text-white/40">{t('Previous Hash')}</label>
+                              <p className="font-mono text-[10px] text-white/40 break-all bg-black/10 p-2 rounded mt-1">{block.previousHash}</p>
+                            </div>
                           </div>
                           
-                          {block.index === 0 ? (
-                            <div className="space-y-2">
-                              <p className="text-emerald-400 font-bold text-sm">{block.data.message}</p>
-                              <p className="text-xs text-white/50">{t('Protocol')}: <span className="font-mono text-white/70">{block.data.protocol}</span></p>
-                              <p className="text-xs text-white/50">{t('HCS Topic ID')}: <span className="font-mono text-blue-400">{block.data.hcs_topic_id}</span></p>
+                          <div className="lg:col-span-2 bg-white/5 rounded-xl p-4 border border-white/5">
+                            <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
+                              <span className="text-xs font-bold text-white/60 uppercase tracking-widest">{t('Transaction Data')}</span>
+                              <span className="text-[10px] text-white/40">{new Date(block.timestamp).toLocaleString()}</span>
                             </div>
-                          ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Type / Record')}</label>
-                                <span className="text-sm font-bold font-mono">{block.data.type || block.data.record_id}</span>
+                            
+                            {block.index === 0 ? (
+                              <div className="space-y-2">
+                                <p className="text-emerald-400 font-bold text-sm">{block.data.message}</p>
+                                <p className="text-xs text-white/50">{t('Protocol')}: <span className="font-mono text-white/70">{block.data.protocol}</span></p>
+                                <p className="text-xs text-white/50">{t('HCS Topic ID')}: <span className="font-mono text-blue-400">{block.data.hcs_topic_id}</span></p>
                               </div>
-                              <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('User / Generator')}</label>
-                                <span className="text-sm font-bold font-mono">{block.data.generator || block.data.user_id || block.data.from}</span>
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Waste / To')}</label>
-                                <span className="text-sm font-bold text-emerald-400">{block.data.waste_type || block.data.to || '-'}</span>
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Amount / CCC')}</label>
-                                <span className="text-sm font-bold text-cyan-400">{block.data.amount || block.data.ccc_amount_kg}</span>
-                              </div>
-                              {(block.data.registry_serial_number || block.data.registry_id) && (
-                                <div className="col-span-2 md:col-span-4 mt-2">
-                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Registry ID')}</label>
-                                  <span className="text-sm font-bold text-blue-400 font-mono">{block.data.registry_serial_number || block.data.registry_id}</span>
+                            ) : (
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Type / Record')}</label>
+                                  <span className="text-sm font-bold font-mono">{block.data.type || block.data.record_id}</span>
                                 </div>
-                              )}
-                            </div>
-                          )}
+                                <div>
+                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('User / Generator')}</label>
+                                  <span className="text-sm font-bold font-mono">{block.data.generator || block.data.user_id || block.data.from}</span>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Waste / To')}</label>
+                                  <span className="text-sm font-bold text-emerald-400">{block.data.waste_type || block.data.to || '-'}</span>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Amount / CCC')}</label>
+                                  <span className="text-sm font-bold text-cyan-400">{block.data.amount || block.data.ccc_amount_kg}</span>
+                                </div>
+                                {(block.data.registry_serial_number || block.data.registry_id) && (
+                                  <div className="col-span-2 md:col-span-4 mt-2">
+                                    <label className="text-[10px] text-white/40 block uppercase tracking-tighter">{t('Registry ID')}</label>
+                                    <span className="text-sm font-bold text-blue-400 font-mono">{block.data.registry_serial_number || block.data.registry_id}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
+                      </Card>
+                    ))
+                  )}
+
+                  {blockchainLedger.length > 0 && (
+                    <div className="mt-8 pt-8 border-t border-white/5">
+                      <h3 className="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                        <Globe size={20} />
+                        {t('Guardian HCS Ledger AI Interface')}
+                      </h3>
+                      <p className="text-white/40 text-sm mb-4">
+                        {t('Query the Hedera Consensus Service topic 0.0.4592011 directly using natural language.')}
+                      </p>
+                      <div className="flex gap-2 mb-4">
+                        <input 
+                          type="text"
+                          value={ledgerQuery}
+                          onChange={(e) => setLedgerQuery(e.target.value)}
+                          placeholder={t('Example: How many carbon units are anchored in total?')}
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-amber-500/50"
+                        />
+                        <button 
+                          onClick={handleLedgerQuery}
+                          disabled={loading}
+                          className="bg-amber-500 text-black px-6 py-3 rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {loading ? <div className="w-4 h-4 border-2 border-black/30 border-t-black animate-spin rounded-full" /> : <Search size={18} />}
+                          {t('Query Ledger')}
+                        </button>
+                      </div>
+                      {ledgerResponse && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl text-amber-400/90 text-sm leading-relaxed"
+                        >
+                          <div className="flex items-center gap-2 mb-2 font-bold text-[10px] uppercase tracking-widest text-amber-500">
+                            <Zap size={10} />
+                            {t('Guardian AI Response')}
+                          </div>
+                          <ReactMarkdown>{ledgerResponse}</ReactMarkdown>
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-8 animate-fade-in text-left">
+                  {/* Status Banner */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="p-5 border-white/5 bg-white/5 flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${guardianAuth ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                        <Cpu size={24} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase text-white/40 block font-mono">Standard Registry Authority</span>
+                        <span className="text-sm font-bold text-white block truncate max-w-[150px]">
+                          {guardianAuth ? guardianAuth.username : t('Not Initialized')}
+                        </span>
+                        <span className={`text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded ${guardianAuth ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                          {guardianAuth ? '● Node Authorized' : '○ Pending Setup'}
+                        </span>
                       </div>
                     </Card>
-                  ))
-                )}
 
-                {blockchainLedger.length > 0 && (
-                  <div className="mt-8 pt-8 border-t border-white/5">
-                    <h3 className="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
-                      <Globe size={20} />
-                      {t('Guardian HCS Ledger AI Interface')}
-                    </h3>
-                    <p className="text-white/40 text-sm mb-4">
-                      {t('Query the Hedera Consensus Service topic 0.0.4592011 directly using natural language.')}
-                    </p>
-                    <div className="flex gap-2 mb-4">
-                      <input 
-                        type="text"
-                        value={ledgerQuery}
-                        onChange={(e) => setLedgerQuery(e.target.value)}
-                        placeholder={t('Example: How many carbon units are anchored in total?')}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-amber-500/50"
-                      />
-                      <button 
-                        onClick={handleLedgerQuery}
-                        disabled={loading}
-                        className="bg-amber-500 text-black px-6 py-3 rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {loading ? <div className="w-4 h-4 border-2 border-black/30 border-t-black animate-spin rounded-full" /> : <Search size={18} />}
-                        {t('Query Ledger')}
-                      </button>
-                    </div>
-                    {ledgerResponse && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl text-amber-400/90 text-sm leading-relaxed"
-                      >
-                        <div className="flex items-center gap-2 mb-2 font-bold text-[10px] uppercase tracking-widest text-amber-500">
-                          <Zap size={10} />
-                          {t('Guardian AI Response')}
-                        </div>
-                        <ReactMarkdown>{ledgerResponse}</ReactMarkdown>
-                      </motion.div>
-                    )}
+                    <Card className="p-5 border-white/5 bg-white/5 flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400">
+                        <FileCode size={24} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase text-white/40 block font-mono">Active Methodology Policies</span>
+                        <span className="text-sm font-bold text-white block">
+                          {guardianPolicies.length} {t('Compiled Policies')}
+                        </span>
+                        <span className="text-[9px] text-white/50 block mt-1">Verra & Gold Standard Compliant</span>
+                      </div>
+                    </Card>
+
+                    <Card className="p-5 border-white/5 bg-white/5 flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400">
+                        <Zap size={24} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase text-white/40 block font-mono">Automated dMRV Mintings</span>
+                        <span className="text-sm font-bold text-white block">
+                          {guardianSubmissions.length} {t('Secured Audits')}
+                        </span>
+                        <span className="text-[9px] text-cyan-400 block mt-1">Direct Hedera Testnet Sync</span>
+                      </div>
+                    </Card>
                   </div>
-                )}
-              </div>
+
+                  {/* 4-Tier Interactive Architecture Map */}
+                  <Card className="p-6 border-white/5 bg-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                          <Layers size={14} className="text-emerald-400" />
+                          {t('Hedera Guardian 4-Tier Node Architecture')}
+                        </h4>
+                        <p className="text-xs text-white/40 mt-1">{t('Decentralized digital MRV pipeline of India’s Circular Economy Operating System')}</p>
+                      </div>
+                      <span className="text-[9px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">TESTNET v2.4</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+                      {/* Tier 1 */}
+                      <div className="p-4 bg-black/40 border border-white/10 rounded-xl space-y-2 relative group hover:border-emerald-500/40 transition-colors">
+                        <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block">Tier 1: Client</span>
+                        <h5 className="font-bold text-xs text-white">RupayKg Web Portal</h5>
+                        <p className="text-[10px] text-white/50 leading-relaxed">
+                          User interfaces, auditor terminals, and waste processing logging forms. Exposes W3C compliance records.
+                        </p>
+                      </div>
+
+                      {/* Tier 2 */}
+                      <div className="p-4 bg-black/40 border border-white/10 rounded-xl space-y-2 relative group hover:border-emerald-500/40 transition-colors">
+                        <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block">Tier 2: API Node</span>
+                        <h5 className="font-bold text-xs text-white">Policy & Trust Manager</h5>
+                        <p className="text-[10px] text-white/50 leading-relaxed">
+                          Compiles complex methodologies (ACM0022), signs DID keys, and orchestrates decentralized credentials.
+                        </p>
+                      </div>
+
+                      {/* Tier 3 */}
+                      <div className="p-4 bg-black/40 border border-white/10 rounded-xl space-y-2 relative group hover:border-emerald-500/40 transition-colors">
+                        <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block">Tier 3: Storage</span>
+                        <h5 className="font-bold text-xs text-white">MongoDB & IPFS</h5>
+                        <p className="text-[10px] text-white/50 leading-relaxed">
+                          Stores schemas, telemetry documents, verifiable presentation metadata, and decentralized credentials.
+                        </p>
+                      </div>
+
+                      {/* Tier 4 */}
+                      <div className="p-4 bg-black/40 border border-white/10 rounded-xl space-y-2 relative group hover:border-emerald-500/40 transition-colors">
+                        <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block">Tier 4: Ledger</span>
+                        <h5 className="font-bold text-xs text-white">Hedera DLT Network</h5>
+                        <p className="text-[10px] text-white/50 leading-relaxed">
+                          Public trust ledger. Locks timestamps, topic sequence hashes (HCS), and mints verified tokens (HTS).
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Main Interaction Grids */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left Panel: Authority & Policies */}
+                    <div className="space-y-6">
+                      {/* Phase 1: Initialize SR Authority */}
+                      <Card className="p-6 border-white/5 bg-white/5 space-y-4">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                          <Lock size={12} className="text-amber-400" />
+                          {t('Phase 1: Setup Standard Registry (SR) Identity')}
+                        </h4>
+
+                        {!guardianAuth ? (
+                          <form onSubmit={handleInitializeAuthority} className="space-y-3">
+                            <p className="text-[11px] text-white/40 leading-relaxed">
+                              Configure this RupayKg node as an authorized Standard Registry root on the Hedera Network to validate climate credits.
+                            </p>
+                            <div>
+                              <label className="block text-[9px] uppercase font-mono text-white/40 mb-1">Registry Authority Username</label>
+                              <input 
+                                type="text"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                                value={authUsername}
+                                onChange={(e) => setAuthUsername(e.target.value)}
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[9px] uppercase font-mono text-white/40 mb-1">Hedera Account ID</label>
+                                <input 
+                                  type="text"
+                                  placeholder="e.g. 0.0.123456"
+                                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono"
+                                  value={authAccountId}
+                                  onChange={(e) => setAuthAccountId(e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase font-mono text-white/40 mb-1">Hedera Private Key</label>
+                                <input 
+                                  type="password"
+                                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono"
+                                  value={authPrivateKey}
+                                  onChange={(e) => setAuthPrivateKey(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <button
+                              type="submit"
+                              disabled={isAuthLoading}
+                              className="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5"
+                            >
+                              {isAuthLoading ? <Loader2 size={12} className="animate-spin" /> : <Lock size={12} />}
+                              {t('Generate Node DID & Auth Presentation')}
+                            </button>
+                          </form>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-1.5 text-xs text-emerald-400 font-mono break-all">
+                              <span className="text-[10px] uppercase text-white/40 font-bold tracking-widest block">Node Cryptographic DID:</span>
+                              {guardianAuth.did}
+                            </div>
+                            <div className="bg-black/30 p-3 rounded-xl border border-white/5 space-y-2">
+                              <span className="text-[10px] uppercase text-white/40 font-bold tracking-widest block">Standard Registry Verifiable Presentation</span>
+                              <pre className="text-[10px] text-cyan-400/90 font-mono h-[140px] overflow-y-auto leading-normal">
+                                {JSON.stringify(guardianAuth.verifiablePresentation, null, 2)}
+                              </pre>
+                            </div>
+                            <button
+                              onClick={() => setGuardianAuth(null)}
+                              className="text-[10px] text-red-400 hover:text-red-300 transition-colors uppercase font-mono tracking-widest block"
+                            >
+                              Reset Node Authority Credentials
+                            </button>
+                          </div>
+                        )}
+                      </Card>
+
+                      {/* Phase 2: Import Policies */}
+                      <Card className="p-6 border-white/5 bg-white/5 space-y-4">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                          <Workflow size={12} className="text-blue-400" />
+                          {t('Phase 2: Import Sustainability Methodology Policies')}
+                        </h4>
+
+                        <div className="space-y-3">
+                          <p className="text-[11px] text-white/40 leading-relaxed">
+                            Upload a <code>.policy</code> file or import standard climate tracking methodologies. Compile rules and verifiable schema definitions directly to the node.
+                          </p>
+
+                          <div className="space-y-2 h-[150px] overflow-y-auto pr-1">
+                            {guardianPolicies.map((p) => (
+                              <div key={p.id} className={`p-3 rounded-xl border transition-all ${activePolicyId === p.id ? 'bg-blue-500/10 border-blue-500/30 text-white' : 'bg-black/20 border-white/5 text-white/60 hover:border-white/10'}`}>
+                                <div className="flex justify-between items-start mb-1">
+                                  <span className="font-bold text-xs block truncate pr-2">{p.policyName}</span>
+                                  <span className="text-[9px] font-mono text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-full">{p.version}</span>
+                                </div>
+                                <p className="text-[10px] text-white/40 mb-2 leading-tight">{p.description}</p>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[9px] font-mono text-white/30">{p.id}</span>
+                                  <button
+                                    onClick={() => setActivePolicyId(p.id)}
+                                    className={`px-2.5 py-1 text-[9px] font-bold uppercase rounded transition-all ${activePolicyId === p.id ? 'bg-blue-500 text-white' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+                                  >
+                                    {activePolicyId === p.id ? 'Selected' : 'Select'}
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="h-px bg-white/5" />
+
+                          {/* Custom Policy Importer Form */}
+                          <form onSubmit={handleImportPolicy} className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[9px] uppercase font-mono text-white/40 mb-0.5">Custom Policy Name</label>
+                                <input 
+                                  type="text"
+                                  placeholder="e.g. Verra Biomass Cooking"
+                                  className="w-full bg-black/40 border border-white/10 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-emerald-500"
+                                  value={newPolicyName}
+                                  onChange={(e) => setNewPolicyName(e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase font-mono text-white/40 mb-0.5">Schema Fields (Comma Sep)</label>
+                                <input 
+                                  type="text"
+                                  className="w-full bg-black/40 border border-white/10 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono"
+                                  value={newPolicyFields}
+                                  onChange={(e) => setNewPolicyFields(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <button
+                              type="submit"
+                              disabled={isImportLoading || !newPolicyName}
+                              className="w-full py-2 border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/10 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5"
+                            >
+                              {isImportLoading ? <Loader2 size={12} className="animate-spin" /> : <Workflow size={12} />}
+                              {t('Upload & Validate Custom .Policy Schema')}
+                            </button>
+                          </form>
+                        </div>
+                      </Card>
+                    </div>
+
+                    {/* Right Panel: MRV Automations */}
+                    <div className="space-y-6">
+                      <Card className="p-6 border-white/5 bg-white/5 space-y-4">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                          <Zap size={12} className="text-emerald-400" />
+                          {t('Phase 3: Automated dMRV Submission & Token Minting')}
+                        </h4>
+
+                        <form onSubmit={handleProcessMrvDocument} className="space-y-4">
+                          <p className="text-[11px] text-white/40 leading-relaxed">
+                            Input real-time environmental asset logs or telemetry signals. The Guardian Engine validates payloads against active policy rules, signs with Standard Registry DIDs, and issues certified fractionalized tokens over Hedera.
+                          </p>
+
+                          {activePolicyId === 'policy-drec-100' && (
+                            <div className="space-y-3 bg-black/20 p-4 rounded-xl border border-white/5">
+                              <span className="text-[10px] uppercase font-bold text-blue-400 block font-mono">Policy Schema fields: dREC tracking</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <label className="block text-[9px] uppercase text-white/40 mb-1">Solar Panels Installed</label>
+                                  <input 
+                                    type="number"
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-500"
+                                    value={drecPanels}
+                                    onChange={(e) => setDrecPanels(e.target.value)}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[9px] uppercase text-white/40 mb-1">Megawatt Hours (MWh)</label>
+                                  <input 
+                                    type="number"
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-500"
+                                    value={drecMwh}
+                                    onChange={(e) => setDrecMwh(e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {activePolicyId === 'policy-methane-200' && (
+                            <div className="space-y-3 bg-black/20 p-4 rounded-xl border border-white/5">
+                              <span className="text-[10px] uppercase font-bold text-emerald-400 block font-mono">Policy Schema fields: ACM0022 Composting</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <label className="block text-[9px] uppercase text-white/40 mb-1">Diverted Waste Weight (kg)</label>
+                                  <input 
+                                    type="number"
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                                    value={methaneWeight}
+                                    onChange={(e) => setMethaneWeight(e.target.value)}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[9px] uppercase text-white/40 mb-1">Waste Category Type</label>
+                                  <input 
+                                    type="text"
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                                    value={methaneType}
+                                    onChange={(e) => setMethaneType(e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {activePolicyId !== 'policy-drec-100' && activePolicyId !== 'policy-methane-200' && (
+                            <div className="space-y-3 bg-black/20 p-4 rounded-xl border border-white/5">
+                              <span className="text-[10px] uppercase font-bold text-amber-400 block font-mono">Custom Schema Fields Selected</span>
+                              <div className="p-3 bg-black/40 rounded border border-white/5 font-mono text-[10px] text-white/50 leading-normal">
+                                {newPolicyFields.split(',').map((f) => (
+                                  <div key={f} className="flex justify-between border-b border-white/5 py-1 last:border-b-0">
+                                    <span>{f}</span>
+                                    <span className="text-amber-400">number (Default: 100.0)</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <button
+                            type="submit"
+                            disabled={isMrvProcessing}
+                            className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5"
+                          >
+                            {isMrvProcessing ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                            {t('Validate dMRV & Mint Hedera Assets')}
+                          </button>
+                        </form>
+
+                        {/* Recent Submission Ticket */}
+                        <AnimatePresence>
+                          {recentMrvResult && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="border border-emerald-500/20 bg-emerald-500/5 p-4 rounded-xl space-y-3 animate-fade-in"
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                  <CheckCircle2 size={12} />
+                                  MRV Cryptographically Validated
+                                </span>
+                                <span className="text-[9px] font-mono text-white/40">{recentMrvResult.submission_id}</span>
+                              </div>
+                              <p className="text-[11px] text-white/70 leading-relaxed">
+                                {recentMrvResult.message}
+                              </p>
+                              <div className="p-2.5 bg-black/40 rounded border border-white/5 font-mono text-[9px] text-emerald-400/90 space-y-1">
+                                <div><strong>Hedera Topic:</strong> {recentMrvResult.hcsMessage.message.policyId}</div>
+                                <div><strong>HCS Seq Number:</strong> {recentMrvResult.hcsMessage.sequenceNumber}</div>
+                                <div className="truncate"><strong>Running Hash:</strong> {recentMrvResult.hcsMessage.runningHash}</div>
+                                <div><strong>Asset Type:</strong> {recentMrvResult.assetType}</div>
+                                <div><strong>Quantity Issued:</strong> <span className="font-bold text-cyan-400">{recentMrvResult.tokensMinted} Credits</span></div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Submissions logs table */}
+                  <Card className="p-6 border-white/5 bg-white/5 space-y-4">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                      <ClipboardList size={12} className="text-blue-400" />
+                      {t('Verifiable Environment Credentials Audit Log')}
+                    </h4>
+
+                    {guardianSubmissions.length === 0 ? (
+                      <div className="py-8 text-center text-white/30 italic text-xs">
+                        No submissions compiled yet. Ingest telemetry records using the dMRV panel to auto-generate signed credentials.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-[11px]">
+                          <thead>
+                            <tr className="border-b border-white/10 text-white/40 uppercase tracking-wider">
+                              <th className="py-2.5 px-3">ID</th>
+                              <th className="py-2.5 px-3">Policy ID</th>
+                              <th className="py-2.5 px-3">Asset Classification</th>
+                              <th className="py-2.5 px-3">CO₂e Avoided</th>
+                              <th className="py-2.5 px-3">HCS Seq</th>
+                              <th className="py-2.5 px-3">Timestamp</th>
+                              <th className="py-2.5 px-3 text-right">W3C Credential</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/5 font-mono">
+                            {guardianSubmissions.slice().reverse().map((sub) => (
+                              <tr key={sub.id} className="text-white/80 hover:bg-white/5 transition-colors">
+                                <td className="py-3 px-3 text-emerald-400 font-bold">{sub.id}</td>
+                                <td className="py-3 px-3 text-white/40">{sub.policyId}</td>
+                                <td className="py-3 px-3 font-sans text-white/90 font-bold">{sub.assetType}</td>
+                                <td className="py-3 px-3 text-cyan-400 font-bold">{Number(sub.carbonMintedKg).toFixed(1)} kg</td>
+                                <td className="py-3 px-3 text-white/40">{sub.hcsMessage.sequenceNumber}</td>
+                                <td className="py-3 px-3 text-white/40">{new Date(sub.timestamp).toLocaleTimeString()}</td>
+                                <td className="py-3 px-3 text-right">
+                                  <button
+                                    onClick={() => {
+                                      const vcPayload = {
+                                        "@context": [
+                                          "https://www.w3.org/2018/credentials/v1",
+                                          "https://rupaykg.org/contexts/sustainability-v2.jsonld"
+                                        ],
+                                        "id": `urn:uuid:${sub.id}`,
+                                        "type": ["VerifiableCredential", "EnvironmentalImpactCredential"],
+                                        "issuer": guardianAuth?.did || "did:hedera:testnet:rupaykg-root-registry",
+                                        "issuanceDate": sub.timestamp,
+                                        "credentialSubject": {
+                                          "id": `did:hedera:testnet:mrv-sensor-${sub.blockId}`,
+                                          "policyId": sub.policyId,
+                                          "impactMetrics": sub.document,
+                                          "certifiedTokensIssued": sub.carbonMintedKg,
+                                          "assetClass": sub.assetType
+                                        },
+                                        "proof": {
+                                          "type": "Ed25519Signature2020",
+                                          "created": sub.timestamp,
+                                          "verificationMethod": `${guardianAuth?.did || "did:hedera:testnet:rupaykg-root-registry"}#key-1`,
+                                          "proofPurpose": "assertionMethod",
+                                          "proofValue": sub.hcsMessage.runningHash.substring(0, 32) + "..."
+                                        }
+                                      };
+                                      const blob = new Blob([JSON.stringify(vcPayload, null, 2)], { type: 'application/json' });
+                                      const url = URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url;
+                                      a.download = `rupaykg-compliance-vc-${sub.id}.jsonld`;
+                                      a.click();
+                                    }}
+                                    className="px-2 py-1 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 text-emerald-400 text-[10px] rounded transition-all"
+                                  >
+                                    Download VC
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </Card>
+                </div>
+              )}
             </motion.div>
           )}
 
