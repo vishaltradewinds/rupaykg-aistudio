@@ -4387,7 +4387,7 @@ export default function App() {
                             {cert.net_carbon_reduction_kg_co2e ? (cert.net_carbon_reduction_kg_co2e / 1000).toFixed(2) : 0} <span className="text-sm text-white/40">tCO₂e</span>
                           </p>
                           <p className="text-xs text-emerald-400/80 flex items-center gap-1">
-                            <CheckCircle size={12} /> {t('Verified & Registered')}
+                            <CheckCircle2 size={12} /> {t('Verified & Registered')}
                           </p>
                         </div>
                         
