@@ -635,6 +635,7 @@ export default function App() {
   const [offsetProjects, setOffsetProjects] = useState<any[]>([]);
   const [methodologies, setMethodologies] = useState<any[]>([]);
   const [selectedPddDoc, setSelectedPddDoc] = useState<any>(null);
+  const [showAcvaActionModal, setShowAcvaActionModal] = useState<any>(null);
   const [acvaComments, setAcvaComments] = useState<string>('');
   const [acvaId, setAcvaId] = useState<string>('ACVA-BEE-001');
   const [greenBonds, setGreenBonds] = useState<any[]>([]);
@@ -2921,7 +2922,13 @@ export default function App() {
         });
         if (res.ok) {
           const data = await res.json();
-          setSelectedPddDoc(data);
+          const proj = offsetProjects.find(p => p.id === projId);
+          if (proj && proj.status === 'validation') {
+            setShowAcvaActionModal({ ...proj, pdd: data });
+            setAcvaComments('');
+          } else {
+            setSelectedPddDoc(data);
+          }
         } else {
           alert('No PDD has been generated for this project yet. Click "Generate PDD & Submit" first.');
         }
@@ -3013,6 +3020,7 @@ export default function App() {
           const data = await res.json();
           alert(data.message);
           setSelectedPddDoc(null);
+          setShowAcvaActionModal(null);
           setAcvaComments('');
           // Refetch projects
           const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -4181,6 +4189,194 @@ export default function App() {
                 <button 
                   onClick={() => setSelectedPddDoc(null)}
                   className="px-6 py-2 bg-white text-black font-bold uppercase text-xs tracking-wider rounded-lg hover:bg-white/90 transition-colors"
+                >
+                  {t('Close')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Modal: ACVA Action Modal */}
+        {showAcvaActionModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                    <ShieldAlert className="text-amber-500 animate-pulse" size={24} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold text-white">{t('ACVA Project Audit & Verification')}</h3>
+                      <span className="text-[10px] uppercase font-mono tracking-wider font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                        {t('Pending ACVA validation')}
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/50 font-medium">
+                      {t('Review PDD, audit carbon offset claims, and issue compliance decisions.')}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowAcvaActionModal(null)}
+                  className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Modal Body: Two Column Grid on Desktop */}
+              <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+                
+                {/* Left Column: PDD Document Review */}
+                <div className="lg:col-span-7 p-6 overflow-y-auto border-r border-white/5 space-y-6 custom-scrollbar bg-black/20">
+                  <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                    <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                      <FileText className="text-emerald-400" size={16} />
+                      {t('Project Design Document (PDD)')}
+                    </h4>
+                    <span className="text-[10px] text-white/40 font-mono">ID: {showAcvaActionModal.id}</span>
+                  </div>
+
+                  {/* Project Summary info card */}
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
+                    <h5 className="font-bold text-white text-base">{showAcvaActionModal.title}</h5>
+                    <p className="text-xs text-white/60 leading-relaxed">{showAcvaActionModal.description}</p>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded">
+                        Type: {showAcvaActionModal.project_type}
+                      </span>
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded">
+                        Location: {showAcvaActionModal.location || 'India'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* PDD Sections */}
+                  {showAcvaActionModal.pdd ? (
+                    <div className="space-y-6">
+                      <div>
+                        <h5 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1.5">{t('1. Executive Summary')}</h5>
+                        <p className="bg-black/40 p-4 rounded-xl border border-white/5 leading-relaxed text-xs text-white/80">{showAcvaActionModal.pdd.executiveSummary}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1.5">{t('2. Baseline Scenario')}</h5>
+                        <p className="bg-black/40 p-4 rounded-xl border border-white/5 leading-relaxed text-xs text-white/80">{showAcvaActionModal.pdd.baselineScenario}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1.5">{t('3. Additionality Analysis')}</h5>
+                        <p className="bg-black/40 p-4 rounded-xl border border-white/5 leading-relaxed text-xs text-white/80">{showAcvaActionModal.pdd.additionality}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1.5">{t('4. Monitoring & Verification Plan (MRV)')}</h5>
+                        <p className="bg-black/40 p-4 rounded-xl border border-white/5 leading-relaxed text-xs text-white/80">{showAcvaActionModal.pdd.monitoringPlan}</p>
+                      </div>
+                      {showAcvaActionModal.pdd.estimatedEmissionReductions && (
+                        <div>
+                          <h5 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1.5">{t('5. Estimated Emission Reductions')}</h5>
+                          <p className="bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 leading-relaxed text-xs text-emerald-300 font-medium">{showAcvaActionModal.pdd.estimatedEmissionReductions}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-white/5 rounded-xl border border-dashed border-white/10">
+                      <p className="text-xs text-white/40 italic">{t('PDD document data not found or still loading.')}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: ACVA Form & Transition Decisions */}
+                <div className="lg:col-span-5 p-6 flex flex-col justify-between bg-black/40 border-l border-white/5">
+                  <div className="space-y-6">
+                    <div className="border-b border-white/5 pb-3">
+                      <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                        <ShieldAlert className="text-amber-500" size={16} />
+                        {t('ACVA Auditor Decisions')}
+                      </h4>
+                    </div>
+
+                    {/* Auditor ID Field */}
+                    <div className="space-y-2">
+                      <label className="block text-xs uppercase tracking-wider text-white/60 font-bold">
+                        {t('ACVA Auditor ID')}
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 focus:outline-none font-mono"
+                        value={acvaId}
+                        onChange={e => setAcvaId(e.target.value)}
+                        placeholder="e.g. ACVA-BEE-001"
+                      />
+                      <p className="text-[10px] text-white/40">
+                        {t('Provide your certified CERC registration/auditor credentials identifier.')}
+                      </p>
+                    </div>
+
+                    {/* Auditor Comments Field */}
+                    <div className="space-y-2">
+                      <label className="block text-xs uppercase tracking-wider text-white/60 font-bold">
+                        {t('Evaluation Notes / Auditor Comments')}
+                      </label>
+                      <textarea
+                        rows={6}
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl p-4 text-xs text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 focus:outline-none leading-relaxed resize-none"
+                        value={acvaComments}
+                        onChange={e => setAcvaComments(e.target.value)}
+                        placeholder={t('Enter verification findings, required methodology adjustments, additionality feedback, or reasoning for approval/rejection here...')}
+                      />
+                    </div>
+
+                    {/* Information Notice */}
+                    <div className="p-4 bg-amber-500/5 rounded-xl border border-amber-500/10 text-[11px] text-amber-300 leading-relaxed flex gap-2">
+                      <ShieldAlert className="text-amber-400 shrink-0" size={16} />
+                      <div>
+                        <p className="font-bold mb-0.5">{t('ACVA Governance Action Notice')}</p>
+                        <p>{t('Approval will finalize the PDD state, registering the project in the Indian Carbon Market (ICM) registry and making it eligible for CCTS compliance issuance.')}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Decision Actions Buttons footer in Right Column */}
+                  <div className="space-y-2.5 pt-6 border-t border-white/5">
+                    <button
+                      onClick={() => handleAcvaAction(showAcvaActionModal.id, 'approve')}
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20"
+                    >
+                      <CheckCircle2 size={16} /> {t('Approve & Register Project')}
+                    </button>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleAcvaAction(showAcvaActionModal.id, 'revision')}
+                        className="py-2.5 bg-blue-600/30 hover:bg-blue-600/40 text-blue-400 hover:text-white border border-blue-500/20 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <RefreshCw size={14} /> {t('Request Revision')}
+                      </button>
+
+                      <button
+                        onClick={() => handleAcvaAction(showAcvaActionModal.id, 'reject')}
+                        className="py-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <X size={14} /> {t('Reject')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Bottom Footer */}
+              <div className="p-4 bg-black/40 border-t border-white/5 flex justify-between items-center text-[10px] text-white/30 font-mono px-6">
+                <span>{t('RUPAYKG ENTERPRISE CIRCULAR ECONOMY ENGINE')} v3.0</span>
+                <button 
+                  onClick={() => setShowAcvaActionModal(null)}
+                  className="px-5 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold uppercase text-xs tracking-wider rounded-lg transition-colors"
                 >
                   {t('Close')}
                 </button>
