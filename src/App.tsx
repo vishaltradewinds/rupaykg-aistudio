@@ -4466,12 +4466,19 @@ export default function App() {
                               const confirm = window.confirm('Verify this data payload against BEE methodology and forward to National CCTS Registry?');
                               if (confirm) {
                                 const res = await fetch('/api/market/execute', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                  body: JSON.stringify({ order_id: order.id })
-                                });
-                                if (res.ok) alert('Verified and Forwarded to CCTS Registry!');
-                                else alert('Action failed.');
+                                   method: 'POST',
+                                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                   body: JSON.stringify({ order_id: order.id })
+                                 });
+                                 if (res.ok) {
+                                   alert('Verified and Forwarded to CCTS Registry!');
+                                   const [regRes, orderRes] = await Promise.all([
+                                     fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                                     fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } })
+                                   ]);
+                                   if (regRes.ok) setRegistryCertificates(await regRes.json());
+                                   if (orderRes.ok) setMarketOrderBook(await orderRes.json());
+                                 } else alert('Action failed.');
                               }
                             }}
                           >
