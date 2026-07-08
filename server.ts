@@ -3319,6 +3319,42 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json({ message: "Project officially registered in Indian Carbon Market CCTS registry!", project: proj });
   });
 
+  app.post("/api/offset-projects/:projectId/acva-action", auth(["super_admin", "regulator"]), (req: any, res) => {
+    const { action, comments, acva_id } = req.body; // action: "approve" | "revision" | "reject"
+    const proj = carbonProjects.find(p => p.id === req.params.projectId);
+    if (!proj) return res.status(404).json({ error: "Project not found." });
+
+    const pdd = projectDesignDocuments.find(p => p.project_id === req.params.projectId);
+
+    if (action === "approve") {
+      proj.status = "registered";
+      if (pdd) {
+        pdd.status = "approved";
+        pdd.acva_comments = comments || "Approved by ACVA Auditor.";
+        pdd.acva_id = acva_id || "ACVA-BEE-001";
+      }
+      return res.json({ message: "Project officially validated and registered in ICM CCTS registry!", project: proj });
+    } else if (action === "revision") {
+      proj.status = "revision";
+      if (pdd) {
+        pdd.status = "revision_requested";
+        pdd.acva_comments = comments || "Revision requested by ACVA Auditor.";
+        pdd.acva_id = acva_id || "ACVA-BEE-001";
+      }
+      return res.json({ message: "Project status updated to Revision Requested.", project: proj });
+    } else if (action === "reject") {
+      proj.status = "rejected";
+      if (pdd) {
+        pdd.status = "rejected";
+        pdd.acva_comments = comments || "Rejected by ACVA Auditor.";
+        pdd.acva_id = acva_id || "ACVA-BEE-001";
+      }
+      return res.json({ message: "Project status updated to Rejected.", project: proj });
+    } else {
+      return res.status(400).json({ error: "Invalid action specified." });
+    }
+  });
+
   app.post("/api/offset-projects/:projectId/compile-mrv", auth(["super_admin", "regulator"]), (req: any, res) => {
     const { amount_kg, waste_type, sector } = req.body;
     const proj = carbonProjects.find(p => p.id === req.params.projectId);

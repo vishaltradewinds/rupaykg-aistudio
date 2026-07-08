@@ -635,6 +635,8 @@ export default function App() {
   const [offsetProjects, setOffsetProjects] = useState<any[]>([]);
   const [methodologies, setMethodologies] = useState<any[]>([]);
   const [selectedPddDoc, setSelectedPddDoc] = useState<any>(null);
+  const [acvaComments, setAcvaComments] = useState<string>('');
+  const [acvaId, setAcvaId] = useState<string>('ACVA-BEE-001');
   const [greenBonds, setGreenBonds] = useState<any[]>([]);
   const [dmrvSensors, setDmrvSensors] = useState<any[]>([]);
   const [selectedProjectForDmrv, setSelectedProjectForDmrv] = useState<any>(null);
@@ -2991,6 +2993,42 @@ export default function App() {
       }
     };
 
+    // Function to handle ACVA state transitions (approve, revision, reject)
+    const handleAcvaAction = async (projId: string, action: 'approve' | 'revision' | 'reject') => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/offset-projects/${projId}/acva-action`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({
+            action,
+            comments: acvaComments,
+            acva_id: acvaId
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          alert(data.message);
+          setSelectedPddDoc(null);
+          setAcvaComments('');
+          // Refetch projects
+          const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (updated.ok) setOffsetProjects(await updated.json());
+        } else {
+          const errorData = await res.json();
+          alert(errorData.error || 'Failed to complete ACVA action.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred during ACVA action submission.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     // Function to handle minting credit certificates
     const handleCompileMrv = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -3236,17 +3274,24 @@ export default function App() {
                 {t('Review submitted Project Design Documents (PDDs) under CERC standards, perform compliance audits, approve project registrations, and prepare verified MRV records for CCTS issuance.')}
               </p>
               <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                {offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').length === 0 ? (
+                {offsetProjects.filter(p => p.status !== 'draft_pdd').length === 0 ? (
                   <div className="text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/5">
                     <p className="text-white/40 text-sm italic">{t('No active projects awaiting review or registered in registry.')}</p>
                   </div>
                 ) : (
-                  offsetProjects.filter(p => p.status === 'validation' || p.status === 'registered').map(proj => (
+                  offsetProjects.filter(p => p.status !== 'draft_pdd').map(proj => (
                     <div key={proj.id} className="p-5 bg-black border border-white/5 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border ${proj.status === 'registered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
-                            {proj.status === 'registered' ? 'Registered' : 'Under ACVA Review'}
+                          <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border ${
+                            proj.status === 'registered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                            proj.status === 'validation' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                            proj.status === 'revision' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                            'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                          }`}>
+                            {proj.status === 'registered' ? t('Registered') :
+                             proj.status === 'validation' ? t('Under ACVA Review') :
+                             proj.status === 'revision' ? t('Revision Requested') : t('Rejected')}
                           </span>
                           <span className="text-xs text-white/40 bg-white/5 px-2 py-0.5 rounded">ID: {proj.id}</span>
                         </div>
@@ -3312,9 +3357,14 @@ export default function App() {
                       <div className="flex justify-between items-start mb-1">
                         <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded ${
                           proj.status === 'registered' ? 'bg-emerald-500/20 text-emerald-400' :
-                          proj.status === 'validation' ? 'bg-amber-500/20 text-amber-400' : 'bg-white/10 text-white/60'
+                          proj.status === 'validation' ? 'bg-amber-500/20 text-amber-400' :
+                          proj.status === 'revision' ? 'bg-blue-500/20 text-blue-400' :
+                          proj.status === 'rejected' ? 'bg-rose-500/20 text-rose-400' : 'bg-white/10 text-white/60'
                         }`}>
-                          {proj.status === 'draft_pdd' ? 'Draft PDD' : proj.status === 'validation' ? 'In Validation' : 'Registered'}
+                          {proj.status === 'draft_pdd' ? t('Draft PDD') : 
+                           proj.status === 'validation' ? t('In Validation') : 
+                           proj.status === 'revision' ? t('Revision Requested') : 
+                           proj.status === 'rejected' ? t('Rejected') : t('Registered')}
                         </span>
                         <span className="font-mono text-[10px] text-white/30">{proj.id}</span>
                       </div>
@@ -3323,8 +3373,8 @@ export default function App() {
                       <p className="text-sm text-white/70 mt-2">{proj.description}</p>
                     </div>
                     
-                    <div className="flex gap-2">
-                      {proj.status === 'draft_pdd' && (
+                    <div className="flex flex-col gap-2">
+                      {(proj.status === 'draft_pdd' || proj.status === 'revision') && (
                         <button 
                           className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
                           onClick={async () => {
@@ -3337,7 +3387,7 @@ export default function App() {
                                  description: proj.description, 
                                  project_type: proj.project_type, 
                                  location: proj.location || 'India' 
-                               })
+                                })
                              });
                              if (draftRes.ok) {
                                const pdd = await draftRes.json();
@@ -3346,7 +3396,7 @@ export default function App() {
                                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                  body: JSON.stringify(pdd)
                                });
-                               if (subRes.ok) alert('PDD Successfully Generated by Guardian AI and Submitted for Validation!');
+                               if (subRes.ok) alert(t('PDD Successfully Generated and Submitted for ACVA Validation!'));
                                
                                const updated = await fetch('/api/offset-projects', { headers: { 'Authorization': `Bearer ${token}` } });
                                if (updated.ok) setOffsetProjects(await updated.json());
@@ -3354,10 +3404,10 @@ export default function App() {
                              setLoading(false);
                           }}
                         >
-                          <FileText size={14} /> {t('Generate AI PDD & Submit')}
+                          <FileText size={14} /> {proj.status === 'revision' ? t('Re-Generate & Submit') : t('Generate AI PDD & Submit')}
                         </button>
                       )}
-                      {(proj.status === 'validation' || proj.status === 'registered') && (
+                      {proj.status !== 'draft_pdd' && (
                         <button
                           onClick={() => handleViewPdd(proj.id)}
                           className="w-full py-2 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
@@ -4051,6 +4101,75 @@ export default function App() {
                   <div>
                     <h4 className="text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1">{t('5. Estimated Emission Reductions')}</h4>
                     <p className="bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 leading-relaxed text-emerald-300 font-medium">{selectedPddDoc.estimatedEmissionReductions}</p>
+                  </div>
+                )}
+                {selectedPddDoc.acva_comments && (
+                  <div className="p-4 bg-amber-500/5 rounded-xl border border-amber-500/20 space-y-1">
+                    <h5 className="text-xs uppercase font-bold text-amber-400 flex items-center gap-1">
+                      <ShieldCheck size={14} /> {t('ACVA Auditor Comments')} ({selectedPddDoc.acva_id || 'ACVA-BEE-001'})
+                    </h5>
+                    <p className="text-xs text-white/80 italic">"{selectedPddDoc.acva_comments}"</p>
+                  </div>
+                )}
+                {isRegulator && (
+                  <div className="p-5 bg-gradient-to-b from-[#141414] to-[#1a1a1a] rounded-xl border border-white/10 space-y-4">
+                    <h4 className="text-xs uppercase tracking-wider text-amber-400 font-bold flex items-center gap-2">
+                      <ShieldAlert size={16} className="text-amber-500 animate-pulse" />
+                      {t('ACVA Verification Action Panel')}
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1 font-bold">{t('ACVA Auditor ID')}</label>
+                        <input
+                          type="text"
+                          className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none font-mono"
+                          value={acvaId}
+                          onChange={e => setAcvaId(e.target.value)}
+                          placeholder="e.g. ACVA-BEE-001"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1 font-bold">{t('Decision Status')}</label>
+                        <p className="text-xs text-amber-300 font-mono mt-2 flex items-center gap-1">
+                          <Activity size={12} /> {t('Currently pending ACVA transition')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1 font-bold">{t('Auditor Evaluation Notes / Revision Demands')}</label>
+                      <textarea
+                        rows={3}
+                        className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-xs text-white focus:border-amber-500 focus:outline-none leading-relaxed"
+                        value={acvaComments}
+                        onChange={e => setAcvaComments(e.target.value)}
+                        placeholder={t('Detail any identified discrepancies, requested revisions to methodologies, or approval reasoning here...')}
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                      <button
+                        onClick={() => handleAcvaAction(selectedPddDoc.project_id, 'approve')}
+                        className="flex-1 min-w-[120px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <CheckCircle2 size={14} /> {t('Approve & Register')}
+                      </button>
+                      
+                      <button
+                        onClick={() => handleAcvaAction(selectedPddDoc.project_id, 'revision')}
+                        className="flex-1 min-w-[120px] px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <RefreshCw size={14} /> {t('Request Revision')}
+                      </button>
+
+                      <button
+                        onClick={() => handleAcvaAction(selectedPddDoc.project_id, 'reject')}
+                        className="flex-1 min-w-[120px] px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <X size={14} /> {t('Reject')}
+                      </button>
+                    </div>
                   </div>
                 )}
                 <div className="flex justify-between text-[11px] text-white/40 border-t border-white/5 pt-4">
