@@ -232,7 +232,7 @@ Return your response as a valid JSON array of objects matching this schema:
 Do not include any markdown formatting (no backticks, no \`\`\`json, just pure JSON).`;
 
     let response;
-    const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-3.5-flash"];
+    const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
     let lastErr: any = null;
 
     for (const modelName of modelsToTry) {
@@ -354,7 +354,7 @@ Return your response as a valid JSON object matching this schema:
 Do not include any markdown formatting (no backticks, no \`\`\`json, just pure JSON).`;
 
     let response;
-    const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-3.5-flash"];
+    const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
     let lastErr: any = null;
 
     for (const modelName of modelsToTry) {

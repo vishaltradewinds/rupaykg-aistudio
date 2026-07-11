@@ -71,6 +71,7 @@ import { ICM_CCTS_SECTORS, ICM_METHODOLOGIES } from './services/icmComplianceSer
 import { safeFetchLgdJson } from './services/lgdService';
 
 import { Chatbot } from './components/Chatbot';
+import EnterpriseSuite from './components/EnterpriseSuite';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -388,7 +389,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite'>('dashboard');
   
   // Hedera Guardian Portal State Variables
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
@@ -922,7 +923,18 @@ export default function App() {
   // Load explorer states list and sync status
   useEffect(() => {
     fetch('/api/lgd/sync-status')
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Received non-JSON response");
+        }
+        const text = await res.text();
+        if (text.trim().startsWith("<")) {
+          throw new Error("Received HTML content instead of JSON");
+        }
+        return JSON.parse(text);
+      })
       .then(data => setLgdSyncInfo(data))
       .catch(err => console.error('Error fetching LGD sync status:', err));
       
@@ -5782,7 +5794,7 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('Task Board')}</span>
             </button>
           )}
-          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality'].includes(user?.role || '') && (
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality', 'citizen'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('history')}
               aria-label={t('View History')}
@@ -5881,6 +5893,13 @@ export default function App() {
             <User size={20} />
             <span className="hidden md:block font-medium">{t('Settings')}</span>
           </button>
+          <button 
+            onClick={() => setView('enterprise_suite')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <ShieldCheck size={20} className="text-emerald-400" />
+            <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise Suite 3.0')}</span>
+          </button>
         </div>
 
         <button 
@@ -5909,6 +5928,7 @@ export default function App() {
               {view === 'blockchain' && t('Hedera HCS Open Source Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
+              {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -7578,7 +7598,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'history' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality'].includes(user?.role || '') && (
+          {view === 'history' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality', 'citizen'].includes(user?.role || '') && (
             <motion.div 
               key="history"
               initial={{ opacity: 0, x: 20 }}
@@ -9364,6 +9384,17 @@ export default function App() {
                   </p>
                 </div>
               </section>
+            </motion.div>
+          )}
+
+          {view === 'enterprise_suite' && (
+            <motion.div
+              key="enterprise_suite"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <EnterpriseSuite user={user} onBackToDashboard={() => setView('dashboard')} />
             </motion.div>
           )}
 
