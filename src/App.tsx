@@ -5782,14 +5782,16 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('Task Board')}</span>
             </button>
           )}
-          <button 
-            onClick={() => setView('history')}
-            aria-label={t('View History')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'history' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <History size={20} />
-            <span className="hidden md:block font-medium">{t('History')}</span>
-          </button>
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('history')}
+              aria-label={t('View History')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'history' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <History size={20} />
+              <span className="hidden md:block font-medium">{t('History')}</span>
+            </button>
+          )}
           {['regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('mrv')}
@@ -5809,21 +5811,25 @@ export default function App() {
             </button>
           )}
           
-          <button 
-            onClick={() => setView('market')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'market' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <LineChart size={20} />
-            <span className="hidden md:block font-medium">{t('CCTS Market')}</span>
-          </button>
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer', 'processor', 'industry'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('market')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'market' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <LineChart size={20} />
+              <span className="hidden md:block font-medium">{t('CCTS Market')}</span>
+            </button>
+          )}
           
-          <button 
-            onClick={() => setView('projects')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'projects' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <Settings size={20} />
-            <span className="hidden md:block font-medium">{t('Offset Projects')}</span>
-          </button>
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer', 'processor', 'industry'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('projects')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'projects' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <Settings size={20} />
+              <span className="hidden md:block font-medium">{t('Offset Projects')}</span>
+            </button>
+          )}
 
           {['super_admin', 'state_admin', 'municipal_admin'].includes(user?.role || '') && (
             <button 
@@ -5852,13 +5858,15 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('CCC Offset Market')}</span>
             </button>
           )}
-          <button 
-            onClick={() => setView('blockchain')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <Cpu size={20} />
-            <span className="hidden md:block font-medium">{t('Hedera HCS Open Source Ledger')}</span>
-          </button>
+          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry'].includes(user?.role || '') && (
+            <button 
+              onClick={() => setView('blockchain')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            >
+              <Cpu size={20} />
+              <span className="hidden md:block font-medium">{t('Hedera HCS Open Source Ledger')}</span>
+            </button>
+          )}
           <button 
             onClick={() => setView('genesis')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -6001,7 +6009,7 @@ export default function App() {
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Stat label={t('CCC Offset')} value={`${(history.reduce((acc, r) => acc + r.ccc_amount_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink setView={setView} />
+                    <Stat label={t('CCC Offset')} value={`${(history.reduce((acc, r) => acc + r.ccc_amount_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink={user?.role === 'fpo'} setView={setView} />
                     <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" setView={setView} />
                     <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" setView={setView} />
                     <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" setView={setView} />
@@ -7570,7 +7578,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'history' && (
+          {view === 'history' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality'].includes(user?.role || '') && (
             <motion.div 
               key="history"
               initial={{ opacity: 0, x: 20 }}
@@ -9359,7 +9367,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'blockchain' && (
+          {view === 'blockchain' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry'].includes(user?.role || '') && (
             <motion.div 
               key="blockchain"
               initial={{ opacity: 0, y: 20 }}
@@ -9967,8 +9975,8 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'projects' && renderOffsetProjectsCenter()}
-          {view === 'market' && renderMarketCenter()}
+          {view === 'projects' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer', 'processor', 'industry'].includes(user?.role || '') && renderOffsetProjectsCenter()}
+          {view === 'market' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer', 'processor', 'industry'].includes(user?.role || '') && renderMarketCenter()}
           {view === 'operations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && renderOperationsCenter()}
         </AnimatePresence>
       </main>
