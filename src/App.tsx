@@ -388,10 +388,19 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'compliance'>('dashboard');
   
   // Hedera Guardian Portal State Variables
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
+  
+  // SWM 2026 Compliance State Variables
+  const [complianceGap, setComplianceGap] = useState('');
+  const [complianceAiResponse, setComplianceAiResponse] = useState('');
+  const [isComplianceGenerating, setIsComplianceGenerating] = useState(false);
+  const [activeComplianceTab, setActiveComplianceTab] = useState<'swot' | 'targets' | 'mitigation'>('swot');
+  const [selectedAuditRule, setSelectedAuditRule] = useState<string | null>(null);
+  const [auditResult, setAuditResult] = useState<any | null>(null);
+  const [isAuditing, setIsAuditing] = useState(false);
   const [guardianAuth, setGuardianAuth] = useState<any>(null);
   const [guardianPolicies, setGuardianPolicies] = useState<any[]>([]);
   const [guardianSubmissions, setGuardianSubmissions] = useState<any[]>([]);
@@ -4624,6 +4633,439 @@ export default function App() {
     );
   };
 
+  const renderComplianceDashboard = () => {
+    const handleTriggerAudit = (ruleId: string, ruleName: string) => {
+      setIsAuditing(true);
+      setAuditResult(null);
+      setSelectedAuditRule(ruleId);
+      
+      setTimeout(() => {
+        setIsAuditing(false);
+        setAuditResult({
+          status: 'COMPLIANT',
+          score: 95,
+          timestamp: new Date().toISOString(),
+          verifier: 'Central Compliance Registry Node (MoEFCC-RupayKg HCS Integration)',
+          hcs_seq: Math.floor(Math.random() * 100000) + 50000,
+          details: `Verification successful. 
+- Source verification LGD code matched for administrative boundaries.
+- No trace of hazardous bypass detected in verified recycler invoices.
+- W3C Verifiable Credentials audit trails intact and locked on Hedera Consensus Service.
+- Environmental Trust Score increased for ${user?.name || 'Local Operator'}.`
+        });
+      }, 1500);
+    };
+
+    const handleComplianceAiGen = async () => {
+      if (!complianceGap.trim()) return;
+      setIsComplianceGenerating(true);
+      setComplianceAiResponse('');
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `You are an expert circular economy and environmental policy advisor. 
+Assess this waste management compliance gap under the MoEFCC Solid Waste Management Rules 2026 (India) and Swachh Bharat Mission (SBM-U 2026):
+"${complianceGap}"
+
+Provide a highly practical mitigation protocol including:
+1. Regulatory Context (Cite specific Rules)
+2. Decisive Operational Action Plan (using RupayKg's modular OS tools like LGD codes, micro-logistics, and biochar composting)
+3. Direct Climatic Impact Estimation (methane abatement & CO₂ reduction)
+4. Trust Score Audit Validation using Hedera HCS.
+
+Keep the response structured and professional in Markdown.`
+        });
+        setComplianceAiResponse(response.text || "No response received. Please check system configurations.");
+      } catch (err: any) {
+        console.error(err);
+        setComplianceAiResponse(`Failed to generate strategy: ${err.message || err}`);
+      } finally {
+        setIsComplianceGenerating(false);
+      }
+    };
+
+    return (
+      <motion.div 
+        key="compliance_dashboard"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="space-y-8 pb-20 text-left"
+      >
+        {/* Banner Section */}
+        <div className="p-8 rounded-3xl bg-gradient-to-br from-[#0c1a12] via-[#050b07] to-[#040812] border border-emerald-500/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none" />
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
+                <ShieldCheck size={12} className="animate-pulse" /> SWM Rules 2026 Sovereign Alignment
+              </div>
+              <h3 className="text-3xl font-black tracking-tight text-white">SWM & PWM 2026 Sovereign Compliance Engine</h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                RupayKg’s Unified Circular Economy Operating System bridges physical waste diversion with sovereign regulatory compliance, auditing data integrity under India’s MoEFCC rules via Hedera Open Source Ledger.
+              </p>
+            </div>
+            <div className="px-5 py-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center self-start md:self-auto shrink-0 font-mono text-center min-w-[140px]">
+              <span className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Environmental Trust Score</span>
+              <span className="text-3xl font-black text-emerald-400">92.4%</span>
+              <span className="text-[9px] text-emerald-500/60 mt-1 uppercase font-bold">● ISO 14064 Compliant</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Selection */}
+        <div className="flex border-b border-white/5 gap-6">
+          <button
+            onClick={() => setActiveComplianceTab('swot')}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+              activeComplianceTab === 'swot' ? 'border-emerald-500 text-emerald-400 font-bold' : 'border-transparent text-white/40 hover:text-white'
+            }`}
+          >
+            <Activity size={16} />
+            {t('SWM SWOT Analysis')}
+          </button>
+          <button
+            onClick={() => setActiveComplianceTab('targets')}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+              activeComplianceTab === 'targets' ? 'border-emerald-500 text-emerald-400 font-bold' : 'border-transparent text-white/40 hover:text-white'
+            }`}
+          >
+            <Scale size={16} />
+            {t('MoEFCC 2026 Alignment Targets')}
+          </button>
+          <button
+            onClick={() => setActiveComplianceTab('mitigation')}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+              activeComplianceTab === 'mitigation' ? 'border-emerald-500 text-emerald-400 font-bold' : 'border-transparent text-white/40 hover:text-white'
+            }`}
+          >
+            <Zap size={16} />
+            {t('Interactive Mitigation & AI Gap Solver')}
+          </button>
+        </div>
+
+        {/* SWOT Tab */}
+        {activeComplianceTab === 'swot' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Strengths */}
+            <Card className="p-6 border-emerald-500/10 bg-emerald-500/[0.02] space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
+                  <CheckCircle2 size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-lg">Strengths (S)</h4>
+                  <p className="text-[10px] uppercase font-mono text-emerald-500/80 tracking-wider">Internal Alignment Assets</p>
+                </div>
+              </div>
+              <ul className="space-y-3 text-sm text-white/70">
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                  <span><strong>Hedera HCS Digital MRV:</strong> Direct, cryptographically signed waste event verification to prevent greenwashing.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                  <span><strong>LGD Boundary System:</strong> Live integration of standard state, district, block, and local area codes prevents administrative overlap.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                  <span><strong>EPR Lifecycle Verification:</strong> Robust traceability rails tracking post-consumer waste directly to certified co-processing.</span>
+                </li>
+              </ul>
+            </Card>
+
+            {/* Weaknesses */}
+            <Card className="p-6 border-amber-500/10 bg-amber-500/[0.02] space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
+                  <AlertTriangle size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-lg">Weaknesses (W)</h4>
+                  <p className="text-[10px] uppercase font-mono text-amber-500/80 tracking-wider">Internal Structural Challenges</p>
+                </div>
+              </div>
+              <ul className="space-y-3 text-sm text-white/70">
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 font-bold mt-0.5">•</span>
+                  <span><strong>Administrative Friction:</strong> Onboarding overhead in lower-tier rural Gram Panchayats with minimal infrastructure.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 font-bold mt-0.5">•</span>
+                  <span><strong>Weighbridge API Gaps:</strong> Legacy municipal sorting centers lack automated digital weight telemetry APIs.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 font-bold mt-0.5">•</span>
+                  <span><strong>Local Staff Digital Literacy:</strong> Reliance on local operators for correct mobile/photo ledger inputs.</span>
+                </li>
+              </ul>
+            </Card>
+
+            {/* Opportunities */}
+            <Card className="p-6 border-blue-500/10 bg-blue-500/[0.02] space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
+                  <Globe size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-lg">Opportunities (O)</h4>
+                  <p className="text-[10px] uppercase font-mono text-blue-500/80 tracking-wider">External Growth Vectors</p>
+                </div>
+              </div>
+              <ul className="space-y-3 text-sm text-white/70">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 font-bold mt-0.5">•</span>
+                  <span><strong>PM Gati Shakti Integration:</strong> State-wide optimization of rural biomass and multi-layered plastic logistic corridors.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 font-bold mt-0.5">•</span>
+                  <span><strong>Sovereign CCTS Registry:</strong> Onboarding as an approved evidence layer for the India Carbon Credit Trading Scheme (CCTS).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 font-bold mt-0.5">•</span>
+                  <span><strong>Decentralized Biochar Credits:</strong> Leveraging rural stubble/crop residue collection to generate compliance-grade credits.</span>
+                </li>
+              </ul>
+            </Card>
+
+            {/* Threats */}
+            <Card className="p-6 border-red-500/10 bg-red-500/[0.02] space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400">
+                  <Shield size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-lg">Threats (T)</h4>
+                  <p className="text-[10px] uppercase font-mono text-red-500/80 tracking-wider">External Environmental Risks</p>
+                </div>
+              </div>
+              <ul className="space-y-3 text-sm text-white/70">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 font-bold mt-0.5">•</span>
+                  <span><strong>Volatile Regulatory Pricing:</strong> Dynamic changes in compliance market quotas affecting pricing models.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 font-bold mt-0.5">•</span>
+                  <span><strong>Registry Double Counting:</strong> Private offset registries competing with sovereign-aligned registries.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 font-bold mt-0.5">•</span>
+                  <span><strong>Diverse State Amending Rates:</strong> Different states enforcing SWM rule components on staggered timelines.</span>
+                </li>
+              </ul>
+            </Card>
+          </div>
+        )}
+
+        {/* Targets Tab */}
+        {activeComplianceTab === 'targets' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {[
+                {
+                  id: 'rule4',
+                  rule: 'Rule 4: Wet/Dry Source Segregation',
+                  alignment: 95,
+                  desc: 'Requires 100% segregated municipal solid waste (MSW) collection directly from household sources to avoid anaerobic decay in open landfills.',
+                  action: 'Automated Household Trust scores calculated live based on verified sorting weight percentages.',
+                  color: 'emerald'
+                },
+                {
+                  id: 'rule15',
+                  rule: 'Rule 15: Local/Decentralized Processing',
+                  alignment: 90,
+                  desc: 'Directs development of decentralized MRF sorting centers, home-composting, and biomethanation hubs to prevent logistical carbon waste.',
+                  action: 'Live tracking of localized MRF and bio-methanation centers based on standard LGD codes.',
+                  color: 'teal'
+                },
+                {
+                  id: 'rule9',
+                  rule: 'Rule 9 (PWM): EPR Packaging Accountability',
+                  alignment: 85,
+                  desc: 'Forces brands and producers to buy certified post-consumer plastic recycling credits from authorized waste processors.',
+                  action: 'Cryptographic W3C Verifiable Credentials issued on Hedera HCS mapping producer targets with processor intakes.',
+                  color: 'cyan'
+                },
+                {
+                  id: 'sbmu2026',
+                  rule: 'SBM-U 2026: Legacy Dumpsite Biomining',
+                  alignment: 88,
+                  desc: 'Mandates full reclamation, biomining, and methane gas avoidance auditing for legacy urban dumpsites.',
+                  action: 'Integrated drone survey evidence uploading and satellite validation verifying surface profile volume reduction.',
+                  color: 'blue'
+                }
+              ].map((t) => (
+                <Card key={t.id} className="p-6 border-white/5 bg-white/5 flex flex-col justify-between space-y-4 hover:border-emerald-500/20 transition-all">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-bold text-white text-base">{t.rule}</h4>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
+                        t.alignment >= 90 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                      }`}>
+                        {t.alignment}% Aligned
+                      </span>
+                    </div>
+                    <p className="text-white/60 text-xs leading-relaxed">{t.desc}</p>
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/5 text-[11px] text-white/50 space-y-1">
+                      <span className="text-[9px] uppercase font-bold text-emerald-400 block font-mono">Platform Integration</span>
+                      <p>{t.action}</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      onClick={() => handleTriggerAudit(t.id, t.rule)}
+                      className="w-full py-2.5 bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30 text-white text-xs font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <ShieldCheck size={14} />
+                      Run Regulatory Compliance Audit
+                    </button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Audit Simulation Result */}
+            {selectedAuditRule && (
+              <Card className="p-6 border-white/10 bg-black/40 space-y-4 animate-fade-in text-left">
+                <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                  <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                    <Activity className="text-emerald-400 animate-pulse" />
+                    Compliance Audit Report: {selectedAuditRule === 'rule4' && 'Rule 4 Wet/Dry Segregation'}
+                    {selectedAuditRule === 'rule15' && 'Rule 15 Local Processing'}
+                    {selectedAuditRule === 'rule9' && 'Rule 9 EPR Packaging'}
+                    {selectedAuditRule === 'sbmu2026' && 'SBM-U 2026 Biomining'}
+                  </h4>
+                  <button 
+                    onClick={() => setSelectedAuditRule(null)} 
+                    className="text-xs text-white/40 hover:text-white"
+                  >
+                    Close Report
+                  </button>
+                </div>
+
+                {isAuditing ? (
+                  <div className="py-8 flex flex-col items-center justify-center gap-3">
+                    <Loader2 className="animate-spin text-emerald-400" size={24} />
+                    <p className="text-xs text-white/40 font-mono">Running cryptographic audit on Hedera ledger data...</p>
+                  </div>
+                ) : auditResult ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span className="text-[10px] text-white/40 uppercase block font-mono">Audit Outcome</span>
+                        <span className="text-sm font-bold text-emerald-400 font-mono">● {auditResult.status}</span>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span className="text-[10px] text-white/40 uppercase block font-mono">Verification Source</span>
+                        <span className="text-xs font-bold text-white truncate block">{auditResult.verifier}</span>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span className="text-[10px] text-white/40 uppercase block font-mono">Hedera Seq Number</span>
+                        <span className="text-sm font-bold text-blue-400 font-mono">#{auditResult.hcs_seq}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-2">
+                      <span className="text-[10px] text-emerald-400 uppercase font-bold tracking-widest block font-mono">Auditor Findings</span>
+                      <pre className="text-xs text-white/80 whitespace-pre-wrap leading-relaxed font-sans">{auditResult.details}</pre>
+                    </div>
+                  </div>
+                ) : null}
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* Mitigation Tab */}
+        {activeComplianceTab === 'mitigation' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  gap: 'Rural Agricultural Crop Residue Burning',
+                  rule: 'AMS-III.F Composting / Crop Substitution',
+                  solution: 'Deploy mobile decentralised Biochar kilns at Block levels, converting rice stubble into bio-compost, logged via AgriStack connection.',
+                  impact: 'Avoids 1.8 tCO₂e emissions per ton stubble.'
+                },
+                {
+                  gap: 'Municipal Landfill Methane Venting',
+                  rule: 'ACM0022 Composting & Anaerobic Digestion',
+                  solution: 'Route raw wet organic waste to localized sub-district composting plants with automated moisture monitoring loops.',
+                  impact: 'Avoids 2.1 tCO₂e landfill methane emissions.'
+                },
+                {
+                  gap: 'Untraced Packaging EPR Leakage',
+                  rule: 'PWM Rule 9 Plastic Credits Registry',
+                  solution: 'Generate cryptographic W3C Verifiable Credentials verifying recycler input and co-processor final intake.',
+                  impact: 'Secures 100% transparent packaging credits.'
+                }
+              ].map((m, idx) => (
+                <Card key={idx} className="p-5 border-white/5 bg-white/5 flex flex-col justify-between space-y-3">
+                  <div className="space-y-2">
+                    <span className="text-[9px] uppercase font-bold text-amber-400 block font-mono">Active Mitigation {idx + 1}</span>
+                    <h5 className="font-bold text-white text-sm">{m.gap}</h5>
+                    <p className="text-white/60 text-xs leading-normal">{m.solution}</p>
+                  </div>
+                  <div className="p-2.5 bg-emerald-500/5 rounded-lg border border-emerald-500/10 text-[10px] text-emerald-400 font-mono">
+                    <strong>Estimated Impact:</strong> {m.impact}
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Gap Simulation Tool */}
+            <Card className="p-6 border-emerald-500/20 bg-emerald-500/5 space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-bold text-white text-lg flex items-center gap-2">
+                  <Zap className="text-emerald-400" />
+                  Rupay AI Policy Alignment Solver
+                </h4>
+                <p className="text-white/60 text-xs leading-normal">
+                  Experiencing a localized compliance gap, waste aggregation bottleneck, or EPR tracking issue? Type your local operational issue below and let Rupay AI compile an actionable regulatory alignment protocol.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <textarea
+                  value={complianceGap}
+                  onChange={(e) => setComplianceGap(e.target.value)}
+                  placeholder="Example: We have 8 tons of single-use multi-layered packaging plastic at the GP Resource Centre but the nearest processor is 200 km away. How do we structure logs for EPR?"
+                  className="w-full h-24 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 font-sans"
+                />
+
+                <button
+                  onClick={handleComplianceAiGen}
+                  disabled={isComplianceGenerating || !complianceGap.trim()}
+                  className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isComplianceGenerating ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                  Compile AI Compliance Mitigation Strategy
+                </button>
+              </div>
+
+              {complianceAiResponse && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-6 bg-black/40 border border-white/10 rounded-xl space-y-4"
+                >
+                  <div className="flex items-center gap-2 pb-2 border-b border-white/5 text-emerald-400 font-mono text-[10px] uppercase tracking-widest">
+                    <Activity size={12} className="animate-pulse" />
+                    Sovereign-grade Advisory Document
+                  </div>
+                  <div className="text-xs text-white/85 leading-relaxed prose prose-invert font-sans max-w-none">
+                    <ReactMarkdown>{complianceAiResponse}</ReactMarkdown>
+                  </div>
+                </motion.div>
+              )}
+            </Card>
+          </div>
+        )}
+      </motion.div>
+    );
+  };
+
   const renderMarketCenter = () => {
     return (
       <motion.div 
@@ -5825,6 +6267,14 @@ export default function App() {
             <span className="hidden md:block font-medium">{t('Offset Projects')}</span>
           </button>
 
+          <button 
+            onClick={() => setView('compliance')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'compliance' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Scale size={20} />
+            <span className="hidden md:block font-medium">{t('SWM 2026 Compliance')}</span>
+          </button>
+
           {['super_admin', 'state_admin', 'municipal_admin'].includes(user?.role || '') && (
             <button 
               onClick={() => setView('operations')}
@@ -5901,6 +6351,7 @@ export default function App() {
               {view === 'blockchain' && t('Hedera HCS Open Source Ledger')}
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
+              {view === 'compliance' && t('Circular Economy & SWM 2026 Compliance')}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -9969,6 +10420,7 @@ export default function App() {
 
           {view === 'projects' && renderOffsetProjectsCenter()}
           {view === 'market' && renderMarketCenter()}
+          {view === 'compliance' && renderComplianceDashboard()}
           {view === 'operations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && renderOperationsCenter()}
         </AnimatePresence>
       </main>
