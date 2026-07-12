@@ -307,15 +307,6 @@ const Stat = ({ label, value, icon: Icon, color = "emerald", blockchainLink = fa
     <div>
       <p className="meta-label text-white/50">{label}</p>
       <p className="text-3xl font-bold tracking-tight text-white mt-1">{value}</p>
-      {blockchainLink && setView && (
-        <button 
-          onClick={() => setView('blockchain')}
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
-          title="Verify on Blockchain"
-        >
-          <Cpu size={12} />
-        </button>
-      )}
     </div>
   </Card>
 );
@@ -5865,35 +5856,12 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('CCC Offset Market')}</span>
             </button>
           )}
-          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry'].includes(user?.role || '') && (
-            <button 
-              onClick={() => setView('blockchain')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <Cpu size={20} />
-              <span className="hidden md:block font-medium">{t('Hedera HCS Open Source Ledger')}</span>
-            </button>
-          )}
-          <button 
-            onClick={() => setView('genesis')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <BookOpen size={20} />
-            <span className="hidden md:block font-medium">{t('Genesis')}</span>
-          </button>
           <button 
             onClick={() => setView('settings')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'settings' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
             <User size={20} />
             <span className="hidden md:block font-medium">{t('Settings')}</span>
-          </button>
-          <button 
-            onClick={() => setView('enterprise_suite')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <ShieldCheck size={20} className="text-emerald-400" />
-            <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise Suite 3.0')}</span>
           </button>
         </div>
 
