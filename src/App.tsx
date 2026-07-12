@@ -5929,6 +5929,7 @@ export default function App() {
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
               {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
+              {view === 'mrv' && t('MRV Verification Dashboard')}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -7795,7 +7796,6 @@ export default function App() {
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold">{t('MRV Verification Dashboard')}</h2>
                   <p className="text-white/40 text-sm">{t('Verify processed waste records to issue CCCs.')}</p>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
