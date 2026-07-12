@@ -4,6 +4,7 @@ import { ai } from "./lib/gemini";
 import { Helmet } from 'react-helmet-async';
 import { 
   Leaf, 
+  LayoutDashboard,
   Wallet, 
   History, 
   PlusCircle, 
@@ -483,7 +484,7 @@ export default function App() {
   const [wardAnalytics, setWardAnalytics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
-  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config' | 'fraud' | 'integrations'>('dashboard');
+  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config' | 'fraud' | 'integrations'>('users');
   const [wasteTypes, setWasteTypes] = useState<WasteType[]>(WASTE_TYPES);
   const [paymentConfig, setPaymentConfig] = useState({ ccc_price_per_kg: 10, logistics_margin_percent: 15 });
   const [comprehensiveMetrics, setComprehensiveMetrics] = useState<any>(null);
@@ -5771,7 +5772,7 @@ export default function App() {
             aria-label={t('Go to Dashboard')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
-            <Activity size={20} />
+            <LayoutDashboard size={20} />
             <span className="hidden md:block font-medium">{t('Dashboard')}</span>
           </button>
           {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
@@ -5790,7 +5791,7 @@ export default function App() {
               aria-label={t('View Task Board')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'tasks' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
-              <Activity size={20} />
+              <ClipboardList size={20} />
               <span className="hidden md:block font-medium">{t('Task Board')}</span>
             </button>
           )}
@@ -5804,22 +5805,16 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('History')}</span>
             </button>
           )}
-          {['regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
-            <button 
-              onClick={() => setView('mrv')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'mrv' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <ShieldCheck size={20} />
-              <span className="hidden md:block font-medium">{t('MRV Dashboard')}</span>
-            </button>
-          )}
           {['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
             <button 
-              onClick={() => setView('admin')}
+              onClick={() => {
+                setView('admin');
+                setAdminSubView('users');
+              }}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'admin' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
-              <BarChart3 size={20} />
-              <span className="hidden md:block font-medium">{t('National KPI')}</span>
+              <Settings size={20} />
+              <span className="hidden md:block font-medium">{t('Admin Controls')}</span>
             </button>
           )}
           
@@ -5838,7 +5833,7 @@ export default function App() {
               onClick={() => setView('projects')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'projects' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
-              <Settings size={20} />
+              <Layers size={20} />
               <span className="hidden md:block font-medium">{t('Offset Projects')}</span>
             </button>
           )}
@@ -5848,7 +5843,7 @@ export default function App() {
               onClick={() => setView('operations')}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'operations' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
             >
-              <Activity size={20} />
+              <Truck size={20} />
               <span className="hidden md:block font-medium">{t('Operations Hub')}</span>
             </button>
           )}
@@ -5920,7 +5915,7 @@ export default function App() {
               {view === 'upload' && `${labels.waste} ${t('Intake')}`}
               {view === 'tasks' && t('Operations Management')}
               {view === 'history' && t('Transaction Ledger')}
-              {view === 'admin' && t('National Dashboard')}
+              {view === 'admin' && t('Admin Controls')}
               {view === 'operations' && t('Operations Control Center')}
               {view === 'market' && t('CCTS Carbon Market')}
               {view === 'projects' && t('Offset Projects')}
@@ -5929,7 +5924,6 @@ export default function App() {
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
               {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
-              {view === 'mrv' && t('MRV Verification Dashboard')}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -8191,14 +8185,8 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              {user?.role === 'super_admin' && (
+              {['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
                 <div className="flex gap-4 mb-6">
-                  <button 
-                    onClick={() => setAdminSubView('dashboard')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'dashboard' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                  >
-                    {t('National Dashboard')}
-                  </button>
                   <button 
                     onClick={() => setAdminSubView('users')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'users' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
