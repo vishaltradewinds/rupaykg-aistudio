@@ -1649,7 +1649,7 @@ export default function App() {
       
       // 10. Fetch CCTS Market Data & Offset Projects
       if (token) {
-        const [regRes, orderRes, projRes, methRes, bondRes, sensorRes] = await Promise.all([
+        const results = await Promise.allSettled([
           fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch(`/api/offset-projects`, { headers: { 'Authorization': `Bearer ${token}` } }),
@@ -1657,12 +1657,15 @@ export default function App() {
           fetch(`/api/bonds`, { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch(`/api/dmrv/sensors`, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
-        if (regRes.ok) setRegistryCertificates(await regRes.json());
-        if (orderRes.ok) setMarketOrderBook(await orderRes.json());
-        if (projRes.ok) setOffsetProjects(await projRes.json());
-        if (methRes.ok) setMethodologies(await methRes.json());
-        if (bondRes.ok) setGreenBonds(await bondRes.json());
-        if (sensorRes.ok) setDmrvSensors(await sensorRes.json());
+
+        const [regRes, orderRes, projRes, methRes, bondRes, sensorRes] = results;
+
+        if (regRes.status === 'fulfilled' && regRes.value.ok) setRegistryCertificates(await regRes.value.json());
+        if (orderRes.status === 'fulfilled' && orderRes.value.ok) setMarketOrderBook(await orderRes.value.json());
+        if (projRes.status === 'fulfilled' && projRes.value.ok) setOffsetProjects(await projRes.value.json());
+        if (methRes.status === 'fulfilled' && methRes.value.ok) setMethodologies(await methRes.value.json());
+        if (bondRes.status === 'fulfilled' && bondRes.value.ok) setGreenBonds(await bondRes.value.json());
+        if (sensorRes.status === 'fulfilled' && sensorRes.value.ok) setDmrvSensors(await sensorRes.value.json());
       }
 
       // 9b. Fetch Enterprise Generator specific profiles, contracts, compliance profiles, and schedules
@@ -3064,12 +3067,12 @@ export default function App() {
           alert(`Verified MRV Audit Payload compiled! Serial: ${data.certificate.id}. Distributed to developer wallet.`);
           setShowMintCccModal(null);
           // Refetch offset projects & registry certificates
-          const [projRes, regRes] = await Promise.all([
+          const [projRes, regRes] = await Promise.allSettled([
             fetch(`/api/offset-projects`, { headers: { 'Authorization': `Bearer ${token}` } }),
             fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } })
           ]);
-          if (projRes.ok) setOffsetProjects(await projRes.json());
-          if (regRes.ok) setRegistryCertificates(await regRes.json());
+          if (projRes.status === 'fulfilled' && projRes.value.ok) setOffsetProjects(await projRes.value.json());
+          if (regRes.status === 'fulfilled' && regRes.value.ok) setRegistryCertificates(await regRes.value.json());
         }
       } catch (err) {
         console.error(err);
@@ -4791,12 +4794,13 @@ export default function App() {
                                  });
                                  if (res.ok) {
                                    alert('Verified and Forwarded to CCTS Registry!');
-                                   const [regRes, orderRes] = await Promise.all([
+                                   const results = await Promise.allSettled([
                                      fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
                                      fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } })
                                    ]);
-                                   if (regRes.ok) setRegistryCertificates(await regRes.json());
-                                   if (orderRes.ok) setMarketOrderBook(await orderRes.json());
+                                   const [regRes, orderRes] = results;
+                                   if (regRes.status === 'fulfilled' && regRes.value.ok) setRegistryCertificates(await regRes.value.json());
+                                   if (orderRes.status === 'fulfilled' && orderRes.value.ok) setMarketOrderBook(await orderRes.value.json());
                                  } else alert('Action failed.');
                               }
                             }}
