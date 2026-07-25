@@ -2490,6 +2490,249 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     });
   });
 
+  // ---------------- CPCB SWM & BWG COMPLIANCE OPERATING SYSTEM ROUTES ----------------
+  let cpcbBwgLogs: any[] = [
+    {
+      id: "LOG_CPCB_001",
+      date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
+      stream: "WET_ORGANIC",
+      wasteType: "Food & Kitchen Waste",
+      weightKg: 280,
+      trackingCode: "TRK-CPCB-WET-8821",
+      vehicleNo: "KA-01-EQ-9921",
+      destinationFacility: "On-site Biomethanation Plant / Municipal MRF-04",
+      weighbridgeRef: "WB-991204",
+      evidencePhotoUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500",
+      geoLat: 12.9716,
+      geoLng: 77.5946,
+      co2eAvoidedKg: 252,
+      verifiedBy: "Senior Compliance Officer (ULB-Verified)",
+      status: "VERIFIED"
+    },
+    {
+      id: "LOG_CPCB_002",
+      date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
+      stream: "DRY_RECYCLABLE",
+      wasteType: "Paper & Cardboard Waste",
+      weightKg: 145,
+      trackingCode: "TRK-CPCB-DRY-3312",
+      vehicleNo: "KA-01-EQ-9921",
+      destinationFacility: "Authorized Paper Recycler (CPCB Reg. #REC-3382)",
+      weighbridgeRef: "WB-991205",
+      evidencePhotoUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=500",
+      geoLat: 12.9720,
+      geoLng: 77.5950,
+      co2eAvoidedKg: 130.5,
+      verifiedBy: "BWG Site Supervisor",
+      status: "VERIFIED"
+    }
+  ];
+
+  app.post("/api/cpcb/bwg-assess", (req, res) => {
+    const { entityName, category, dailyWasteKg, builtUpAreaSqm } = req.body;
+    const wasteNum = Number(dailyWasteKg) || 0;
+    const areaNum = Number(builtUpAreaSqm) || 0;
+
+    const isMandatoryBWG = wasteNum >= 100 || areaNum >= 5000;
+    const applicableRules = [
+      "Solid Waste Management Rules 2016 (Rule 4 & Rule 13)",
+      "CPCB Mandatory Four-Stream Segregation Directive (Wet, Dry, Hazardous, Sanitary)",
+      isMandatoryBWG ? "Mandatory On-site Wet Waste Processing / Biomethanation / Composting" : "Voluntary Municipal Collection Agreement",
+      "Extended Bulk Waste Generator Responsibility (EBWGR) Audit Standards",
+      "Digital Weighbridge & GPS Vehicle Tracking Compliance"
+    ];
+
+    res.json({
+      category: category || "COMMERCIAL_COMPLEX",
+      entityName: entityName || "Enterprise Bulk Waste Generator",
+      dailyWasteKg: wasteNum,
+      builtUpAreaSqm: areaNum,
+      isMandatoryBWG,
+      applicableRules,
+      mandatoryStreamCount: 4,
+      onSiteProcessingRequired: isMandatoryBWG && wasteNum >= 100,
+      registrationStatus: isMandatoryBWG ? "REGISTERED_CPCB" : "EXEMPT",
+      complianceScore: isMandatoryBWG ? 88 : 75
+    });
+  });
+
+  app.get("/api/cpcb/logs", (req, res) => {
+    res.json(cpcbBwgLogs);
+  });
+
+  app.post("/api/cpcb/logs", (req, res) => {
+    const { stream, wasteType, weightKg, trackingCode, vehicleNo, destinationFacility, geoLat, geoLng, verifiedBy } = req.body;
+    const weightNum = Number(weightKg) || 0;
+
+    let cccFactor = 0.9;
+    if (stream === "WET_ORGANIC") cccFactor = 0.9;
+    if (stream === "DRY_RECYCLABLE") cccFactor = 1.2;
+    if (stream === "DOMESTIC_HAZARDOUS") cccFactor = 2.0;
+    if (stream === "SANITARY_REJECT") cccFactor = 0.3;
+
+    const newLog = {
+      id: `LOG_CPCB_${Date.now().toString().slice(-6)}`,
+      date: new Date().toISOString().split("T")[0],
+      stream: stream || "WET_ORGANIC",
+      wasteType: wasteType || "Municipal Segregated Stream",
+      weightKg: weightNum,
+      trackingCode: trackingCode || `TRK-CPCB-${Date.now().toString().slice(-4)}`,
+      vehicleNo: vehicleNo || "KA-01-EQ-9921",
+      destinationFacility: destinationFacility || "CPCB Authorized Processing Facility",
+      weighbridgeRef: `WB-${Date.now().toString().slice(-6)}`,
+      evidencePhotoUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500",
+      geoLat: geoLat ? Number(geoLat) : 12.9716,
+      geoLng: geoLng ? Number(geoLng) : 77.5946,
+      co2eAvoidedKg: Number((weightNum * cccFactor).toFixed(1)),
+      verifiedBy: verifiedBy || "Compliance Officer",
+      status: "VERIFIED"
+    };
+
+    cpcbBwgLogs.unshift(newLog);
+
+    logs.push({
+      id: Date.now(),
+      event: "CPCB_BWG_LOG_ADDED",
+      details: `Added CPCB 4-stream log entry ${newLog.id} (${weightNum}kg ${stream})`,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json(newLog);
+  });
+
+  app.get("/api/cpcb/calendar", (req, res) => {
+    res.json([
+      {
+        id: "CAL_001",
+        title: "CPCB Form IV Annual SWM Compliance Return Filing",
+        filingType: "ANNUAL_FORM_IV",
+        dueDate: "2026-06-30",
+        status: "COMPLETED",
+        regulatoryBody: "Central Pollution Control Board (CPCB) / SPCB",
+        documentRef: "DOC-CPCB-FORM4-2025-26",
+        lastUpdated: new Date().toISOString()
+      },
+      {
+        id: "CAL_002",
+        title: "Extended Bulk Waste Generator Responsibility (EBWGR) Certificate Audit",
+        filingType: "EBWGR_CERTIFICATE",
+        dueDate: "2026-08-15",
+        status: "PENDING",
+        regulatoryBody: "State Pollution Control Board (SPCB)",
+        lastUpdated: new Date().toISOString()
+      },
+      {
+        id: "CAL_003",
+        title: "Monthly Four-Stream Waste Segregation Logbook Verification",
+        filingType: "MONTHLY_LOGBOOK",
+        dueDate: "2026-08-05",
+        status: "PENDING",
+        regulatoryBody: "Urban Local Body (ULB) SWM Cell",
+        lastUpdated: new Date().toISOString()
+      },
+      {
+        id: "CAL_004",
+        title: "SPCB Water & Air Consent Renewal (Consent to Operate - CTO)",
+        filingType: "SPCB_PERMIT_RENEWAL",
+        dueDate: "2026-10-31",
+        status: "PENDING",
+        regulatoryBody: "State Pollution Control Board",
+        lastUpdated: new Date().toISOString()
+      }
+    ]);
+  });
+
+  app.post("/api/cpcb/ai-assistant", async (req, res) => {
+    const { question, entityDetails } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    const defaultResponse = {
+      answer: `Under CPCB SWM Rules 2016 (Rule 4 & Rule 13), Bulk Waste Generators producing >100 kg/day or occupying >5,000 sqm must:
+1. Four-Stream Segregate: Wet Organic, Dry Recyclable, Domestic Hazardous, and Sanitary/Reject streams at source.
+2. Wet Waste Management: Process wet waste on-site through composting or biomethanation, or transfer to an authorized ULB/CPCB processing plant.
+3. EBWGR Compliance: Maintain daily digital logbooks with weighbridge slips and GPS manifest dispatches to pass SPCB annual audits.
+4. Annual Returns: Submit CPCB Form IV return annually before June 30th. RupayKg auto-prepares your filing package.`,
+      references: ["SWM Rules 2016 Rule 4(1)", "CPCB EBWGR Guidelines 2024", "Form IV Annual Return Template"]
+    };
+
+    if (!apiKey) {
+      return res.json(defaultResponse);
+    }
+
+    try {
+      const client = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: { "User-Agent": "aistudio-build" }
+        }
+      });
+
+      const response = await client.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: `You are an expert Indian CPCB SWM 2016 and Bulk Waste Generator (BWG) Compliance Advisor for RupayKg Operating System.
+Answer the following compliance query specifically in the context of CPCB SWM Rules 2016, SPCB consent guidelines, Extended Bulk Waste Generator Responsibility (EBWGR), four-stream waste segregation, and audit readiness.
+
+User Entity Details: ${JSON.stringify(entityDetails || {})}
+User Compliance Question: ${question || "How do I maintain 100% CPCB SWM compliance as a Bulk Waste Generator?"}`
+              }
+            ]
+          }
+        ]
+      });
+
+      const text = response.text || defaultResponse.answer;
+      res.json({
+        answer: text,
+        references: ["SWM Rules 2016", "CPCB Centralised Portal Guidelines", "RupayKg Digital MRV & EBWGR Standard"]
+      });
+    } catch (err: any) {
+      console.error("CPCB AI Assistant Error:", err);
+      res.json(defaultResponse);
+    }
+  });
+
+  app.post("/api/cpcb/export-submission", (req, res) => {
+    const { entityName, category } = req.body;
+    const totalLogs = cpcbBwgLogs.length;
+    const totalWeightKg = cpcbBwgLogs.reduce((sum, l) => sum + l.weightKg, 0);
+    const wetKg = cpcbBwgLogs.filter(l => l.stream === "WET_ORGANIC").reduce((sum, l) => sum + l.weightKg, 0);
+    const dryKg = cpcbBwgLogs.filter(l => l.stream === "DRY_RECYCLABLE").reduce((sum, l) => sum + l.weightKg, 0);
+    const hazKg = cpcbBwgLogs.filter(l => l.stream === "DOMESTIC_HAZARDOUS").reduce((sum, l) => sum + l.weightKg, 0);
+    const rejKg = cpcbBwgLogs.filter(l => l.stream === "SANITARY_REJECT").reduce((sum, l) => sum + l.weightKg, 0);
+
+    const submissionPackage = {
+      cpcbSystemHeader: {
+        platform: "RupayKg Enterprise Compliance OS v3.0",
+        targetPortal: "CPCB Centralised SWM Portal & SPCB OCMS",
+        submissionTimestamp: new Date().toISOString(),
+        entityName: entityName || "Enterprise Bulk Waste Generator",
+        category: category || "COMMERCIAL_COMPLEX",
+        complianceStandard: "SWM Rules 2016 / Rule 4 & 13"
+      },
+      fourStreamMetrics: {
+        totalDispatchedKg: totalWeightKg,
+        wetOrganicKg: wetKg,
+        dryRecyclableKg: dryKg,
+        domesticHazardousKg: hazKg,
+        sanitaryRejectKg: rejKg,
+        diversionRatePercent: totalWeightKg > 0 ? Number((((wetKg + dryKg) / totalWeightKg) * 100).toFixed(1)) : 0
+      },
+      digitalManifestCount: totalLogs,
+      verificationStatus: "SWACHH_INDIA_AUDIT_READY",
+      auditTrailHash: `0x${Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`
+    };
+
+    res.json({
+      message: "CPCB SWM Portal Submission Package generated successfully",
+      package: submissionPackage
+    });
+  });
+
   // ---------------- STATUS & INTERNAL ----------------
   app.get("/api/status", (req, res) => {
     res.json({

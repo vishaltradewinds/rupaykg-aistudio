@@ -48,6 +48,8 @@ import {
 } from '../services/enterpriseMrvService';
 import { GuardianPolicyAdapter } from '../services/guardianPolicyAdapter';
 import { RegistryGatewayAdapter } from '../services/registryGatewayAdapter';
+import CpcbBwgCompliance from './CpcbBwgCompliance';
+
 import {
   OperatingMode,
   EvidenceType,
@@ -372,6 +374,16 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
           </button>
 
           <button
+            onClick={() => setActiveTab('cpcb_compliance')}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded text-xs font-bold transition-all ${
+              activeTab === 'cpcb_compliance' ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500' : 'text-white/60 hover:bg-white/5 hover:text-white'
+            }`}
+          >
+            <ShieldCheck size={15} className="text-emerald-400" />
+            CPCB SWM & BWG Operating System
+          </button>
+
+          <button
             onClick={() => setActiveTab('mrv_core')}
             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded text-xs font-bold transition-all ${
               activeTab === 'mrv_core' ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500' : 'text-white/60 hover:bg-white/5 hover:text-white'
@@ -493,12 +505,21 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-6"
               >
-                <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-white">
-                    <Activity className="text-emerald-400 animate-pulse" />
-                    Executive Operations Command Center
-                  </h3>
-                  <p className="text-xs text-white/40 mt-1">Sovereign real-time telemetry, MRV scores, and CCTS alignment checklists</p>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+                      <Activity className="text-emerald-400 animate-pulse" />
+                      Executive Operations Command Center
+                    </h3>
+                    <p className="text-xs text-white/40 mt-1">Sovereign real-time telemetry, MRV scores, and CCTS alignment checklists</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('cpcb_compliance')}
+                    className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all shrink-0"
+                  >
+                    <ShieldCheck size={14} />
+                    CPCB SWM & BWG Hub
+                  </button>
                 </div>
 
                 {/* Main Dynamic Executive KPI Panels */}
@@ -582,7 +603,20 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
               </motion.div>
             )}
 
+            {/* CPCB SWM & BWG COMPLIANCE TAB */}
+            {activeTab === 'cpcb_compliance' && (
+              <motion.div
+                key="tab_cpcb"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <CpcbBwgCompliance user={user} />
+              </motion.div>
+            )}
+
             {/* 2. CANONICAL MRV CORE EVENTS */}
+
             {activeTab === 'mrv_core' && (
               <motion.div
                 key="tab_mrv"

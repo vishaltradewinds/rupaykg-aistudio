@@ -477,3 +477,71 @@ export interface Job {
     ref: string;
   }[];
 }
+
+// CPCB SWM & Bulk Waste Generator (BWG) Enterprise Operating System Types
+export type BWGCategory = 
+  | 'HOTEL_HOSPITALITY' 
+  | 'COMMERCIAL_COMPLEX' 
+  | 'EDUCATIONAL_INSTITUTION' 
+  | 'HEALTHCARE_HOSPITAL' 
+  | 'GATED_COMMUNITY_RWA' 
+  | 'INDUSTRIAL_PARK' 
+  | 'MUNICIPAL_GEN';
+
+export type FourStreamType = 
+  | 'WET_ORGANIC' 
+  | 'DRY_RECYCLABLE' 
+  | 'DOMESTIC_HAZARDOUS' 
+  | 'SANITARY_REJECT';
+
+export interface BWGEligibilityResult {
+  category: BWGCategory;
+  entityName: string;
+  dailyWasteKg: number;
+  builtUpAreaSqm: number;
+  isMandatoryBWG: boolean;
+  applicableRules: string[];
+  mandatoryStreamCount: number;
+  onSiteProcessingRequired: boolean;
+  registrationStatus: 'REGISTERED_CPCB' | 'PENDING_REGISTRATION' | 'EXEMPT';
+  complianceScore: number; // 0-100
+}
+
+export interface CPCBRenewalCalendarItem {
+  id: string;
+  title: string;
+  filingType: 'ANNUAL_FORM_IV' | 'MONTHLY_LOGBOOK' | 'EBWGR_CERTIFICATE' | 'SPCB_PERMIT_RENEWAL' | 'SWM_AUDIT';
+  dueDate: string;
+  status: 'COMPLETED' | 'PENDING' | 'OVERDUE' | 'UNDER_REVIEW';
+  regulatoryBody: string;
+  documentRef?: string;
+  lastUpdated: string;
+}
+
+export interface CPCBBwgLogEntry {
+  id: string;
+  date: string;
+  stream: FourStreamType;
+  wasteType: string;
+  weightKg: number;
+  trackingCode: string;
+  vehicleNo: string;
+  destinationFacility: string;
+  weighbridgeRef?: string;
+  evidencePhotoUrl?: string;
+  geoLat?: number;
+  geoLng?: number;
+  co2eAvoidedKg: number;
+  verifiedBy: string;
+  status: 'VERIFIED' | 'FLAGGED' | 'DISPATCHED';
+}
+
+export interface CPCBSwmIntegrationStatus {
+  portalName: string;
+  category: 'GOVT_PORTAL' | 'SPCB_REGULATOR' | 'ULB_MUNICIPALITY' | 'PROCESSOR_RECYCLER' | 'ESG_REGISTRY';
+  status: 'ACTIVE' | 'ASSISTED_SUBMISSION' | 'DIRECT_API' | 'PENDING_ONBOARDING';
+  lastSync: string;
+  totalSubmissions: number;
+  endpointUrl: string;
+}
+

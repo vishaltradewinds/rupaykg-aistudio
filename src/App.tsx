@@ -5863,7 +5863,15 @@ export default function App() {
             <User size={20} />
             <span className="hidden md:block font-medium">{t('Settings')}</span>
           </button>
+          <button 
+            onClick={() => setView('enterprise_suite')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <ShieldCheck size={20} className="text-emerald-400" />
+            <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise OS & CPCB Hub')}</span>
+          </button>
         </div>
+
 
         <button 
           onClick={logout}
