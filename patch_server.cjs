@@ -1,39 +1,55 @@
 const fs = require('fs');
-let code = fs.readFileSync('server.ts', 'utf8');
+let code = fs.readFileSync('server.ts', 'utf-8');
 
-const target = `  app.get("/api/offset-projects/methodologies", auth(), (req, res) => {
-    res.json(methodologyLibrary);
-  });`;
+const importStatement = `import { SWMComplianceService } from "./src/services/swmComplianceEngine";\n`;
+if (!code.includes('swmComplianceEngine')) {
+    code = importStatement + code;
+}
 
-const replacement = `  app.get("/api/offset-projects/methodologies", auth(), (req, res) => {
-    res.json(methodologyLibrary);
+const apiRoutes = `
+  // --- National SWM Compliance Engine Routes ---
+  const swmService = new SWMComplianceService();
+
+  app.post("/api/swm/register", async (req: any, res) => {
+    try {
+      const registration = await swmService.registerEntity(req.body);
+      res.json(registration);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   });
 
-  app.post("/api/offset-projects/methodologies/import", auth(), (req, res) => {
-    const { name, sector, description, rules, standards_body, version } = req.body;
-    
-    if (!name || !sector || !description) {
-      return res.status(400).json({ error: "Missing required methodology fields" });
+  app.post("/api/swm/validate", async (req: any, res) => {
+    try {
+      const { entityId, ruleId, evidenceData } = req.body;
+      const result = await swmService.validateCompliance(entityId, ruleId, evidenceData);
+      res.json(result);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
     }
+  });
 
-    const newMethodology = {
-      id: \`CERC-AM-\${String(Math.floor(Math.random() * 9000) + 1000)}\`,
-      name,
-      sector,
-      description,
-      standards_body: standards_body || "Custom / Imported",
-      version: version || "1.0",
-      rules: rules || []
-    };
+  app.get("/api/swm/dashboard", async (req: any, res) => {
+    try {
+      const type = req.query.type as string || 'national';
+      const stats = await swmService.getDashboardMetrics(type, {});
+      res.json(stats);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+  // ---------------------------------------------
+`;
 
-    methodologyLibrary.push(newMethodology);
-    res.json({ message: "Methodology successfully compiled and synced to registry node.", methodology: newMethodology });
-  });`;
-
-if (code.includes(target)) {
-  code = code.replace(target, replacement);
-  fs.writeFileSync('server.ts', code);
-  console.log('Server API patched');
+if (!code.includes('/api/swm/register')) {
+    const splitStr = `  // Catch-all 404 handler for unmatched API routes`;
+    if (code.includes(splitStr)) {
+        code = code.replace(splitStr, apiRoutes + '\n' + splitStr);
+        fs.writeFileSync('server.ts', code);
+        console.log('Successfully patched server.ts');
+    } else {
+        console.error('Could not find injection point');
+    }
 } else {
-  console.log('Server target not found');
+    console.log('Already patched');
 }

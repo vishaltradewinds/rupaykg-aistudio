@@ -1,3 +1,4 @@
+import { SWMComplianceService } from "./src/services/swmComplianceEngine";
 import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
@@ -4077,6 +4078,40 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
       res.status(500).json({ error: err.message });
     }
   });
+
+
+  // --- National SWM Compliance Engine Routes ---
+  const swmService = new SWMComplianceService();
+
+  app.post("/api/swm/register", async (req: any, res) => {
+    try {
+      const registration = await swmService.registerEntity(req.body);
+      res.json(registration);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/swm/validate", async (req: any, res) => {
+    try {
+      const { entityId, ruleId, evidenceData } = req.body;
+      const result = await swmService.validateCompliance(entityId, ruleId, evidenceData);
+      res.json(result);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/swm/dashboard", async (req: any, res) => {
+    try {
+      const type = req.query.type as string || 'national';
+      const stats = await swmService.getDashboardMetrics(type, {});
+      res.json(stats);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+  // ---------------------------------------------
 
   // Catch-all 404 handler for unmatched API routes to prevent HTML SPA fallback
   app.all("/api/*", (req, res) => {
