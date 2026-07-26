@@ -562,88 +562,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const verifiableCredentials: any[] = [];
   const cccCertificates: any[] = [];
   const guardianMessages: any[] = [];
-  const carbonProjects: any[] = [
-    {
-      id: "PROJ-SAMPLE-01",
-      title: "Pune Municipal Biogas Expansion Project",
-      description: "Anaerobic digestion of food waste and organic matter from commercial and municipal wards in Pune.",
-      project_type: "Methane Abatement",
-      location: "Pune District, Maharashtra",
-      owner_id: "SEED-OWNER-01",
-      status: "registered",
-      methodology_id: "ICM-WM-002",
-      created_at: new Date().toISOString()
-    },
-    {
-      id: "PROJ-SAMPLE-02",
-      title: "Maharashtra Crop Residue Aggregation",
-      description: "Preventing stubble burning and open fires by collecting crop residue and processing it into bio-pellets.",
-      project_type: "Biomass Power",
-      location: "Vidarbha, Maharashtra",
-      owner_id: "SEED-OWNER-01",
-      status: "registered",
-      methodology_id: "ICM-AG-001",
-      created_at: new Date().toISOString()
-    }
-  ];
-  const projectDesignDocuments: any[] = [
-    {
-      id: "PDD-SAMPLE-01",
-      project_id: "PROJ-SAMPLE-01",
-      executiveSummary: "Pune Biogas Expansion is a flagship municipal organic waste treatment project converting 50 tons per day of food waste into clean biomethane gas and organic fertilizer.",
-      baselineScenario: "Municipal waste is dumped in unmanaged open landfills, releasing high volumes of anaerobic methane gas directly into the atmosphere.",
-      additionality: "High capital expenditure for anaerobic biogas digestors is offset only by CCTS carbon credit revenue and performance-linked green bond coupon savings.",
-      monitoringPlan: "All incoming municipal trucks are weighed at digitized weighbridges, with real-time SCADA sensor feeds tracking biogas gas production hourly.",
-      estimatedEmissionReductions: "Estimated 12,000 metric tons CO2e reduced annually.",
-      status: "approved",
-      submitted_at: new Date().toISOString()
-    },
-    {
-      id: "PDD-SAMPLE-02",
-      project_id: "PROJ-SAMPLE-02",
-      executiveSummary: "Vidarbha Farmer Producer Co. operates a crop residue aggregation supply chain across 15 villages, diverting paddy straw from agricultural stubble burning.",
-      baselineScenario: "Farmers burn paddy straw in open fields, causing catastrophic air pollution and carbon emissions.",
-      additionality: "Logistical and aggregation costs exceed agricultural fertilizer margins. Carbon offset pricing makes the supply chain highly viable.",
-      monitoringPlan: "Village collection centres track weight on smart IoT-connected scale balances. Stubble burning suppression is verified daily using Sentinel-2 satellite thermal mapping.",
-      estimatedEmissionReductions: "Estimated 6,500 metric tons CO2e reduced annually.",
-      status: "approved",
-      submitted_at: new Date().toISOString()
-    }
-  ];
-  const greenBonds: any[] = [
-    {
-      id: "BOND-92A1",
-      project_id: "PROJ-SAMPLE-01",
-      title: "Pune Municipal Biogas Expansion Bond",
-      issuer: "Pune Green Energy Ltd",
-      target_amount: 10000000,
-      raised_amount: 8500000,
-      baseline_coupon: 8.5,
-      stepdown_coupon: 6.0,
-      mrv_target_co2_kg: 50000,
-      current_mrv_progress_co2_kg: 42000,
-      maturity_years: 5,
-      status: "active",
-      created_at: new Date().toISOString(),
-      investors: ["USR-MUTUAL-FUND", "USR-IMPACT-INVESTOR"]
-    },
-    {
-      id: "BOND-EE44",
-      project_id: "PROJ-SAMPLE-02",
-      title: "Maharashtra Crop Residue Aggregation SLL",
-      issuer: "Vidarbha Farmer Producer Co.",
-      target_amount: 5000000,
-      raised_amount: 2500000,
-      baseline_coupon: 9.0,
-      stepdown_coupon: 6.5,
-      mrv_target_co2_kg: 30000,
-      current_mrv_progress_co2_kg: 12000,
-      maturity_years: 3,
-      status: "active",
-      created_at: new Date().toISOString(),
-      investors: ["USR-CSR-FOUNDATION"]
-    }
-  ];
+  const carbonProjects: any[] = [];
+  const projectDesignDocuments: any[] = [];
+  const greenBonds: any[] = [];
   const methodologyLibrary: any[] = [];
   
   // Seed with ICM methodologies dynamically
@@ -2463,42 +2384,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   // ---------------- CPCB SWM & BWG COMPLIANCE OPERATING SYSTEM ROUTES ----------------
-  let cpcbBwgLogs: any[] = [
-    {
-      id: "LOG_CPCB_001",
-      date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
-      stream: "WET_ORGANIC",
-      wasteType: "Food & Kitchen Waste",
-      weightKg: 280,
-      trackingCode: "TRK-CPCB-WET-8821",
-      vehicleNo: "KA-01-EQ-9921",
-      destinationFacility: "On-site Biomethanation Plant / Municipal MRF-04",
-      weighbridgeRef: "WB-991204",
-      evidencePhotoUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500",
-      geoLat: 12.9716,
-      geoLng: 77.5946,
-      co2eAvoidedKg: 252,
-      verifiedBy: "Senior Compliance Officer (ULB-Verified)",
-      status: "VERIFIED"
-    },
-    {
-      id: "LOG_CPCB_002",
-      date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
-      stream: "DRY_RECYCLABLE",
-      wasteType: "Paper & Cardboard Waste",
-      weightKg: 145,
-      trackingCode: "TRK-CPCB-DRY-3312",
-      vehicleNo: "KA-01-EQ-9921",
-      destinationFacility: "Authorized Paper Recycler (CPCB Reg. #REC-3382)",
-      weighbridgeRef: "WB-991205",
-      evidencePhotoUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=500",
-      geoLat: 12.9720,
-      geoLng: 77.5950,
-      co2eAvoidedKg: 130.5,
-      verifiedBy: "BWG Site Supervisor",
-      status: "VERIFIED"
-    }
-  ];
+  let cpcbBwgLogs: any[] = [];
 
   app.post("/api/cpcb/bwg-assess", (req, res) => {
     const { entityName, category, dailyWasteKg, builtUpAreaSqm } = req.body;
@@ -2732,35 +2618,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
   // ---------------- HEDERA GUARDIAN API STATE & ROUTES ----------------
   let guardianAuthority: any = null;
-  const guardianPolicies: any[] = [
-    {
-      id: "policy-drec-100",
-      policyName: "dREC Renewable Energy Tracking Policy v1.4",
-      version: "1.4.0",
-      description: "Automated dREC tracking and verification methodology. Measures solar/wind MWh output to verify Renewable Energy Certificates.",
-      status: "Active",
-      schema: {
-        solarPanelsInstalled: "number",
-        megawattHoursGenerated: "number",
-        reportingPeriodStart: "string",
-        reportingPeriodEnd: "string"
-      }
-    },
-    {
-      id: "policy-methane-200",
-      policyName: "ACM0022 - Large-Scale Consolidated Landfill Methane Avoidance Policy v3.0",
-      version: "3.0.0",
-      description: "CDM methodology for solid waste composting and landfill gas extraction tracking. Converts biomass waste diverted into carbon offsets.",
-      status: "Active",
-      schema: {
-        divertedWeightKg: "number",
-        wasteType: "string",
-        compostProducedKg: "number",
-        reportingPeriodStart: "string",
-        reportingPeriodEnd: "string"
-      }
-    }
-  ];
+  const guardianPolicies: any[] = [];
   const guardianSubmissions: any[] = [];
 
   app.post("/api/v1/demo/authority", (req, res) => {
@@ -3736,12 +3594,7 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
   });
 
   // Simulated dMRV Sensors
-  const mockSensors = [
-    { id: "SEN-BIOMASS-01", name: "Pune Weighbridge Digital Scale", type: "Weighbridge Sensor", last_reading: "1,420 kg", status: "active", battery: "94%" },
-    { id: "SEN-TEMP-02", name: "Biomethanation Core Temperature Probe", type: "Thermodynamic Probe", last_reading: "57.8 °C", status: "active", battery: "88%" },
-    { id: "SEN-SAT-03", name: "Sentinel-2 Crop Stubble Absorption Remote Sensing", type: "NDVI Vegetation Index", last_reading: "0.15 NDVI (Suppressed Burning)", status: "active", battery: "100%" },
-    { id: "SEN-FLOW-04", name: "Methane Gas Liquefaction Flow Meter", type: "Gas Flow Meter", last_reading: "420 m³/h", status: "active", battery: "91%" }
-  ];
+  const mockSensors = [];
 
   app.get("/api/dmrv/sensors", auth(), (req: any, res) => {
     res.json(mockSensors);

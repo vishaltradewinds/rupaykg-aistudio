@@ -36,33 +36,7 @@ export class RegistryGatewayAdapter {
   }
 
   private static seedInitialSubmissions(): RegistryProjectSubmission[] {
-    const initial: RegistryProjectSubmission[] = [
-      {
-        submissionId: 'SUB_CCTS_001',
-        projectId: 'PROJ_EAST_MUNI_COMPOST',
-        registryName: 'INDIA_CCTS',
-        status: 'ISSUED',
-        submittedAt: '2026-02-14T08:30:00.000Z',
-        assessedScore: 100,
-        totalCreditsRequested: 1450,
-        creditsIssued: 1450,
-        transactionHash: '0xbee_ccts_8bf4c1a2d3e9f0c2a8b9e07f',
-        isSandbox: true,
-        notes: 'National CCTS registry successfully verified composting methane avoidance records'
-      },
-      {
-        submissionId: 'SUB_CDM_002',
-        projectId: 'PROJ_PUNJAB_STUBBLE_BURN',
-        registryName: 'UNFCCC_CDM',
-        status: 'UNDER_REVIEW',
-        submittedAt: '2026-03-01T11:15:00.000Z',
-        assessedScore: 90,
-        totalCreditsRequested: 840,
-        creditsIssued: 0,
-        isSandbox: true,
-        notes: 'Small-scale crop residue aggregation pipeline awaiting final UNFCCC EB panel review'
-      }
-    ];
+    const initial: RegistryProjectSubmission[] = [];
     localStorage.setItem(this.SUBMISSIONS_KEY, JSON.stringify(initial));
     return initial;
   }
