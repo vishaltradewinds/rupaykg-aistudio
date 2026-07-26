@@ -1,27 +1,14 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/App.tsx', 'utf8');
+let code = fs.readFileSync('src/App.tsx', 'utf-8');
 
-const target = `        <div className="flex items-center gap-3 mb-12 px-2">
-          <div className="p-2 bg-emerald-500 rounded-xl text-black">
-            <Leaf size={24} />
-          </div>
-          <span className="text-xl font-bold tracking-tighter hidden md:block">RUPAYKG</span>
-        </div>`;
+// We can just regex replace the entire button blocks for municipal and partner
+const removeMunicipal = /\{\['municipal_admin', 'state_admin', 'super_admin'\]\.includes\(user\?\.role \|\| ''\) && \(\s*<button\s*onClick=\{\(\) => setView\('municipal'\)\}\s*className=\{`w-full flex items-center gap-3 p-3 rounded-xl transition-all \$\{view === 'municipal' \? 'bg-emerald-500\/10 text-emerald-400' : 'text-white\/40 hover:text-white hover:bg-white\/5'\}`\}\s*>\s*<Map size=\{20\} \/>\s*<span className="hidden md:block font-medium">\{labels\.analytics\}<\/span>\s*<\/button>\s*\)\}/g;
 
-const replacement = `        <div className="flex items-center gap-3 mb-12 px-2">
-          <div className="p-2 bg-emerald-500 rounded-xl text-black shadow-lg shadow-emerald-500/20">
-            <Leaf size={24} />
-          </div>
-          <div>
-            <span className="text-xl font-bold tracking-tighter hidden md:block">RUPAYKG</span>
-            <span className="text-[9px] font-mono text-emerald-400 hidden md:block tracking-widest mt-0.5">CIRCULAR ECONOMY OS</span>
-          </div>
-        </div>`;
+code = code.replace(removeMunicipal, '');
 
-if (code.includes(target)) {
-  code = code.replace(target, replacement);
-  fs.writeFileSync('src/App.tsx', code);
-  console.log('Sidebar patched');
-} else {
-  console.log('Sidebar target not found');
-}
+const removePartner = /\{\['csr_partner', 'epr_partner', 'ccc_buyer'\]\.includes\(user\?\.role \|\| ''\) && \(\s*<button\s*onClick=\{\(\) => setView\('partner'\)\}\s*className=\{`w-full flex items-center gap-3 p-3 rounded-xl transition-all \$\{view === 'partner' \? 'bg-emerald-500\/10 text-emerald-400' : 'text-white\/40 hover:text-white hover:bg-white\/5'\}`\}\s*>\s*<Globe size=\{20\} \/>\s*<span className="hidden md:block font-medium">\{t\('CCC Offset Market'\)\}<\/span>\s*<\/button>\s*\)\}/g;
+
+code = code.replace(removePartner, '');
+
+fs.writeFileSync('src/App.tsx', code);
+console.log('Sidebar patched.');

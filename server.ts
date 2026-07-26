@@ -1968,36 +1968,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     },
   );
 
-  // ================================
-  // WARD LEVEL GOVERNMENT ANALYTICS
-  // ================================
-  app.get(
-    "/api/municipal/ward-analytics",
-    auth(["municipal_admin", "state_admin", "super_admin"]),
-    (req: any, res) => {
-      const { context } = req.query;
-      const wardData: Record<
-        string,
-        { _id: string; total_weight: number; count: number }
-      > = {};
-
-      let filteredRecords = filterByJurisdiction(req.user, records, "records", req.query);
-      if (context && context !== "all") {
-        filteredRecords = filteredRecords.filter((r) => r.context === context);
-      }
-
-      filteredRecords.forEach((r) => {
-        const ward = r.village || "Unknown";
-        if (!wardData[ward]) {
-          wardData[ward] = { _id: ward, total_weight: 0, count: 0 };
-        }
-        wardData[ward].total_weight += r.weight_kg || 0;
-        wardData[ward].count += 1;
-      });
-
-      res.json({ ward_data: Object.values(wardData) });
-    },
-  );
+  
 
   // ================================
   // FRAUD HEATMAP DATA
