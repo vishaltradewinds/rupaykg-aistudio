@@ -73,6 +73,7 @@ import { safeFetchLgdJson } from './services/lgdService';
 
 import { Chatbot } from './components/Chatbot';
 import EnterpriseSuite from './components/EnterpriseSuite';
+import SwmCompliancePlatform from './components/SwmCompliancePlatform';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -381,7 +382,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance'>('dashboard');
   
   // Hedera Guardian Portal State Variables
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
@@ -5874,6 +5875,14 @@ export default function App() {
             <ShieldCheck size={20} className="text-emerald-400" />
             <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise OS & CPCB Hub')}</span>
           </button>
+          
+          <button 
+            onClick={() => setView('swm_compliance')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'swm_compliance' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <BookOpen size={20} className={view === 'swm_compliance' ? 'text-blue-400' : ''} />
+            <span className="hidden md:block font-bold">National SWM Portal</span>
+          </button>
         </div>
 
 
@@ -5904,6 +5913,7 @@ export default function App() {
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
               {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
+              {view === 'swm_compliance' && 'National SWM Compliance Platform'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -9363,6 +9373,17 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
             >
               <EnterpriseSuite user={user} onBackToDashboard={() => setView('dashboard')} />
+            </motion.div>
+          )}
+
+          {view === 'swm_compliance' && (
+            <motion.div
+              key="swm_compliance"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <SwmCompliancePlatform user={user} onBackToDashboard={() => setView('dashboard')} />
             </motion.div>
           )}
 
