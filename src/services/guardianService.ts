@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { randomBytesHex, hashStringHex } from "../utils/cryptoUtils";
 
 // ========================================================
 // HEDERA GUARDIAN ORCHESTRATION SERVICE
@@ -34,9 +34,9 @@ export class GuardianService {
    */
   static async anchorToHCS(vc: any): Promise<GuardianMessage> {
     const timestamp = new Date().toISOString();
-    let messageId = `hcs-${crypto.randomBytes(8).toString('hex')}`;
+    let messageId = `hcs-${randomBytesHex(8)}`;
     let sequenceNumber = Math.floor(Math.random() * 10000);
-    let runningHash = crypto.createHash('sha384').update(JSON.stringify(vc) + sequenceNumber).digest('hex');
+    let runningHash = hashStringHex(JSON.stringify(vc) + sequenceNumber);
     let topicId = this.HCS_TOPIC_ID;
 
     // Actual Hedera Guardian API Integration
@@ -88,7 +88,7 @@ export class GuardianService {
    * Generates a DID for a physical waste processing device or stakeholder.
    */
   static generateDID(entityId: string): string {
-    const fingerprint = crypto.createHash('sha256').update(entityId).digest('hex').substring(0, 16);
+    const fingerprint = hashStringHex(entityId).substring(0, 16);
     return `did:hedera:mainnet:${fingerprint};rupaykg-owner`;
   }
 

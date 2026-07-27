@@ -1,5 +1,5 @@
 import { MRVEvent, EvidenceRecord, CCTSReadinessAssessment, CCTSReadinessStatus } from '../types';
-import crypto from 'crypto';
+import { randomBytesHex } from '../utils/cryptoUtils';
 
 export interface RegistryProjectSubmission {
   submissionId: string;
@@ -64,7 +64,7 @@ export class RegistryGatewayAdapter {
       : 'Submission blocked: Project does not meet CCTS compliance criteria. Clear open verification findings first.';
 
     const newSubmission: RegistryProjectSubmission = {
-      submissionId: `SUB_CCTS_${crypto.randomBytes(3).toString('hex').toUpperCase()}`,
+      submissionId: `SUB_CCTS_${randomBytesHex(3).toUpperCase()}`,
       projectId: assessment.projectId,
       registryName: 'INDIA_CCTS',
       status,
@@ -92,7 +92,7 @@ export class RegistryGatewayAdapter {
     if (sub.status === 'UNDER_REVIEW') {
       sub.status = 'ISSUED';
       sub.creditsIssued = sub.totalCreditsRequested;
-      sub.transactionHash = `0xbee_ccts_${crypto.randomBytes(12).toString('hex')}`;
+      sub.transactionHash = `0xbee_ccts_${randomBytesHex(12)}`;
       sub.notes = 'Official CCTS Compliance Credits minted successfully inside National carbon depository.';
     }
 

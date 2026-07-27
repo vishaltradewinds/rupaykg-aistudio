@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import crypto from 'crypto';
+import { hashStringHex } from '../utils/cryptoUtils';
 
 // ========================================================
 // W3C VERIFIABLE CREDENTIALS 2.0 SERVICE
@@ -92,7 +92,7 @@ export class VCService {
     // Data Integrity Proof (Deterministic SHA256 of the JCS representation)
     // Note: In strict W3C, this would use a proper Ed25519 signature
     const canonicalString = JSON.stringify(vc);
-    const hmac = crypto.createHash('sha256').update(canonicalString).digest('hex');
+    const hmac = hashStringHex(canonicalString);
 
     vc.proof = {
       "type": "DataIntegrityProof",

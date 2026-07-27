@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { randomBytesHex } from "../utils/cryptoUtils";
 
 // ========================================================
 // CARBON CALCULATION ENGINE
@@ -101,7 +101,7 @@ export function generateCarbonEvent(record: any, wasteTypeConfig: any) {
   else if (risk_score < 0.2) hierarchy_status = "AI Verified";
 
   return {
-    id: "ENV" + crypto.randomBytes(4).toString("hex").toUpperCase(),
+    id: "ENV" + randomBytesHex(4).toUpperCase(),
     waste_event_id: record.id,
     timestamp: new Date().toISOString(),
     geo_lat: record.geo_lat,

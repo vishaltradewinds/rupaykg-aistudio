@@ -467,7 +467,6 @@ class EnterpriseMrvStore {
 
   private seedInitialActivityData() {
     this.mrvEvents = [];
-    this.emissionsData = [];
     this.evidenceRecords = [];
     this.evidencePackages = [];
     this.massBalances = [];

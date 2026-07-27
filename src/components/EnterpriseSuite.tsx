@@ -49,6 +49,7 @@ import {
 import { GuardianPolicyAdapter } from '../services/guardianPolicyAdapter';
 import { RegistryGatewayAdapter } from '../services/registryGatewayAdapter';
 import CpcbBwgCompliance from './CpcbBwgCompliance';
+import HederaGuardianSuite from './HederaGuardianSuite';
 
 import {
   OperatingMode,
@@ -1117,77 +1118,76 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-6"
               >
-                <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2">
-                    <Cpu className="text-emerald-400 animate-pulse" />
-                    Hedera Guardian Policy Integration Studio
-                  </h3>
-                  <p className="text-xs text-white/40 mt-1">Official Guardian portal isolation, role, and schema mapping matrices</p>
-                </div>
+                {/* Full Hedera Guardian & HCS Ledger Suite (Monitor Health, Visualise Flows, HCS Console, Auto-Verify Chain) */}
+                <HederaGuardianSuite user={user} />
 
-                {/* Capability & Provider Status Header */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {integrations.filter(i => i.name.includes('Guardian')).map(cap => (
-                    <div key={cap.name} className="bg-black/30 p-4 rounded-lg border border-emerald-500/20 col-span-3 flex justify-between items-center">
-                      <div>
-                        <span className="text-xs font-mono text-emerald-400 font-bold uppercase">{cap.environment}</span>
-                        <h4 className="text-base font-bold text-white mt-1">{cap.name}</h4>
-                        <p className="text-xs text-white/40 mt-1">Capabilities: {cap.capabilities.join(', ')}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-block px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded text-xs">
-                          {cap.status} (Sandbox Mode)
-                        </span>
-                        <p className="text-[10px] text-white/30 mt-2">Last check: {cap.lastHealthCheck}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Visual Mappings: Role Mapping Matrix & Schema mappings */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Role Mapping */}
-                  <div className="bg-black/40 p-4 rounded-lg border border-white/5 space-y-4">
-                    <h4 className="text-xs font-bold tracking-wider text-white/40 uppercase">Role Mapping Matrix (RupayKg vs Guardian)</h4>
-                    <div className="space-y-2 text-xs font-mono">
-                      <div className="p-3 bg-slate-900 rounded border border-white/5 flex justify-between items-center">
+                <div className="pt-6 border-t border-white/10">
+                  <h4 className="text-sm font-bold text-white/60 mb-4 uppercase tracking-wider">Role & Entity Schema Matrices</h4>
+                  
+                  {/* Capability & Provider Status Header */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    {integrations.filter(i => i.name.includes('Guardian')).map(cap => (
+                      <div key={cap.name} className="bg-black/30 p-4 rounded-xl border border-emerald-500/20 col-span-3 flex justify-between items-center">
                         <div>
-                          <p className="text-white/40 text-[9px]">RupayKg Operator Role</p>
-                          <p className="font-bold text-white">MUNICIPAL_OPERATOR</p>
+                          <span className="text-xs font-mono text-emerald-400 font-bold uppercase">{cap.environment}</span>
+                          <h4 className="text-base font-bold text-white mt-1">{cap.name}</h4>
+                          <p className="text-xs text-white/40 mt-1">Capabilities: {cap.capabilities.join(', ')}</p>
                         </div>
-                        <ArrowRight size={14} className="text-emerald-400" />
-                        <div>
-                          <p className="text-white/40 text-[9px]">Guardian Policy Role</p>
-                          <p className="font-bold text-emerald-400">DataCollector</p>
+                        <div className="text-right">
+                          <span className="inline-block px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded text-xs">
+                            {cap.status} (Sandbox Mode)
+                          </span>
+                          <p className="text-[10px] text-white/30 mt-2">Last check: {cap.lastHealthCheck}</p>
                         </div>
                       </div>
-                      <div className="p-3 bg-slate-900 rounded border border-white/5 flex justify-between items-center">
-                        <div>
-                          <p className="text-white/40 text-[9px]">RupayKg Operator Role</p>
-                          <p className="font-bold text-white">VERIFIER</p>
-                        </div>
-                        <ArrowRight size={14} className="text-emerald-400" />
-                        <div>
-                          <p className="text-white/40 text-[9px]">Guardian Policy Role</p>
-                          <p className="font-bold text-emerald-400">AuditorVerifier</p>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
-                  {/* Schema Mappings */}
-                  <div className="bg-black/40 p-4 rounded-lg border border-white/5 space-y-4">
-                    <h4 className="text-xs font-bold tracking-wider text-white/40 uppercase">Entity Schema Mapping Matrix</h4>
-                    <div className="space-y-2 text-xs font-mono">
-                      <div className="p-3 bg-slate-900 rounded border border-white/5 space-y-2">
-                        <div className="flex justify-between border-b border-white/5 pb-1 text-[10px]">
-                          <span className="text-emerald-400">RupayKg Entity: MRVEvent</span>
-                          <span className="text-white/40">Guardian: MunicipalActivity</span>
+                  {/* Visual Mappings: Role Mapping Matrix & Schema mappings */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Role Mapping */}
+                    <div className="bg-black/40 p-4 rounded-xl border border-white/5 space-y-4">
+                      <h4 className="text-xs font-bold tracking-wider text-white/40 uppercase">Role Mapping Matrix (RupayKg vs Guardian)</h4>
+                      <div className="space-y-2 text-xs font-mono">
+                        <div className="p-3 bg-slate-900 rounded-lg border border-white/5 flex justify-between items-center">
+                          <div>
+                            <p className="text-white/40 text-[9px]">RupayKg Operator Role</p>
+                            <p className="font-bold text-white">MUNICIPAL_OPERATOR</p>
+                          </div>
+                          <ArrowRight size={14} className="text-emerald-400" />
+                          <div>
+                            <p className="text-white/40 text-[9px]">Guardian Policy Role</p>
+                            <p className="font-bold text-emerald-400">DataCollector</p>
+                          </div>
                         </div>
-                        <div className="space-y-1 text-[10px]">
-                          <p>measurement <span className="text-white/40">→</span> tonnesQuantity</p>
-                          <p>recordedAt <span className="text-white/40">→</span> timestamp</p>
-                          <p>latitude <span className="text-white/40">→</span> geoLatitude</p>
+                        <div className="p-3 bg-slate-900 rounded-lg border border-white/5 flex justify-between items-center">
+                          <div>
+                            <p className="text-white/40 text-[9px]">RupayKg Operator Role</p>
+                            <p className="font-bold text-white">VERIFIER</p>
+                          </div>
+                          <ArrowRight size={14} className="text-emerald-400" />
+                          <div>
+                            <p className="text-white/40 text-[9px]">Guardian Policy Role</p>
+                            <p className="font-bold text-emerald-400">AuditorVerifier</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Schema Mappings */}
+                    <div className="bg-black/40 p-4 rounded-xl border border-white/5 space-y-4">
+                      <h4 className="text-xs font-bold tracking-wider text-white/40 uppercase">Entity Schema Mapping Matrix</h4>
+                      <div className="space-y-2 text-xs font-mono">
+                        <div className="p-3 bg-slate-900 rounded-lg border border-white/5 space-y-2">
+                          <div className="flex justify-between border-b border-white/5 pb-1 text-[10px]">
+                            <span className="text-emerald-400">RupayKg Entity: MRVEvent</span>
+                            <span className="text-white/40">Guardian: MunicipalActivity</span>
+                          </div>
+                          <div className="space-y-1 text-[10px]">
+                            <p>measurement <span className="text-white/40">→</span> tonnesQuantity</p>
+                            <p>recordedAt <span className="text-white/40">→</span> timestamp</p>
+                            <p>latitude <span className="text-white/40">→</span> geoLatitude</p>
+                          </div>
                         </div>
                       </div>
                     </div>

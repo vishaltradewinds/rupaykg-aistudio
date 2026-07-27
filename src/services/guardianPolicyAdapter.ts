@@ -1,6 +1,6 @@
 import { MethodologyIR, MRVEvent, EvidenceRecord, Policy } from '../types';
 import { GuardianService } from './guardianService';
-import crypto from 'crypto';
+import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils';
 
 /**
  * ========================================================
@@ -29,7 +29,7 @@ export class GuardianPolicyAdapter {
     console.log(`[GuardianPolicyAdapter] Translating Methodology IR [${ir.metadata.methodologyId}] to Hedera Guardian schema representations.`);
     
     // Simulate compilation steps
-    const policyId = `POL_GUARD_${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    const policyId = `POL_GUARD_${randomBytesHex(4).toUpperCase()}`;
     const hederaTopicId = `0.0.${Math.floor(1000000 + Math.random() * 9000000)}`;
     
     // Guardian specific compilation outputs
@@ -69,7 +69,7 @@ export class GuardianPolicyAdapter {
         "https://www.w3.org/2018/credentials/v1",
         "https://rupaykg.org/schemas/mrv-event-v1.json"
       ],
-      "id": `urn:uuid:${crypto.randomBytes(16).toString('hex')}`,
+      "id": `urn:uuid:${randomBytesHex(16)}`,
       "type": ["VerifiableCredential", "RupayKgMrvEventCredential"],
       "issuer": `did:rupaykg:authority:national-compost-01`,
       "issuanceDate": new Date().toISOString(),
@@ -98,7 +98,7 @@ export class GuardianPolicyAdapter {
         "created": new Date().toISOString(),
         "verificationMethod": "did:rupaykg:authority:national-compost-01#key-1",
         "proofPurpose": "assertionMethod",
-        "proofValue": `sig_${crypto.randomBytes(32).toString('hex')}`
+        "proofValue": `sig_${randomBytesHex(32)}`
       }
     };
 
@@ -119,7 +119,7 @@ export class GuardianPolicyAdapter {
    * Creates an immutable Decentrailized Identifier (DID) for a stakeholder or processing node.
    */
   static generateStakeholderDID(entityId: string): { did: string; status: string; isSandbox: boolean } {
-    const fingerprint = crypto.createHash('sha256').update(entityId).digest('hex').substring(0, 16);
+    const fingerprint = hashStringHex(entityId).substring(0, 16);
     const did = `did:hedera:mainnet:${fingerprint};rupaykg-owner`;
     return {
       did,
