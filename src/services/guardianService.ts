@@ -1,4 +1,5 @@
 import { randomBytesHex, hashStringHex } from "../utils/cryptoUtils";
+import { safeParseJson } from "../utils/safeJson";
 
 // ========================================================
 // HEDERA GUARDIAN ORCHESTRATION SERVICE
@@ -53,11 +54,13 @@ export class GuardianService {
         });
         
         if (response.ok) {
-          const data = await response.json();
-          messageId = data.id || messageId;
-          topicId = data.topicId || topicId;
-          sequenceNumber = data.sequenceNumber || sequenceNumber;
-          runningHash = data.runningHash || runningHash;
+          const data = await safeParseJson(response);
+          if (data) {
+            messageId = data.id || messageId;
+            topicId = data.topicId || topicId;
+            sequenceNumber = data.sequenceNumber || sequenceNumber;
+            runningHash = data.runningHash || runningHash;
+          }
         } else {
           console.warn(`[Guardian] API returned status ${response.status}. Falling back to simulation.`);
         }
@@ -102,7 +105,7 @@ export class GuardianService {
            headers: this.guardianApiKey ? { 'Authorization': `Bearer ${this.guardianApiKey}` } : {}
         });
         if (response.ok) {
-           const policies = await response.json();
+           const policies = await safeParseJson(response);
            if (policies && policies.length > 0) {
               return policies[0]; // Return the first active policy
            }

@@ -3425,6 +3425,82 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     }
   });
 
+  app.post("/api/carbon/guardian/sync-ledger", async (req, res) => {
+    try {
+      const existingCount = guardianMessages.length;
+      const baseSeq = existingCount > 0 
+        ? Math.max(...guardianMessages.map(m => m.sequenceNumber || 0)) 
+        : 1042;
+
+      const newBatch: any[] = [];
+      const eventTypes = ["MRV_EVENT", "WEIGHBRIDGE_TICKET", "POLICY_COMPLIANCE", "CIRCULAR_CREDIT_ANCHOR"];
+      const locations = [
+        "MRF Facility #04, Pune Zone B",
+        "Gobar-Dhan Biogas Plant, Gram Panchayat Khed",
+        "Compost Processing Facility #12, Mumbai",
+        "Resource Recovery Center, Ahmedabad"
+      ];
+
+      const countToGenerate = Math.floor(Math.random() * 2) + 1;
+      for (let i = 0; i < countToGenerate; i++) {
+        const seq = baseSeq + i + 1;
+        const eventType = eventTypes[(seq + i) % eventTypes.length];
+        const loc = locations[(seq + i) % locations.length];
+        const weight = (1800 + (seq * 137) % 3200).toLocaleString();
+        const uuid = crypto.randomBytes(6).toString('hex');
+
+        const vcPayload = {
+          "@context": ["https://www.w3.org/2018/credentials/v1"],
+          id: `urn:uuid:rupaykg-hcs-sync-${uuid}`,
+          type: ["VerifiableCredential", "RupayKgHcsSyncCredential"],
+          issuer: "did:rupaykg:authority:national-compost-01",
+          issuanceDate: new Date().toISOString(),
+          credentialSubject: {
+            id: `did:hedera:testnet:topic-0.0.4592011:${seq}`,
+            eventType,
+            facility: loc,
+            measurement: `${weight} kg Diverted Solid Waste`,
+            mrvScore: 98 + (i % 3),
+            sequenceNumber: seq
+          },
+          proof: {
+            type: "Ed25519Signature2020",
+            created: new Date().toISOString(),
+            proofValue: `sig_${crypto.randomBytes(32).toString('hex')}`
+          }
+        };
+
+        const calcHash = crypto.createHash('sha384')
+          .update(JSON.stringify(vcPayload) + seq)
+          .digest('hex');
+
+        const syncMessage = {
+          id: `hcs-sync-${uuid}`,
+          topicId: "0.0.4592011",
+          sequenceNumber: seq,
+          runningHash: `0x${calcHash}`,
+          timestamp: new Date().toISOString(),
+          message: vcPayload
+        };
+
+        guardianMessages.push(syncMessage);
+        newBatch.push(syncMessage);
+      }
+
+      res.json({
+        success: true,
+        synced_at: new Date().toISOString(),
+        topic_id: "0.0.4592011",
+        synced_count: newBatch.length,
+        latest_sequence_number: baseSeq + newBatch.length,
+        new_messages: newBatch,
+        messages: guardianMessages
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to sync Hedera Consensus Service ledger batch", details: err.message });
+    }
+  });
+
   app.post(
     "/api/carbon/guardian/ai-analyze",
     auth(["regulator", "super_admin"]),

@@ -34,6 +34,8 @@ import {
   CPCBSwmIntegrationStatus
 } from '../types';
 
+import { safeParseJson } from '../utils/safeJson';
+
 interface CpcbBwgComplianceProps {
   user: any;
 }
@@ -95,8 +97,8 @@ export default function CpcbBwgCompliance({ user }: CpcbBwgComplianceProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ entityName, category, dailyWasteKg, builtUpAreaSqm })
       });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setEligibilityResult(data);
       } else {
         setEligibilityResult(
@@ -131,9 +133,8 @@ export default function CpcbBwgCompliance({ user }: CpcbBwgComplianceProps) {
         body: JSON.stringify(payload)
       });
 
-
-      if (res.ok) {
-        const data = await res.json();
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setLogEntries(prev => [data, ...prev]);
       } else {
         cpcbService.addLogEntry(payload);
@@ -162,8 +163,12 @@ export default function CpcbBwgCompliance({ user }: CpcbBwgComplianceProps) {
           entityDetails: { entityName, category, dailyWasteKg, builtUpAreaSqm }
         })
       });
-      const data = await res.json();
-      setAiResponse(data.answer);
+      const data = await safeParseJson(res);
+      if (data?.answer) {
+        setAiResponse(data.answer);
+      } else {
+        throw new Error('Invalid response');
+      }
     } catch (err) {
       setAiResponse(
         'Under CPCB SWM Rules 2016, Bulk Waste Generators producing >100 kg/day or occupying >5,000 sqm must mandate 4-stream segregation at source, process wet waste on-site or via authorized ULB facilities, maintain digital daily logbooks, and submit CPCB Form IV annual returns before June 30th.'
@@ -181,8 +186,12 @@ export default function CpcbBwgCompliance({ user }: CpcbBwgComplianceProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ entityName, category })
       });
-      const data = await res.json();
-      setExportPackage(data.package);
+      const data = await safeParseJson(res);
+      if (data?.package) {
+        setExportPackage(data.package);
+      } else {
+        throw new Error('Invalid package data');
+      }
     } catch {
       setExportPackage({
         cpcbSystemHeader: {

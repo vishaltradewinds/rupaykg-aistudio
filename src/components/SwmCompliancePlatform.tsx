@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { safeParseJson } from '../utils/safeJson';
 
 export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) {
   const { t } = useTranslation();
@@ -146,8 +147,8 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(regForm)
       });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setRegisteredEntitiesList(prev => [data.registeredEntity, ...prev]);
         setRegSuccessMessage(`Entity "${regForm.name}" registered successfully with CPCB Token ${data.registeredEntity.cpcbToken}`);
         setTimeout(() => setRegSuccessMessage(''), 6000);
@@ -197,8 +198,8 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(wbForm)
       });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setGeneratedSlip(data);
       }
     } catch (err) {
@@ -227,8 +228,8 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel: 'LIVE_OPERATIONAL_SYNC', entityId: 'MUNI-MUMBAI-01' })
       });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setCpcbSyncLogs(prev => [
           {
             channel: 'LIVE_OPERATIONAL_FEED',
@@ -256,8 +257,8 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ zone: aiZone, pastDailyAvgKg: 450 })
       });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setAiForecastResult(data);
       }
     } catch (err) {
@@ -275,8 +276,8 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
         headers: { 'Content-Type': 'application/json' },
         body: apiMethod === 'POST' ? JSON.stringify({ test: 'payload', timestamp: new Date().toISOString() }) : undefined
       });
-      const data = await res.json();
-      setApiResponse(data);
+      const data = await safeParseJson(res);
+      setApiResponse(data || { status: res.status, message: res.statusText });
     } catch (err: any) {
       setApiResponse({ error: err.message });
     }

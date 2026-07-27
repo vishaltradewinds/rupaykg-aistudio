@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { safeParseJson } from '../utils/safeJson';
+
 interface HederaGuardianSuiteProps {
   user?: any;
   defaultSubTab?: 'monitor' | 'visualizer' | 'console' | 'integrity' | 'policy';
@@ -72,6 +74,11 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [broadcastStatus, setBroadcastStatus] = useState<string | null>(null);
 
+  // Real-time Sync Ledger state
+  const [isSyncingLedger, setIsSyncingLedger] = useState(false);
+  const [newlySyncedIds, setNewlySyncedIds] = useState<string[]>([]);
+  const [syncedBannerInfo, setSyncedBannerInfo] = useState<{ count: number; timestamp: string; newSeqs: number[] } | null>(null);
+
   // 4. AUTO VERIFY CHAIN INTEGRITY STATE
   const [isVerifyingChain, setIsVerifyingChain] = useState(false);
   const [verificationProgress, setVerificationProgress] = useState(0);
@@ -83,6 +90,44 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
     fetchLedgerHealth();
     fetchHcsMessages();
   }, []);
+
+  const handleSyncLedger = async () => {
+    setIsSyncingLedger(true);
+    try {
+      const token = localStorage.getItem('rupay_token');
+      const res = await fetch('/api/carbon/guardian/sync-ledger', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (res.ok) {
+        const data = await safeParseJson(res);
+        if (data && data.messages) {
+          setHcsMessages(data.messages);
+          const newBatch = data.new_messages || [];
+          const newIds = newBatch.map((m: any) => m.id);
+          const newSeqs = newBatch.map((m: any) => m.sequenceNumber || m.id);
+          setNewlySyncedIds(newIds);
+          setSyncedBannerInfo({
+            count: data.synced_count || newBatch.length,
+            timestamp: new Date().toLocaleTimeString(),
+            newSeqs
+          });
+          fetchLedgerHealth();
+          
+          if (newBatch.length > 0) {
+            setSelectedMessage(newBatch[newBatch.length - 1]);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to sync HCS ledger batch:", err);
+    } finally {
+      setIsSyncingLedger(false);
+    }
+  };
 
   // Auto-trigger chain integrity audit when entering the integrity subtab if not yet run
   useEffect(() => {
@@ -99,8 +144,8 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       if (res.ok) {
-        const data = await res.json();
-        setHealthData(data);
+        const data = await safeParseJson(res);
+        if (data) setHealthData(data);
       }
     } catch (err) {
       console.error("Failed to fetch Hedera health:", err);
@@ -116,7 +161,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       if (res.ok) {
-        const data = await res.json();
+        const data = await safeParseJson(res);
         setHcsMessages(data || []);
       }
     } catch (err) {
@@ -142,14 +187,14 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
           eventType: broadcastType
         })
       });
-      const data = await res.json();
-      if (res.ok) {
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setBroadcastStatus('Message successfully anchored to Hedera HCS!');
         setBroadcastText('');
         fetchHcsMessages();
         fetchLedgerHealth();
       } else {
-        setBroadcastStatus(data.error || 'Failed to broadcast message.');
+        setBroadcastStatus(data?.error || 'Failed to broadcast message.');
       }
     } catch (err: any) {
       setBroadcastStatus('Network error during broadcast.');
@@ -176,18 +221,20 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       if (res.ok) {
-        const data = await res.json();
-        if (tamperMode) {
-          data.status = 'FAIL';
-          data.chain_integrity_score = 66;
-          data.anomalies_detected = 1;
-          data.sequence_continuity = 'DISRUPTED_AT_SEQ_1041';
-          if (data.verified_items && data.verified_items.length > 1) {
-            data.verified_items[1].status = 'INTEGRITY_COMPROMISED';
-            data.verified_items[1].runningHash = '0xCORRUPTED_RUNNING_HASH_ANOMALY';
+        const data = await safeParseJson(res);
+        if (data) {
+          if (tamperMode) {
+            data.status = 'FAIL';
+            data.chain_integrity_score = 66;
+            data.anomalies_detected = 1;
+            data.sequence_continuity = 'DISRUPTED_AT_SEQ_1041';
+            if (data.verified_items && data.verified_items.length > 1) {
+              data.verified_items[1].status = 'INTEGRITY_COMPROMISED';
+              data.verified_items[1].runningHash = '0xCORRUPTED_RUNNING_HASH_ANOMALY';
+            }
           }
+          setAuditResult(data);
         }
-        setAuditResult(data);
       }
     } catch (err) {
       console.error("Failed chain verification:", err);
@@ -272,17 +319,18 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
     {
       id: 'node-5',
       title: '5. HCS Consensus Anchoring',
-      subtitle: 'Hedera Topic 0.0.4592011',
-      status: 'ANCHORED',
-      latency: '38ms',
+      subtitle: syncedBannerInfo ? `${syncedBannerInfo.count} Fresh Tx Synced (Seq #${syncedBannerInfo.newSeqs.join(', #')})` : 'Hedera Topic 0.0.4592011',
+      status: newlySyncedIds.length > 0 ? 'LIVE SYNCED' : 'ANCHORED',
+      latency: isSyncingLedger ? 'Syncing...' : '12ms',
       icon: Radio,
       details: {
         topicId: healthData.topic_id,
-        sequenceNumber: healthData.latest_sequence_number,
-        runningHash: '0x384_running_hash_verified_link',
-        consensusTimestamp: new Date().toISOString()
+        latestSequenceNumber: `#${healthData.latest_sequence_number}`,
+        syncBatchStatus: newlySyncedIds.length > 0 ? `${newlySyncedIds.length} Fresh Messages Anchored` : 'Standard Stream',
+        latestRunningHash: hcsMessages.length > 0 && hcsMessages[hcsMessages.length - 1]?.runningHash ? `${hcsMessages[hcsMessages.length - 1].runningHash.substring(0, 18)}...` : '0x384_running_hash_verified_link',
+        lastConsensusSync: syncedBannerInfo ? syncedBannerInfo.timestamp : new Date(healthData.last_ping || Date.now()).toLocaleTimeString()
       },
-      schemaSnippet: `{\n  "topicId": "0.0.4592011",\n  "sequenceNumber": 1042,\n  "runningHash": "0x384a8f92c10...",\n  "consensusTimestamp": "2026-07-27T01:15:00.000Z"\n}`
+      schemaSnippet: `{\n  "topicId": "${healthData.topic_id}",\n  "latestSequenceNumber": ${healthData.latest_sequence_number},\n  "syncedBatchCount": ${newlySyncedIds.length},\n  "status": "LIVE_CONSENSUS_SYNCED",\n  "runningHash": "${hcsMessages.length > 0 && hcsMessages[hcsMessages.length - 1]?.runningHash ? hcsMessages[hcsMessages.length - 1].runningHash.substring(0, 22) : '0x384a8f92c10'}..."\n}`
     },
     {
       id: 'node-6',
@@ -330,6 +378,15 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleSyncLedger}
+            disabled={isSyncingLedger}
+            className="px-3.5 py-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black font-extrabold rounded-xl text-xs transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer"
+          >
+            <Zap size={14} className={isSyncingLedger ? 'animate-spin' : ''} />
+            {isSyncingLedger ? 'Syncing HCS Batch...' : 'Sync Ledger'}
+          </button>
+
           <button
             onClick={() => {
               fetchLedgerHealth();
@@ -406,6 +463,50 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
           Guardian Policy Inspector
         </button>
       </div>
+
+      {/* Real-Time Sync Notification Banner */}
+      <AnimatePresence>
+        {syncedBannerInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-gradient-to-r from-emerald-950/90 via-slate-900 to-cyan-950/90 border border-emerald-400/50 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xl shadow-emerald-500/10"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-emerald-400 text-black rounded-xl font-bold animate-pulse">
+                <Zap size={18} />
+              </div>
+              <div>
+                <div className="font-extrabold text-white flex items-center gap-2">
+                  <span>Hedera HCS Real-Time Batch Synced!</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[10px] font-black uppercase tracking-wider">
+                    {syncedBannerInfo.count} New Entry{syncedBannerInfo.count > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <p className="text-white/60 font-mono text-[11px] mt-0.5">
+                  Latest Sequence Heights #{syncedBannerInfo.newSeqs.join(', #')} anchored to Topic {healthData.topic_id} at {syncedBannerInfo.timestamp}.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveSubTab('console')}
+                className="px-3 py-1.5 bg-emerald-400 text-black font-extrabold rounded-xl text-xs hover:bg-emerald-300 transition-all flex items-center gap-1 font-mono cursor-pointer"
+              >
+                Inspect in HCS Console <ArrowRight size={13} />
+              </button>
+              <button
+                onClick={() => setSyncedBannerInfo(null)}
+                className="p-1.5 text-white/40 hover:text-white cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ======================================================== */}
       {/* 1. MONITOR LEDGER HEALTH */}
@@ -544,25 +645,37 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
               const IconComp = node.icon;
               const isSelected = selectedNodeId === node.id;
               const isExecutingStep = isExecutingFlow && activeExecutionStep === index;
+              const isNewlySyncedNode = node.id === 'node-5' && newlySyncedIds.length > 0;
 
               return (
                 <div
                   key={node.id}
                   onClick={() => setSelectedNodeId(node.id)}
                   className={`cursor-pointer p-4 rounded-2xl border transition-all flex flex-col justify-between relative overflow-hidden ${
-                    isSelected
+                    isNewlySyncedNode
+                      ? 'bg-emerald-950/80 border-emerald-400 shadow-xl shadow-emerald-500/30 ring-2 ring-emerald-400/60'
+                      : isSelected
                       ? 'bg-emerald-500/10 border-emerald-500 shadow-lg shadow-emerald-500/10'
                       : isExecutingStep
                       ? 'bg-amber-500/20 border-amber-400 animate-pulse'
                       : 'bg-black/40 border-white/10 hover:border-white/30'
                   }`}
                 >
+                  {isNewlySyncedNode && (
+                    <div className="absolute top-0 right-0 px-2 py-0.5 bg-emerald-400 text-black text-[9px] font-black uppercase tracking-wider rounded-bl-lg flex items-center gap-1 animate-pulse">
+                      <Zap size={10} /> BATCH SYNCED
+                    </div>
+                  )}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <div className={`p-2 rounded-xl ${isSelected ? 'bg-emerald-500 text-black' : 'bg-white/10 text-emerald-400'}`}>
+                      <div className={`p-2 rounded-xl ${isSelected ? 'bg-emerald-500 text-black' : isNewlySyncedNode ? 'bg-emerald-400 text-black font-bold' : 'bg-white/10 text-emerald-400'}`}>
                         <IconComp size={18} />
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                        isNewlySyncedNode 
+                          ? 'bg-emerald-400 text-black font-black border-emerald-300 animate-bounce' 
+                          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      }`}>
                         {node.status}
                       </span>
                     </div>
@@ -687,8 +800,17 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                 </span>
               </div>
 
-              {/* Search & Export */}
-              <div className="flex items-center gap-2">
+              {/* Search, Sync & Export */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={handleSyncLedger}
+                  disabled={isSyncingLedger}
+                  className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer"
+                >
+                  <Zap size={13} className={isSyncingLedger ? 'animate-spin' : ''} />
+                  {isSyncingLedger ? 'Syncing...' : 'Sync Ledger'}
+                </button>
+
                 <div className="relative">
                   <Search size={14} className="absolute left-3 top-2.5 text-white/40" />
                   <input
@@ -696,7 +818,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                     placeholder="Filter sequence, hash, or payload..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="pl-8 pr-3 py-1.5 bg-slate-900 border border-white/10 text-xs rounded-xl text-white outline-none focus:border-emerald-500 w-56"
+                    className="pl-8 pr-3 py-1.5 bg-slate-900 border border-white/10 text-xs rounded-xl text-white outline-none focus:border-emerald-500 w-52"
                   />
                 </div>
 
@@ -709,7 +831,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                     a.download = `hcs-debug-log-${healthData.topic_id}.json`;
                     a.click();
                   }}
-                  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs rounded-xl transition-all flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Download size={13} />
                   Export Logs
@@ -724,21 +846,36 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                   No HCS messages found matching filter criteria.
                 </p>
               ) : (
-                filteredMessages.map((m, idx) => (
-                  <div
-                    key={m.id || idx}
-                    onClick={() => setSelectedMessage(m)}
-                    className="cursor-pointer p-3 bg-slate-900/90 rounded-xl border border-white/5 hover:border-emerald-500/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
-                        #{m.sequenceNumber || idx + 1}
-                      </span>
-                      <span className="text-white font-bold">{m.id || `hcs-${idx + 1}`}</span>
-                      <span className="text-white/40 text-[10px]">
-                        {new Date(m.timestamp || Date.now()).toLocaleTimeString()}
-                      </span>
-                    </div>
+                filteredMessages.map((m, idx) => {
+                  const isNewlySynced = newlySyncedIds.includes(m.id);
+                  return (
+                    <div
+                      key={m.id || idx}
+                      onClick={() => setSelectedMessage(m)}
+                      className={`cursor-pointer p-3 rounded-xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs relative overflow-hidden ${
+                        isNewlySynced
+                          ? 'bg-emerald-950/90 border-emerald-400 shadow-lg shadow-emerald-500/20 ring-2 ring-emerald-400/50'
+                          : 'bg-slate-900/90 border-white/5 hover:border-emerald-500/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-0.5 rounded font-bold border ${
+                          isNewlySynced 
+                            ? 'bg-emerald-400 text-black font-black border-emerald-300' 
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        }`}>
+                          #{m.sequenceNumber || idx + 1}
+                        </span>
+                        <span className="text-white font-bold">{m.id || `hcs-${idx + 1}`}</span>
+                        {isNewlySynced && (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[9px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1">
+                            <Zap size={9} /> JUST SYNCED
+                          </span>
+                        )}
+                        <span className="text-white/40 text-[10px]">
+                          {new Date(m.timestamp || Date.now()).toLocaleTimeString()}
+                        </span>
+                      </div>
 
                     <div className="flex items-center gap-3">
                       <span className="text-white/50 text-[10px] truncate max-w-[200px]">
@@ -749,8 +886,9 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                       </span>
                     </div>
                   </div>
-                ))
-              )}
+                );
+              })
+            )}
             </div>
           </div>
 

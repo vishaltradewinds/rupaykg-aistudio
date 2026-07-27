@@ -70,6 +70,7 @@ import ReactMarkdown from 'react-markdown';
 import { WASTE_TYPES, WASTE_CATEGORIES, WasteType, INDIAN_STATES } from './constants';
 import { ICM_CCTS_SECTORS, ICM_METHODOLOGIES } from './services/icmComplianceService';
 import { safeFetchLgdJson } from './services/lgdService';
+import { safeParseJson } from './utils/safeJson';
 
 import { Chatbot } from './components/Chatbot';
 import EnterpriseSuite from './components/EnterpriseSuite';
@@ -689,12 +690,16 @@ export default function App() {
           if (!isMounted) return;
 
           if (wasteRes.ok && paymentRes.ok) {
-            const wasteData = await wasteRes.json();
-            const paymentData = await paymentRes.json();
-            setWasteTypes(wasteData);
-            setUploadData(prev => ({ ...prev, waste_type: wasteData[0]?.type || prev.waste_type }));
-            setPaymentConfig(paymentData);
-            success = true;
+            const wasteData = await safeParseJson(wasteRes);
+            const paymentData = await safeParseJson(paymentRes);
+            if (wasteData && paymentData) {
+              setWasteTypes(wasteData);
+              setUploadData(prev => ({ ...prev, waste_type: wasteData[0]?.type || prev.waste_type }));
+              setPaymentConfig(paymentData);
+              success = true;
+            } else {
+              throw new Error('Received non-JSON content from configuration endpoints');
+            }
           } else {
             throw new Error('Non-ok response from configuration endpoints');
           }
@@ -1289,8 +1294,8 @@ export default function App() {
     try {
       const authRes = await fetch('/api/v1/demo/authority');
       if (authRes.ok) {
-        const authData = await authRes.json();
-        if (authData.success) {
+        const authData = await safeParseJson(authRes);
+        if (authData?.success) {
           setGuardianAuth(authData);
         } else {
           setGuardianAuth(null);
@@ -1299,14 +1304,14 @@ export default function App() {
       
       const policiesRes = await fetch('/api/v1/policies');
       if (policiesRes.ok) {
-        const policiesData = await policiesRes.json();
-        setGuardianPolicies(policiesData);
+        const policiesData = await safeParseJson(policiesRes);
+        if (policiesData) setGuardianPolicies(policiesData);
       }
       
       const submissionsRes = await fetch('/api/v1/demo/submissions');
       if (submissionsRes.ok) {
-        const subsData = await submissionsRes.json();
-        setGuardianSubmissions(subsData);
+        const subsData = await safeParseJson(submissionsRes);
+        if (subsData) setGuardianSubmissions(subsData);
       }
     } catch (err) {
       console.error("Failed to fetch Hedera Guardian status", err);
@@ -1422,14 +1427,14 @@ export default function App() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
-        const data = await res.json();
-        setBlockchainLedger(data);
+        const data = await safeParseJson(res);
+        if (data) setBlockchainLedger(data);
       }
       
       const verifyRes = await fetch('/api/blockchain/verify');
       if (verifyRes.ok) {
-        const verifyData = await verifyRes.json();
-        setIsChainValid(verifyData.isValid);
+        const verifyData = await safeParseJson(verifyRes);
+        if (verifyData) setIsChainValid(verifyData.isValid);
       }
     } catch (err) {
       console.error("Failed to fetch blockchain ledger", err);
@@ -1609,43 +1614,51 @@ export default function App() {
       // 5. Fetch available records for supply chain roles
       if (currentUser?.role === 'aggregator') {
         const availRes = await fetch('/api/aggregator/available', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (availRes.ok) setAvailableRecords(await availRes.json());
+        const availData = await safeParseJson(availRes);
+        if (availData) setAvailableRecords(availData);
         
         const fleetRes = await fetch('/api/aggregator/fleet', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (fleetRes.ok) setAggregatorFleet(await fleetRes.json());
+        const fleetData = await safeParseJson(fleetRes);
+        if (fleetData) setAggregatorFleet(fleetData);
       } else if (currentUser?.role === 'processor') {
         const availRes = await fetch('/api/processor/available', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (availRes.ok) setAvailableRecords(await availRes.json());
+        const availData = await safeParseJson(availRes);
+        if (availData) setAvailableRecords(availData);
 
         const invRes = await fetch('/api/processor/inventory', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (invRes.ok) setProcessorInventory(await invRes.json());
+        const invData = await safeParseJson(invRes);
+        if (invData) setProcessorInventory(invData);
       }
 
       // 6. Fetch MRV records for regulators
       if (['regulator', 'state_admin', 'super_admin'].includes(currentUser?.role || '')) {
         const mrvRes = await fetch('/api/mrv/pending', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (mrvRes.ok) setMrvRecords(await mrvRes.json());
+        const mrvData = await safeParseJson(mrvRes);
+        if (mrvData) setMrvRecords(mrvData);
         
         const mrvHistRes = await fetch('/api/mrv/history', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (mrvHistRes.ok) setMrvHistory(await mrvHistRes.json());
+        const mrvHistData = await safeParseJson(mrvHistRes);
+        if (mrvHistData) setMrvHistory(mrvHistData);
       }
 
       // 7. Fetch available CCCs for partners
       if (['csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const cccsRes = await fetch('/api/partner/available-cccs', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (cccsRes.ok) setAvailableCCCs(await cccsRes.json());
+        const cccsData = await safeParseJson(cccsRes);
+        if (cccsData) setAvailableCCCs(cccsData);
       }
 
       // 8. Fetch Series A / Admin KPI data
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const compRes = await fetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (compRes.ok) setComprehensiveMetrics(await compRes.json());
+        const compData = await safeParseJson(compRes);
+        if (compData) setComprehensiveMetrics(compData);
       }
 
       // 9. Fetch Carbon Dashboard
       const carbonRes = await fetch(`/api/carbon/dashboard`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (carbonRes.ok) {
-        const carbonData = await carbonRes.json();
+      const carbonData = await safeParseJson(carbonRes);
+      if (carbonData) {
         setCarbonDashboard(carbonData);
       }
       
@@ -1662,53 +1675,73 @@ export default function App() {
 
         const [regRes, orderRes, projRes, methRes, bondRes, sensorRes] = results;
 
-        if (regRes.status === 'fulfilled' && regRes.value.ok) setRegistryCertificates(await regRes.value.json());
-        if (orderRes.status === 'fulfilled' && orderRes.value.ok) setMarketOrderBook(await orderRes.value.json());
-        if (projRes.status === 'fulfilled' && projRes.value.ok) setOffsetProjects(await projRes.value.json());
-        if (methRes.status === 'fulfilled' && methRes.value.ok) setMethodologies(await methRes.value.json());
-        if (bondRes.status === 'fulfilled' && bondRes.value.ok) setGreenBonds(await bondRes.value.json());
-        if (sensorRes.status === 'fulfilled' && sensorRes.value.ok) setDmrvSensors(await sensorRes.value.json());
+        if (regRes.status === 'fulfilled' && regRes.value.ok) {
+          const data = await safeParseJson(regRes.value);
+          if (data) setRegistryCertificates(data);
+        }
+        if (orderRes.status === 'fulfilled' && orderRes.value.ok) {
+          const data = await safeParseJson(orderRes.value);
+          if (data) setMarketOrderBook(data);
+        }
+        if (projRes.status === 'fulfilled' && projRes.value.ok) {
+          const data = await safeParseJson(projRes.value);
+          if (data) setOffsetProjects(data);
+        }
+        if (methRes.status === 'fulfilled' && methRes.value.ok) {
+          const data = await safeParseJson(methRes.value);
+          if (data) setMethodologies(data);
+        }
+        if (bondRes.status === 'fulfilled' && bondRes.value.ok) {
+          const data = await safeParseJson(bondRes.value);
+          if (data) setGreenBonds(data);
+        }
+        if (sensorRes.status === 'fulfilled' && sensorRes.value.ok) {
+          const data = await safeParseJson(sensorRes.value);
+          if (data) setDmrvSensors(data);
+        }
       }
 
       // 9b. Fetch Enterprise Generator specific profiles, contracts, compliance profiles, and schedules
       if (['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(currentUser?.role || '')) {
         const analyticRes = await fetch(`/api/generators/${currentUser?.id}/analytics`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (analyticRes.ok) {
-          const analyticData = await analyticRes.json();
+        const analyticData = await safeParseJson(analyticRes);
+        if (analyticData) {
           setGeneratorProfile(analyticData);
         }
         
         const contractRes = await fetch(`/api/generators/${currentUser?.id}/contracts`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (contractRes.ok) {
-          const contractData = await contractRes.json();
+        const contractData = await safeParseJson(contractRes);
+        if (contractData) {
           setActiveContracts(contractData);
         }
 
         const complianceRes = await fetch(`/api/generators/${currentUser?.id}/compliance`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (complianceRes.ok) {
-          const complianceData = await complianceRes.json();
+        const complianceData = await safeParseJson(complianceRes);
+        if (complianceData) {
           setComplianceRecords(complianceData);
         }
 
         const scheduleRes = await fetch(`/api/pickups/schedule`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (scheduleRes.ok) {
-          const scheduleData = await scheduleRes.json();
+        const scheduleData = await safeParseJson(scheduleRes);
+        if (scheduleData) {
           setPickupSchedules(scheduleData);
         }
       }
 
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
         const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (kpiRes.ok) setAdminKpi(await kpiRes.json());
+        const kpiData = await safeParseJson(kpiRes);
+        if (kpiData) setAdminKpi(kpiData);
 
         const fraudRes = await fetch(`/api/admin/fraud-map?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (fraudRes.ok) {
-          const fraudData = await fraudRes.json();
+        const fraudData = await safeParseJson(fraudRes);
+        if (fraudData) {
           setFraudMap(fraudData.flagged_events);
         }
 
         const trendsRes = await fetch(`/api/analytics/trends?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (trendsRes.ok) setTrendsData(await trendsRes.json());
+        const trendsData = await safeParseJson(trendsRes);
+        if (trendsData) setTrendsData(trendsData);
       }
 
       // 9. Fetch Municipal Analytics
@@ -1719,16 +1752,19 @@ export default function App() {
       // 10. Fetch Integrations Data
       if (adminSubView === 'integrations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
         const agristackRes = await fetch('/api/integrations/agristack', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (agristackRes.ok) setAgristackData(await agristackRes.json());
+        const agristackData = await safeParseJson(agristackRes);
+        if (agristackData) setAgristackData(agristackData);
         
         const ondcRes = await fetch('/api/integrations/ondc', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (ondcRes.ok) setOndcData(await ondcRes.json());
+        const ondcData = await safeParseJson(ondcRes);
+        if (ondcData) setOndcData(ondcData);
       }
 
       // 10. Fetch CCC Pool
       if (['ccc_buyer', 'regulator', 'super_admin', 'state_admin', 'municipal_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
         const poolRes = await fetch(`/api/ccc/pool?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (poolRes.ok) setCccPool(await poolRes.json());
+        const poolData = await safeParseJson(poolRes);
+        if (poolData) setCccPool(poolData);
       }
     } catch (err) {
       console.error(err);
