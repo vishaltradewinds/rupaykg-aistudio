@@ -74,6 +74,7 @@ import { safeFetchLgdJson } from './services/lgdService';
 import { Chatbot } from './components/Chatbot';
 import EnterpriseSuite from './components/EnterpriseSuite';
 import SwmCompliancePlatform from './components/SwmCompliancePlatform';
+import { StakeholderGuides } from './components/StakeholderGuides';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -6290,6 +6291,12 @@ export default function App() {
                   {t('The platform operates a Digital MRV (Measurement, Reporting, and Verification) engine where every physical waste event automatically triggers a corresponding Carbon Lifecycle Event. Net emission reductions are calculated based on landfill methane avoidance, biomass substitution, and transport optimization, ensuring that every kilogram of waste and its climate value are immutably linked and audit-ready for national registries.')}
                 </p>
               </Card>
+
+              {/* IX. Stakeholder Guides Section */}
+              <StakeholderGuides 
+                userRole={user?.role} 
+                onNavigateToView={(v) => setView(v as any)} 
+              />
 
               {/* Founder's Note */}
               <section className="bg-white/5 border border-white/10 rounded-3xl p-12 relative overflow-hidden">

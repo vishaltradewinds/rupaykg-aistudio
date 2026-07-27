@@ -3329,13 +3329,12 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
   app.get(
     "/api/carbon/guardian/messages",
-    auth(),
     (req, res) => {
       res.json(guardianMessages);
     },
   );
 
-  app.get("/api/carbon/guardian/health", auth(), async (req, res) => {
+  app.get("/api/carbon/guardian/health", async (req, res) => {
     const health = {
       status: "OPERATIONAL",
       network: "Hedera Testnet (Consensus Service)",
@@ -3353,7 +3352,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     res.json(health);
   });
 
-  app.post("/api/carbon/guardian/verify-chain", auth(), async (req, res) => {
+  app.post("/api/carbon/guardian/verify-chain", async (req, res) => {
     const messages = guardianMessages;
     let validCount = 0;
     let corruptedCount = 0;
@@ -3390,7 +3389,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.post("/api/carbon/guardian/broadcast-test", auth(), async (req, res) => {
+  app.post("/api/carbon/guardian/broadcast-test", async (req, res) => {
     try {
       const { topicId, payloadText, eventType } = req.body;
       const testVc = {
