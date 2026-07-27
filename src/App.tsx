@@ -1064,9 +1064,13 @@ export default function App() {
           if (!isMounted) return;
 
           if (res.ok) {
-            const data = await res.json();
-            setDbStatus(data);
-            success = true;
+            const data = await safeParseJson(res);
+            if (data) {
+              setDbStatus(data);
+              success = true;
+            } else {
+              throw new Error("Invalid response from DB status endpoint");
+            }
           } else if (res.status === 401 || res.status === 403) {
             // Authentic credentials issue - don't keep retrying as it will keep returning 401/403
             success = true;
@@ -1210,12 +1214,14 @@ export default function App() {
       setDbStatus(prev => prev ? { ...prev, status: 'connecting' } : null);
       const res = await fetch('/api/db-retry', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) {
-        const data = await res.json();
-        setDbStatus(data);
-        if (data.status === 'connected') {
-          setMessage({ type: 'success', text: 'Successfully connected to MongoDB' });
-        } else if (data.status === 'failed') {
-          setMessage({ type: 'error', text: `Failed to connect: ${data.error}` });
+        const data = await safeParseJson(res);
+        if (data) {
+          setDbStatus(data);
+          if (data.status === 'connected') {
+            setMessage({ type: 'success', text: 'Successfully connected to MongoDB' });
+          } else if (data.status === 'failed') {
+            setMessage({ type: 'error', text: `Failed to connect: ${data.error}` });
+          }
         }
       }
     } catch (err) {
@@ -1238,8 +1244,8 @@ export default function App() {
         setMessage({ type: 'success', text: 'User role updated successfully' });
         fetchUserData();
       } else {
-        const data = await res.json();
-        setMessage({ type: 'error', text: data.error || 'Failed to update user role' });
+        const data = await safeParseJson(res);
+        setMessage({ type: 'error', text: data?.error || 'Failed to update user role' });
       }
     } catch (err) {
       console.error(err);
@@ -1262,8 +1268,8 @@ export default function App() {
         setMessage({ type: 'success', text: 'User deleted successfully' });
         fetchUserData();
       } else {
-        const data = await res.json();
-        setMessage({ type: 'error', text: data.error || 'Failed to delete user' });
+        const data = await safeParseJson(res);
+        setMessage({ type: 'error', text: data?.error || 'Failed to delete user' });
       }
     } catch (err) {
       console.error(err);
@@ -1332,10 +1338,12 @@ export default function App() {
         })
       });
       if (res.ok) {
-        const data = await res.json();
-        setGuardianAuth(data);
-        fetchBlockchainLedger();
-        fetchGuardianData();
+        const data = await safeParseJson(res);
+        if (data) {
+          setGuardianAuth(data);
+          fetchBlockchainLedger();
+          fetchGuardianData();
+        }
       }
     } catch (err) {
       console.error("Failed to initialize Standard Registry authority", err);
@@ -1361,10 +1369,12 @@ export default function App() {
         })
       });
       if (res.ok) {
-        const data = await res.json();
-        setNewPolicyName('');
-        setNewPolicyDesc('');
-        await fetchGuardianData();
+        const data = await safeParseJson(res);
+        if (data) {
+          setNewPolicyName('');
+          setNewPolicyDesc('');
+          await fetchGuardianData();
+        }
       }
     } catch (err) {
       console.error("Failed to import policy", err);
@@ -1409,10 +1419,12 @@ export default function App() {
         body: JSON.stringify({ document: documentPayload })
       });
       if (res.ok) {
-        const data = await res.json();
-        setRecentMrvResult(data);
-        await fetchGuardianData();
-        fetchBlockchainLedger();
+        const data = await safeParseJson(res);
+        if (data) {
+          setRecentMrvResult(data);
+          await fetchGuardianData();
+          fetchBlockchainLedger();
+        }
       }
     } catch (err) {
       console.error("Failed to process MRV Document", err);
@@ -1517,15 +1529,17 @@ export default function App() {
         headers: { 'Authorization': `Bearer ${token}` } 
       });
       if (statsRes.ok) {
-        const data = await statsRes.json();
-        setPilotStats(data);
-        setPilotRecords(data.recentLogs || []);
+        const data = await safeParseJson(statsRes);
+        if (data) {
+          setPilotStats(data);
+          setPilotRecords(data.recentLogs || []);
+        }
       }
 
       const playbookRes = await fetch('/api/pilot/playbook');
       if (playbookRes.ok) {
-        const data = await playbookRes.json();
-        setPilotPlaybook(data);
+        const data = await safeParseJson(playbookRes);
+        if (data) setPilotPlaybook(data);
       }
     } catch (err) {
       console.error("Failed to fetch pilot data", err);
@@ -1547,9 +1561,14 @@ export default function App() {
       if (!currentUser) {
         const meRes = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
         if (meRes.ok) {
-          const meData = await meRes.json();
-          currentUser = meData.user;
-          setUser(currentUser);
+          const meData = await safeParseJson(meRes);
+          if (meData?.user) {
+            currentUser = meData.user;
+            setUser(currentUser);
+          } else {
+            logout();
+            return;
+          }
         } else {
           logout();
           return;
@@ -1560,35 +1579,35 @@ export default function App() {
       if (currentUser?.role === 'citizen' || currentUser?.role === 'fpo') {
         const walletRes = await fetch('/api/citizen/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
         if (walletRes.ok) {
-          const walletData = await walletRes.json();
-          setWalletBalance(walletData.wallet_balance);
+          const walletData = await safeParseJson(walletRes);
+          if (walletData) setWalletBalance(walletData.wallet_balance);
         }
       } else if (['csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const walletRes = await fetch('/api/partner/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
         if (walletRes.ok) {
-          const walletData = await walletRes.json();
-          setWalletBalance(walletData.wallet_balance);
+          const walletData = await safeParseJson(walletRes);
+          if (walletData) setWalletBalance(walletData.wallet_balance);
         }
       }
 
       // 3. Fetch history
       const historyRes = await fetch(`/api/history?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
       if (historyRes.ok) {
-        const historyData = await historyRes.json();
-        setHistory(historyData);
+        const historyData = await safeParseJson(historyRes);
+        if (historyData) setHistory(historyData);
       }
 
       // 4. Fetch admin stats
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
         const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}&context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (statsRes.ok) {
-          const statsData = await statsRes.json();
-          setAdminStats(statsData);
+          const statsData = await safeParseJson(statsRes);
+          if (statsData) setAdminStats(statsData);
           
           const logsRes = await fetch('/api/audit-logs', { headers: { 'Authorization': `Bearer ${token}` } });
           if (logsRes.ok) {
-            const logsData = await logsRes.json();
-            setAuditLogs(logsData);
+            const logsData = await safeParseJson(logsRes);
+            if (logsData) setAuditLogs(logsData);
           }
         }
       }
@@ -1597,8 +1616,8 @@ export default function App() {
       if (currentUser?.role === 'super_admin' && adminSubView === 'users') {
         const usersRes = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
         if (usersRes.ok) {
-          const usersData = await usersRes.json();
-          setUsersList(usersData);
+          const usersData = await safeParseJson(usersRes);
+          if (usersData) setUsersList(usersData);
         }
       }
 
@@ -1606,8 +1625,10 @@ export default function App() {
       if (['aggregator', 'super_admin', 'state_admin', 'municipal_admin'].includes(currentUser?.role || '')) {
         const kpiRes = await fetch(`/api/dashboard/kpi?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (kpiRes.ok) {
-          const kpiData = await kpiRes.json();
-          setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_ccc_amount_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
+          const kpiData = await safeParseJson(kpiRes);
+          if (kpiData) {
+            setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_ccc_amount_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
+          }
         }
       }
 
@@ -1777,12 +1798,11 @@ export default function App() {
       const res = await fetch(`/api/carbon/vc/${recordId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) {
-        const vc = await res.json();
+      const vc = await safeParseJson(res);
+      if (res.ok && vc) {
         setSelectedVC(vc);
       } else {
-        const err = await res.json();
-        alert(err.error || 'VC not found');
+        alert(vc?.error || 'VC not found');
       }
     } catch (err) {
       console.error(err);
@@ -1803,8 +1823,8 @@ export default function App() {
         },
         body: JSON.stringify({ vcId })
       });
-      const data = await res.json();
-      setGuardianReport(data.report);
+      const data = await safeParseJson(res);
+      if (data?.report) setGuardianReport(data.report);
     } catch (err) {
       console.error(err);
     } finally {
@@ -1824,8 +1844,8 @@ export default function App() {
         },
         body: JSON.stringify({ query: ledgerQuery })
       });
-      const data = await res.json();
-      setLedgerResponse(data.answer);
+      const data = await safeParseJson(res);
+      if (data?.answer) setLedgerResponse(data.answer);
     } catch (err) {
       console.error(err);
     } finally {
@@ -1849,9 +1869,9 @@ export default function App() {
         headers,
         body: JSON.stringify(formData)
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       
-      if (!res.ok) throw new Error(data.error || 'Auth failed');
+      if (!res.ok || !data) throw new Error(data?.error || 'Auth failed');
 
       if (authMode === 'login') {
         localStorage.setItem('rupay_token', data.token);
@@ -1894,8 +1914,8 @@ export default function App() {
         },
         body: JSON.stringify(pickupScheduleForm)
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to schedule');
+      const data = await safeParseJson(res);
+      if (!res.ok || !data) throw new Error(data?.error || 'Failed to schedule');
       setMessage({ type: 'success', text: 'Pickup scheduled successfully!' });
       setPickupScheduleForm({
         waste_type: 'organic',
@@ -1906,7 +1926,10 @@ export default function App() {
       });
       // reload schedules
       const scheduleRes = await fetch(`/api/pickups/schedule`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (scheduleRes.ok) setPickupSchedules(await scheduleRes.json());
+      if (scheduleRes.ok) {
+        const scheduleData = await safeParseJson(scheduleRes);
+        if (scheduleData) setPickupSchedules(scheduleData);
+      }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
     } finally {
@@ -1925,12 +1948,12 @@ export default function App() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ crop_type: uploadData.crop_type, hectares: parseFloat(uploadData.acreage) * 0.404686 }) // convert acres to hectares
       });
-      const data = await res.json();
-      if (res.ok) {
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
         setUploadData(prev => ({ ...prev, weight_kg: data.estimated_kg.toFixed(1) }));
         setMessage({ type: 'success', text: `Estimated ${data.estimated_kg.toFixed(1)} kg of biomass for ${uploadData.acreage} acres of ${uploadData.crop_type}.` });
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to estimate biomass' });
+        setMessage({ type: 'error', text: data?.error || 'Failed to estimate biomass' });
       }
     } catch (err) {
       setMessage({ type: 'error', text: 'Network error during estimation' });
@@ -2101,8 +2124,8 @@ export default function App() {
         },
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Operation failed');
+      const data = await safeParseJson(res);
+      if (!res.ok || !data) throw new Error(data?.error || 'Operation failed');
 
       setMessage({ type: 'success', text: data.message });
       setUploadData({ weight_kg: '', waste_type: wasteTypes[0]?.type || '', village: '', geo_lat: 0, geo_long: 0, image_url: '', acreage: '', crop_type: '', double_counting_declaration: false });
@@ -2128,8 +2151,8 @@ export default function App() {
         },
         body: JSON.stringify({ record_id: recordId })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Operation failed');
+      const data = await safeParseJson(res);
+      if (!res.ok || !data) throw new Error(data?.error || 'Operation failed');
 
       setMessage({ type: 'success', text: data.message });
       fetchUserData();
@@ -2200,8 +2223,8 @@ export default function App() {
           acva_id: compliance.acva_id
         })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'MRV Operation failed');
+      const data = await safeParseJson(res);
+      if (!res.ok || !data) throw new Error(data?.error || 'MRV Operation failed');
 
       setMessage({ type: 'success', text: data.message });
       fetchUserData();
@@ -2254,8 +2277,8 @@ export default function App() {
         },
         body: JSON.stringify({ record_ids: recordIds })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Purchase failed');
+      const data = await safeParseJson(res);
+      if (!res.ok || !data) throw new Error(data?.error || 'Purchase failed');
 
       setMessage({ type: 'success', text: data.message });
       fetchUserData();
