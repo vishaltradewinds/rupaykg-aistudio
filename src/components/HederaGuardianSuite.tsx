@@ -28,10 +28,11 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface HederaGuardianSuiteProps {
   user?: any;
+  defaultSubTab?: 'monitor' | 'visualizer' | 'console' | 'integrity' | 'policy';
 }
 
-export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'monitor' | 'visualizer' | 'console' | 'integrity' | 'policy'>('monitor');
+export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, defaultSubTab = 'monitor' }) => {
+  const [activeSubTab, setActiveSubTab] = useState<'monitor' | 'visualizer' | 'console' | 'integrity' | 'policy'>(defaultSubTab);
   
   // 5. GUARDIAN POLICY INSPECTOR STATE
   const [selectedPolicyId, setSelectedPolicyId] = useState<string>('pol-acm0022');
@@ -75,12 +76,20 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
   const [isVerifyingChain, setIsVerifyingChain] = useState(false);
   const [verificationProgress, setVerificationProgress] = useState(0);
   const [auditResult, setAuditResult] = useState<any>(null);
+  const [simulateTamper, setSimulateTamper] = useState(false);
 
   // Fetch initial health and messages
   useEffect(() => {
     fetchLedgerHealth();
     fetchHcsMessages();
   }, []);
+
+  // Auto-trigger chain integrity audit when entering the integrity subtab if not yet run
+  useEffect(() => {
+    if (activeSubTab === 'integrity' && !auditResult && !isVerifyingChain) {
+      runChainIntegrityAudit(simulateTamper);
+    }
+  }, [activeSubTab]);
 
   const fetchLedgerHealth = async () => {
     setIsRefreshingHealth(true);
@@ -149,14 +158,14 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
     }
   };
 
-  const runChainIntegrityAudit = async () => {
+  const runChainIntegrityAudit = async (tamperMode = simulateTamper) => {
     setIsVerifyingChain(true);
     setVerificationProgress(0);
     setAuditResult(null);
 
     // Animate progress for real-time visual feedback
     for (let i = 1; i <= 10; i++) {
-      await new Promise(r => setTimeout(r, 80));
+      await new Promise(r => setTimeout(r, 60));
       setVerificationProgress(i * 10);
     }
 
@@ -168,6 +177,16 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
       });
       if (res.ok) {
         const data = await res.json();
+        if (tamperMode) {
+          data.status = 'FAIL';
+          data.chain_integrity_score = 66;
+          data.anomalies_detected = 1;
+          data.sequence_continuity = 'DISRUPTED_AT_SEQ_1041';
+          if (data.verified_items && data.verified_items.length > 1) {
+            data.verified_items[1].status = 'INTEGRITY_COMPROMISED';
+            data.verified_items[1].runningHash = '0xCORRUPTED_RUNNING_HASH_ANOMALY';
+          }
+        }
         setAuditResult(data);
       }
     } catch (err) {
@@ -775,25 +794,43 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
               </div>
               <h4 className="text-xl font-bold text-white">Automated Ledger Hash-Link & Chain Integrity Audit</h4>
               <p className="text-xs text-white/60 max-w-2xl leading-relaxed">
-                Recalculates SHA-384 consensus running hashes, verifies Ed25519 signatures, checks sequence continuity, and validates timestamp monotonicity across the Hedera Guardian ledger.
+                Fetches recent HCS topic sequences for Topic <span className="text-cyan-400 font-mono font-bold">0.0.4592011</span>, recalculates SHA-384 consensus running hashes, verifies Ed25519 signatures, checks sequence continuity, and validates timestamp monotonicity across the Hedera ledger.
               </p>
             </div>
 
-            <button
-              onClick={runChainIntegrityAudit}
-              disabled={isVerifyingChain}
-              className="px-6 py-3 bg-emerald-500 text-black font-extrabold rounded-xl text-sm hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 whitespace-nowrap"
-            >
-              <RefreshCw size={16} className={isVerifyingChain ? 'animate-spin' : ''} />
-              {isVerifyingChain ? 'Scanning Chain...' : 'Run Chain Integrity Auto-Audit'}
-            </button>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  const newTamper = !simulateTamper;
+                  setSimulateTamper(newTamper);
+                  runChainIntegrityAudit(newTamper);
+                }}
+                className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                  simulateTamper
+                    ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 hover:bg-rose-500/30'
+                    : 'bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <AlertTriangle size={14} />
+                {simulateTamper ? 'Tamper Simulation: ON' : 'Simulate Chain Tamper'}
+              </button>
+
+              <button
+                onClick={() => runChainIntegrityAudit(simulateTamper)}
+                disabled={isVerifyingChain}
+                className="px-5 py-2.5 bg-emerald-500 text-black font-extrabold rounded-xl text-xs hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 whitespace-nowrap"
+              >
+                <RefreshCw size={14} className={isVerifyingChain ? 'animate-spin' : ''} />
+                {isVerifyingChain ? 'Verifying Chain...' : 'Auto-Verify Chain Now'}
+              </button>
+            </div>
           </div>
 
           {/* Progress Bar */}
           {isVerifyingChain && (
             <div className="bg-black/40 p-6 rounded-2xl border border-white/10 space-y-3">
               <div className="flex justify-between text-xs font-mono text-white">
-                <span>Verifying Cryptographic Ledger Hashes...</span>
+                <span>Fetching HCS Topic Sequence & Recalculating Running Hashes...</span>
                 <span className="text-emerald-400 font-bold">{verificationProgress}%</span>
               </div>
               <div className="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-white/10">
@@ -810,30 +847,66 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-black/50 p-6 rounded-2xl border border-emerald-500/40 space-y-6"
+              className={`bg-black/50 p-6 rounded-2xl border space-y-6 ${
+                auditResult.status === 'PASS'
+                  ? 'border-emerald-500/40 shadow-lg shadow-emerald-500/5'
+                  : 'border-rose-500/50 shadow-lg shadow-rose-500/10'
+              }`}
             >
               {/* Status Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-2xl border border-emerald-500/30">
-                    <CheckCircle2 size={28} />
+                  <div className={`p-3 rounded-2xl border ${
+                    auditResult.status === 'PASS'
+                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                      : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                  }`}>
+                    {auditResult.status === 'PASS' ? (
+                      <CheckCircle2 size={32} />
+                    ) : (
+                      <AlertTriangle size={32} className="animate-pulse" />
+                    )}
                   </div>
                   <div>
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
-                      Official Cryptographic Certificate
+                    <span className={`text-[10px] font-mono uppercase tracking-widest font-bold ${
+                      auditResult.status === 'PASS' ? 'text-emerald-400' : 'text-rose-400'
+                    }`}>
+                      {auditResult.status === 'PASS' ? 'Cryptographic Integrity Certificate: VERIFIED' : 'Cryptographic Integrity Certificate: TAMPER DETECTED'}
                     </span>
-                    <h4 className="text-lg font-bold text-white">
-                      Chain Verification Complete — {auditResult.status === 'PASS' ? '100% Intact' : 'Warning'}
+                    <h4 className="text-xl font-bold text-white flex items-center gap-2">
+                      {auditResult.status === 'PASS' ? (
+                        <>
+                          <span className="text-emerald-400 font-extrabold">100% LEDGER INTEGRITY VERIFIED</span>
+                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+                            PASS
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-rose-400 font-extrabold">LEDGER INTEGRITY COMPROMISED</span>
+                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono">
+                            RED ALERT
+                          </span>
+                        </>
+                      )}
                     </h4>
-                    <p className="text-xs text-white/50 font-mono">Audit Certificate ID: {auditResult.audit_id}</p>
+                    <p className="text-xs text-white/50 font-mono mt-1">
+                      Topic ID: <span className="text-cyan-400 font-bold">0.0.4592011</span> | Audit Cert: {auditResult.audit_id}
+                    </p>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="inline-block px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl text-xs font-mono">
-                    Status: {auditResult.status} (Zero Anomalies)
+                  <span className={`inline-block px-4 py-1.5 font-bold rounded-xl text-xs font-mono border ${
+                    auditResult.status === 'PASS'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  }`}>
+                    {auditResult.status === 'PASS'
+                      ? 'Status: PASS (0 Corrupted Blocks)'
+                      : `Status: FAIL (${auditResult.anomalies_detected || 1} Corrupted Block)`}
                   </span>
-                  <p className="text-[10px] text-white/40 mt-1">Verified at {new Date(auditResult.verified_at).toLocaleTimeString()}</p>
+                  <p className="text-[10px] text-white/40 mt-1">Auto-Verified at {new Date(auditResult.verified_at).toLocaleTimeString()}</p>
                 </div>
               </div>
 
@@ -846,7 +919,11 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
 
                 <div className="p-4 bg-slate-900/80 rounded-xl border border-white/5">
                   <span className="text-white/40 block mb-1">Sequence Continuity</span>
-                  <span className="text-lg font-bold text-emerald-400">{auditResult.sequence_continuity}</span>
+                  <span className={`text-lg font-bold ${
+                    auditResult.status === 'PASS' ? 'text-emerald-400' : 'text-rose-400'
+                  }`}>
+                    {auditResult.sequence_continuity}
+                  </span>
                 </div>
 
                 <div className="p-4 bg-slate-900/80 rounded-xl border border-white/5">
@@ -856,32 +933,59 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
 
                 <div className="p-4 bg-slate-900/80 rounded-xl border border-white/5">
                   <span className="text-white/40 block mb-1">Tamper Status</span>
-                  <span className="text-lg font-bold text-emerald-400">PASSED (0 Corrupted)</span>
+                  <span className={`text-lg font-bold ${
+                    auditResult.status === 'PASS' ? 'text-emerald-400' : 'text-rose-400'
+                  }`}>
+                    {auditResult.status === 'PASS' ? 'PASSED (0 Corrupted)' : 'FAILED (1 Tampered)'}
+                  </span>
                 </div>
               </div>
 
               {/* Items List */}
               <div className="space-y-3 font-mono text-xs">
-                <h5 className="font-bold text-white/60 uppercase tracking-wider text-[10px]">Verified Ledger Items Breakdown</h5>
-                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2">
-                  {auditResult.verified_items.map((item: any) => (
-                    <div
-                      key={item.id}
-                      className="p-3 bg-slate-900/90 rounded-xl border border-white/5 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <CheckCircle2 size={14} className="text-emerald-400" />
-                        <span className="font-bold text-white">Seq #{item.sequenceNumber}</span>
-                        <span className="text-white/40 text-[10px]">{item.id}</span>
+                <h5 className="font-bold text-white/60 uppercase tracking-wider text-[10px]">
+                  Recent HCS Topic Sequence Verification Ledger
+                </h5>
+                <div className="space-y-2 max-h-[260px] overflow-y-auto pr-2">
+                  {auditResult.verified_items.map((item: any) => {
+                    const isItemIntact = item.status === 'VERIFIED_INTACT';
+                    return (
+                      <div
+                        key={item.id}
+                        className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                          isItemIntact
+                            ? 'bg-slate-900/90 border-white/5 hover:border-emerald-500/30'
+                            : 'bg-rose-950/40 border-rose-500/40 hover:border-rose-500'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {isItemIntact ? (
+                            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                          ) : (
+                            <AlertTriangle size={16} className="text-rose-400 shrink-0 animate-bounce" />
+                          )}
+                          <div>
+                            <span className="font-bold text-white mr-2">Seq #{item.sequenceNumber}</span>
+                            <span className="text-white/40 text-[10px]">{item.id}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className={`text-[10px] font-mono truncate max-w-[220px] ${
+                            isItemIntact ? 'text-emerald-400/80' : 'text-rose-400 font-bold'
+                          }`}>
+                            Hash: {item.runningHash}
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded font-bold text-[10px] border ${
+                            isItemIntact
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                          }`}>
+                            {isItemIntact ? 'VERIFIED INTACT' : 'TAMPERED / CORRUPTED'}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-emerald-400/80 text-[10px] truncate max-w-[180px]">{item.runningHash}</span>
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold text-[10px] border border-emerald-500/20">
-                          {item.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </motion.div>

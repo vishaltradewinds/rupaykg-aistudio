@@ -74,6 +74,7 @@ import { safeFetchLgdJson } from './services/lgdService';
 import { Chatbot } from './components/Chatbot';
 import EnterpriseSuite from './components/EnterpriseSuite';
 import SwmCompliancePlatform from './components/SwmCompliancePlatform';
+import HederaGuardianSuite from './components/HederaGuardianSuite';
 import { StakeholderGuides } from './components/StakeholderGuides';
 
 const LANGUAGES = [
@@ -3010,6 +3011,14 @@ export default function App() {
           
           
           <button 
+            onClick={() => setView('blockchain')}
+            aria-label={t('Blockchain Ledger')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Cpu size={20} className={view === 'blockchain' ? 'text-cyan-400' : ''} />
+            <span className="hidden md:block font-medium">{t('Blockchain Ledger')}</span>
+          </button>
+          <button 
             onClick={() => setView('genesis')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
@@ -3060,6 +3069,7 @@ export default function App() {
               {view === 'tasks' && t('Operations Management')}
               {view === 'history' && t('Transaction Ledger')}
               {view === 'admin' && t('Admin Controls')}
+              {view === 'blockchain' && t('Hedera HCS Consensus Ledger & Auto-Verify')}
               
               
               
@@ -6387,6 +6397,18 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
             >
               <SwmCompliancePlatform user={user} onBackToDashboard={() => setView('dashboard')} />
+            </motion.div>
+          )}
+
+          {view === 'blockchain' && (
+            <motion.div
+              key="blockchain"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              <HederaGuardianSuite user={user} defaultSubTab="integrity" />
             </motion.div>
           )}
 
