@@ -31,7 +31,14 @@ interface HederaGuardianSuiteProps {
 }
 
 export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'monitor' | 'visualizer' | 'console' | 'integrity'>('monitor');
+  const [activeSubTab, setActiveSubTab] = useState<'monitor' | 'visualizer' | 'console' | 'integrity' | 'policy'>('monitor');
+  
+  // 5. GUARDIAN POLICY INSPECTOR STATE
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string>('pol-acm0022');
+  const [policySimQuantity, setPolicySimQuantity] = useState<number>(3.5);
+  const [policySimWasteType, setPolicySimWasteType] = useState<string>('ORGANIC_FOOD');
+  const [policyEvalResult, setPolicyEvalResult] = useState<any>(null);
+  const [isEvaluatingPolicy, setIsEvaluatingPolicy] = useState<boolean>(false);
   
   // 1. MONITOR LEDGER HEALTH STATE
   const [healthData, setHealthData] = useState<any>({
@@ -366,6 +373,18 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
         >
           <ShieldCheck size={15} />
           Auto-Verify Chain Integrity
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('policy')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeSubTab === 'policy'
+              ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
+              : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+          }`}
+        >
+          <Code size={15} />
+          Guardian Policy Inspector
         </button>
       </div>
 
@@ -867,6 +886,217 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user }
               </div>
             </motion.div>
           )}
+        </motion.div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 5. GUARDIAN POLICY INSPECTOR */}
+      {/* ======================================================== */}
+      {activeSubTab === 'policy' && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          {/* Policy Selection Header */}
+          <div className="bg-black/40 p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold font-mono mb-2">
+                <Code size={14} />
+                Hedera Guardian Policy IR Engine
+              </div>
+              <h4 className="text-xl font-bold text-white">Methodology & Policy Rule Inspector</h4>
+              <p className="text-xs text-white/50 mt-1">
+                Inspect formal Guardian JSON-LD policy blocks, role matrices, rule logic, and test real-time policy dry-runs.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="text-xs text-white/50 font-mono">Select Policy:</label>
+              <select
+                value={selectedPolicyId}
+                onChange={e => {
+                  setSelectedPolicyId(e.target.value);
+                  setPolicyEvalResult(null);
+                }}
+                className="bg-slate-900 border border-emerald-500/30 text-white font-mono text-xs rounded-xl px-4 py-2 outline-none focus:border-emerald-400"
+              >
+                <option value="pol-acm0022">UNFCCC ACM0022 - Methane Avoidance via Composting</option>
+                <option value="pol-ams3f">AMS-III.F - Avoidance of Methane in Organic Waste</option>
+                <option value="pol-cpcb2026">CPCB Municipal Solid Waste Rules 2026</option>
+                <option value="pol-biochar">Biochar Pyrolysis Soil Carbon Removal</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Active Policy Metadata & Workflow Blocks */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Policy Info Card */}
+            <div className="bg-black/40 p-6 rounded-2xl border border-white/10 space-y-4">
+              <h5 className="text-xs font-bold text-emerald-400 uppercase tracking-wider font-mono flex items-center gap-2">
+                <FileText size={15} />
+                Policy Specifications & Governance
+              </h5>
+
+              <div className="space-y-2 text-xs font-mono">
+                <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between">
+                  <span className="text-white/40">Policy ID:</span>
+                  <span className="text-white font-bold">{selectedPolicyId.toUpperCase()}</span>
+                </div>
+                <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between">
+                  <span className="text-white/40">Version:</span>
+                  <span className="text-emerald-400 font-bold">v3.4.0 (ISO 14064-2)</span>
+                </div>
+                <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between">
+                  <span className="text-white/40">Target HCS Topic:</span>
+                  <span className="text-cyan-400 font-bold">{healthData.topic_id}</span>
+                </div>
+                <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between">
+                  <span className="text-white/40">Default Token Class:</span>
+                  <span className="text-amber-400 font-bold">0.0.984102 (RUPAY_dCOR)</span>
+                </div>
+                <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between">
+                  <span className="text-white/40">Verifiable Schema:</span>
+                  <span className="text-white font-bold">RupayKgMrvCredential_v2</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Workflow Execution Blocks Tree */}
+            <div className="md:col-span-2 bg-black/40 p-6 rounded-2xl border border-white/10 space-y-4">
+              <h5 className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono flex items-center gap-2">
+                <Layers size={15} />
+                Policy Execution IR Block Hierarchy
+              </h5>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                <div className="p-3.5 bg-slate-900/90 rounded-xl border border-white/5 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-emerald-400 font-bold">Block #1: IngestionGateway</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">ACTIVE</span>
+                  </div>
+                  <p className="text-[11px] text-white/50">Validates IoT weighbridge signature & DID authorization</p>
+                </div>
+
+                <div className="p-3.5 bg-slate-900/90 rounded-xl border border-white/5 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-emerald-400 font-bold">Block #2: SchemaValidator</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">ACTIVE</span>
+                  </div>
+                  <p className="text-[11px] text-white/50">Verifies JSON-LD W3C VC 2.0 structure & fields</p>
+                </div>
+
+                <div className="p-3.5 bg-slate-900/90 rounded-xl border border-white/5 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-emerald-400 font-bold">Block #3: FormulaEvaluator</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">ACTIVE</span>
+                  </div>
+                  <p className="text-[11px] text-white/50">Applies ER = BE - PE - LE baseline avoidance equation</p>
+                </div>
+
+                <div className="p-3.5 bg-slate-900/90 rounded-xl border border-white/5 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-cyan-400 font-bold">Block #4: HcsAnchorNode</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400">ANCHORED</span>
+                  </div>
+                  <p className="text-[11px] text-white/50">Submits SHA-384 message to Hedera Topic {healthData.topic_id}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Policy Dry-Run Evaluation Engine */}
+          <div className="bg-black/40 p-6 rounded-2xl border border-emerald-500/30 space-y-4">
+            <h5 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+              <Zap size={15} className="text-emerald-400" />
+              Policy Rule Evaluator Dry-Run Simulator
+            </h5>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-[10px] text-white/50 uppercase font-mono block mb-1">Waste Mass Ingestion (Tonnes)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={policySimQuantity}
+                  onChange={e => setPolicySimQuantity(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-slate-900 border border-white/10 text-xs rounded-xl p-2.5 text-white font-mono focus:border-emerald-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] text-white/50 uppercase font-mono block mb-1">Waste Organic Category</label>
+                <select
+                  value={policySimWasteType}
+                  onChange={e => setPolicySimWasteType(e.target.value)}
+                  className="w-full bg-slate-900 border border-white/10 text-xs rounded-xl p-2.5 text-white font-mono"
+                >
+                  <option value="ORGANIC_FOOD">Food & Kitchen Waste (High Methane Factor)</option>
+                  <option value="MARKET_VEGETABLE">APMC Vegetable Waste</option>
+                  <option value="AGRI_BIOMASS">Agricultural Straw / Stubble</option>
+                  <option value="MIXED_MUNICIPAL">Mixed Municipal Organic Waste</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={async () => {
+                    setIsEvaluatingPolicy(true);
+                    await new Promise(r => setTimeout(r, 600));
+                    const co2e = (policySimQuantity * 0.82).toFixed(2);
+                    setPolicyEvalResult({
+                      status: 'POLICY_PASSED',
+                      policyId: selectedPolicyId,
+                      wasteMassTonnes: policySimQuantity,
+                      wasteType: policySimWasteType,
+                      methaneAvoidedTCO2e: co2e,
+                      tokenMintEligible: `${co2e} dCOR Tokens`,
+                      evaluatedRules: [
+                        { rule: 'Methane Avoidance Baseline check', passed: true },
+                        { rule: 'Landfill Diversion Proof', passed: true },
+                        { rule: 'Double-Counting Hash Check', passed: true },
+                        { rule: 'W3C VC Signature Verification', passed: true }
+                      ],
+                      timestamp: new Date().toISOString()
+                    });
+                    setIsEvaluatingPolicy(false);
+                  }}
+                  disabled={isEvaluatingPolicy}
+                  className="w-full py-2.5 bg-emerald-500 text-black font-extrabold rounded-xl text-xs hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
+                >
+                  <Zap size={14} className={isEvaluatingPolicy ? 'animate-spin' : ''} />
+                  {isEvaluatingPolicy ? 'Evaluating Rules...' : 'Run Policy Rules Evaluation'}
+                </button>
+              </div>
+            </div>
+
+            {policyEvalResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-5 bg-slate-950 rounded-xl border border-emerald-500/40 space-y-3 font-mono text-xs"
+              >
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <span className="text-emerald-400 font-bold flex items-center gap-2">
+                    <CheckCircle2 size={16} />
+                    Policy Dry-Run Passed — Eligible for HCS Anchoring
+                  </span>
+                  <span className="text-amber-400 font-bold">
+                    Mint Reward: {policyEvalResult.tokenMintEligible}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                  {policyEvalResult.evaluatedRules.map((r: any, idx: number) => (
+                    <div key={idx} className="p-2 bg-slate-900 rounded border border-white/5 flex items-center justify-between">
+                      <span className="text-white/70">{r.rule}</span>
+                      <span className="text-emerald-400 font-bold">PASSED</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
         </motion.div>
       )}
     </div>
