@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 import { safeParseJson } from '../utils/safeJson';
+import { VirtualizedHcsLedger } from './VirtualizedHcsLedger';
 
 interface HederaGuardianSuiteProps {
   user?: any;
@@ -162,7 +163,13 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
       });
       if (res.ok) {
         const data = await safeParseJson(res);
-        setHcsMessages(data || []);
+        if (Array.isArray(data)) {
+          setHcsMessages(data);
+        } else if (data && Array.isArray(data.messages)) {
+          setHcsMessages(data.messages);
+        } else {
+          setHcsMessages([]);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch HCS messages:", err);
@@ -789,108 +796,20 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
             )}
           </div>
 
-          {/* Terminal Console Stream View */}
-          <div className="bg-slate-950 p-6 rounded-2xl border border-white/10 space-y-4 font-mono">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2">
-                <Terminal size={18} className="text-emerald-400" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">HCS Live Terminal Stream</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  Topic: {healthData.topic_id}
-                </span>
-              </div>
-
-              {/* Search, Sync & Export */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  onClick={handleSyncLedger}
-                  disabled={isSyncingLedger}
-                  className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer"
-                >
-                  <Zap size={13} className={isSyncingLedger ? 'animate-spin' : ''} />
-                  {isSyncingLedger ? 'Syncing...' : 'Sync Ledger'}
-                </button>
-
-                <div className="relative">
-                  <Search size={14} className="absolute left-3 top-2.5 text-white/40" />
-                  <input
-                    type="text"
-                    placeholder="Filter sequence, hash, or payload..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="pl-8 pr-3 py-1.5 bg-slate-900 border border-white/10 text-xs rounded-xl text-white outline-none focus:border-emerald-500 w-52"
-                  />
-                </div>
-
-                <button
-                  onClick={() => {
-                    const blob = new Blob([JSON.stringify(hcsMessages, null, 2)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `hcs-debug-log-${healthData.topic_id}.json`;
-                    a.click();
-                  }}
-                  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Download size={13} />
-                  Export Logs
-                </button>
-              </div>
-            </div>
-
-            {/* Messages Table / List */}
-            <div className="space-y-2 max-h-[360px] overflow-y-auto pr-2">
-              {filteredMessages.length === 0 ? (
-                <p className="text-xs text-white/40 italic py-8 text-center">
-                  No HCS messages found matching filter criteria.
-                </p>
-              ) : (
-                filteredMessages.map((m, idx) => {
-                  const isNewlySynced = newlySyncedIds.includes(m.id);
-                  return (
-                    <div
-                      key={m.id || idx}
-                      onClick={() => setSelectedMessage(m)}
-                      className={`cursor-pointer p-3 rounded-xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs relative overflow-hidden ${
-                        isNewlySynced
-                          ? 'bg-emerald-950/90 border-emerald-400 shadow-lg shadow-emerald-500/20 ring-2 ring-emerald-400/50'
-                          : 'bg-slate-900/90 border-white/5 hover:border-emerald-500/40'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 rounded font-bold border ${
-                          isNewlySynced 
-                            ? 'bg-emerald-400 text-black font-black border-emerald-300' 
-                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        }`}>
-                          #{m.sequenceNumber || idx + 1}
-                        </span>
-                        <span className="text-white font-bold">{m.id || `hcs-${idx + 1}`}</span>
-                        {isNewlySynced && (
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[9px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1">
-                            <Zap size={9} /> JUST SYNCED
-                          </span>
-                        )}
-                        <span className="text-white/40 text-[10px]">
-                          {new Date(m.timestamp || Date.now()).toLocaleTimeString()}
-                        </span>
-                      </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="text-white/50 text-[10px] truncate max-w-[200px]">
-                        Hash: {m.runningHash ? `${m.runningHash.substring(0, 16)}...` : '0x384_valid'}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-[10px] border border-cyan-500/20">
-                        {m.message?.vc_id ? 'VC Payload' : 'Telemetry'}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-            </div>
-          </div>
+          {/* Virtualized Infinite-Scroll HCS Terminal Stream */}
+          <VirtualizedHcsLedger
+            items={hcsMessages}
+            itemHeight={68}
+            containerHeight={380}
+            selectedItemId={selectedMessage?.id}
+            onSelectItem={(m) => setSelectedMessage(m)}
+            onSyncLedger={handleSyncLedger}
+            isSyncing={isSyncingLedger}
+            newlySyncedIds={newlySyncedIds}
+            topicId={healthData.topic_id}
+            variant="console"
+            title="HCS Live Terminal Stream"
+          />
 
           {/* Selected Message Inspector */}
           {selectedMessage && (
@@ -1079,53 +998,16 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                 </div>
               </div>
 
-              {/* Items List */}
-              <div className="space-y-3 font-mono text-xs">
-                <h5 className="font-bold text-white/60 uppercase tracking-wider text-[10px]">
-                  Recent HCS Topic Sequence Verification Ledger
-                </h5>
-                <div className="space-y-2 max-h-[260px] overflow-y-auto pr-2">
-                  {auditResult.verified_items.map((item: any) => {
-                    const isItemIntact = item.status === 'VERIFIED_INTACT';
-                    return (
-                      <div
-                        key={item.id}
-                        className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
-                          isItemIntact
-                            ? 'bg-slate-900/90 border-white/5 hover:border-emerald-500/30'
-                            : 'bg-rose-950/40 border-rose-500/40 hover:border-rose-500'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          {isItemIntact ? (
-                            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-                          ) : (
-                            <AlertTriangle size={16} className="text-rose-400 shrink-0 animate-bounce" />
-                          )}
-                          <div>
-                            <span className="font-bold text-white mr-2">Seq #{item.sequenceNumber}</span>
-                            <span className="text-white/40 text-[10px]">{item.id}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className={`text-[10px] font-mono truncate max-w-[220px] ${
-                            isItemIntact ? 'text-emerald-400/80' : 'text-rose-400 font-bold'
-                          }`}>
-                            Hash: {item.runningHash}
-                          </span>
-                          <span className={`px-2.5 py-0.5 rounded font-bold text-[10px] border ${
-                            isItemIntact
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                              : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                          }`}>
-                            {isItemIntact ? 'VERIFIED INTACT' : 'TAMPERED / CORRUPTED'}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              {/* Virtualized HCS Topic Sequence Verification Ledger */}
+              <VirtualizedHcsLedger
+                items={auditResult.verified_items || []}
+                itemHeight={64}
+                containerHeight={320}
+                topicId={healthData.topic_id}
+                variant="integrity"
+                title="HCS Topic Sequence Verification Ledger"
+                searchPlaceholder="Search sequence or hash..."
+              />
             </motion.div>
           )}
         </motion.div>

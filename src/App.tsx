@@ -675,6 +675,54 @@ export default function App() {
   const [ledgerQuery, setLedgerQuery] = useState<string>('');
   const [ledgerResponse, setLedgerResponse] = useState<string>('');
 
+  const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
+  const [realtimeToast, setRealtimeToast] = useState<{ message: string; time: string } | null>(null);
+
+  useEffect(() => {
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource('/api/live/stream');
+      es.onopen = () => setIsLiveConnected(true);
+      es.onerror = () => setIsLiveConnected(false);
+      es.onmessage = (event) => {
+        try {
+          const parsed = JSON.parse(event.data);
+          if (parsed.type === 'CONNECTED') {
+            setIsLiveConnected(true);
+          } else if (parsed.type === 'BIOMASS_RECORD_CREATED') {
+            setRealtimeToast({
+              message: `⚡ Live Network Event: New waste record logged (${parsed.data.weight_kg || ''} kg ${parsed.data.waste_type || ''})`,
+              time: new Date().toLocaleTimeString()
+            });
+            fetchUserData();
+          } else if (parsed.type === 'MRV_VERIFIED') {
+            setRealtimeToast({
+              message: `🌱 Live MRV Sync: Carbon Credits verified & recorded on blockchain`,
+              time: new Date().toLocaleTimeString()
+            });
+            fetchUserData();
+          } else if (parsed.type === 'TELEMETRY_BEAT') {
+            setLiveClimateTelemetry(parsed.data);
+          }
+        } catch (err) {
+          console.error('Real-time SSE event parse error:', err);
+        }
+      };
+    } catch (e) {
+      console.error('Failed to establish EventSource connection:', e);
+    }
+    return () => {
+      if (es) es.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (realtimeToast) {
+      const timer = setTimeout(() => setRealtimeToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [realtimeToast]);
+
   useEffect(() => {
     let isMounted = true;
     const fetchConfig = async () => {
@@ -2323,6 +2371,14 @@ export default function App() {
     if (!showAuth) {
       return (
         <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans overflow-hidden">
+          {realtimeToast && (
+            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 bg-[#18181B]/95 backdrop-blur-md border border-emerald-500/40 rounded-full shadow-2xl text-emerald-300 text-xs font-semibold flex items-center gap-3">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+              <span>{realtimeToast.message}</span>
+              <span className="text-white/40 text-[10px] font-mono">{realtimeToast.time}</span>
+              <button onClick={() => setRealtimeToast(null)} className="ml-2 text-white/40 hover:text-white">✕</button>
+            </div>
+          )}
           {/* Navigation */}
           <nav className="flex items-center justify-between p-6 md:px-12 border-b border-white/10 bg-[var(--color-bg)]/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
             <div className="flex items-center gap-3">
@@ -2331,7 +2387,10 @@ export default function App() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold tracking-tighter leading-none">RUPAYKG</span>
-                <span className="text-[9px] font-mono text-emerald-400 tracking-widest mt-1 uppercase">Circular Economy OS</span>
+                <span className="text-[9px] font-mono text-emerald-400 tracking-widest mt-1 uppercase flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isLiveConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                  {isLiveConnected ? 'LIVE REALTIME OS' : 'CONNECTING...'}
+                </span>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
@@ -2984,6 +3043,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans">
+      {realtimeToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 bg-[#18181B]/95 backdrop-blur-md border border-emerald-500/40 rounded-full shadow-2xl text-emerald-300 text-xs font-semibold flex items-center gap-3">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+          <span>{realtimeToast.message}</span>
+          <span className="text-white/40 text-[10px] font-mono">{realtimeToast.time}</span>
+          <button onClick={() => setRealtimeToast(null)} className="ml-2 text-white/40 hover:text-white">✕</button>
+        </div>
+      )}
       <Helmet>
         <title>{t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg - Sovereign Digital MRV Infrastructure</title>
         <meta name="description" content={t(`Access the RupayKg ${view} dashboard. Sovereign-grade digital MRV infrastructure for waste-to-carbon accounting, AI-verification, and climate intelligence.`)} />
@@ -3006,7 +3073,10 @@ export default function App() {
           </div>
           <div>
             <span className="text-xl font-bold tracking-tighter hidden md:block">RUPAYKG</span>
-            <span className="text-[9px] font-mono text-emerald-400 hidden md:block tracking-widest mt-0.5">CIRCULAR ECONOMY OS</span>
+            <span className="text-[9px] font-mono text-emerald-400 hidden md:block tracking-widest mt-0.5 uppercase flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${isLiveConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              {isLiveConnected ? 'LIVE REALTIME' : 'CONNECTING'}
+            </span>
           </div>
         </div>
 

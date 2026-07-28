@@ -409,6 +409,19 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   );
 
   // --- IN-MEMORY FALLBACK DB ---
+  const liveSseClients = new Set<express.Response>();
+
+  function broadcastRealtimeEvent(type: string, data: any) {
+    const payload = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
+    for (const client of liveSseClients) {
+      try {
+        client.write(`data: ${payload}\n\n`);
+      } catch {
+        liveSseClients.delete(client);
+      }
+    }
+  }
+
   const adminHashedPassword = bcrypt.hashSync("admin_password", 10);
   const users: any[] = [
     {
@@ -1405,6 +1418,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         });
       }
 
+      broadcastRealtimeEvent("MRV_VERIFIED", { record_id, status, verified_at: record.mrv_verified_at });
       res.json({ message: `MRV ${status} successfully` });
     },
   );
@@ -1473,6 +1487,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         parseFloat(weight_kg),
         image_url
       );
+      broadcastRealtimeEvent("BIOMASS_RECORD_CREATED", { waste_type, weight_kg, ...result });
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message || "Verification failed" });
@@ -2690,6 +2705,22 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   app.get(
     "/api/blockchain/ledger",
     (req: any, res) => {
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+      const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : undefined;
+      
+      if (limit !== undefined || offset !== undefined) {
+        const start = offset || 0;
+        const end = limit !== undefined ? start + limit : blockchain.length;
+        const items = blockchain.slice(start, end);
+        return res.json({
+          total: blockchain.length,
+          limit: limit || blockchain.length,
+          offset: start,
+          hasMore: end < blockchain.length,
+          items
+        });
+      }
+
       res.json(blockchain);
     },
   );
@@ -3330,6 +3361,22 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   app.get(
     "/api/carbon/guardian/messages",
     (req, res) => {
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+      const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : undefined;
+      
+      if (limit !== undefined || offset !== undefined) {
+        const start = offset || 0;
+        const end = limit !== undefined ? start + limit : guardianMessages.length;
+        const items = guardianMessages.slice(start, end);
+        return res.json({
+          total: guardianMessages.length,
+          limit: limit || guardianMessages.length,
+          offset: start,
+          hasMore: end < guardianMessages.length,
+          messages: items
+        });
+      }
+
       res.json(guardianMessages);
     },
   );
@@ -4245,6 +4292,38 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
     }
   });
   // ---------------------------------------------
+
+  // ---------------- REAL-TIME LIVE SSE STREAM ----------------
+  app.get("/api/live/stream", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders();
+
+    liveSseClients.add(res);
+
+    res.write(
+      `data: ${JSON.stringify({ type: "CONNECTED", status: "live_realtime_connected", timestamp: new Date().toISOString() })}\n\n`
+    );
+
+    req.on("close", () => {
+      liveSseClients.delete(res);
+    });
+  });
+
+  // Background Telemetry Heartbeat (every 10 seconds)
+  setInterval(() => {
+    if (liveSseClients.size > 0) {
+      broadcastRealtimeEvent("TELEMETRY_BEAT", {
+        active_sensors: 124,
+        network_status: "HEALTHY",
+        telemetry_node: "India Circular Mesh Node #7",
+        total_records: records.length,
+        live_timestamp: new Date().toISOString()
+      });
+    }
+  }, 10000);
 
   // Catch-all 404 handler for unmatched API routes to prevent HTML SPA fallback
   app.all("/api/*", (req, res) => {
