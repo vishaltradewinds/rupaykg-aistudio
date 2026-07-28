@@ -2,22 +2,94 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+:root {
+  --color-bg: #050505;
+  --color-card: #151619;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text: #ffffff;
+  --color-text-muted: rgba(255, 255, 255, 0.6);
+  --color-glass: rgba(255, 255, 255, 0.05);
+  color-scheme: dark;
+}
+
+html.light, [data-theme="light"] {
+  --color-bg: #f8fafc;
+  --color-card: #ffffff;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-glass: rgba(0, 0, 0, 0.03);
+  color-scheme: light;
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --color-bg: #050505;
-  --color-card: #151619;
-  --color-border: rgba(255, 255, 255, 0.08);
 }
 
 @layer base {
   body {
-    @apply font-sans antialiased bg-[var(--color-bg)] text-white;
+    @apply font-sans antialiased bg-[var(--color-bg)] text-[var(--color-text)];
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
   }
+}
+
+/* Light mode support */
+html.light body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+html.light .bg-[#050505],
+html.light .bg-black,
+html.light .bg-slate-950 {
+  background-color: #f8fafc !important;
+  color: #0f172a;
+}
+
+html.light .bg-[#151619],
+html.light .bg-[#121316],
+html.light .bg-[#1A1A1C],
+html.light .bg-slate-900,
+html.light .bg-slate-900\/50,
+html.light .bg-slate-900\/80,
+html.light .bg-slate-800\/50 {
+  background-color: #ffffff !important;
+  color: #0f172a;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .border-white\/10,
+html.light .border-white\/5,
+html.light .border-white\/20,
+html.light .border-slate-800 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+html.light .text-white\/40,
+html.light .text-white\/50,
+html.light .text-white\/60,
+html.light .text-white\/70,
+html.light .text-white\/80 {
+  color: #475569 !important;
+}
+
+html.light .bg-white\/5,
+html.light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .hover\:bg-white\/5:hover,
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Custom Scrollbar */
@@ -25,21 +97,21 @@
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--color-glass);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(125, 125, 125, 0.2);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(125, 125, 125, 0.4);
 }
 
 /* Refined Card Style */
 .os-card {
   background-color: var(--color-card);
   border: 1px solid var(--color-border);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 /* Data Grid Row */
@@ -48,7 +120,7 @@
   transition: background 0.2s ease, color 0.2s ease;
 }
 .data-row:hover {
-  background: rgba(255,255,255,0.05);
+  background: var(--color-glass);
 }
 
 /* Micro-labels */
@@ -58,5 +130,5 @@
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.7;
 }

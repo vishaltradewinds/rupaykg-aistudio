@@ -21,6 +21,8 @@ import {
   CheckCircle2,
   ChevronRight,
   Globe,
+  Sun,
+  Moon,
   ArrowRight,
   ShieldCheck,
   ShieldAlert,
@@ -492,6 +494,23 @@ export default function App() {
   const [aggregatorFleet, setAggregatorFleet] = useState<any>(null);
   const [processorInventory, setProcessorInventory] = useState<any>(null);
   const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    return (localStorage.getItem('rupay_theme') as 'dark' | 'light') || 'dark';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light');
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+    } else {
+      root.classList.add('dark');
+      root.classList.remove('light');
+      root.setAttribute('data-theme', 'dark');
+    }
+    localStorage.setItem('rupay_theme', theme);
+  }, [theme]);
   const [dashboardStateFilter, setDashboardStateFilter] = useState<string>('');
   const [dashboardDistrictFilter, setDashboardDistrictFilter] = useState<string>('');
   const [dashboardSubdistrictFilter, setDashboardSubdistrictFilter] = useState<string>('');
@@ -2364,7 +2383,7 @@ export default function App() {
             </div>
           )}
           {/* Navigation */}
-          <nav className="flex items-center justify-between p-6 md:px-12 border-b border-white/10 bg-[var(--color-bg)]/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
+          <nav className="flex items-center justify-between p-4 md:p-6 md:px-12 border-b border-white/10 bg-[var(--color-bg)]/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-emerald-500 rounded-xl text-black shadow-lg shadow-emerald-500/20">
                 <Leaf size={24} />
@@ -2377,12 +2396,31 @@ export default function App() {
                 </span>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
+            <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-white/60">
               <a href="#features" className="hover:text-white transition-colors">{t('Features')}</a>
               <a href="#how-it-works" className="hover:text-white transition-colors">{t('How it Works')}</a>
               <a href="#roles" className="hover:text-white transition-colors">{t('Ecosystem Roles')}</a>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Theme Toggle Button */}
+              <button
+                onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+                className="flex items-center gap-2 p-2 sm:px-3.5 sm:py-2 bg-white/5 border border-white/10 rounded-full text-xs font-bold transition-all hover:bg-white/10 text-white cursor-pointer shadow-sm shrink-0"
+                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {theme === 'dark' ? (
+                  <>
+                    <Sun size={15} className="text-amber-400 shrink-0" />
+                    <span className="hidden sm:inline">{t('Light Mode')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon size={15} className="text-indigo-400 shrink-0" />
+                    <span className="hidden sm:inline">{t('Dark Mode')}</span>
+                  </>
+                )}
+              </button>
+
               <div className="relative">
                 <button 
                   onClick={() => setShowLangDropdown(!showLangDropdown)}
@@ -2754,7 +2792,24 @@ export default function App() {
 
     return (
       <div className="min-h-screen bg-[var(--color-bg)] text-white flex items-center justify-center p-4 font-sans relative">
-        <div className="absolute top-6 right-6 z-50">
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+            className="flex items-center gap-2 p-2 sm:px-3.5 sm:py-2.5 bg-white/5 border border-white/20 rounded-full text-xs font-bold transition-all hover:bg-white/10 text-white cursor-pointer backdrop-blur-md shrink-0 shadow-sm"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun size={15} className="text-amber-400 shrink-0" />
+                <span className="hidden sm:inline">{t('Light Mode')}</span>
+              </>
+            ) : (
+              <>
+                <Moon size={15} className="text-indigo-400 shrink-0" />
+                <span className="hidden sm:inline">{t('Dark Mode')}</span>
+              </>
+            )}
+          </button>
           <div className="relative">
             <button 
               onClick={() => setShowLangDropdown(!showLangDropdown)}
@@ -3202,7 +3257,26 @@ export default function App() {
               )}
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4 flex-wrap">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+              className="flex items-center gap-2 px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold transition-all hover:bg-white/10 text-white cursor-pointer"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun size={15} className="text-amber-400" />
+                  <span className="hidden sm:inline">{t('Light Mode')}</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={15} className="text-indigo-400" />
+                  <span className="hidden sm:inline">{t('Dark Mode')}</span>
+                </>
+              )}
+            </button>
+
             <div className="relative">
               <button 
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
@@ -6222,6 +6296,37 @@ export default function App() {
                     {loading ? t('Saving...') : t('Save Changes')}
                   </button>
                 </form>
+              </Card>
+
+              <Card className="p-8 border-white/5 bg-white/5">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <Sun className="text-amber-400" size={20} />
+                  {t('Theme & Appearance')}
+                </h3>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 gap-4">
+                  <div>
+                    <p className="font-medium">{t('Interface Theme Mode')}</p>
+                    <p className="text-xs text-white/40">{t('Switch between Dark Mode and Light Mode for optimal visual comfort.')}</p>
+                  </div>
+                  <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setTheme('dark')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${theme === 'dark' ? 'bg-emerald-500 text-black shadow-md' : 'text-white/50 hover:text-white'}`}
+                    >
+                      <Moon size={14} />
+                      {t('Dark Mode')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTheme('light')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${theme === 'light' ? 'bg-emerald-500 text-black shadow-md' : 'text-white/50 hover:text-white'}`}
+                    >
+                      <Sun size={14} />
+                      {t('Light Mode')}
+                    </button>
+                  </div>
+                </div>
               </Card>
 
               <Card className="p-8 border-white/5 bg-white/5">
