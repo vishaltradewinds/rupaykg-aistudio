@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { safeParseJson } from '../utils/safeJson';
+import { safeParseJson, safeFetch } from '../utils/safeJson';
 
 export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) {
   const { t } = useTranslation();
@@ -228,13 +228,13 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const handleRegisterEntity = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/swm/register', {
+      const res = await safeFetch('/api/swm/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(regForm)
       });
       const data = await safeParseJson(res);
-      if (res.ok && data) {
+      if (res && res.ok && data) {
         setRegisteredEntitiesList(prev => [data.registeredEntity, ...prev]);
         setRegSuccessMessage(`Entity "${regForm.name}" registered successfully with CPCB Token ${data.registeredEntity.cpcbToken}`);
         setTimeout(() => setRegSuccessMessage(''), 6000);
@@ -279,13 +279,13 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   // Generate Weighbridge Slip (Layer 7)
   const handleGenerateWbSlip = async () => {
     try {
-      const res = await fetch('/api/swm/weighbridge/slip', {
+      const res = await safeFetch('/api/swm/weighbridge/slip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(wbForm)
       });
       const data = await safeParseJson(res);
-      if (res.ok && data) {
+      if (res && res.ok && data) {
         setGeneratedSlip(data);
       }
     } catch (err) {
@@ -309,13 +309,13 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const handleTriggerCpcbSync = async () => {
     setSyncingActive(true);
     try {
-      const res = await fetch('/api/swm/cpcb-sync', {
+      const res = await safeFetch('/api/swm/cpcb-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel: 'LIVE_OPERATIONAL_SYNC', entityId: 'MUNI-MUMBAI-01' })
       });
       const data = await safeParseJson(res);
-      if (res.ok && data) {
+      if (res && res.ok && data) {
         setCpcbSyncLogs(prev => [
           {
             channel: 'LIVE_OPERATIONAL_FEED',
@@ -338,13 +338,13 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const handleRunAiForecast = async () => {
     setLoadingAiForecast(true);
     try {
-      const res = await fetch('/api/swm/ai-forecast', {
+      const res = await safeFetch('/api/swm/ai-forecast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ zone: aiZone, pastDailyAvgKg: 450 })
       });
       const data = await safeParseJson(res);
-      if (res.ok && data) {
+      if (res && res.ok && data) {
         setAiForecastResult(data);
       }
     } catch (err) {
@@ -357,13 +357,13 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   // Run REST API Tester (Layer 18)
   const handleTestApi = async () => {
     try {
-      const res = await fetch(apiEndpoint, {
+      const res = await safeFetch(apiEndpoint, {
         method: apiMethod,
         headers: { 'Content-Type': 'application/json' },
         body: apiMethod === 'POST' ? JSON.stringify({ test: 'payload', timestamp: new Date().toISOString() }) : undefined
       });
       const data = await safeParseJson(res);
-      setApiResponse(data || { status: res.status, message: res.statusText });
+      setApiResponse(data || { status: res ? res.status : 'error', message: res ? res.statusText : 'Network failure' });
     } catch (err: any) {
       setApiResponse({ error: err.message });
     }

@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { safeParseJson } from '../utils/safeJson';
+import { safeParseJson, safeFetch } from '../utils/safeJson';
 import { VirtualizedHcsLedger } from './VirtualizedHcsLedger';
 
 interface HederaGuardianSuiteProps {
@@ -141,10 +141,10 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
     setIsRefreshingHealth(true);
     try {
       const token = localStorage.getItem('rupay_token');
-      const res = await fetch('/api/carbon/guardian/health', {
+      const res = await safeFetch('/api/carbon/guardian/health', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      if (res.ok) {
+      if (res && res.ok) {
         const data = await safeParseJson(res);
         if (data) setHealthData(data);
       }
@@ -158,10 +158,10 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
   const fetchHcsMessages = async () => {
     try {
       const token = localStorage.getItem('rupay_token');
-      const res = await fetch('/api/carbon/guardian/messages', {
+      const res = await safeFetch('/api/carbon/guardian/messages', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      if (res.ok) {
+      if (res && res.ok) {
         const data = await safeParseJson(res);
         if (Array.isArray(data)) {
           setHcsMessages(data);

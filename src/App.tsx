@@ -70,7 +70,7 @@ import ReactMarkdown from 'react-markdown';
 import { WASTE_TYPES, WASTE_CATEGORIES, WasteType, INDIAN_STATES } from './constants';
 import { ICM_CCTS_SECTORS, ICM_METHODOLOGIES } from './services/icmComplianceService';
 import { safeFetchLgdJson } from './services/lgdService';
-import { safeParseJson } from './utils/safeJson';
+import { safeParseJson, safeFetch, safeFetchJson } from './utils/safeJson';
 
 import { Chatbot } from './components/Chatbot';
 import EnterpriseSuite from './components/EnterpriseSuite';
@@ -537,29 +537,23 @@ export default function App() {
       
       try {
         console.log(`Fetching public impact data (Attempt ${retryCount + 1})...`);
-        const res = await fetch('/api/public/impact', {
+        const res = await safeFetch('/api/public/impact', {
           headers: {
             'Accept': 'application/json',
             'Cache-Control': 'no-cache'
           }
         });
         
-        if (res.ok) {
-          const contentType = res.headers.get("content-type");
-          if (!contentType || !contentType.includes("application/json")) {
-            throw new Error("Received non-JSON response (likely HTML fallback)");
-          }
-          const text = await res.text();
-          if (text.trim().startsWith("<")) {
-            throw new Error("Received HTML content instead of JSON");
-          }
-          const data = JSON.parse(text);
-          if (isMounted) {
+        if (res && res.ok) {
+          const data = await safeParseJson(res);
+          if (data && isMounted) {
             setPublicImpact(data);
             retryCount = 0; // Reset on success
+            return;
           }
+          throw new Error("Received invalid or non-JSON content from impact endpoint");
         } else {
-          throw new Error(`Server responded with status: ${res.status}`);
+          throw new Error(`Server responded with status: ${res ? res.status : 'network error'}`);
         }
       } catch (err) {
         if (!isMounted) return;
@@ -731,13 +725,13 @@ export default function App() {
       while (retries > 0 && !success && isMounted) {
         try {
           const [wasteRes, paymentRes] = await Promise.all([
-            fetch('/api/waste-types'),
-            fetch('/api/payment-config')
+            safeFetch('/api/waste-types'),
+            safeFetch('/api/payment-config')
           ]);
           
           if (!isMounted) return;
 
-          if (wasteRes.ok && paymentRes.ok) {
+          if (wasteRes && wasteRes.ok && paymentRes && paymentRes.ok) {
             const wasteData = await safeParseJson(wasteRes);
             const paymentData = await safeParseJson(paymentRes);
             if (wasteData && paymentData) {
@@ -969,20 +963,10 @@ export default function App() {
 
   // Load explorer states list and sync status
   useEffect(() => {
-    fetch('/api/lgd/sync-status')
-      .then(async res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Received non-JSON response");
-        }
-        const text = await res.text();
-        if (text.trim().startsWith("<")) {
-          throw new Error("Received HTML content instead of JSON");
-        }
-        return JSON.parse(text);
+    safeFetchJson('/api/lgd/sync-status')
+      .then(data => {
+        if (data) setLgdSyncInfo(data);
       })
-      .then(data => setLgdSyncInfo(data))
       .catch(err => console.error('Error fetching LGD sync status:', err));
       
     const controller = new AbortController();
@@ -1107,11 +1091,11 @@ export default function App() {
           if (token) {
             headers['Authorization'] = `Bearer ${token}`;
           }
-          const res = await fetch('/api/db-status', { headers });
+          const res = await safeFetch('/api/db-status', { headers });
           
           if (!isMounted) return;
 
-          if (res.ok) {
+          if (res && res.ok) {
             const data = await safeParseJson(res);
             if (data) {
               setDbStatus(data);
@@ -1734,37 +1718,37 @@ export default function App() {
       // 10. Fetch CCTS Market Data & Offset Projects
       if (token) {
         const results = await Promise.allSettled([
-          fetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/offset-projects`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/offset-projects/methodologies`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/bonds`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/dmrv/sensors`, { headers: { 'Authorization': `Bearer ${token}` } })
+          safeFetch(`/api/registry/certificates`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          safeFetch(`/api/market/orderbook`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          safeFetch(`/api/offset-projects`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          safeFetch(`/api/offset-projects/methodologies`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          safeFetch(`/api/bonds`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          safeFetch(`/api/dmrv/sensors`, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
         const [regRes, orderRes, projRes, methRes, bondRes, sensorRes] = results;
 
-        if (regRes.status === 'fulfilled' && regRes.value.ok) {
+        if (regRes.status === 'fulfilled' && regRes.value && regRes.value.ok) {
           const data = await safeParseJson(regRes.value);
           if (data) setRegistryCertificates(data);
         }
-        if (orderRes.status === 'fulfilled' && orderRes.value.ok) {
+        if (orderRes.status === 'fulfilled' && orderRes.value && orderRes.value.ok) {
           const data = await safeParseJson(orderRes.value);
           if (data) setMarketOrderBook(data);
         }
-        if (projRes.status === 'fulfilled' && projRes.value.ok) {
+        if (projRes.status === 'fulfilled' && projRes.value && projRes.value.ok) {
           const data = await safeParseJson(projRes.value);
           if (data) setOffsetProjects(data);
         }
-        if (methRes.status === 'fulfilled' && methRes.value.ok) {
+        if (methRes.status === 'fulfilled' && methRes.value && methRes.value.ok) {
           const data = await safeParseJson(methRes.value);
           if (data) setMethodologies(data);
         }
-        if (bondRes.status === 'fulfilled' && bondRes.value.ok) {
+        if (bondRes.status === 'fulfilled' && bondRes.value && bondRes.value.ok) {
           const data = await safeParseJson(bondRes.value);
           if (data) setGreenBonds(data);
         }
-        if (sensorRes.status === 'fulfilled' && sensorRes.value.ok) {
+        if (sensorRes.status === 'fulfilled' && sensorRes.value && sensorRes.value.ok) {
           const data = await safeParseJson(sensorRes.value);
           if (data) setDmrvSensors(data);
         }
