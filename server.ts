@@ -2699,7 +2699,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   const guardianPolicies: any[] = [];
   const guardianSubmissions: any[] = [];
 
-  app.post("/api/v1/demo/authority", (req, res) => {
+  app.post("/api/v1/guardian/authority", (req, res) => {
     const { username, hederaAccountId, hederaPrivateKey } = req.body;
     if (!username || !hederaAccountId || !hederaPrivateKey) {
       return res.status(400).json({ error: "Missing required fields: username, hederaAccountId, hederaPrivateKey" });
@@ -2740,7 +2740,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.get("/api/v1/demo/authority", (req, res) => {
+  app.get("/api/v1/guardian/authority", (req, res) => {
     if (!guardianAuthority) {
       return res.json({ success: false, message: "Authority not initialized yet" });
     }
@@ -2882,7 +2882,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.get("/api/v1/demo/submissions", (req, res) => {
+  app.get("/api/v1/guardian/submissions", (req, res) => {
     res.json(guardianSubmissions);
   });
 

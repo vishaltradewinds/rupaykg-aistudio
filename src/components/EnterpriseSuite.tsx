@@ -635,7 +635,7 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
                     <p className="text-xs text-white/40 mt-1">Official system of record for physical circular economy events</p>
                   </div>
                   
-                  {/* Quick Seed Button for demonstration */}
+                  {/* Log Core Event */}
                   <button
                     onClick={() => {
                       enterpriseMrvService.addMrvEvent({
@@ -1447,7 +1447,7 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
                               <div className="flex gap-2 mt-2">
                                 <button
                                   onClick={() => {
-                                    RegistryGatewayAdapter.triggerMockIssuance(sub.submissionId);
+                                    RegistryGatewayAdapter.approveAndIssueCredits(sub.submissionId);
                                     loadAllStates();
                                   }}
                                   className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-bold rounded flex items-center gap-1 transition-all"

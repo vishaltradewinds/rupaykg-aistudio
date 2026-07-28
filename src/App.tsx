@@ -1298,7 +1298,7 @@ export default function App() {
 
   const fetchGuardianData = async () => {
     try {
-      const authRes = await fetch('/api/v1/demo/authority');
+      const authRes = await fetch('/api/v1/guardian/authority');
       if (authRes.ok) {
         const authData = await safeParseJson(authRes);
         if (authData?.success) {
@@ -1314,7 +1314,7 @@ export default function App() {
         if (policiesData) setGuardianPolicies(policiesData);
       }
       
-      const submissionsRes = await fetch('/api/v1/demo/submissions');
+      const submissionsRes = await fetch('/api/v1/guardian/submissions');
       if (submissionsRes.ok) {
         const subsData = await safeParseJson(submissionsRes);
         if (subsData) setGuardianSubmissions(subsData);
@@ -1328,7 +1328,7 @@ export default function App() {
     e.preventDefault();
     setIsAuthLoading(true);
     try {
-      const res = await fetch('/api/v1/demo/authority', {
+      const res = await fetch('/api/v1/guardian/authority', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

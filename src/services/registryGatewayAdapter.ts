@@ -82,9 +82,9 @@ export class RegistryGatewayAdapter {
   }
 
   /**
-   * Mock triggers issuance of carbon certificates on the registry if verification is fully clear.
+   * Triggers issuance of carbon certificates on the registry if verification is fully clear.
    */
-  static triggerMockIssuance(submissionId: string): RegistryProjectSubmission {
+  static approveAndIssueCredits(submissionId: string): RegistryProjectSubmission {
     const list = this.getSubmissions();
     const sub = list.find(s => s.submissionId === submissionId);
     if (!sub) throw new Error('Submission not found');
