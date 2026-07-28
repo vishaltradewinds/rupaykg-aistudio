@@ -6,7 +6,8 @@ import {
   Truck, QrCode, Layers, Radio, Cpu, FileCheck, ArrowUpRight, ArrowDownRight,
   Smartphone, Download, Play, Plus, ChevronRight, BarChart3, Filter, Copy, Check,
   Lock, Send, Eye, HardDrive, Bell, Compass, HelpCircle, Navigation, Terminal,
-  Clock, ShieldAlert, Sparkles, PieChart, CheckCircle2, XCircle
+  Clock, ShieldAlert, Sparkles, PieChart, CheckCircle2, XCircle, Trash2, RotateCcw,
+  ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -18,27 +19,8 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const [activeRoleDashboard, setActiveRoleDashboard] = useState('bwg');
   const [activeMobileRole, setActiveMobileRole] = useState('collector');
   
-  // Registration Form State (Layer 1)
-  const [regForm, setRegForm] = useState({
-    entityType: 'BWG',
-    name: 'Oberoi Grand Commercial Complex',
-    gstin: '27AAAAA0000A1Z5',
-    pan: 'AAAAA0000A',
-    cin: 'U74999MH2020PTC123456',
-    address: 'Sector 18, Commercial Belt, Mumbai, Maharashtra',
-    state: 'Maharashtra',
-    district: 'Mumbai Suburban',
-    ulb: 'Brihanmumbai Municipal Corporation (BMC)',
-    ward: 'Ward K-East',
-    contactPerson: 'Anil Kumar (Chief Environmental Officer)',
-    phone: '+91 98200 12345',
-    email: 'compliance@oberoigrand.com',
-    builtUpAreaSqm: 12500,
-    waterConsumptionKlDay: 45,
-    dailyWasteGenerationKg: 420,
-    wasteCategories: ['Organic Wet Waste', 'Dry Recyclables', 'Domestic Hazardous', 'Sanitary Reject']
-  });
-  const [registeredEntitiesList, setRegisteredEntitiesList] = useState([
+  // Default Seed Data definitions for restore capability
+  const defaultSeedEntities = [
     {
       id: 'REG-CPCB-001',
       type: 'BWG',
@@ -87,7 +69,50 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
       complianceScore: 92,
       cpcbToken: 'CPCB-AUTH-30192D'
     }
-  ]);
+  ];
+
+  const defaultSeedSources = [
+    { id: 'SRC-HOTEL-01', name: 'Taj Lands End Hotel & Kitchen', type: 'Hotels', area: 'Bandra West', dailyCapacityKg: 650, schedule: 'Daily 06:00 AM & 08:00 PM', qrCode: 'QR-SRC-7711', streams: ['Wet Organic', 'Dry Recyclable'] },
+    { id: 'SRC-HOSP-02', name: 'Lilavati Hospital & Research Centre', type: 'Hospitals', area: 'Bandra Reef', dailyCapacityKg: 820, schedule: 'Daily 05:00 AM & 04:00 PM', qrCode: 'QR-SRC-8822', streams: ['Domestic Hazardous', 'Sanitary', 'Wet'] },
+    { id: 'SRC-RES-03', name: 'Pali Hill Residential Towers (240 Flats)', type: 'Residential Blocks', area: 'Pali Hill', dailyCapacityKg: 480, schedule: 'Daily 07:30 AM', qrCode: 'QR-SRC-9933', streams: ['Wet Organic', 'Dry Recyclable'] },
+    { id: 'SRC-MKT-04', name: 'Dadarmarket Wholesale Vegetable Yard', type: 'Markets', area: 'Dadar East', dailyCapacityKg: 2400, schedule: 'Shift A (12:00 PM) & Shift B (10:00 PM)', qrCode: 'QR-SRC-1044', streams: ['Wet Organic'] }
+  ];
+
+  const defaultSeedBins = [
+    { id: 'BIN-GREEN-01', tagId: 'RFID-99120-WET', type: 'Wet / Organic', color: 'emerald', capacityL: 240, fillPercent: 88, lastPicked: '2026-07-26 07:15 AM', status: 'Near Capacity', maintenance: 'Good Condition' },
+    { id: 'BIN-BLUE-02', tagId: 'RFID-99121-DRY', type: 'Dry / Recyclable', color: 'blue', capacityL: 240, fillPercent: 42, lastPicked: '2026-07-26 08:30 AM', status: 'Optimal', maintenance: 'Good Condition' },
+    { id: 'BIN-RED-03', tagId: 'RFID-99122-HAZ', type: 'Domestic Hazardous', color: 'rose', capacityL: 120, fillPercent: 15, lastPicked: '2026-07-25 04:00 PM', status: 'Low Fill', maintenance: 'Sanitized' },
+    { id: 'BIN-YELLOW-04', tagId: 'RFID-99123-SAN', type: 'Sanitary Reject', color: 'amber', capacityL: 120, fillPercent: 65, lastPicked: '2026-07-26 09:00 AM', status: 'Moderate', maintenance: 'Lid Latch Inspected' }
+  ];
+
+  const defaultSeedLogs = [
+    { channel: 'BWG_REGISTRATION', status: '200 OK', syncToken: 'CPCB-TX-172102-881', timestamp: '2026-07-26 10:14:02', recordsCount: 142 },
+    { channel: 'DAILY_WASTE_QUANTITIES', status: '200 OK', syncToken: 'CPCB-TX-172102-882', timestamp: '2026-07-26 10:30:15', recordsCount: 4820 },
+    { channel: 'FORM_IV_ANNUAL_RETURNS', status: '200 OK', syncToken: 'CPCB-TX-172102-883', timestamp: '2026-07-25 18:00:00', recordsCount: 12 },
+    { channel: 'EBWGR_COMPLIANCE_LEDBER', status: '200 OK', syncToken: 'CPCB-TX-172102-884', timestamp: '2026-07-26 09:45:22', recordsCount: 94 }
+  ];
+
+  // Registration Form State (Layer 1)
+  const [regForm, setRegForm] = useState({
+    entityType: 'BWG',
+    name: 'Oberoi Grand Commercial Complex',
+    gstin: '27AAAAA0000A1Z5',
+    pan: 'AAAAA0000A',
+    cin: 'U74999MH2020PTC123456',
+    address: 'Sector 18, Commercial Belt, Mumbai, Maharashtra',
+    state: 'Maharashtra',
+    district: 'Mumbai Suburban',
+    ulb: 'Brihanmumbai Municipal Corporation (BMC)',
+    ward: 'Ward K-East',
+    contactPerson: 'Anil Kumar (Chief Environmental Officer)',
+    phone: '+91 98200 12345',
+    email: 'compliance@oberoigrand.com',
+    builtUpAreaSqm: 12500,
+    waterConsumptionKlDay: 45,
+    dailyWasteGenerationKg: 420,
+    wasteCategories: ['Organic Wet Waste', 'Dry Recyclables', 'Domestic Hazardous', 'Sanitary Reject']
+  });
+  const [registeredEntitiesList, setRegisteredEntitiesList] = useState(defaultSeedEntities);
   const [regSuccessMessage, setRegSuccessMessage] = useState('');
 
   // BWG Eligibility Auto-Calculator State (Layer 2)
@@ -95,33 +120,18 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const [bwgCalcAreaSqm, setBwgCalcAreaSqm] = useState(6200);
 
   // Waste Sources State (Layer 3)
-  const [sources, setSources] = useState([
-    { id: 'SRC-HOTEL-01', name: 'Taj Lands End Hotel & Kitchen', type: 'Hotels', area: 'Bandra West', dailyCapacityKg: 650, schedule: 'Daily 06:00 AM & 08:00 PM', qrCode: 'QR-SRC-7711', streams: ['Wet Organic', 'Dry Recyclable'] },
-    { id: 'SRC-HOSP-02', name: 'Lilavati Hospital & Research Centre', type: 'Hospitals', area: 'Bandra Reef', dailyCapacityKg: 820, schedule: 'Daily 05:00 AM & 04:00 PM', qrCode: 'QR-SRC-8822', streams: ['Domestic Hazardous', 'Sanitary', 'Wet'] },
-    { id: 'SRC-RES-03', name: 'Pali Hill Residential Towers (240 Flats)', type: 'Residential Blocks', area: 'Pali Hill', dailyCapacityKg: 480, schedule: 'Daily 07:30 AM', qrCode: 'QR-SRC-9933', streams: ['Wet Organic', 'Dry Recyclable'] },
-    { id: 'SRC-MKT-04', name: 'Dadarmarket Wholesale Vegetable Yard', type: 'Markets', area: 'Dadar East', dailyCapacityKg: 2400, schedule: 'Shift A (12:00 PM) & Shift B (10:00 PM)', qrCode: 'QR-SRC-1044', streams: ['Wet Organic'] }
-  ]);
+  const [sources, setSources] = useState(defaultSeedSources);
   const [selectedQrSource, setSelectedQrSource] = useState<any>(null);
 
   // Bin Fleet State (Layer 4)
-  const [bins, setBins] = useState([
-    { id: 'BIN-GREEN-01', tagId: 'RFID-99120-WET', type: 'Wet / Organic', color: 'emerald', capacityL: 240, fillPercent: 88, lastPicked: '2026-07-26 07:15 AM', status: 'Near Capacity', maintenance: 'Good Condition' },
-    { id: 'BIN-BLUE-02', tagId: 'RFID-99121-DRY', type: 'Dry / Recyclable', color: 'blue', capacityL: 240, fillPercent: 42, lastPicked: '2026-07-26 08:30 AM', status: 'Optimal', maintenance: 'Good Condition' },
-    { id: 'BIN-RED-03', tagId: 'RFID-99122-HAZ', type: 'Domestic Hazardous', color: 'rose', capacityL: 120, fillPercent: 15, lastPicked: '2026-07-25 04:00 PM', status: 'Low Fill', maintenance: 'Sanitized' },
-    { id: 'BIN-YELLOW-04', tagId: 'RFID-99123-SAN', type: 'Sanitary Reject', color: 'amber', capacityL: 120, fillPercent: 65, lastPicked: '2026-07-26 09:00 AM', status: 'Moderate', maintenance: 'Lid Latch Inspected' }
-  ]);
+  const [bins, setBins] = useState(defaultSeedBins);
 
   // Weighbridge State (Layer 7)
   const [wbForm, setWbForm] = useState({ grossKg: 14200, tareKg: 4800, vehicleNo: 'KA-01-EQ-9921', facilityName: 'Municipal Biomethanation Plant 04' });
   const [generatedSlip, setGeneratedSlip] = useState<any>(null);
 
   // CPCB Sync Bridge State (Layer 11)
-  const [cpcbSyncLogs, setCpcbSyncLogs] = useState([
-    { channel: 'BWG_REGISTRATION', status: '200 OK', syncToken: 'CPCB-TX-172102-881', timestamp: '2026-07-26 10:14:02', recordsCount: 142 },
-    { channel: 'DAILY_WASTE_QUANTITIES', status: '200 OK', syncToken: 'CPCB-TX-172102-882', timestamp: '2026-07-26 10:30:15', recordsCount: 4820 },
-    { channel: 'FORM_IV_ANNUAL_RETURNS', status: '200 OK', syncToken: 'CPCB-TX-172102-883', timestamp: '2026-07-25 18:00:00', recordsCount: 12 },
-    { channel: 'EBWGR_COMPLIANCE_LEDBER', status: '200 OK', syncToken: 'CPCB-TX-172102-884', timestamp: '2026-07-26 09:45:22', recordsCount: 94 }
-  ]);
+  const [cpcbSyncLogs, setCpcbSyncLogs] = useState(defaultSeedLogs);
   const [syncingActive, setSyncingActive] = useState(false);
 
   // GIS Map Filter State (Layer 14)
@@ -137,6 +147,82 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const [apiMethod, setApiMethod] = useState('POST');
   const [apiResponse, setApiResponse] = useState<any>(null);
   const [copiedCurl, setCopiedCurl] = useState(false);
+
+  // Purge & Restore Handlers
+  const handlePurgeDemoData = () => {
+    setRegisteredEntitiesList([]);
+    setSources([]);
+    setBins([]);
+    setCpcbSyncLogs([]);
+    setRegForm({
+      entityType: 'BWG',
+      name: '',
+      gstin: '',
+      pan: '',
+      cin: '',
+      address: '',
+      state: 'Maharashtra',
+      district: 'Mumbai Suburban',
+      ulb: '',
+      ward: '',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      builtUpAreaSqm: 0,
+      waterConsumptionKlDay: 0,
+      dailyWasteGenerationKg: 0,
+      wasteCategories: []
+    });
+    setWbForm({ grossKg: 0, tareKg: 0, vehicleNo: '', facilityName: '' });
+    setGeneratedSlip(null);
+    setAiForecastResult(null);
+    setRegSuccessMessage('All demo seed data has been purged from the National SWM Platform.');
+    setTimeout(() => setRegSuccessMessage(''), 8000);
+  };
+
+  const handleRestoreDemoData = () => {
+    setRegisteredEntitiesList(defaultSeedEntities);
+    setSources(defaultSeedSources);
+    setBins(defaultSeedBins);
+    setCpcbSyncLogs(defaultSeedLogs);
+    setRegForm({
+      entityType: 'BWG',
+      name: 'Oberoi Grand Commercial Complex',
+      gstin: '27AAAAA0000A1Z5',
+      pan: 'AAAAA0000A',
+      cin: 'U74999MH2020PTC123456',
+      address: 'Sector 18, Commercial Belt, Mumbai, Maharashtra',
+      state: 'Maharashtra',
+      district: 'Mumbai Suburban',
+      ulb: 'Brihanmumbai Municipal Corporation (BMC)',
+      ward: 'Ward K-East',
+      contactPerson: 'Anil Kumar (Chief Environmental Officer)',
+      phone: '+91 98200 12345',
+      email: 'compliance@oberoigrand.com',
+      builtUpAreaSqm: 12500,
+      waterConsumptionKlDay: 45,
+      dailyWasteGenerationKg: 420,
+      wasteCategories: ['Organic Wet Waste', 'Dry Recyclables', 'Domestic Hazardous', 'Sanitary Reject']
+    });
+    setRegSuccessMessage('Default demo seed data restored for testing.');
+    setTimeout(() => setRegSuccessMessage(''), 6000);
+  };
+
+  const handleDeleteEntity = (id: string) => {
+    setRegisteredEntitiesList(prev => prev.filter(e => e.id !== id));
+  };
+
+  const handleDeleteSource = (id: string) => {
+    setSources(prev => prev.filter(s => s.id !== id));
+  };
+
+  const handleDeleteBin = (id: string) => {
+    setBins(prev => prev.filter(b => b.id !== id));
+  };
+
+  const handleDeleteLog = (syncToken: string) => {
+    setCpcbSyncLogs(prev => prev.filter(l => l.syncToken !== syncToken));
+  };
 
   // Handle Register Entity (Layer 1)
   const handleRegisterEntity = async (e: React.FormEvent) => {
@@ -289,7 +375,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
     { id: 'layer2_compliance', label: '2. SWM Compliance Engine', icon: CheckCircle, layerNum: 'Layer 2' },
     { id: 'layer3_sources', label: '3. Waste Sources (QR/GPS)', icon: MapPin, layerNum: 'Layer 3' },
     { id: 'layer4_bins', label: '4. IoT Bin Management', icon: Radio, layerNum: 'Layer 4' },
-    { id: 'layer5_collections', label: '5. Collection Duty & Progress', icon: ClipboardListIcon, layerNum: 'Layer 5' },
+    { id: 'layer5_collections', label: '5. Collection Duty & Progress', icon: ClipboardList, layerNum: 'Layer 5' },
     { id: 'layer6_transport', label: '6. Transportation & E-Manifests', icon: Truck, layerNum: 'Layer 6' },
     { id: 'layer7_weighbridge', label: '7. Weighbridge Integration', icon: Scale, layerNum: 'Layer 7' },
     { id: 'layer8_processing', label: '8. Processing Facilities', icon: Zap, layerNum: 'Layer 8' },
@@ -328,7 +414,26 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
               <strong>Strategic Operational Positioning:</strong> The CPCB Central SWM Portal remains the official national compliance & regulatory system of record. RupayKg functions as India's operational digital waste execution platform, handling daily collection, weighbridge SCADA, IoT bin sensors, transportation manifests, and carbon MRV while automatically synchronizing records with CPCB.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {registeredEntitiesList.length > 0 ? (
+              <button
+                onClick={handlePurgeDemoData}
+                className="px-3.5 py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 border border-rose-500/30 shadow-lg shadow-rose-500/10"
+                title="Purge pre-loaded demo seed entities and forms from the platform"
+              >
+                <Trash2 size={14} />
+                Purge Demo Seed Data
+              </button>
+            ) : (
+              <button
+                onClick={handleRestoreDemoData}
+                className="px-3.5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 border border-emerald-500/30 shadow-lg shadow-emerald-500/10"
+                title="Load sample seed entities for testing"
+              >
+                <RotateCcw size={14} />
+                Restore Seed Data
+              </button>
+            )}
             <button
               onClick={handleTriggerCpcbSync}
               disabled={syncingActive}
@@ -350,31 +455,33 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6 pt-6 border-t border-white/10 relative z-10">
           <div className="bg-black/40 border border-white/10 rounded-2xl p-3 text-center">
             <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Registered Entities</span>
-            <p className="text-xl font-bold text-white mt-1">1,42,593</p>
-            <span className="text-[10px] text-emerald-400">CPCB Mirror Active</span>
+            <p className="text-xl font-bold text-white mt-1">{registeredEntitiesList.length}</p>
+            <span className="text-[10px] text-emerald-400">{registeredEntitiesList.length > 0 ? 'CPCB Mirror Active' : 'Clean Platform State'}</span>
           </div>
           <div className="bg-black/40 border border-white/10 rounded-2xl p-3 text-center">
-            <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Daily Waste Processed</span>
-            <p className="text-xl font-bold text-emerald-400 mt-1">4,820 MT</p>
-            <span className="text-[10px] text-emerald-400/80">94.2% Segregated</span>
+            <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Daily Waste Logged</span>
+            <p className="text-xl font-bold text-emerald-400 mt-1">
+              {(registeredEntitiesList.reduce((acc, curr) => acc + (curr.dailyKg || 0), 0) / 1000).toFixed(1)} MT/d
+            </p>
+            <span className="text-[10px] text-emerald-400/80">{registeredEntitiesList.length > 0 ? 'Live Stream Active' : '0 kg pending'}</span>
           </div>
           <div className="bg-black/40 border border-white/10 rounded-2xl p-3 text-center">
             <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">CPCB API Bridge Status</span>
             <p className="text-xl font-bold text-blue-400 mt-1 flex items-center justify-center gap-1">
               <CheckCircle size={18} className="text-emerald-400" />
-              100% Synced
+              {cpcbSyncLogs.length > 0 ? 'Synced' : 'Ready'}
             </p>
             <span className="text-[10px] text-blue-300">Form IV Ready</span>
           </div>
           <div className="bg-black/40 border border-white/10 rounded-2xl p-3 text-center">
-            <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">CO₂ Abated / Month</span>
-            <p className="text-xl font-bold text-purple-400 mt-1">12,450 tCO₂e</p>
-            <span className="text-[10px] text-purple-300">CCTS Registry Verified</span>
+            <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">IoT Bins Active</span>
+            <p className="text-xl font-bold text-purple-400 mt-1">{bins.length}</p>
+            <span className="text-[10px] text-purple-300">RFID / QR Fleet</span>
           </div>
           <div className="bg-black/40 border border-white/10 rounded-2xl p-3 text-center">
-            <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">EBWGR Compliance Rate</span>
-            <p className="text-xl font-bold text-amber-400 mt-1">92.4%</p>
-            <span className="text-[10px] text-amber-300">Certificates Transferable</span>
+            <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Waste Sources</span>
+            <p className="text-xl font-bold text-amber-400 mt-1">{sources.length}</p>
+            <span className="text-[10px] text-amber-300">Tracked Locations</span>
           </div>
         </div>
       </div>
@@ -674,20 +781,38 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                           <th className="p-3">Waste (kg/d)</th>
                           <th className="p-3">CPCB Token</th>
                           <th className="p-3">Status</th>
+                          <th className="p-3 text-right">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5 text-white/80">
-                        {registeredEntitiesList.map((ent, i) => (
-                          <tr key={i} className="hover:bg-white/5">
-                            <td className="p-3 font-mono text-emerald-400 font-bold">{ent.id}</td>
-                            <td className="p-3"><span className="px-2 py-0.5 bg-white/10 rounded text-[10px] uppercase font-bold">{ent.type}</span></td>
-                            <td className="p-3 font-semibold text-white">{ent.name}</td>
-                            <td className="p-3">{ent.location} ({ent.ulb})</td>
-                            <td className="p-3 font-mono">{ent.dailyKg} kg</td>
-                            <td className="p-3 font-mono text-blue-400 text-[10px]">{ent.cpcbToken}</td>
-                            <td className="p-3"><span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold">{ent.cpcbStatus}</span></td>
+                        {registeredEntitiesList.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="p-8 text-center text-white/50 text-xs italic">
+                              No registered SWM entities in the platform directory. Register a new entity using the form above or click "Restore Seed Data".
+                            </td>
                           </tr>
-                        ))}
+                        ) : (
+                          registeredEntitiesList.map((ent, i) => (
+                            <tr key={i} className="hover:bg-white/5">
+                              <td className="p-3 font-mono text-emerald-400 font-bold">{ent.id}</td>
+                              <td className="p-3"><span className="px-2 py-0.5 bg-white/10 rounded text-[10px] uppercase font-bold">{ent.type}</span></td>
+                              <td className="p-3 font-semibold text-white">{ent.name}</td>
+                              <td className="p-3">{ent.location} ({ent.ulb})</td>
+                              <td className="p-3 font-mono">{ent.dailyKg} kg</td>
+                              <td className="p-3 font-mono text-blue-400 text-[10px]">{ent.cpcbToken}</td>
+                              <td className="p-3"><span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold">{ent.cpcbStatus}</span></td>
+                              <td className="p-3 text-right">
+                                <button
+                                  onClick={() => handleDeleteEntity(ent.id)}
+                                  className="p-1.5 text-white/40 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
+                                  title={`Remove ${ent.name}`}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -807,36 +932,51 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {sources.map(src => (
-                    <div key={src.id} className="bg-black/40 border border-white/10 rounded-2xl p-4 space-y-3 relative">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">{src.type}</span>
-                          <h4 className="font-bold text-white text-sm">{src.name}</h4>
-                          <p className="text-xs text-white/50">{src.area} • Capacity: {src.dailyCapacityKg} kg/day</p>
-                        </div>
-                        <button
-                          onClick={() => setSelectedQrSource(src)}
-                          className="p-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-xs flex items-center gap-1"
-                        >
-                          <QrCode size={16} /> QR
-                        </button>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1 text-[10px]">
-                        {src.streams.map((st, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-white/80">
-                            {st}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-white/50">
-                        <span>Schedule: {src.schedule}</span>
-                        <span className="font-mono text-emerald-400">{src.qrCode}</span>
-                      </div>
+                  {sources.length === 0 ? (
+                    <div className="col-span-2 p-8 text-center bg-black/40 border border-white/10 rounded-2xl text-white/50 text-xs italic">
+                      No waste source generation points tracked. Add a new source point above or restore seed data.
                     </div>
-                  ))}
+                  ) : (
+                    sources.map(src => (
+                      <div key={src.id} className="bg-black/40 border border-white/10 rounded-2xl p-4 space-y-3 relative">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">{src.type}</span>
+                            <h4 className="font-bold text-white text-sm">{src.name}</h4>
+                            <p className="text-xs text-white/50">{src.area} • Capacity: {src.dailyCapacityKg} kg/day</p>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => setSelectedQrSource(src)}
+                              className="p-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-xs flex items-center gap-1"
+                            >
+                              <QrCode size={16} /> QR
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSource(src.id)}
+                              className="p-2 text-white/40 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all"
+                              title={`Delete ${src.name}`}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1 text-[10px]">
+                          {src.streams.map((st, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-white/80">
+                              {st}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-white/50">
+                          <span>Schedule: {src.schedule}</span>
+                          <span className="font-mono text-emerald-400">{src.qrCode}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 {/* QR Code Modal Preview */}
@@ -868,22 +1008,36 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {bins.map(bin => (
-                    <div key={bin.id} className="bg-black/40 border border-white/10 rounded-2xl p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-${bin.color}-500/20 text-${bin.color}-400`}>
-                            {bin.type}
-                          </span>
-                          <h4 className="font-bold text-white text-sm mt-1">{bin.id} ({bin.capacityL} Liters)</h4>
+                  {bins.length === 0 ? (
+                    <div className="col-span-2 p-8 text-center bg-black/40 border border-white/10 rounded-2xl text-white/50 text-xs italic">
+                      No IoT smart bins registered in fleet. Connect a new RFID/ultrasonic bin sensor or restore seed data.
+                    </div>
+                  ) : (
+                    bins.map(bin => (
+                      <div key={bin.id} className="bg-black/40 border border-white/10 rounded-2xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-${bin.color}-500/20 text-${bin.color}-400`}>
+                              {bin.type}
+                            </span>
+                            <h4 className="font-bold text-white text-sm mt-1">{bin.id} ({bin.capacityL} Liters)</h4>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleTriggerBinSensor(bin.id)}
+                              className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs text-white rounded-lg flex items-center gap-1"
+                            >
+                              <Zap size={12} className="text-amber-400" /> Sim Sensor
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBin(bin.id)}
+                              className="p-1.5 text-white/40 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
+                              title={`Delete ${bin.id}`}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => handleTriggerBinSensor(bin.id)}
-                          className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-xs text-white rounded-lg flex items-center gap-1"
-                        >
-                          <Zap size={12} className="text-amber-400" /> Sim Sensor
-                        </button>
-                      </div>
 
                       {/* Fill Level Bar */}
                       <div>
@@ -904,8 +1058,9 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                         <span>Last Picked: {bin.lastPicked}</span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  ))
+                )}
+              </div>
               </motion.div>
             )}
 
@@ -914,7 +1069,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
               <motion.div key="layer5" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
                 <div>
                   <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <ClipboardListIcon className="text-emerald-400" />
+                    <ClipboardList className="text-emerald-400" />
                     Layer 5: Collection Management & Dispatch
                   </h3>
                   <p className="text-xs text-white/60 mt-1">
@@ -1275,18 +1430,33 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                   </div>
 
                   <div className="space-y-2 text-xs font-mono">
-                    {cpcbSyncLogs.map((log, idx) => (
-                      <div key={idx} className="p-3 bg-white/5 rounded-xl flex items-center justify-between text-white/80">
-                        <div>
-                          <span className="font-bold text-emerald-400 block text-[11px]">{log.channel}</span>
-                          <span className="text-[10px] text-white/40">Records: {log.recordsCount} • Timestamp: {log.timestamp}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[10px] font-bold block">{log.status}</span>
-                          <span className="text-[9px] text-blue-300">{log.syncToken}</span>
-                        </div>
+                    {cpcbSyncLogs.length === 0 ? (
+                      <div className="p-8 text-center text-white/50 text-xs italic font-sans">
+                        No CPCB synchronization logs recorded. Trigger a live sync above or restore seed logs.
                       </div>
-                    ))}
+                    ) : (
+                      cpcbSyncLogs.map((log, idx) => (
+                        <div key={idx} className="p-3 bg-white/5 rounded-xl flex items-center justify-between text-white/80">
+                          <div>
+                            <span className="font-bold text-emerald-400 block text-[11px]">{log.channel}</span>
+                            <span className="text-[10px] text-white/40">Records: {log.recordsCount} • Timestamp: {log.timestamp}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[10px] font-bold block">{log.status}</span>
+                              <span className="text-[9px] text-blue-300">{log.syncToken}</span>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteLog(log.syncToken)}
+                              className="p-1.5 text-white/40 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
+                              title={`Delete log ${log.syncToken}`}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </motion.div>

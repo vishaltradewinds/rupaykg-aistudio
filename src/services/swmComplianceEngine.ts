@@ -140,16 +140,16 @@ export class SWMComplianceService {
       ]);
       
       return {
-        totalRegisteredEntities: totalEntities || 142593,
-        activeViolations: nonCompliant || 1204,
-        complianceScore: avgScoreData.length > 0 ? Number(avgScoreData[0].avgScore.toFixed(1)) : 94.2
+        totalRegisteredEntities: totalEntities || 0,
+        activeViolations: nonCompliant || 0,
+        complianceScore: avgScoreData.length > 0 ? Number(avgScoreData[0].avgScore.toFixed(1)) : 100.0
       };
     }
 
     return {
-      totalRegisteredEntities: 142593,
-      activeViolations: 1204,
-      complianceScore: 94.2
+      totalRegisteredEntities: 0,
+      activeViolations: 0,
+      complianceScore: 100.0
     };
   }
 }
