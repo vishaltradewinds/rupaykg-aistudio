@@ -64,7 +64,7 @@ export async function safeFetchLgdJson<T>(url: string, signal?: AbortSignal, ret
       return JSON.parse(text) as T;
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        throw err; // Do not retry if aborted by client
+        return [] as any; // Aborted cleanly
       }
       lastError = err;
       if (i < retries - 1) {
@@ -74,5 +74,6 @@ export async function safeFetchLgdJson<T>(url: string, signal?: AbortSignal, ret
       }
     }
   }
-  throw lastError || new Error(`Failed to fetch LGD from ${url}`);
+  console.warn(`safeFetchLgdJson failed for ${url}:`, lastError);
+  return [] as any;
 }
