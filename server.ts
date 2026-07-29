@@ -1,4 +1,5 @@
 import { auth as requireAuth } from "./src/middleware/auth.ts";
+import { registerStakeholderUser } from "./src/db/users.ts";
 import { SWMComplianceService } from "./src/services/swmComplianceEngine";
 import express from "express";
 import mongoose from "mongoose";
@@ -755,7 +756,94 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   app.get("/api/me", auth(), (req: any, res) => {
-    res.json({ user: req.user });
+    const isRegistered = !!req.user?.role;
+    res.json({ 
+      user: req.user, 
+      requiresRegistration: !isRegistered 
+    });
+  });
+
+  app.post("/api/auth/register-stakeholder", auth(), async (req: any, res) => {
+    const { role, name, phone, state, district, subdistrict, local_area, village, organization_name } = req.body;
+
+    if (!role || (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role))) {
+      return res.status(400).json({ error: "Invalid stakeholder role specified. Please select a valid role." });
+    }
+
+    const uid = req.user.uid || req.user.id;
+    const email = req.user.email || '';
+
+    const registeredUser = await registerStakeholderUser({
+      uid,
+      email,
+      name: name || req.user.name || 'User',
+      role,
+      phone,
+      state,
+      district,
+      subdistrict,
+      local_area: local_area || village,
+      village: village || local_area,
+      organization_name
+    });
+
+    let memUser = users.find((u) => u.id === uid || u.uid === uid || (phone && u.phone === phone) || (email && u.email === email));
+    if (!memUser) {
+      memUser = {
+        id: uid,
+        uid,
+        email,
+        role,
+        name: name || req.user.name || 'User',
+        phone,
+        state,
+        district,
+        subdistrict,
+        local_area: local_area || village,
+        village: village || local_area,
+        organization_name,
+        wallet_balance: 0
+      };
+      users.push(memUser);
+    } else {
+      Object.assign(memUser, {
+        role,
+        name: name || req.user.name || 'User',
+        phone: phone || memUser.phone,
+        state: state || memUser.state,
+        district: district || memUser.district,
+        subdistrict: subdistrict || memUser.subdistrict,
+        local_area: local_area || village || memUser.local_area,
+        village: village || local_area || memUser.village,
+        organization_name: organization_name || memUser.organization_name
+      });
+    }
+
+    if (dbStatus === "connected") {
+      await User.findOneAndUpdate(
+        { id: uid },
+        { id: uid, role, name: name || req.user.name, phone, state, district, subdistrict, local_area: local_area || village, organization_name },
+        { upsert: true, new: true }
+      );
+    }
+
+    res.json({
+      message: `Stakeholder account successfully registered under role: ${role}`,
+      user: {
+        id: uid,
+        uid,
+        email,
+        name: name || req.user.name,
+        role,
+        phone,
+        state,
+        district,
+        subdistrict,
+        local_area: local_area || village,
+        organization_name,
+        is_registered: true
+      }
+    });
   });
 
   // ---------------- FARMER ROUTES ----------------

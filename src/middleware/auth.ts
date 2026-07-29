@@ -18,20 +18,34 @@ export const auth = (roles: string[] = []) => {
     try {
       const decodedToken = await adminAuth.verifyIdToken(token);
       
-      const dbUser = await getOrCreateUser(decodedToken.uid, decodedToken.email || '', decodedToken.name || 'User');
+      const dbUser: any = await getOrCreateUser(
+        decodedToken.uid, 
+        decodedToken.email || '', 
+        decodedToken.name || 'User'
+      );
       
       req.user = {
-        id: dbUser.uid,
-        role: dbUser.role,
-        name: dbUser.name,
-        state: dbUser.state,
-        district: dbUser.district,
-        village: dbUser.village,
+        id: dbUser.uid || decodedToken.uid,
+        uid: dbUser.uid || decodedToken.uid,
+        email: dbUser.email || decodedToken.email,
+        role: dbUser.role || null,
+        name: dbUser.name || decodedToken.name || 'User',
+        phone: dbUser.phone || null,
+        state: dbUser.state || null,
+        district: dbUser.district || null,
+        subdistrict: dbUser.subdistrict || null,
+        local_area: dbUser.local_area || dbUser.village || null,
+        village: dbUser.village || null,
+        organization_name: dbUser.organization_name || null,
+        is_registered: !!dbUser.role,
         ...dbUser
       };
 
-      if (roles.length > 0 && !roles.includes(req.user.role)) {
-        return res.status(403).json({ error: "Insufficient permissions" });
+      if (roles.length > 0 && (!req.user.role || !roles.includes(req.user.role))) {
+        return res.status(403).json({ 
+          error: "Insufficient permissions or stakeholder registration required",
+          requiresRegistration: !req.user.role 
+        });
       }
 
       next();

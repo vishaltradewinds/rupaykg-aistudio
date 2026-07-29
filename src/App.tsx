@@ -708,7 +708,7 @@ export default function App() {
   }, [operatingContext]);
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
   const [dbStatus, setDbStatus] = useState<{ status: string, error: string } | null>(null);
   const [ecoTips, setEcoTips] = useState<string[]>([]);
   const [forecast, setForecast] = useState<string>('');
@@ -1997,9 +1997,62 @@ export default function App() {
       
       localStorage.setItem('rupay_token', idToken);
       setToken(idToken);
-      setUser(data.user || data);
+
+      if (data.requiresRegistration || !data.user?.role) {
+        setUser(data.user || { name: result.user.displayName || 'SSO User', email: result.user.email });
+        setAuthMode('register');
+        setMessage({ 
+          type: 'info', 
+          text: 'National SSO authenticated. Please complete your official Stakeholder Registration below to select your role.' 
+        });
+        return;
+      }
+
+      setUser(data.user);
+      setShowAuth(false);
+      setMessage({ type: 'success', text: `Logged in as ${data.user.role}` });
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'National SSO Authentication failed.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStakeholderRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.role) {
+      setMessage({ type: 'error', text: 'Please select your stakeholder role.' });
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/auth/register-stakeholder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          role: formData.role,
+          name: formData.name || user?.name || '',
+          phone: formData.phone,
+          state: formData.state,
+          district: formData.district,
+          subdistrict: formData.subdistrict,
+          local_area: formData.local_area,
+          organization_name: formData.organization_name
+        })
+      });
+      const data = await safeParseJson(res);
+      if (!res.ok) throw new Error(data?.error || 'Stakeholder registration failed.');
+
+      setUser(data.user);
+      setShowAuth(false);
+      setAuthMode('login');
+      setMessage({ type: 'success', text: `Stakeholder registered successfully as ${data.user.role}. Welcome to RupayKg!` });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Stakeholder registration failed.' });
     } finally {
       setLoading(false);
     }
@@ -2899,7 +2952,7 @@ export default function App() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
+          className="w-full max-w-lg"
         >
           <BrandIdentity isLiveConnected={isLiveConnected} variant="login" />
 
@@ -2919,38 +2972,219 @@ export default function App() {
                   RURAL
                 </button>
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold">
-                {t('Context:')} {operatingContext}
+              <div className="flex gap-2 bg-white/5 p-1 rounded-xl text-[10px] font-bold">
+                <button
+                  onClick={() => setAuthMode('login')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${authMode === 'login' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                >
+                  SSO LOGIN
+                </button>
+                <button
+                  onClick={() => setAuthMode('register')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${authMode === 'register' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                >
+                  REGISTER STAKEHOLDER
+                </button>
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 mt-8">
-              <button 
-                type="button"
-                onClick={() => handleAuth()}
-                disabled={loading}
-                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-              >
-                <ShieldCheck size={24} />
-                {loading ? t("Authenticating...") : t("Login via Jan Parichay (National SSO)")}
-              </button>
-              
-              {message && (
-                <div className={`p-3 rounded-xl text-sm flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
-                  {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-                  {message.text}
+            {authMode === 'login' ? (
+              <div className="flex flex-col gap-4 mt-6">
+                <div className="text-center mb-2">
+                  <h3 className="text-lg font-bold text-white">Sovereign Single Sign-On</h3>
+                  <p className="text-xs text-white/50 mt-1">Authenticate via Jan Parichay National SSO or Sovereign Identity</p>
                 </div>
-              )}
-              
-              <button 
-                type="button"
-                onClick={() => setShowAuth(false)}
-                className="w-full text-white/40 hover:text-white text-sm mt-4 transition-colors"
-              >
-                ← {t("Back to Home")}
-              </button>
-            </div>
 
+                <button 
+                  type="button"
+                  onClick={() => handleAuth()}
+                  disabled={loading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20"
+                >
+                  <ShieldCheck size={22} />
+                  {loading ? t("Authenticating...") : t("Login via Jan Parichay (National SSO)")}
+                </button>
+                
+                {message && (
+                  <div className={`p-3 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400" : message.type === "info" ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"}`}>
+                    {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                    <span>{message.text}</span>
+                  </div>
+                )}
+                
+                <div className="border-t border-white/10 pt-4 text-center">
+                  <p className="text-xs text-white/40 mb-3">First time on RupayKg Enterprise?</p>
+                  <button 
+                    type="button"
+                    onClick={() => setAuthMode('register')}
+                    className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Register as Specific Stakeholder Role →
+                  </button>
+                </div>
+
+                <button 
+                  type="button"
+                  onClick={() => setShowAuth(false)}
+                  className="w-full text-white/40 hover:text-white text-xs mt-2 transition-colors"
+                >
+                  ← {t("Back to Home")}
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleStakeholderRegister} className="flex flex-col gap-4 mt-4">
+                <div className="text-center mb-1">
+                  <h3 className="text-base font-bold text-white">Stakeholder Role Registration</h3>
+                  <p className="text-[11px] text-white/50">Mandatory Role & Territorial Boundary Registration. No default role assigned.</p>
+                </div>
+
+                <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
+                      Stakeholder Role *
+                    </label>
+                    <select
+                      value={formData.role}
+                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                      required
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                    >
+                      <option value="">-- Select Stakeholder Category --</option>
+                      <optgroup label="Urban Governance & Municipal Bodies">
+                        <option value="municipal_admin">Municipal Authority / Urban Local Body Admin</option>
+                        <option value="municipal_generator">Bulk Municipal Waste Generator</option>
+                      </optgroup>
+                      <optgroup label="Rural Economy & Agriculture">
+                        <option value="fpo">Gram Panchayat / FPO / Rural Enterprise</option>
+                        <option value="citizen">Citizen / Individual Generator / Farmer</option>
+                      </optgroup>
+                      <optgroup label="Circular Logistics & Processing Operations">
+                        <option value="aggregator">Waste Aggregator / Collection Logistics Partner</option>
+                        <option value="processor">Recycler / MRF / Compost Plant Operator</option>
+                      </optgroup>
+                      <optgroup label="Bulk Generators (Commercial & Industrial)">
+                        <option value="industry_generator">Industrial Facility Generator</option>
+                        <option value="commercial_generator">Commercial Establishment Generator</option>
+                        <option value="institution_generator">Institutional Facility Generator</option>
+                      </optgroup>
+                      <optgroup label="Regulators & Carbon Markets">
+                        <option value="regulator">Environmental Regulator / Auditor</option>
+                        <option value="ccc_buyer">Carbon Project Developer & Credit Buyer</option>
+                        <option value="csr_partner">CSR Sustainability Partner</option>
+                        <option value="epr_partner">EPR Brand / PRO Partner</option>
+                      </optgroup>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Full Name *</label>
+                    <input
+                      type="text"
+                      value={formData.name || user?.name || ''}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g. Rajesh Kumar"
+                      required
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Mobile Phone *</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="e.g. 9876543210"
+                      required
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Organization / Enterprise Name</label>
+                    <input
+                      type="text"
+                      value={formData.organization_name}
+                      onChange={(e) => setFormData({ ...formData, organization_name: e.target.value })}
+                      placeholder="e.g. Jabalpur Green Recyclers Ltd / Ward 12 Authority"
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold text-white/60 mb-1">State *</label>
+                      <input
+                        type="text"
+                        value={formData.state}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                        placeholder="Madhya Pradesh"
+                        required
+                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-white/60 mb-1">District *</label>
+                      <input
+                        type="text"
+                        value={formData.district}
+                        onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                        placeholder="Jabalpur"
+                        required
+                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold text-white/60 mb-1">Sub-District / Block</label>
+                      <input
+                        type="text"
+                        value={formData.subdistrict}
+                        onChange={(e) => setFormData({ ...formData, subdistrict: e.target.value })}
+                        placeholder="Patan"
+                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-white/60 mb-1">Ward / Village / Local Area</label>
+                      <input
+                        type="text"
+                        value={formData.local_area}
+                        onChange={(e) => setFormData({ ...formData, local_area: e.target.value })}
+                        placeholder="Ward 14 / Village Khajuri"
+                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {message && (
+                  <div className={`p-2.5 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400" : message.type === "info" ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"}`}>
+                    {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                    <span>{message.text}</span>
+                  </div>
+                )}
+
+                <button 
+                  type="submit"
+                  disabled={loading || !formData.role}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs shadow-lg shadow-emerald-500/20 mt-2"
+                >
+                  <ShieldCheck size={18} />
+                  {loading ? t("Registering Stakeholder...") : t("Complete Stakeholder Registration")}
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setShowAuth(false)}
+                  className="w-full text-white/40 hover:text-white text-xs mt-1 transition-colors"
+                >
+                  ← {t("Back to Home")}
+                </button>
+              </form>
+            )}
           </Card>
         </motion.div>
       </div>

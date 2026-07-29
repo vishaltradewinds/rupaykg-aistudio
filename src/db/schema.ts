@@ -6,11 +6,15 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   uid: text('uid').notNull().unique(), // Firebase Auth UID representing SSO
   email: text('email').notNull(),
-  role: text('role').notNull().default('citizen'),
+  role: text('role'), // Stakeholder role assigned upon explicit registration
   name: text('name').notNull(),
+  phone: text('phone'),
   state: text('state'),
   district: text('district'),
+  subdistrict: text('subdistrict'),
+  local_area: text('local_area'),
   village: text('village'),
+  organization_name: text('organization_name'),
   wallet_balance: doublePrecision('wallet_balance').default(0),
   createdAt: timestamp('created_at').defaultNow(),
 });
