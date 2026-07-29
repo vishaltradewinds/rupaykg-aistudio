@@ -1,3 +1,4 @@
+import { auth as requireAuth } from "./src/middleware/auth.ts";
 import { SWMComplianceService } from "./src/services/swmComplianceEngine";
 import express from "express";
 import mongoose from "mongoose";
@@ -648,30 +649,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   ];
 
   function auth(roles: string[] = []) {
-    return (req: any, res: any, next: any) => {
-      const authHeader = req.headers.authorization;
-      if (!authHeader)
-        return res.status(401).json({ error: "No token provided" });
-      const token = authHeader.split(" ")[1];
-      try {
-        let decoded;
-        try {
-          decoded = jwt.verify(token, publicKey, { algorithms: ["RS256"] });
-        } catch (e) {
-          decoded = jwt.verify(token, JWT_SECRET);
-        }
-        req.user = decoded;
-        if (roles.length > 0 && !roles.includes(req.user.role)) {
-          return res.status(403).json({ error: "Insufficient permissions" });
-        }
-        next();
-      } catch (err) {
-        return res
-          .status(401)
-          .json({ error: "Invalid or expired administrator token" });
-      }
-    };
-  };
+    return requireAuth(roles);
+  }
 
   app.post("/api/auth/register", async (req: any, res) => {
     const { phone, password, role, name, district, state, organization_name, village, local_area, subdistrict } = req.body;
