@@ -80,7 +80,6 @@ import EnterpriseSuite from './components/EnterpriseSuite';
 import SwmCompliancePlatform from './components/SwmCompliancePlatform';
 import HederaGuardianSuite from './components/HederaGuardianSuite';
 import { StakeholderGuides } from './components/StakeholderGuides';
-import { loginWithSSO, logoutSSO } from './lib/firebase';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -495,6 +494,8 @@ export default function App() {
   }, [i18n.language]);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
+  const [loginId, setLoginId] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   
   // Pilot Engine States
   const [pilotStats, setPilotStats] = useState<any>(null);
@@ -2025,39 +2026,47 @@ export default function App() {
     }
   };
 
-  const handleAuth = async (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (!loginId.trim() || !loginPassword.trim()) {
+      setMessage({ type: 'error', text: 'Please enter both Login ID and Password.' });
+      return;
+    }
     setLoading(true);
     setMessage(null);
     try {
-      const result = await loginWithSSO();
-      const idToken = await result.user.getIdToken();
-      
-      const res = await fetch('/api/me', {
-        headers: { 'Authorization': `Bearer ${idToken}` }
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          loginId: loginId.trim(),
+          phone: loginId.trim(),
+          password: loginPassword.trim()
+        })
       });
       const data = await safeParseJson(res);
-      
-      if (!res.ok || !data) throw new Error(data?.error || 'Auth failed');
-      
-      localStorage.setItem('rupay_token', idToken);
-      setToken(idToken);
+      if (!res.ok || !data) throw new Error(data?.error || 'Invalid Login ID or Password');
+
+      localStorage.setItem('rupay_token', data.token);
+      setToken(data.token);
 
       if (data.requiresRegistration || !data.user?.role) {
-        setUser(data.user || { name: result.user.displayName || 'SSO User', email: result.user.email });
+        setUser(data.user || { name: 'User', email: '' });
         setAuthMode('register');
         setMessage({ 
           type: 'info', 
-          text: 'National SSO authenticated. Please complete your official Stakeholder Registration below to select your role.' 
+          text: 'Authenticated. Please complete your official Stakeholder Registration below.' 
         });
         return;
       }
 
       setUser(data.user);
       setShowAuth(false);
-      setMessage({ type: 'success', text: `Logged in as ${data.user.role}` });
+      setMessage({ type: 'success', text: `Logged in as ${data.user.role || data.user.name}` });
+      setLoginId('');
+      setLoginPassword('');
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'National SSO Authentication failed.' });
+      setMessage({ type: 'error', text: err.message || 'Authentication failed. Invalid Login ID or Password.' });
     } finally {
       setLoading(false);
     }
@@ -2072,30 +2081,70 @@ export default function App() {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch('/api/auth/register-stakeholder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          role: formData.role,
-          name: formData.name || user?.name || '',
-          phone: formData.phone,
-          state: formData.state,
-          district: formData.district,
-          subdistrict: formData.subdistrict,
-          local_area: formData.local_area,
-          organization_name: formData.organization_name
-        })
-      });
-      const data = await safeParseJson(res);
-      if (!res.ok) throw new Error(data?.error || 'Stakeholder registration failed.');
+      if (token) {
+        const res = await fetch('/api/auth/register-stakeholder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            role: formData.role,
+            name: formData.name || user?.name || '',
+            phone: formData.phone,
+            state: formData.state,
+            district: formData.district,
+            subdistrict: formData.subdistrict,
+            local_area: formData.local_area,
+            organization_name: formData.organization_name
+          })
+        });
+        const data = await safeParseJson(res);
+        if (!res.ok) throw new Error(data?.error || 'Stakeholder registration failed.');
 
-      setUser(data.user);
-      setShowAuth(false);
-      setAuthMode('login');
-      setMessage({ type: 'success', text: `Stakeholder registered successfully as ${data.user.role}. Welcome to RupayKg!` });
+        setUser(data.user);
+        setShowAuth(false);
+        setAuthMode('login');
+        setMessage({ type: 'success', text: `Stakeholder registered successfully as ${data.user.role}. Welcome to RupayKg!` });
+      } else {
+        if (!formData.phone && !formData.name) {
+          throw new Error('Please enter your Phone / Login ID and Name.');
+        }
+        const regPassword = formData.password || 'password123';
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            phone: formData.phone,
+            loginId: formData.phone,
+            password: regPassword,
+            role: formData.role,
+            name: formData.name,
+            state: formData.state,
+            district: formData.district,
+            subdistrict: formData.subdistrict,
+            local_area: formData.local_area,
+            organization_name: formData.organization_name
+          })
+        });
+        const data = await safeParseJson(res);
+        if (!res.ok) throw new Error(data?.error || 'Registration failed.');
+
+        if (data.token && data.user) {
+          localStorage.setItem('rupay_token', data.token);
+          setToken(data.token);
+          setUser(data.user);
+          setShowAuth(false);
+          setMessage({ type: 'success', text: `Registered & logged in successfully as ${data.user.role}. Welcome to RupayKg!` });
+        } else {
+          setAuthMode('login');
+          setLoginId(formData.phone);
+          setLoginPassword(regPassword);
+          setMessage({ type: 'success', text: 'Registration successful! Please log in with your credentials.' });
+        }
+      }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Stakeholder registration failed.' });
     } finally {
@@ -2603,14 +2652,16 @@ export default function App() {
   };
 
   const logout = async () => {
-    localStorage.removeItem('rupay_token');
-    setToken(null);
-    setUser(null);
     try {
-      await logoutSSO();
+      if (token) {
+        await fetch('/api/logout', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+      }
     } catch (err) {
       console.error(err);
     }
+    localStorage.removeItem('rupay_token');
+    setToken(null);
+    setUser(null);
   };
 
   if (!token) {
@@ -3096,7 +3147,7 @@ export default function App() {
                   onClick={() => setAuthMode('login')}
                   className={`px-3 py-1.5 rounded-lg transition-all ${authMode === 'login' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
                 >
-                  SSO LOGIN
+                  LOGIN
                 </button>
                 <button
                   onClick={() => setAuthMode('register')}
@@ -3108,22 +3159,51 @@ export default function App() {
             </div>
 
             {authMode === 'login' ? (
-              <div className="flex flex-col gap-4 mt-6">
-                <div className="text-center mb-2">
-                  <h3 className="text-lg font-bold text-white">Sovereign Single Sign-On</h3>
-                  <p className="text-xs text-white/50 mt-1">Authenticate via Jan Parichay National SSO or Sovereign Identity</p>
+              <form onSubmit={handleLogin} className="flex flex-col gap-4 mt-4">
+                <div className="text-center mb-1">
+                  <h3 className="text-lg font-bold text-white">Account Login</h3>
+                  <p className="text-xs text-white/50 mt-1">Enter your Login ID and password to access RupayKg Enterprise</p>
+                </div>
+
+                <div className="space-y-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
+                      Login ID / Phone / Email *
+                    </label>
+                    <input
+                      type="text"
+                      value={loginId}
+                      onChange={(e) => setLoginId(e.target.value)}
+                      placeholder="e.g. 9999999999 or admin"
+                      required
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-emerald-500 outline-none transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
+                      Password *
+                    </label>
+                    <input
+                      type="password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-emerald-500 outline-none transition-colors"
+                    />
+                  </div>
                 </div>
 
                 <button 
-                  type="button"
-                  onClick={() => handleAuth()}
+                  type="submit"
                   disabled={loading}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-lg shadow-emerald-500/20 mt-1"
                 >
-                  <ShieldCheck size={22} />
-                  {loading ? t("Authenticating...") : t("Login via Jan Parichay (National SSO)")}
+                  <Lock size={18} />
+                  {loading ? t("Logging in...") : t("Login")}
                 </button>
-                
+
                 {message && (
                   <div className={`p-3 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400" : message.type === "info" ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"}`}>
                     {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
@@ -3149,7 +3229,7 @@ export default function App() {
                 >
                   ← {t("Back to Home")}
                 </button>
-              </div>
+              </form>
             ) : (
               <form onSubmit={handleStakeholderRegister} className="flex flex-col gap-4 mt-4">
                 <div className="text-center mb-1">
@@ -3208,13 +3288,25 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Mobile Phone *</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Mobile Phone / Login ID *</label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="e.g. 9876543210"
                       required
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Password *</label>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="••••••••"
+                      required={!token}
                       className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
                     />
                   </div>

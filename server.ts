@@ -429,6 +429,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     {
       id: "admin_1",
       phone: "9999999999",
+      loginId: "admin",
+      username: "admin",
       password: adminHashedPassword,
       role: "super_admin",
       name: "System Administrator",
@@ -654,32 +656,47 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   }
 
   app.post("/api/auth/register", async (req: any, res) => {
-    const { phone, password, role, name, district, state, organization_name, village, local_area, subdistrict } = req.body;
+    const { phone, loginId, email, password, role, name, district, state, organization_name, village, local_area, subdistrict } = req.body;
+
+    const identifier = loginId || phone || email;
+    if (!identifier || !password) {
+      return res.status(400).json({ error: "Login ID (or Phone) and password are required" });
+    }
 
     if (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role)) {
       return res.status(400).json({ error: "Invalid role specified" });
     }
 
     if (dbStatus === "connected") {
-      const existingUser = await User.findOne({ phone });
+      const existingUser = await User.findOne({
+        $or: [
+          { phone: identifier },
+          { email: identifier },
+          { loginId: identifier },
+          { username: identifier }
+        ]
+      });
       if (existingUser)
-        return res.status(400).json({ error: "User already exists" });
+        return res.status(400).json({ error: "User with this Login ID or Phone already exists" });
     } else {
-      if (users.find((u) => u.phone === phone))
-        return res.status(400).json({ error: "User already exists" });
+      if (users.find((u) => u.phone === identifier || u.loginId === identifier || u.email === identifier || u.id === identifier))
+        return res.status(400).json({ error: "User with this Login ID or Phone already exists" });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const userId = Date.now().toString();
     const newUser = {
-      id: Date.now().toString(),
-      phone,
+      id: userId,
+      phone: phone || identifier,
+      loginId: loginId || identifier,
+      email: email || "",
       password: hashedPassword,
       role,
-      name,
-      district,
-      state,
+      name: name || "User",
+      district: district || "",
+      state: state || "",
       subdistrict: subdistrict || null,
       local_area: local_area || village || null,
       organization_name: organization_name || null,
@@ -692,20 +709,57 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       users.push(newUser);
     }
 
-    res.json({ message: "Registered successfully", role });
+    const tokenPayload = {
+      id: userId,
+      role: newUser.role,
+      name: newUser.name,
+      district: newUser.district,
+      state: newUser.state,
+      organization_name: newUser.organization_name,
+      phone: newUser.phone,
+    };
+
+    const jti = crypto.randomUUID();
+    const token = jwt.sign(tokenPayload, privateKey, {
+      algorithm: "RS256",
+      expiresIn: "24h",
+      jwtid: jti
+    });
+
+    res.json({ message: "Registered successfully", role, user: tokenPayload, token });
   });
 
   app.post("/api/login", async (req, res) => {
-    const { phone, password } = req.body;
+    const { phone, loginId, username, email, password } = req.body;
+    const identifier = loginId || username || email || phone;
+
+    if (!identifier || !password) {
+      return res.status(400).json({ error: "Login ID and password are required" });
+    }
 
     let user;
     if (dbStatus === "connected") {
-      user = await User.findOne({ phone });
+      user = await User.findOne({
+        $or: [
+          { phone: identifier },
+          { email: identifier },
+          { loginId: identifier },
+          { username: identifier },
+          { id: identifier }
+        ]
+      });
     } else {
-      user = users.find((u) => u.phone === phone);
+      user = users.find(
+        (u) =>
+          u.phone === identifier ||
+          u.loginId === identifier ||
+          u.email === identifier ||
+          u.username === identifier ||
+          u.id === identifier
+      );
     }
 
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user) return res.status(401).json({ error: "Invalid Login ID or Password" });
 
     // Strict Bcrypt verification only
     let isMatch = false;
@@ -713,7 +767,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       isMatch = await bcrypt.compare(password, user.password);
     }
 
-    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+    if (!isMatch) return res.status(401).json({ error: "Invalid Login ID or Password" });
 
     const tokenPayload = {
       id: user.id,
@@ -722,6 +776,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       district: user.district,
       state: user.state,
       organization_name: user.organization_name,
+      phone: user.phone,
+      email: user.email,
     };
     
     // Sovereign capability: JTI injection for revocation
