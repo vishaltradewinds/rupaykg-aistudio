@@ -1,6 +1,6 @@
 {
-  "name": "RupayKg - Sovereign Digital MRV Infrastructure",
-  "description": "Sovereign-grade digital MRV infrastructure for waste-to-carbon accounting, AI-verification, and climate intelligence.",
+  "name": "RupayKg Enterprise 3.0 - Circular OS",
+  "description": "India's Circular Economy Operating System connecting Urban & Rural governance, digital MRV, EPR compliance, satellite GIS, and carbon credit asset trading.",
   "requestFramePermissions": [
     "geolocation",
     "camera"
