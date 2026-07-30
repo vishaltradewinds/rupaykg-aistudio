@@ -37,7 +37,31 @@ interface StakeholderReportsCenterProps {
 }
 
 export const STAKEHOLDER_REPORT_TYPES = [
-  // 1. Urban Municipal Governance
+  // 1. Bulk Waste Generators (PRIMARY INITIAL FOCUS - SWM Rules 2016 Rule 4 & 13)
+  {
+    id: 'bwg_form_ii_iii_audit',
+    category: 'bwg_primary',
+    roleTarget: ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'industry', 'municipality', 'super_admin', 'municipal_admin'],
+    title: 'BWG Form II & III On-Site Statutory Compliance Audit (SWM Rules 4 & 13)',
+    subtitle: 'Mandatory for Hotels (>100 rooms), Gated Communities (>5,000 m²), Tech Parks, Malls, Hospitals & Factories. Verifies on-site wet waste composting log, dry waste handover & local body clearance.',
+    icon: Building2,
+    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-black',
+    authority: 'Urban Local Body (ULB) & State Pollution Control Board (SPCB)',
+    standard: 'SWM Rules 2016 / Rule 4 & Rule 13'
+  },
+  {
+    id: 'bwg_daily_4stream_manifest',
+    category: 'bwg_primary',
+    roleTarget: ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'industry', 'municipality', 'super_admin', 'municipal_admin'],
+    title: 'BWG Daily 4-Stream Waste Segregation & QR Chain-of-Custody Manifest',
+    subtitle: 'Digital weighbridge logs for Wet Organic, Dry Recyclables, Domestic Hazardous & Sanitary Rejects with GPS camera time-stamps.',
+    icon: FileCheck,
+    badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    authority: 'CPCB & Local Municipal Waste Cell',
+    standard: 'CPCB BWG Guidelines 2017'
+  },
+
+  // 2. Urban Municipal Governance
   {
     id: 'cpcb_form_iv',
     category: 'urban_municipal',
@@ -188,8 +212,8 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
   operatingContext = 'urban',
   onNavigateView
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedReportId, setSelectedReportId] = useState<string>('cpcb_form_iv');
+  const [selectedCategory, setSelectedCategory] = useState<string>('bwg_primary');
+  const [selectedReportId, setSelectedReportId] = useState<string>('bwg_form_ii_iii_audit');
   const [reportingPeriod, setReportingPeriod] = useState<string>('fy_2024_25');
   const [jurisdictionState, setJurisdictionState] = useState<string>(user?.state || 'Jammu and Kashmir');
   const [jurisdictionDistrict, setJurisdictionDistrict] = useState<string>(user?.district || 'Srinagar');
@@ -365,6 +389,7 @@ Hedera HCS Hash,${generatedReport.complianceStatus.hederaGuardianHcsHash},,ISO 1
 
   const categories = [
     { id: 'all', label: 'All Stakeholder Reports' },
+    { id: 'bwg_primary', label: '⭐ Bulk Waste Generators (BWGs)' },
     { id: 'urban_municipal', label: 'Urban & Municipal (ULBs)' },
     { id: 'rural_panchayat', label: 'Rural & Panchayats (SBM-G)' },
     { id: 'industry_pro', label: 'Industry & EPR Brands' },
