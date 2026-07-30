@@ -1,55 +1,38 @@
 const fs = require('fs');
-let code = fs.readFileSync('server.ts', 'utf-8');
 
-const importStatement = `import { SWMComplianceService } from "./src/services/swmComplianceEngine";\n`;
-if (!code.includes('swmComplianceEngine')) {
-    code = importStatement + code;
+let code = fs.readFileSync('server.ts', 'utf8');
+
+const importStatement = `import { createAuthRouter, createMeRouter } from "./src/routes/auth.routes.js";\n`;
+
+if (!code.includes('createAuthRouter')) {
+    // Insert import after Express import
+    code = code.replace('import express from "express";', importStatement + 'import express from "express";');
 }
 
-const apiRoutes = `
-  // --- National SWM Compliance Engine Routes ---
-  const swmService = new SWMComplianceService();
+const startIndex = code.indexOf('  app.post("/api/auth/register"');
+const endIndex = code.indexOf('  // ---------------- FARMER ROUTES ----------------');
 
-  app.post("/api/swm/register", async (req: any, res) => {
-    try {
-      const registration = await swmService.registerEntity(req.body);
-      res.json(registration);
-    } catch (e: any) {
-      res.status(500).json({ error: e.message });
-    }
-  });
+if (startIndex !== -1 && endIndex !== -1) {
+    const authDepsString = `
+  const getDbStatus = () => dbStatus;
+  const authDeps = {
+    users,
+    getDbStatus,
+    User,
+    PUBLIC_ROLES,
+    ADMIN_ROLES,
+    privateKey,
+    clientRedis,
+    auth
+  };
 
-  app.post("/api/swm/validate", async (req: any, res) => {
-    try {
-      const { entityId, ruleId, evidenceData } = req.body;
-      const result = await swmService.validateCompliance(entityId, ruleId, evidenceData);
-      res.json(result);
-    } catch (e: any) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  app.get("/api/swm/dashboard", async (req: any, res) => {
-    try {
-      const type = req.query.type as string || 'national';
-      const stats = await swmService.getDashboardMetrics(type, {});
-      res.json(stats);
-    } catch (e: any) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  // ---------------------------------------------
+  app.use("/api", createAuthRouter(authDeps));
+  app.use("/api/me", createMeRouter(authDeps));
 `;
-
-if (!code.includes('/api/swm/register')) {
-    const splitStr = `  // Catch-all 404 handler for unmatched API routes`;
-    if (code.includes(splitStr)) {
-        code = code.replace(splitStr, apiRoutes + '\n' + splitStr);
-        fs.writeFileSync('server.ts', code);
-        console.log('Successfully patched server.ts');
-    } else {
-        console.error('Could not find injection point');
-    }
+    
+    code = code.substring(0, startIndex) + authDepsString + code.substring(endIndex);
+    fs.writeFileSync('server.ts', code);
+    console.log("Successfully replaced auth routes.");
 } else {
-    console.log('Already patched');
+    console.log("Could not find start/end indices.");
 }

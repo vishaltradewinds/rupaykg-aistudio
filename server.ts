@@ -1,6 +1,8 @@
 import { auth as requireAuth } from "./src/middleware/auth.ts";
 import { registerStakeholderUser } from "./src/db/users.ts";
 import { SWMComplianceService } from "./src/services/swmComplianceEngine";
+import { createGeneratorsRouter } from "./src/routes/generators.routes.js";
+import { createAuthRouter, createMeRouter } from "./src/routes/auth.routes.js";
 import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
@@ -653,199 +655,21 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     return requireAuth(roles);
   }
 
-  app.post("/api/auth/register", async (req: any, res) => {
-    const { phone, password, role, name, district, state, organization_name, village, local_area, subdistrict } = req.body;
 
-    if (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role)) {
-      return res.status(400).json({ error: "Invalid role specified" });
-    }
+  const getDbStatus = () => dbStatus;
+  const authDeps = {
+    users,
+    getDbStatus,
+    User,
+    PUBLIC_ROLES,
+    ADMIN_ROLES,
+    privateKey,
+    clientRedis,
+    auth
+  };
 
-    if (dbStatus === "connected") {
-      const existingUser = await User.findOne({ phone });
-      if (existingUser)
-        return res.status(400).json({ error: "User already exists" });
-    } else {
-      if (users.find((u) => u.phone === phone))
-        return res.status(400).json({ error: "User already exists" });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = {
-      id: Date.now().toString(),
-      phone,
-      password: hashedPassword,
-      role,
-      name,
-      district,
-      state,
-      subdistrict: subdistrict || null,
-      local_area: local_area || village || null,
-      organization_name: organization_name || null,
-      wallet_balance: 0,
-    };
-
-    if (dbStatus === "connected") {
-      await User.create(newUser);
-    } else {
-      users.push(newUser);
-    }
-
-    res.json({ message: "Registered successfully", role });
-  });
-
-  app.post("/api/login", async (req, res) => {
-    const { phone, password } = req.body;
-
-    let user;
-    if (dbStatus === "connected") {
-      user = await User.findOne({ phone });
-    } else {
-      user = users.find((u) => u.phone === phone);
-    }
-
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
-
-    // Strict Bcrypt verification only
-    let isMatch = false;
-    if (user.password) {
-      isMatch = await bcrypt.compare(password, user.password);
-    }
-
-    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
-
-    const tokenPayload = {
-      id: user.id,
-      role: user.role,
-      name: user.name,
-      district: user.district,
-      state: user.state,
-      organization_name: user.organization_name,
-    };
-    
-    // Sovereign capability: JTI injection for revocation
-    const jti = crypto.randomUUID();
-    const token = jwt.sign(tokenPayload, privateKey, {
-      algorithm: "RS256",
-      expiresIn: "24h",
-      jwtid: jti
-    });
-    res.json({ token, user: tokenPayload });
-  });
-
-  app.post("/api/logout", auth(), async (req: any, res) => {
-     if (req.user?.jti && clientRedis.isReady) {
-         const { exp } = req.user;
-         const ttl = exp ? exp - Math.floor(Date.now() / 1000) : 86400; // 24h fallback
-         if (ttl > 0) {
-            await clientRedis.setEx(`bl_${req.user.jti}`, ttl, "true");
-         }
-     }
-     res.json({ message: "Logged out successfully" });
-  });
-
-  app.post("/api/auth/reset-password", async (req, res) => {
-    const { phone, new_password } = req.body;
-    const user = users.find((u) => u.phone === phone);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(new_password, salt);
-    res.json({ message: "Password reset successfully" });
-  });
-
-  app.get("/api/me", auth(), (req: any, res) => {
-    const isRegistered = !!req.user?.role;
-    res.json({ 
-      user: req.user, 
-      requiresRegistration: !isRegistered 
-    });
-  });
-
-  app.post("/api/auth/register-stakeholder", auth(), async (req: any, res) => {
-    const { role, name, phone, state, district, subdistrict, local_area, village, organization_name } = req.body;
-
-    if (!role || (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role))) {
-      return res.status(400).json({ error: "Invalid stakeholder role specified. Please select a valid role." });
-    }
-
-    const uid = req.user.uid || req.user.id;
-    const email = req.user.email || '';
-
-    const registeredUser = await registerStakeholderUser({
-      uid,
-      email,
-      name: name || req.user.name || 'User',
-      role,
-      phone,
-      state,
-      district,
-      subdistrict,
-      local_area: local_area || village,
-      village: village || local_area,
-      organization_name
-    });
-
-    let memUser = users.find((u) => u.id === uid || u.uid === uid || (phone && u.phone === phone) || (email && u.email === email));
-    if (!memUser) {
-      memUser = {
-        id: uid,
-        uid,
-        email,
-        role,
-        name: name || req.user.name || 'User',
-        phone,
-        state,
-        district,
-        subdistrict,
-        local_area: local_area || village,
-        village: village || local_area,
-        organization_name,
-        wallet_balance: 0
-      };
-      users.push(memUser);
-    } else {
-      Object.assign(memUser, {
-        role,
-        name: name || req.user.name || 'User',
-        phone: phone || memUser.phone,
-        state: state || memUser.state,
-        district: district || memUser.district,
-        subdistrict: subdistrict || memUser.subdistrict,
-        local_area: local_area || village || memUser.local_area,
-        village: village || local_area || memUser.village,
-        organization_name: organization_name || memUser.organization_name
-      });
-    }
-
-    if (dbStatus === "connected") {
-      await User.findOneAndUpdate(
-        { id: uid },
-        { id: uid, role, name: name || req.user.name, phone, state, district, subdistrict, local_area: local_area || village, organization_name },
-        { upsert: true, new: true }
-      );
-    }
-
-    res.json({
-      message: `Stakeholder account successfully registered under role: ${role}`,
-      user: {
-        id: uid,
-        uid,
-        email,
-        name: name || req.user.name,
-        role,
-        phone,
-        state,
-        district,
-        subdistrict,
-        local_area: local_area || village,
-        organization_name,
-        is_registered: true
-      }
-    });
-  });
-
+  app.use("/api", createAuthRouter(authDeps));
+  app.use("/api/me", createMeRouter(authDeps));
   // ---------------- FARMER ROUTES ----------------
   app.post("/api/farmer/create", auth(["aggregator"]), (req: any, res) => {
     const { name, mobile, land_area, crop_type, latitude, longitude } =
@@ -899,121 +723,16 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   );
 
   // ---------------- MULTI-GENERATOR & CLIMATE PLATFORM ENDPOINTS ----------------
-  app.get("/api/generators", auth(), (req: any, res) => {
-    res.json(generators);
-  });
 
-  app.get("/api/generators/:id", auth(), (req: any, res) => {
-    const gen = generators.find((g) => g.id === req.params.id);
-    if (!gen) return res.status(404).json({ error: "Generator not found" });
-    res.json(gen);
-  });
+  const generatorDeps = {
+    generators,
+    records,
+    contracts,
+    compliance_records,
+    auth
+  };
 
-  app.post("/api/generators", auth(), (req: any, res) => {
-    const g = req.body;
-    const newGen = {
-      id: g.generator_id || "gen_" + Date.now(),
-      generator_id: g.generator_id || "gen_" + Date.now(),
-      generator_type: g.generator_type || "industry",
-      legal_name: g.legal_name || "Enterprise Waste Partner",
-      trade_name: g.trade_name || g.legal_name || "Enterprise Generator",
-      gst_number: g.gst_number || "",
-      facility_type: g.facility_type || "factory",
-      waste_categories: g.waste_categories || ["organic", "mixed"],
-      geo_location: g.geo_location || { lat: 19.076, lng: 72.877 },
-      district: g.district || "Default District",
-      state: g.state || "Default State",
-      panchayat_or_municipality: g.panchayat_or_municipality || "Municipal Authority",
-      contact_person: g.contact_person || "Operations Manager",
-      contact_details: g.contact_details || "",
-      recurring_volume_estimate: g.recurring_volume_estimate || 1000,
-      compliance_profile: g.compliance_profile || "Standard SWM Compliant",
-      ESG_profile: g.ESG_profile || "Awaiting Verification",
-      EPR_profile: g.EPR_profile || "EPR-TBD",
-      active_status: true
-    };
-    generators.push(newGen);
-    res.status(201).json(newGen);
-  });
-
-  app.get("/api/generators/:id/batches", auth(), (req: any, res) => {
-    const filtered = records.filter((r) => r.citizen_id === req.params.id);
-    res.json(filtered);
-  });
-
-  app.get("/api/generators/:id/contracts", auth(), (req: any, res) => {
-    const filtered = contracts.filter((c) => c.generator_id === req.params.id);
-    res.json(filtered);
-  });
-
-  app.post("/api/generators/:id/contracts", auth(), (req: any, res) => {
-    const newContract = {
-      id: "con_" + Date.now(),
-      generator_id: req.params.id,
-      recycler_id: req.body.recycler_id || "processor_1",
-      sla_terms: req.body.sla_terms || "Weekly collection contract",
-      pickup_commitment_kg: req.body.pickup_commitment_kg || 100,
-      vendor_rating: 5.0,
-      status: "active",
-      created_at: new Date().toISOString()
-    };
-    contracts.push(newContract);
-    res.status(201).json(newContract);
-  });
-
-  app.get("/api/generators/:id/compliance", auth(), (req: any, res) => {
-    const filtered = compliance_records.filter((c) => c.generator_id === req.params.id);
-    res.json(filtered);
-  });
-
-  app.post("/api/generators/:id/compliance", auth(), (req: any, res) => {
-    const newRecord = {
-      id: "comp_" + Date.now(),
-      generator_id: req.params.id,
-      waste_batch_id: req.body.waste_batch_id || "REC_GENERIC",
-      compliance_proof_hash: req.body.compliance_proof_hash || crypto.randomBytes(32).toString("hex"),
-      classification: req.body.classification || "non-hazardous",
-      epr_ref_number: req.body.epr_ref_number || "EPR-REF-" + Date.now(),
-      regulator_review_status: "approved",
-      verified_at: new Date().toISOString()
-    };
-    compliance_records.push(newRecord);
-    res.status(201).json(newRecord);
-  });
-
-  app.get("/api/generators/:id/analytics", auth(), (req: any, res) => {
-    const genId = req.params.id;
-    const gen = generators.find(g => g.id === genId) || {};
-    const genRecords = records.filter(r => r.citizen_id === genId);
-    
-    const total_waste_kg = genRecords.reduce((acc, r) => acc + (r.weight_kg || r.weight || 0), 0);
-    const total_value_rupees = genRecords.reduce((acc, r) => acc + (r.generator_payout || r.total_value || 0), 0);
-    const total_ccc_verified = genRecords.filter(r => r.mrv_status === 'verified').reduce((acc, r) => acc + (r.ccc_amount_kg || 0), 0);
-    
-    // Climate metrics calculations (carbon Engine-aligned)
-    const carbon_co2e_avoided_kg = total_waste_kg * 1.83; // Baseline average reduction factor
-    const diversion_rate = total_waste_kg > 0 ? 94.5 : 0; // standard recovery efficiency for industries
-    
-    res.json({
-      generator_id: genId,
-      generator_type: gen.generator_type || "industry",
-      legal_name: gen.legal_name || "Facility",
-      total_waste_kg,
-      total_value_rupees,
-      total_ccc_verified,
-      carbon_co2e_avoided_kg,
-      diversion_rate,
-      compliance_rating: 98,
-      epr_obligation_fulfilled_percent: 74.2,
-      facility_performance: [
-        { month: 'Jan', organic: total_waste_kg * 0.4, plastic: total_waste_kg * 0.35, mixed: total_waste_kg * 0.25 },
-        { month: 'Feb', organic: total_waste_kg * 0.42, plastic: total_waste_kg * 0.38, mixed: total_waste_kg * 0.2 },
-        { month: 'Mar', organic: total_waste_kg * 0.45, plastic: total_waste_kg * 0.4, mixed: total_waste_kg * 0.15 },
-        { month: 'Apr', organic: total_waste_kg * 0.48, plastic: total_waste_kg * 0.42, mixed: total_waste_kg * 0.1 },
-        { month: 'May', organic: total_waste_kg * 0.51, plastic: total_waste_kg * 0.44, mixed: total_waste_kg * 0.05 },
-      ]
-    });
-  });
+  app.use("/api/generators", createGeneratorsRouter(generatorDeps));
 
   app.get("/api/facilities", auth(), (req: any, res) => {
     const list = generators.map((g) => ({
