@@ -791,7 +791,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   app.post("/api/logout", auth(), async (req: any, res) => {
-     if (req.user?.jti && clientRedis.isReady) {
+     if (req.user?.jti && clientRedis?.isReady) {
          const { exp } = req.user;
          const ttl = exp ? exp - Math.floor(Date.now() / 1000) : 86400; // 24h fallback
          if (ttl > 0) {

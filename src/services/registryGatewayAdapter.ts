@@ -57,7 +57,7 @@ export class RegistryGatewayAdapter {
   ): RegistryProjectSubmission {
     const list = this.getSubmissions();
 
-    const isReady = assessment.status === CCTSReadinessStatus.READY || assessment.status === CCTSReadinessStatus.CONDITIONALLY_READY;
+    const isReady = assessment?.status === CCTSReadinessStatus.READY || assessment?.status === CCTSReadinessStatus.CONDITIONALLY_READY;
     const status = isReady ? 'UNDER_REVIEW' : 'REJECTED';
     const notes = isReady 
       ? 'Payload successfully received by National Bureau of Energy Efficiency (BEE) Gateway. Entered verification queue.' 
