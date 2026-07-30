@@ -80,6 +80,7 @@ import EnterpriseSuite from './components/EnterpriseSuite';
 import SwmCompliancePlatform from './components/SwmCompliancePlatform';
 import HederaGuardianSuite from './components/HederaGuardianSuite';
 import { StakeholderGuides } from './components/StakeholderGuides';
+import StakeholderReportsCenter from './components/StakeholderReportsCenter';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -466,7 +467,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports'>('dashboard');
   
   // Hedera Guardian Portal State Variables
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
@@ -3543,6 +3544,14 @@ export default function App() {
             <BookOpen size={20} className={view === 'swm_compliance' ? 'text-blue-400' : ''} />
             <span className="hidden md:block font-bold">National SWM Portal</span>
           </button>
+          
+          <button 
+            onClick={() => setView('reports')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'reports' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <FileText size={20} className={view === 'reports' ? 'text-purple-400' : ''} />
+            <span className="hidden md:block font-bold text-purple-300">Compliance & Reports</span>
+          </button>
         </div>
 
 
@@ -3575,6 +3584,7 @@ export default function App() {
               {view === 'settings' && t('Account Settings')}
               {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
               {view === 'swm_compliance' && 'National SWM Compliance Platform'}
+              {view === 'reports' && 'Stakeholder Statutory Reports & Returns Hub'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -3690,6 +3700,38 @@ export default function App() {
                   </button>
                 </div>
               )}
+
+              {/* Quick Stakeholder Statutory Report Generation Banner */}
+              <div className="bg-gradient-to-r from-purple-900/40 via-indigo-900/30 to-emerald-900/30 border border-purple-500/30 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 bg-purple-500/20 text-purple-300 rounded-xl shrink-0">
+                    <FileText size={22} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-extrabold text-purple-300 uppercase tracking-widest">STATUTORY COMPLIANCE REPORTS</span>
+                      <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-[10px] font-bold rounded-md">CPCB & SPCB READY</span>
+                    </div>
+                    <p className="text-sm font-semibold text-white mt-0.5">
+                      {['municipal_admin', 'municipality', 'municipal_generator'].includes(user?.role || '') && "CPCB Form IV Annual Return & Swachh Survekshan SBM 2.0 Star Rating Dossier"}
+                      {['panchayat', 'fpo'].includes(user?.role || '') && "SBM-G Phase II Annual Progress Return & GOBARdhan Stubble Prevention Audit"}
+                      {['industry', 'industry_generator', 'commercial', 'epr_partner', 'pro'].includes(user?.role || '') && "CPCB Mandatory EPR Compliance Return & SEBI BRSR Core ESG Statement"}
+                      {['processor', 'aggregator', 'recycler'].includes(user?.role || '') && "CPCB Authorized Recycler Return & Hedera Guardian ISO 14064-3 MRV Ledger Audit"}
+                      {['auditor', 'regulator', 'super_admin', 'state_admin'].includes(user?.role || '') && "UNFCCC ACM0022 / CCTS Carbon Verification Audit & Razorpay Ledger Reconciliation"}
+                      {['citizen'].includes(user?.role || '') && "Citizen Carbon Diversion Footprint Certificate & Direct Wallet Payout Receipts"}
+                      {!['municipal_admin', 'municipality', 'municipal_generator', 'panchayat', 'fpo', 'industry', 'industry_generator', 'commercial', 'epr_partner', 'pro', 'processor', 'aggregator', 'recycler', 'auditor', 'regulator', 'super_admin', 'state_admin', 'citizen'].includes(user?.role || '') && "Official Compliance Dossiers & Statutory Regulatory Returns Engine"}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setView('reports')}
+                  className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                >
+                  <FileText size={16} />
+                  Generate Compliance Report →
+                </button>
+              </div>
 
               {(user?.role === 'citizen' || user?.role === 'fpo') && (
                 <div className="space-y-6">
@@ -6979,6 +7021,17 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
             >
               <SwmCompliancePlatform user={user} onBackToDashboard={() => setView('dashboard')} />
+            </motion.div>
+          )}
+
+          {view === 'reports' && (
+            <motion.div
+              key="reports"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <StakeholderReportsCenter user={user} historyData={history} operatingContext={operatingContext} onNavigateView={(v: string) => setView(v as any)} />
             </motion.div>
           )}
 
