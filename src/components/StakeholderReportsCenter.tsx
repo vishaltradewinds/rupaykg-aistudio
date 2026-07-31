@@ -60,8 +60,19 @@ export const STAKEHOLDER_REPORT_TYPES = [
     authority: 'CPCB & Local Municipal Waste Cell',
     standard: 'CPCB BWG Guidelines 2017'
   },
+  {
+    id: 'biomedical_hazardous_bwg_return',
+    category: 'bwg_primary',
+    roleTarget: ['industry_generator', 'commercial_generator', 'institution_generator', 'institution', 'industry', 'super_admin', 'regulator'],
+    title: 'Bio-Medical & Hazardous Waste BWG Statutory Compliance Return',
+    subtitle: 'Mandatory return for hospitals, labs & pharmaceutical units under Bio-Medical Waste Management Rules 2016 & Hazardous Waste Rules.',
+    icon: ShieldCheck,
+    badgeColor: 'bg-red-500/10 text-red-400 border-red-500/20',
+    authority: 'State Pollution Control Board & CPCB Health Cell',
+    standard: 'Bio-Medical Waste Rules 2016 / Rule 13'
+  },
 
-  // 2. Urban Municipal Governance
+  // 2. Urban Municipal & State Governance
   {
     id: 'cpcb_form_iv',
     category: 'urban_municipal',
@@ -72,6 +83,17 @@ export const STAKEHOLDER_REPORT_TYPES = [
     badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     authority: 'CPCB & State Pollution Control Board (SPCB)',
     standard: 'SWM Rules 2016 / Rule 24'
+  },
+  {
+    id: 'spcb_state_inventory_return',
+    category: 'urban_municipal',
+    roleTarget: ['state_admin', 'regulator', 'super_admin', 'municipal_admin'],
+    title: 'SPCB State-Wide Annual Waste Inventory & Processing Master Return',
+    subtitle: 'State Pollution Control Board consolidated master return for state assemblies and CPCB national portal.',
+    icon: Scale,
+    badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    authority: 'State Pollution Control Board (SPCB) & Ministry of Environment (MoEFCC)',
+    standard: 'SWM Rules 2016 / Rule 24(2)'
   },
   {
     id: 'swachh_survekshan_dossier',
@@ -96,7 +118,7 @@ export const STAKEHOLDER_REPORT_TYPES = [
     standard: 'CPCB Legacy Waste Remediation 2019'
   },
 
-  // 2. Rural & Panchayat Governance
+  // 3. Rural & Panchayat Governance
   {
     id: 'sbmg_gobardhan_return',
     category: 'rural_panchayat',
@@ -119,8 +141,19 @@ export const STAKEHOLDER_REPORT_TYPES = [
     authority: 'CAQM / Ministry of Agriculture & Farmers Welfare',
     standard: 'CAQM Stubble Burning Framework'
   },
+  {
+    id: 'agristack_fpo_carbon_dossier',
+    category: 'rural_panchayat',
+    roleTarget: ['fpo', 'panchayat', 'citizen', 'super_admin', 'state_admin'],
+    title: 'AgriStack Integrated FPO Biomass & Farmer Carbon Credit Return',
+    subtitle: 'Verification of crop residue diversion, soil organic carbon accretion, and direct beneficiary bank transfers.',
+    icon: Award,
+    badgeColor: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+    authority: 'AgriStack India & National Farmers Carbon Registry',
+    standard: 'AgriStack Digital Agriculture Mission'
+  },
 
-  // 3. Industry, Brands & PROs (EPR & ESG)
+  // 4. Industry, Brands, PROs & CSR
   {
     id: 'epr_compliance_return',
     category: 'industry_pro',
@@ -144,18 +177,18 @@ export const STAKEHOLDER_REPORT_TYPES = [
     standard: 'SEBI BRSR Core Circular'
   },
   {
-    id: 'bwg_form_ii_iii_audit',
+    id: 'csr_schedule_vii_audit',
     category: 'industry_pro',
-    roleTarget: ['industry_generator', 'commercial_generator', 'institution_generator', 'commercial', 'institution', 'super_admin'],
-    title: 'Bulk Waste Generator (BWG) Form II & III On-Site Compliance Audit',
-    subtitle: 'On-site wet waste composting log, dry waste handover certificates, and 4-stream segregation compliance.',
-    icon: Building2,
+    roleTarget: ['csr_partner', 'industry', 'commercial', 'super_admin', 'ccc_buyer'],
+    title: 'Companies Act Schedule VII CSR Circular Economy & Carbon Impact Audit',
+    subtitle: 'Audited statement for corporate CSR committees under Section 135 of Companies Act 2013.',
+    icon: Award,
     badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-    authority: 'Local Municipal Body / SPCB',
-    standard: 'SWM Rules 2016 / Rule 4 & 13'
+    authority: 'Ministry of Corporate Affairs (MCA)',
+    standard: 'Companies Act 2013 / Section 135 Schedule VII'
   },
 
-  // 4. Recyclers & Processors
+  // 5. Recyclers & Processors
   {
     id: 'recycler_mrf_operational_return',
     category: 'recycler_processor',
@@ -166,6 +199,17 @@ export const STAKEHOLDER_REPORT_TYPES = [
     badgeColor: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
     authority: 'CPCB / SPCB Waste Processing Registry',
     standard: 'Recycled Plastics & Hazardous Waste Rules'
+  },
+  {
+    id: 'ewaste_battery_recycler_return',
+    category: 'recycler_processor',
+    roleTarget: ['processor', 'recycler', 'super_admin', 'regulator'],
+    title: 'CPCB E-Waste & Battery Recycler EPR Certificate Audit Return',
+    subtitle: 'Recycling facility recovery efficiency, secondary raw material yields, and digital EPR credit generation log.',
+    icon: Cpu,
+    badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    authority: 'CPCB E-Waste & Battery Portal',
+    standard: 'E-Waste Rules 2022 / Battery Rules 2022'
   },
   {
     id: 'hedera_guardian_mrv_audit',
@@ -179,7 +223,7 @@ export const STAKEHOLDER_REPORT_TYPES = [
     standard: 'ISO 14064-3 & Verra VM0018'
   },
 
-  // 5. Carbon Verifiers, Auditors & Financial Regulators
+  // 6. Carbon Verifiers, Auditors & Financial Regulators
   {
     id: 'unfccc_acm0022_carbon_verification',
     category: 'auditor_regulator',
@@ -192,7 +236,7 @@ export const STAKEHOLDER_REPORT_TYPES = [
     standard: 'UNFCCC ACM0022 / CCTS Methodology'
   },
 
-  // 6. Citizen & Farmer Impact
+  // 7. Citizen & Farmer Impact
   {
     id: 'citizen_farmer_carbon_certificate',
     category: 'citizen_farmer',

@@ -2323,7 +2323,13 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   // ================================
   app.get(
     "/api/analytics/environmental-report",
-    auth(["super_admin", "state_admin", "municipal_admin", "regulator", "industry", "commercial", "institution"]),
+    auth([
+      "super_admin", "state_admin", "municipal_admin", "regulator", 
+      "industry", "commercial", "institution", "citizen", "fpo", 
+      "aggregator", "processor", "panchayat", "csr_partner", "epr_partner", 
+      "ccc_buyer", "auditor", "pro", "industry_generator", 
+      "commercial_generator", "institution_generator", "municipal_generator"
+    ]),
     (req: any, res) => {
       // Sovereign Climate Reporting Infrastructure
       const filteredRecords = filterByJurisdiction(req.user, records, "records");
