@@ -1733,8 +1733,8 @@ export default function App() {
       // 1. Fetch user info if not set
       let currentUser = user;
       if (!currentUser) {
-        const meRes = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (meRes.ok) {
+        const meRes = await safeFetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (meRes && meRes.ok) {
           const meData = await safeParseJson(meRes);
           if (meData?.user) {
             currentUser = meData.user;
@@ -1751,35 +1751,35 @@ export default function App() {
 
       // 2. Fetch wallet (only for citizen or fpo)
       if (currentUser?.role === 'citizen' || currentUser?.role === 'fpo') {
-        const walletRes = await fetch('/api/citizen/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (walletRes.ok) {
+        const walletRes = await safeFetch('/api/citizen/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (walletRes && walletRes.ok) {
           const walletData = await safeParseJson(walletRes);
           if (walletData) setWalletBalance(walletData.wallet_balance);
         }
       } else if (['csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
-        const walletRes = await fetch('/api/partner/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (walletRes.ok) {
+        const walletRes = await safeFetch('/api/partner/wallet', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (walletRes && walletRes.ok) {
           const walletData = await safeParseJson(walletRes);
           if (walletData) setWalletBalance(walletData.wallet_balance);
         }
       }
 
       // 3. Fetch history
-      const historyRes = await fetch(`/api/history?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (historyRes.ok) {
+      const historyRes = await safeFetch(`/api/history?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (historyRes && historyRes.ok) {
         const historyData = await safeParseJson(historyRes);
         if (historyData) setHistory(historyData);
       }
 
       // 4. Fetch admin stats
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
-        const statsRes = await fetch(`/api/admin/dashboard?role=${adminRoleFilter}&context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (statsRes.ok) {
+        const statsRes = await safeFetch(`/api/admin/dashboard?role=${adminRoleFilter}&context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (statsRes && statsRes.ok) {
           const statsData = await safeParseJson(statsRes);
           if (statsData) setAdminStats(statsData);
           
-          const logsRes = await fetch('/api/audit-logs', { headers: { 'Authorization': `Bearer ${token}` } });
-          if (logsRes.ok) {
+          const logsRes = await safeFetch('/api/audit-logs', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (logsRes && logsRes.ok) {
             const logsData = await safeParseJson(logsRes);
             if (logsData) setAuditLogs(logsData);
           }
@@ -1788,8 +1788,8 @@ export default function App() {
 
       // 5. Fetch users for Super Admins
       if (currentUser?.role === 'super_admin' && adminSubView === 'users') {
-        const usersRes = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (usersRes.ok) {
+        const usersRes = await safeFetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (usersRes && usersRes.ok) {
           const usersData = await safeParseJson(usersRes);
           if (usersData) setUsersList(usersData);
         }
@@ -1797,8 +1797,8 @@ export default function App() {
 
       // Fetch KPI stats for aggregators and admins
       if (['aggregator', 'super_admin', 'state_admin', 'municipal_admin'].includes(currentUser?.role || '')) {
-        const kpiRes = await fetch(`/api/dashboard/kpi?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (kpiRes.ok) {
+        const kpiRes = await safeFetch(`/api/dashboard/kpi?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (kpiRes && kpiRes.ok) {
           const kpiData = await safeParseJson(kpiRes);
           if (kpiData) {
             setAdminStats(prev => prev ? { ...prev, total_farmers: kpiData.total_farmers } : { total_users: 0, total_biomass_records: 0, total_wallet_disbursed: 0, total_ccc_amount_kg: 0, total_weight_kg: 0, total_farmers: kpiData.total_farmers });
@@ -1808,50 +1808,50 @@ export default function App() {
 
       // 5. Fetch available records for supply chain roles
       if (currentUser?.role === 'aggregator') {
-        const availRes = await fetch('/api/aggregator/available', { headers: { 'Authorization': `Bearer ${token}` } });
+        const availRes = await safeFetch('/api/aggregator/available', { headers: { 'Authorization': `Bearer ${token}` } });
         const availData = await safeParseJson(availRes);
         if (availData) setAvailableRecords(availData);
         
-        const fleetRes = await fetch('/api/aggregator/fleet', { headers: { 'Authorization': `Bearer ${token}` } });
+        const fleetRes = await safeFetch('/api/aggregator/fleet', { headers: { 'Authorization': `Bearer ${token}` } });
         const fleetData = await safeParseJson(fleetRes);
         if (fleetData) setAggregatorFleet(fleetData);
       } else if (currentUser?.role === 'processor') {
-        const availRes = await fetch('/api/processor/available', { headers: { 'Authorization': `Bearer ${token}` } });
+        const availRes = await safeFetch('/api/processor/available', { headers: { 'Authorization': `Bearer ${token}` } });
         const availData = await safeParseJson(availRes);
         if (availData) setAvailableRecords(availData);
 
-        const invRes = await fetch('/api/processor/inventory', { headers: { 'Authorization': `Bearer ${token}` } });
+        const invRes = await safeFetch('/api/processor/inventory', { headers: { 'Authorization': `Bearer ${token}` } });
         const invData = await safeParseJson(invRes);
         if (invData) setProcessorInventory(invData);
       }
 
       // 6. Fetch MRV records for regulators
       if (['regulator', 'state_admin', 'super_admin'].includes(currentUser?.role || '')) {
-        const mrvRes = await fetch('/api/mrv/pending', { headers: { 'Authorization': `Bearer ${token}` } });
+        const mrvRes = await safeFetch('/api/mrv/pending', { headers: { 'Authorization': `Bearer ${token}` } });
         const mrvData = await safeParseJson(mrvRes);
         if (mrvData) setMrvRecords(mrvData);
         
-        const mrvHistRes = await fetch('/api/mrv/history', { headers: { 'Authorization': `Bearer ${token}` } });
+        const mrvHistRes = await safeFetch('/api/mrv/history', { headers: { 'Authorization': `Bearer ${token}` } });
         const mrvHistData = await safeParseJson(mrvHistRes);
         if (mrvHistData) setMrvHistory(mrvHistData);
       }
 
       // 7. Fetch available CCCs for partners
       if (['csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
-        const cccsRes = await fetch('/api/partner/available-cccs', { headers: { 'Authorization': `Bearer ${token}` } });
+        const cccsRes = await safeFetch('/api/partner/available-cccs', { headers: { 'Authorization': `Bearer ${token}` } });
         const cccsData = await safeParseJson(cccsRes);
         if (cccsData) setAvailableCCCs(cccsData);
       }
 
       // 8. Fetch Series A / Admin KPI data
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'csr_partner', 'epr_partner', 'ccc_buyer'].includes(currentUser?.role || '')) {
-        const compRes = await fetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const compRes = await safeFetch(`/api/analytics/comprehensive?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         const compData = await safeParseJson(compRes);
         if (compData) setComprehensiveMetrics(compData);
       }
 
       // 9. Fetch Carbon Dashboard
-      const carbonRes = await fetch(`/api/carbon/dashboard`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const carbonRes = await safeFetch(`/api/carbon/dashboard`, { headers: { 'Authorization': `Bearer ${token}` } });
       const carbonData = await safeParseJson(carbonRes);
       if (carbonData) {
         setCarbonDashboard(carbonData);
@@ -1898,25 +1898,25 @@ export default function App() {
 
       // 9b. Fetch Enterprise Generator specific profiles, contracts, compliance profiles, and schedules
       if (['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(currentUser?.role || '')) {
-        const analyticRes = await fetch(`/api/generators/${currentUser?.id}/analytics`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const analyticRes = await safeFetch(`/api/generators/${currentUser?.id}/analytics`, { headers: { 'Authorization': `Bearer ${token}` } });
         const analyticData = await safeParseJson(analyticRes);
         if (analyticData) {
           setGeneratorProfile(analyticData);
         }
         
-        const contractRes = await fetch(`/api/generators/${currentUser?.id}/contracts`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const contractRes = await safeFetch(`/api/generators/${currentUser?.id}/contracts`, { headers: { 'Authorization': `Bearer ${token}` } });
         const contractData = await safeParseJson(contractRes);
         if (contractData) {
           setActiveContracts(contractData);
         }
 
-        const complianceRes = await fetch(`/api/generators/${currentUser?.id}/compliance`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const complianceRes = await safeFetch(`/api/generators/${currentUser?.id}/compliance`, { headers: { 'Authorization': `Bearer ${token}` } });
         const complianceData = await safeParseJson(complianceRes);
         if (complianceData) {
           setComplianceRecords(complianceData);
         }
 
-        const scheduleRes = await fetch(`/api/pickups/schedule`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const scheduleRes = await safeFetch(`/api/pickups/schedule`, { headers: { 'Authorization': `Bearer ${token}` } });
         const scheduleData = await safeParseJson(scheduleRes);
         if (scheduleData) {
           setPickupSchedules(scheduleData);
@@ -1924,17 +1924,17 @@ export default function App() {
       }
 
       if (['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
-        const kpiRes = await fetch(`/api/admin/kpi?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const kpiRes = await safeFetch(`/api/admin/kpi?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         const kpiData = await safeParseJson(kpiRes);
         if (kpiData) setAdminKpi(kpiData);
 
-        const fraudRes = await fetch(`/api/admin/fraud-map?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const fraudRes = await safeFetch(`/api/admin/fraud-map?context=${operatingContext}&state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         const fraudData = await safeParseJson(fraudRes);
         if (fraudData) {
           setFraudMap(fraudData.flagged_events);
         }
 
-        const trendsRes = await fetch(`/api/analytics/trends?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const trendsRes = await safeFetch(`/api/analytics/trends?state=${dashboardStateFilter}&district=${dashboardDistrictFilter}&subdistrict=${dashboardSubdistrictFilter}&local_area=${dashboardLocalAreaFilter}`, { headers: { 'Authorization': `Bearer ${token}` } });
         const trendsData = await safeParseJson(trendsRes);
         if (trendsData) setTrendsData(trendsData);
       }
@@ -1946,23 +1946,23 @@ export default function App() {
 
       // 10. Fetch Integrations Data
       if (adminSubView === 'integrations' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(currentUser?.role || '')) {
-        const agristackRes = await fetch('/api/integrations/agristack', { headers: { 'Authorization': `Bearer ${token}` } });
+        const agristackRes = await safeFetch('/api/integrations/agristack', { headers: { 'Authorization': `Bearer ${token}` } });
         const agristackData = await safeParseJson(agristackRes);
         if (agristackData) setAgristackData(agristackData);
         
-        const ondcRes = await fetch('/api/integrations/ondc', { headers: { 'Authorization': `Bearer ${token}` } });
+        const ondcRes = await safeFetch('/api/integrations/ondc', { headers: { 'Authorization': `Bearer ${token}` } });
         const ondcData = await safeParseJson(ondcRes);
         if (ondcData) setOndcData(ondcData);
       }
 
       // 10. Fetch CCC Pool
       if (['ccc_buyer', 'regulator', 'super_admin', 'state_admin', 'municipal_admin', 'csr_partner', 'epr_partner'].includes(currentUser?.role || '')) {
-        const poolRes = await fetch(`/api/ccc/pool?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const poolRes = await safeFetch(`/api/ccc/pool?context=${operatingContext}`, { headers: { 'Authorization': `Bearer ${token}` } });
         const poolData = await safeParseJson(poolRes);
         if (poolData) setCccPool(poolData);
       }
     } catch (err) {
-      console.error(err);
+      console.error("fetchUserData error:", err);
     }
   };
 
@@ -2632,7 +2632,7 @@ export default function App() {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch('/api/partner/fund', {
+      const res = await safeFetch('/api/partner/fund', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -2640,8 +2640,8 @@ export default function App() {
         },
         body: JSON.stringify({ amount })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Funding failed');
+      const data = await safeParseJson(res);
+      if (!res || !res.ok) throw new Error(data?.error || 'Funding failed');
 
       setMessage({ type: 'success', text: data.message });
       fetchUserData();
