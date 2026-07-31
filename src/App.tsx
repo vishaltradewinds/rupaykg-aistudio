@@ -1219,11 +1219,11 @@ export default function App() {
             } else {
               throw new Error("Invalid response from DB status endpoint");
             }
-          } else if (res.status === 401 || res.status === 403) {
+          } else if (res && (res.status === 401 || res.status === 403)) {
             // Authentic credentials issue - don't keep retrying as it will keep returning 401/403
             success = true;
           } else {
-            throw new Error(`DB status endpoint returned status: ${res.status}`);
+            throw new Error(`DB status endpoint returned status: ${res ? res.status : 'network error'}`);
           }
         } catch (err) {
           retries--;

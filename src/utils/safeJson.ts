@@ -5,9 +5,9 @@
 
 export async function safeParseJson<T = any>(res: Response): Promise<T | null> {
   try {
-    if (!res || !res.ok) return null;
+    if (!res) return null;
     const contentType = res.headers.get("content-type");
-    const text = await res.text();
+    const text = await res.clone().text();
     if (!text) return null;
     const trimmed = text.trim();
     if (trimmed.startsWith("<")) return null;

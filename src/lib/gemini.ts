@@ -19,18 +19,13 @@ export const ai = {
           throw new Error('AI service temporarily unavailable. Please try again.');
         }
 
-        let errorMsg = 'AI generation failed';
+        const data = await safeParseJson(response);
+
         if (!response.ok) {
-          try {
-            const data = await safeParseJson(response);
-            errorMsg = data?.error || `AI generation failed with status: ${response.status}`;
-          } catch (e) {
-            errorMsg = `AI generation failed with status: ${response.status}`;
-          }
+          const errorMsg = data?.error || `AI generation failed with status: ${response.status}`;
           throw new Error(errorMsg);
         }
 
-        const data = await safeParseJson(response);
         if (!data) {
           throw new Error("Received invalid response from AI service");
         }
