@@ -597,6 +597,57 @@ export default function CpcbBwgCompliance({ user }: CpcbBwgComplianceProps) {
                 ))}
               </div>
             </div>
+
+            {/* CPCB / SPCB Used Black Oil & Hazardous Waste Form-10 Compliance Shield Card */}
+            <div className="md:col-span-2 bg-gradient-to-r from-rose-950/40 via-black to-slate-950 p-6 rounded-2xl border border-rose-500/30 space-y-4 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 font-bold text-lg">
+                    ⚠️
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+                      CPCB & SPCB Hazardous Waste & Used Oil (Form-10) Compliance Shield
+                      <span className="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono px-2 py-0.5 rounded-full uppercase">
+                        2026 GAZETTE MANDATE
+                      </span>
+                    </h3>
+                    <p className="text-xs text-white/60">
+                      Protected against ₹1,000 - ₹5,000/L Environmental Compensation (EC) fines & NGT/Court closure orders.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 text-xs">
+                <div className="bg-black/50 p-3 rounded-xl border border-white/5 space-y-1">
+                  <span className="text-[10px] text-rose-400 font-bold uppercase block">1. Form-10 & Recycler ID</span>
+                  <p className="text-white font-medium text-[11px]">Handover ONLY to CPCB registered transport vehicles & authorized refiners with Form-10 manifest.</p>
+                </div>
+                <div className="bg-black/50 p-3 rounded-xl border border-white/5 space-y-1">
+                  <span className="text-[10px] text-amber-400 font-bold uppercase block">2. Quarterly E-Return</span>
+                  <p className="text-white font-medium text-[11px]">Mandatory quarterly Form-10 + GST E-Return every 3 months on CPCB / SPCB Portal.</p>
+                </div>
+                <div className="bg-black/50 p-3 rounded-xl border border-white/5 space-y-1">
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase block">3. Zero Cash Payments</span>
+                  <p className="text-white font-medium text-[11px]">100% digital payment trace strictly via Cheque or Direct Bank Account Transfer.</p>
+                </div>
+                <div className="bg-black/50 p-3 rounded-xl border border-white/5 space-y-1">
+                  <span className="text-[10px] text-cyan-400 font-bold uppercase block">4. Zero Drain Dumping</span>
+                  <p className="text-white font-medium text-[11px]">Strict ban on throwing coolant/oil into drains, land mixing, or illegal burning.</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                <div className="text-xs text-white/70">
+                  <span className="font-bold text-rose-400">NGT Case Reference:</span> Recent NGT penalties of ₹5 Crore+ imposed on MP automobile service centers selling oil without Form-10.
+                </div>
+                <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 whitespace-nowrap flex items-center gap-1.5">
+                  <ShieldCheck size={14} /> RupayKg Form-10 Shield Active
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}

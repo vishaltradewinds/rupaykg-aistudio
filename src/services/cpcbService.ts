@@ -47,14 +47,14 @@ export class CpcbService {
       id: 'LOG_CPCB_003',
       date: new Date().toISOString().split('T')[0],
       stream: 'DOMESTIC_HAZARDOUS',
-      wasteType: 'Paint & Solvent Waste',
-      weightKg: 18,
-      trackingCode: 'TRK-CPCB-HAZ-1049',
-      vehicleNo: 'KA-01-HAZ-0012',
-      destinationFacility: 'State TSDF Facility (Authorized Haz Waste Facility)',
+      wasteType: 'Used Black Oil / Spent Lubricant (Form-10 Manifested)',
+      weightKg: 180,
+      trackingCode: 'TRK-CPCB-HAZ-OIL-1049',
+      vehicleNo: 'MP-09-HAZ-4821 (CPCB GPS Regd.)',
+      destinationFacility: 'CPCB Authorized Refiner & Used Oil Recycler (Reg. #CPCB-OIL-REC-901)',
       weighbridgeRef: 'WB-991208',
-      co2eAvoidedKg: 36,
-      verifiedBy: 'Certified Environmental Auditor',
+      co2eAvoidedKg: 360,
+      verifiedBy: 'Certified Environmental Auditor (Form-10 & GST Invoice Matched)',
       status: 'VERIFIED'
     },
     {
@@ -104,11 +104,12 @@ export class CpcbService {
     },
     {
       id: 'CAL_004',
-      title: 'SPCB Water & Air Consent Renewal (Consent to Operate - CTO)',
+      title: 'Mandatory Quarterly Form-10 + GST E-Return Filing (Used Black Oil & Hazardous Waste 2026)',
       filingType: 'SPCB_PERMIT_RENEWAL',
-      dueDate: '2026-10-31',
+      dueDate: '2026-09-30',
       status: 'PENDING',
-      regulatoryBody: 'State Pollution Control Board',
+      regulatoryBody: 'State Pollution Control Board (SPCB) & CPCB Hazardous Waste Portal',
+      documentRef: 'FORM-10-Q2-2026-RETURN',
       lastUpdated: new Date().toISOString()
     }
   ];

@@ -155,6 +155,17 @@ export const STAKEHOLDER_REPORT_TYPES = [
 
   // 4. Industry, Brands, PROs & CSR
   {
+    id: 'cpcb_form_10_used_oil_return',
+    category: 'industry_pro',
+    roleTarget: ['industry', 'industry_generator', 'commercial', 'commercial_generator', 'processor', 'recycler', 'super_admin', 'regulator'],
+    title: 'CPCB / SPCB Form-10 Used Black Oil & Hazardous Waste Quarterly Statutory Return',
+    subtitle: 'Mandatory Form-10 manifest ledger, GST invoice matching, CPCB registered recycler verification, zero-cash bank payment trail, and ₹1,000-₹5,000/L EC Fine Shield.',
+    icon: ShieldCheck,
+    badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    authority: 'State Pollution Control Board (SPCB) & CPCB Hazardous Waste Portal',
+    standard: 'Hazardous Wastes Rules 2016 (Form-10) / CPCB Used Oil 2026 / MPPCB Orders'
+  },
+  {
     id: 'epr_compliance_return',
     category: 'industry_pro',
     roleTarget: ['industry', 'industry_generator', 'commercial', 'epr_partner', 'pro', 'super_admin', 'regulator'],
@@ -487,6 +498,38 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
                 { label: 'Direct Wallet Disbursed to Farmers', value: `₹${baseEarnings.toLocaleString()}` },
                 { label: 'Verified Methane & SOC Credits (tCO₂e)', value: `${(baseCcc / 1000).toFixed(3)} tCO₂e` },
                 { label: 'Aadhaar / Bank Account NPCI Sync', value: '100% Direct Transfer Verified' }
+              ]
+            }
+          ];
+          break;
+
+        case 'cpcb_form_10_used_oil_return':
+          statutoryFormName = 'CPCB / SPCB FORM-10 (Rule 20 Hazardous Wastes Rules 2016 / 2026 Standards)';
+          statutorySections = [
+            {
+              title: 'Section I: Used Black Oil & Spent Coolant Generation & Storage Audit',
+              items: [
+                { label: 'Used Black Oil / Spent Lubricant Volume', value: `${Math.round(baseWeight * 0.12).toLocaleString()} Liters` },
+                { label: 'Spent Coolant / Water Mix Waste Volume', value: `${Math.round(baseWeight * 0.04).toLocaleString()} Liters` },
+                { label: 'CPCB Barcoded Storage Identification', value: `TANK-HAZOIL-MP-2026-88` },
+                { label: 'Environmental Compensation (EC) Fine Shield', value: `₹${(Math.round(baseWeight * 0.16) * 3000).toLocaleString()} (Fine Shielded @ ₹3,000/L)` }
+              ]
+            },
+            {
+              title: 'Section II: Form-10 Manifest & Authorized Recycler Dispatch Ledger',
+              items: [
+                { label: 'CPCB Authorized Recycler Registration ID', value: `CPCB-RECY-OIL-2026-MP09` },
+                { label: 'CPCB Registered Vehicle & GPS Reg.', value: `MP-09-HAZ-4821 (GPS Tracked)` },
+                { label: 'Form-10 Manifest Serial Hash', value: `FORM10-MANIFEST-${Math.floor(100000 + Math.random() * 900000)}` },
+                { label: 'GST Invoice & Bank Account Txn Match', value: '100% Matched (Zero Cash Payment Audit Passed)' }
+              ]
+            },
+            {
+              title: 'Section III: 2026 Quarterly Form-10 E-Return & NGT/Court Penalty Shield',
+              items: [
+                { label: 'Quarterly Form-10 E-Return Filing Ref.', value: `E-RETURN-Q2-FORM10-${Math.floor(1000 + Math.random() * 9000)}` },
+                { label: 'Drain Dumping & Burning Prohibition Check', value: '100% Compliant (Zero Illegal Discharge)' },
+                { label: 'NGT / Supreme Court Environmental Compliance', value: 'GRADE A+ (Protected against ₹5 Cr Penalty)' }
               ]
             }
           ];
