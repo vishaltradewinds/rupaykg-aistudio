@@ -95,43 +95,43 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   // Registration Form State (Layer 1)
   const [regForm, setRegForm] = useState({
     entityType: 'BWG',
-    name: 'Oberoi Grand Commercial Complex',
-    gstin: '27AAAAA0000A1Z5',
-    pan: 'AAAAA0000A',
-    cin: 'U74999MH2020PTC123456',
-    address: 'Sector 18, Commercial Belt, Mumbai, Maharashtra',
+    name: '',
+    gstin: '',
+    pan: '',
+    cin: '',
+    address: '',
     state: 'Maharashtra',
     district: 'Mumbai Suburban',
-    ulb: 'Brihanmumbai Municipal Corporation (BMC)',
-    ward: 'Ward K-East',
-    contactPerson: 'Anil Kumar (Chief Environmental Officer)',
-    phone: '+91 98200 12345',
-    email: 'compliance@oberoigrand.com',
-    builtUpAreaSqm: 12500,
-    waterConsumptionKlDay: 45,
-    dailyWasteGenerationKg: 420,
-    wasteCategories: ['Organic Wet Waste', 'Dry Recyclables', 'Domestic Hazardous', 'Sanitary Reject']
+    ulb: '',
+    ward: '',
+    contactPerson: '',
+    phone: '',
+    email: '',
+    builtUpAreaSqm: 0,
+    waterConsumptionKlDay: 0,
+    dailyWasteGenerationKg: 0,
+    wasteCategories: [] as string[]
   });
-  const [registeredEntitiesList, setRegisteredEntitiesList] = useState(defaultSeedEntities);
+  const [registeredEntitiesList, setRegisteredEntitiesList] = useState<any[]>([]);
   const [regSuccessMessage, setRegSuccessMessage] = useState('');
 
   // BWG Eligibility Auto-Calculator State (Layer 2)
-  const [bwgCalcWasteKg, setBwgCalcWasteKg] = useState(150);
-  const [bwgCalcAreaSqm, setBwgCalcAreaSqm] = useState(6200);
+  const [bwgCalcWasteKg, setBwgCalcWasteKg] = useState(0);
+  const [bwgCalcAreaSqm, setBwgCalcAreaSqm] = useState(0);
 
   // Waste Sources State (Layer 3)
-  const [sources, setSources] = useState(defaultSeedSources);
+  const [sources, setSources] = useState<any[]>([]);
   const [selectedQrSource, setSelectedQrSource] = useState<any>(null);
 
   // Bin Fleet State (Layer 4)
-  const [bins, setBins] = useState(defaultSeedBins);
+  const [bins, setBins] = useState<any[]>([]);
 
   // Weighbridge State (Layer 7)
-  const [wbForm, setWbForm] = useState({ grossKg: 14200, tareKg: 4800, vehicleNo: 'KA-01-EQ-9921', facilityName: 'Municipal Biomethanation Plant 04' });
+  const [wbForm, setWbForm] = useState({ grossKg: 0, tareKg: 0, vehicleNo: '', facilityName: '' });
   const [generatedSlip, setGeneratedSlip] = useState<any>(null);
 
   // CPCB Sync Bridge State (Layer 11)
-  const [cpcbSyncLogs, setCpcbSyncLogs] = useState(defaultSeedLogs);
+  const [cpcbSyncLogs, setCpcbSyncLogs] = useState<any[]>([]);
   const [syncingActive, setSyncingActive] = useState(false);
 
   // GIS Map Filter State (Layer 14)
