@@ -81,6 +81,7 @@ import SwmCompliancePlatform from './components/SwmCompliancePlatform';
 import HederaGuardianSuite from './components/HederaGuardianSuite';
 import { StakeholderGuides } from './components/StakeholderGuides';
 import StakeholderReportsCenter from './components/StakeholderReportsCenter';
+import { OfflineStatusBadge } from './components/OfflineStatusBadge';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -3592,6 +3593,9 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-3 md:gap-4 flex-wrap">
+            {/* Offline Status Badge & Data Buffer Indicator */}
+            <OfflineStatusBadge />
+
             {/* Theme Toggle Button */}
             <button
               onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
