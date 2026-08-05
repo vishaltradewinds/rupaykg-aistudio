@@ -11,18 +11,47 @@ export default defineConfig(({mode}) => {
       react(), 
       tailwindcss(),
       VitePWA({
-        disable: mode === 'development',
+        disable: false,
         registerType: 'autoUpdate',
-        includeAssets: ['icon.svg'],
+        includeAssets: ['icon.svg', 'logo.png', 'robots.txt', 'sitemap.xml'],
         workbox: {
-          maximumFileSizeToCacheInBytes: 4000000,
+          maximumFileSizeToCacheInBytes: 5000000,
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /\/api\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'rupaykg-api-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+                },
+                networkTimeoutSeconds: 5,
+              },
+            },
+          ],
         },
         manifest: {
-          name: 'RupayKg',
+          name: 'RupayKg Enterprise 3.0',
           short_name: 'RupayKg',
-          description: 'National-scale Digital Public Infrastructure for Waste Management',
+          description: 'National-scale Digital Public Infrastructure for Waste Management & Circular Economy OS',
           theme_color: '#10b981',
-          background_color: '#000000',
+          background_color: '#090d16',
           display: 'standalone',
           icons: [
             {
