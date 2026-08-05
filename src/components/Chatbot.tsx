@@ -209,10 +209,27 @@ export const Chatbot = () => {
           setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));
         };
         audio.play();
+      } else if ('speechSynthesis' in window) {
+        // Fallback to 100% Free Open Web Speech API
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => {
+          setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));
+        };
+        window.speechSynthesis.speak(utterance);
+      } else {
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));
       }
     } catch (err) {
       console.error("TTS Error:", err);
-      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => {
+          setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));
+        };
+        window.speechSynthesis.speak(utterance);
+      } else {
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isAudioPlaying: false } : m));
+      }
     }
   };
 
