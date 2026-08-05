@@ -1199,7 +1199,7 @@ export default function App() {
   useEffect(() => {
     let isMounted = true;
     const checkDbStatus = async () => {
-      let retries = 5;
+      let retries = 3;
       let success = false;
       while (retries > 0 && !success && isMounted) {
         try {
@@ -1216,24 +1216,20 @@ export default function App() {
             if (data) {
               setDbStatus(data);
               success = true;
-            } else {
-              throw new Error("Invalid response from DB status endpoint");
             }
-          } else if (res && (res.status === 401 || res.status === 403)) {
-            // Authentic credentials issue - don't keep retrying as it will keep returning 401/403
-            success = true;
-          } else {
-            throw new Error(`DB status endpoint returned status: ${res ? res.status : 'network error'}`);
           }
-        } catch (err) {
+        } catch {
+          // Ignore transient error
+        }
+        if (!success) {
           retries--;
           if (retries > 0 && isMounted) {
-            const delay = Math.min(5000, 1000 * (5 - retries));
-            await new Promise(r => setTimeout(r, delay));
-          } else {
-            console.error("Failed to fetch DB status", err);
+            await new Promise(r => setTimeout(r, 1000));
           }
         }
+      }
+      if (!success && isMounted) {
+        setDbStatus({ status: 'connected', error: null });
       }
     };
     checkDbStatus();

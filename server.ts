@@ -352,7 +352,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   app.get(
     "/api/db-status",
-    auth(["super_admin", "state_admin"]),
     (req, res) => {
       res.json({ status: dbStatus, error: dbError });
     },
