@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { safeFetchJson } from '../utils/safeJson';
+import { jsPDF } from 'jspdf';
 
 interface StakeholderReportsCenterProps {
   user: any;
@@ -780,6 +781,137 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
     }
   };
 
+  const downloadPdfReport = () => {
+    if (!generatedReport) return;
+
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // Top Emerald Header Banner
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, 0, 210, 18, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RUPAYKG ENTERPRISE 3.0 CIRCULAR OS', 12, 12);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('OFFICIAL STATUTORY COMPLIANCE DOSSIER', 132, 12);
+
+      let y = 28;
+
+      // Report Title & Statutory Header
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      const titleLines = doc.splitTextToSize(generatedReport.title, 184);
+      doc.text(titleLines, 12, y);
+      y += titleLines.length * 6 + 3;
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Statutory Form: ${generatedReport.statutoryFormName}`, 12, y); y += 4.5;
+      doc.text(`Regulatory Authority: ${generatedReport.authority}`, 12, y); y += 4.5;
+      doc.text(`Statutory Standard: ${generatedReport.standard}`, 12, y); y += 4.5;
+      doc.text(`Jurisdiction: ${generatedReport.jurisdiction.district}, ${generatedReport.jurisdiction.state} (LGD: ${generatedReport.jurisdiction.lgdCode})`, 12, y); y += 4.5;
+      doc.text(`Organization: ${generatedReport.jurisdiction.organization}`, 12, y); y += 4.5;
+      doc.text(`Issuer: ${generatedReport.stakeholderInfo.name} (${generatedReport.stakeholderInfo.role})`, 12, y); y += 4.5;
+      doc.text(`Generated Timestamp: ${new Date(generatedReport.generatedAt).toLocaleString()}`, 12, y); y += 7;
+
+      // Horizontal Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.line(12, y, 198, y);
+      y += 6;
+
+      // Key Metrics Container
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(12, y, 186, 26, 3, 3, 'FD');
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+
+      doc.text(`Total Material Processed: ${generatedReport.metrics.totalMaterialProcessedKg.toLocaleString()} kg`, 16, y + 7);
+      doc.text(`Landfill Diversion Rate: ${generatedReport.metrics.landfillDiversionPercent}%`, 110, y + 7);
+
+      doc.text(`Avoided Methane: ${generatedReport.metrics.avoidedMethaneKgCo2e.toLocaleString()} kg CO2e`, 16, y + 14);
+      doc.text(`Carbon Offset Credits: ${generatedReport.metrics.carbonCreditsGeneratedTons} tCO2e`, 110, y + 14);
+
+      doc.text(`Economic Disbursement: Rs. ${generatedReport.metrics.totalEconomicDisbursement.toLocaleString()}`, 16, y + 21);
+      doc.text(`Digital Evidence Logs: ${generatedReport.metrics.digitalEvidenceLogsCount} records`, 110, y + 21);
+
+      y += 33;
+
+      // Statutory Form Sections
+      if (generatedReport.statutorySections && generatedReport.statutorySections.length > 0) {
+        generatedReport.statutorySections.forEach((sec: any) => {
+          if (y > 255) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(16, 185, 129);
+          doc.text(sec.title.toUpperCase(), 12, y);
+          y += 5;
+
+          doc.setFontSize(8.5);
+          doc.setTextColor(51, 65, 85);
+
+          sec.items.forEach((it: any) => {
+            if (y > 270) {
+              doc.addPage();
+              y = 20;
+            }
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${it.label}: `, 16, y);
+            const labelWidth = doc.getTextWidth(`${it.label}: `);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`${it.value}`, 16 + labelWidth, y);
+            y += 4.5;
+          });
+          y += 4;
+        });
+      }
+
+      // Cryptographic Audit Footer Card
+      if (y > 240) {
+        doc.addPage();
+        y = 20;
+      }
+      y += 3;
+      doc.setFillColor(240, 253, 250);
+      doc.setDrawColor(204, 251, 241);
+      doc.roundedRect(12, y, 186, 22, 3, 3, 'FD');
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(13, 148, 136);
+      doc.text('HEDERA GUARDIAN HCS ISO 14064-3 AUDIT LEDGER PROOF', 16, y + 6);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(51, 65, 85);
+      doc.text(`HCS Hash: ${generatedReport.complianceStatus.hederaGuardianHcsHash}`, 16, y + 12);
+      doc.text(`Auditor Seal: ${generatedReport.complianceStatus.auditorSignatureSeal}`, 16, y + 17);
+      doc.text(`Verification Score: ${generatedReport.complianceStatus.verificationConfidenceScore}% (COMPLIANT)`, 125, y + 17);
+
+      // Save PDF Document
+      doc.save(`${activeReportConfig.id}_compliance_dossier_${generatedReport.jurisdiction.district}_${Date.now()}.pdf`);
+    } catch (err) {
+      console.error('Error compiling PDF dossier:', err);
+      alert('Failed to compile PDF dossier. Falling back to text report.');
+      downloadTextReport();
+    }
+  };
+
   const downloadTextReport = () => {
     if (!generatedReport) return;
     
@@ -1140,11 +1272,20 @@ ${statutoryCsvRows}"Core Metrics","Total Waste Processed","${generatedReport.met
 
                   <div className="flex items-center gap-2 shrink-0">
                     <button
-                      onClick={downloadTextReport}
-                      title="Download Text/PDF Format"
-                      className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                      onClick={downloadPdfReport}
+                      title="Export Official PDF Dossier"
+                      className="px-3 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-extrabold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
                     >
                       <Download size={16} />
+                      <span>PDF DOSSIER</span>
+                    </button>
+
+                    <button
+                      onClick={downloadTextReport}
+                      title="Download Plain Text Format"
+                      className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <FileText size={16} />
                       <span className="hidden sm:inline">TXT</span>
                     </button>
 
