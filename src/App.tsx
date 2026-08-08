@@ -83,6 +83,7 @@ import { StakeholderGuides } from './components/StakeholderGuides';
 import StakeholderReportsCenter from './components/StakeholderReportsCenter';
 import { OfflineStatusBadge } from './components/OfflineStatusBadge';
 import { StakeholderVerificationDashboard } from './components/StakeholderVerificationDashboard';
+import { InstallPwaPrompt } from './components/InstallPwaPrompt';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -3409,6 +3410,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans">
+      <InstallPwaPrompt />
       {realtimeToast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 bg-[#18181B]/95 backdrop-blur-md border border-emerald-500/40 rounded-full shadow-2xl text-emerald-300 text-xs font-semibold flex items-center gap-3">
           <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
