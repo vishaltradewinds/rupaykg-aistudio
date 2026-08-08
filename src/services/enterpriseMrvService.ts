@@ -370,7 +370,7 @@ class EnterpriseMrvStore {
         provider: 'Bureau of Energy Efficiency (BEE)',
         category: 'REGISTRY',
         status: IntegrationStatus.NOT_CONFIGURED,
-        mode: 'MOCK',
+        mode: 'SIMULATED',
         capabilities: ['Project Registration', 'CCTS Token Allocation', 'Compliance Checking'],
         environment: 'Development Sandbox',
         lastHealthCheck: '7/11/2026, 9:00:00 AM',

@@ -19,79 +19,6 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const [activeRoleDashboard, setActiveRoleDashboard] = useState('bwg');
   const [activeMobileRole, setActiveMobileRole] = useState('collector');
   
-  // Default Seed Data definitions for restore capability
-  const defaultSeedEntities = [
-    {
-      id: 'REG-CPCB-001',
-      type: 'BWG',
-      name: 'Oberoi Grand Commercial Complex',
-      location: 'Mumbai, MH',
-      ulb: 'BMC Ward K-East',
-      dailyKg: 420,
-      areaSqm: 12500,
-      cpcbStatus: 'CPCB Synced',
-      complianceScore: 96,
-      cpcbToken: 'CPCB-AUTH-88219A'
-    },
-    {
-      id: 'REG-CPCB-002',
-      type: 'Facility',
-      name: 'Kalyan Bio-Methanation & Waste-to-Energy Plant',
-      location: 'Thane, MH',
-      ulb: 'KDMC',
-      dailyKg: 50000,
-      areaSqm: 45000,
-      cpcbStatus: 'CPCB Synced',
-      complianceScore: 98,
-      cpcbToken: 'CPCB-AUTH-99120B'
-    },
-    {
-      id: 'REG-CPCB-003',
-      type: 'Recycler',
-      name: 'EcoPlast Certified Recyclers India Ltd',
-      location: 'Pune, MH',
-      ulb: 'PMC Zone 4',
-      dailyKg: 15000,
-      areaSqm: 18000,
-      cpcbStatus: 'CPCB Synced',
-      complianceScore: 94,
-      cpcbToken: 'CPCB-AUTH-10492C'
-    },
-    {
-      id: 'REG-CPCB-004',
-      type: 'Transporter',
-      name: 'Swachh Express Logistics Fleet',
-      location: 'Navi Mumbai, MH',
-      ulb: 'NMMC',
-      dailyKg: 30000,
-      areaSqm: 5000,
-      cpcbStatus: 'CPCB Synced',
-      complianceScore: 92,
-      cpcbToken: 'CPCB-AUTH-30192D'
-    }
-  ];
-
-  const defaultSeedSources = [
-    { id: 'SRC-HOTEL-01', name: 'Taj Lands End Hotel & Kitchen', type: 'Hotels', area: 'Bandra West', dailyCapacityKg: 650, schedule: 'Daily 06:00 AM & 08:00 PM', qrCode: 'QR-SRC-7711', streams: ['Wet Organic', 'Dry Recyclable'] },
-    { id: 'SRC-HOSP-02', name: 'Lilavati Hospital & Research Centre', type: 'Hospitals', area: 'Bandra Reef', dailyCapacityKg: 820, schedule: 'Daily 05:00 AM & 04:00 PM', qrCode: 'QR-SRC-8822', streams: ['Domestic Hazardous', 'Sanitary', 'Wet'] },
-    { id: 'SRC-RES-03', name: 'Pali Hill Residential Towers (240 Flats)', type: 'Residential Blocks', area: 'Pali Hill', dailyCapacityKg: 480, schedule: 'Daily 07:30 AM', qrCode: 'QR-SRC-9933', streams: ['Wet Organic', 'Dry Recyclable'] },
-    { id: 'SRC-MKT-04', name: 'Dadarmarket Wholesale Vegetable Yard', type: 'Markets', area: 'Dadar East', dailyCapacityKg: 2400, schedule: 'Shift A (12:00 PM) & Shift B (10:00 PM)', qrCode: 'QR-SRC-1044', streams: ['Wet Organic'] }
-  ];
-
-  const defaultSeedBins = [
-    { id: 'BIN-GREEN-01', tagId: 'RFID-99120-WET', type: 'Wet / Organic', color: 'emerald', capacityL: 240, fillPercent: 88, lastPicked: '2026-07-26 07:15 AM', status: 'Near Capacity', maintenance: 'Good Condition' },
-    { id: 'BIN-BLUE-02', tagId: 'RFID-99121-DRY', type: 'Dry / Recyclable', color: 'blue', capacityL: 240, fillPercent: 42, lastPicked: '2026-07-26 08:30 AM', status: 'Optimal', maintenance: 'Good Condition' },
-    { id: 'BIN-RED-03', tagId: 'RFID-99122-HAZ', type: 'Domestic Hazardous', color: 'rose', capacityL: 120, fillPercent: 15, lastPicked: '2026-07-25 04:00 PM', status: 'Low Fill', maintenance: 'Sanitized' },
-    { id: 'BIN-YELLOW-04', tagId: 'RFID-99123-SAN', type: 'Sanitary Reject', color: 'amber', capacityL: 120, fillPercent: 65, lastPicked: '2026-07-26 09:00 AM', status: 'Moderate', maintenance: 'Lid Latch Inspected' }
-  ];
-
-  const defaultSeedLogs = [
-    { channel: 'BWG_REGISTRATION', status: '200 OK', syncToken: 'CPCB-TX-172102-881', timestamp: '2026-07-26 10:14:02', recordsCount: 142 },
-    { channel: 'DAILY_WASTE_QUANTITIES', status: '200 OK', syncToken: 'CPCB-TX-172102-882', timestamp: '2026-07-26 10:30:15', recordsCount: 4820 },
-    { channel: 'FORM_IV_ANNUAL_RETURNS', status: '200 OK', syncToken: 'CPCB-TX-172102-883', timestamp: '2026-07-25 18:00:00', recordsCount: 12 },
-    { channel: 'EBWGR_COMPLIANCE_LEDBER', status: '200 OK', syncToken: 'CPCB-TX-172102-884', timestamp: '2026-07-26 09:45:22', recordsCount: 94 }
-  ];
-
   // Registration Form State (Layer 1)
   const [regForm, setRegForm] = useState({
     entityType: 'BWG',
@@ -148,65 +75,6 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const [apiResponse, setApiResponse] = useState<any>(null);
   const [copiedCurl, setCopiedCurl] = useState(false);
 
-  // Purge & Restore Handlers
-  const handlePurgeDemoData = () => {
-    setRegisteredEntitiesList([]);
-    setSources([]);
-    setBins([]);
-    setCpcbSyncLogs([]);
-    setRegForm({
-      entityType: 'BWG',
-      name: '',
-      gstin: '',
-      pan: '',
-      cin: '',
-      address: '',
-      state: 'Maharashtra',
-      district: 'Mumbai Suburban',
-      ulb: '',
-      ward: '',
-      contactPerson: '',
-      phone: '',
-      email: '',
-      builtUpAreaSqm: 0,
-      waterConsumptionKlDay: 0,
-      dailyWasteGenerationKg: 0,
-      wasteCategories: []
-    });
-    setWbForm({ grossKg: 0, tareKg: 0, vehicleNo: '', facilityName: '' });
-    setGeneratedSlip(null);
-    setAiForecastResult(null);
-    setRegSuccessMessage('All demo seed data has been purged from the National SWM Platform.');
-    setTimeout(() => setRegSuccessMessage(''), 8000);
-  };
-
-  const handleRestoreDemoData = () => {
-    setRegisteredEntitiesList(defaultSeedEntities);
-    setSources(defaultSeedSources);
-    setBins(defaultSeedBins);
-    setCpcbSyncLogs(defaultSeedLogs);
-    setRegForm({
-      entityType: 'BWG',
-      name: 'Oberoi Grand Commercial Complex',
-      gstin: '27AAAAA0000A1Z5',
-      pan: 'AAAAA0000A',
-      cin: 'U74999MH2020PTC123456',
-      address: 'Sector 18, Commercial Belt, Mumbai, Maharashtra',
-      state: 'Maharashtra',
-      district: 'Mumbai Suburban',
-      ulb: 'Brihanmumbai Municipal Corporation (BMC)',
-      ward: 'Ward K-East',
-      contactPerson: 'Anil Kumar (Chief Environmental Officer)',
-      phone: '+91 98200 12345',
-      email: 'compliance@oberoigrand.com',
-      builtUpAreaSqm: 12500,
-      waterConsumptionKlDay: 45,
-      dailyWasteGenerationKg: 420,
-      wasteCategories: ['Organic Wet Waste', 'Dry Recyclables', 'Domestic Hazardous', 'Sanitary Reject']
-    });
-    setRegSuccessMessage('Default demo seed data restored for testing.');
-    setTimeout(() => setRegSuccessMessage(''), 6000);
-  };
 
   const handleDeleteEntity = (id: string) => {
     setRegisteredEntitiesList(prev => prev.filter(e => e.id !== id));
@@ -415,25 +283,6 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {registeredEntitiesList.length > 0 ? (
-              <button
-                onClick={handlePurgeDemoData}
-                className="px-3.5 py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 border border-rose-500/30 shadow-lg shadow-rose-500/10"
-                title="Purge pre-loaded demo seed entities and forms from the platform"
-              >
-                <Trash2 size={14} />
-                Purge Demo Seed Data
-              </button>
-            ) : (
-              <button
-                onClick={handleRestoreDemoData}
-                className="px-3.5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 border border-emerald-500/30 shadow-lg shadow-emerald-500/10"
-                title="Load sample seed entities for testing"
-              >
-                <RotateCcw size={14} />
-                Restore Seed Data
-              </button>
-            )}
             <button
               onClick={handleTriggerCpcbSync}
               disabled={syncingActive}

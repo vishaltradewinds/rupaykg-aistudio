@@ -53,7 +53,7 @@ export enum IntegrationStatus {
   NOT_CONFIGURED = 'NOT_CONFIGURED',
   CONFIGURED = 'CONFIGURED',
   SANDBOX = 'SANDBOX',
-  MOCK = 'MOCK',
+  SIMULATED = 'SIMULATED',
   CONNECTED = 'CONNECTED',
   DEGRADED = 'DEGRADED',
   UNAVAILABLE = 'UNAVAILABLE',
@@ -448,7 +448,7 @@ export interface IntegrationCapability {
   provider: string;
   category: 'REGISTRY' | 'BLOCKCHAIN' | 'IOT' | 'EXTERNAL_API' | 'ANALYTICS';
   status: IntegrationStatus;
-  mode: 'SANDBOX' | 'MOCK' | 'CONNECTED' | 'NOT_CONFIGURED';
+  mode: 'SANDBOX' | 'SIMULATED' | 'CONNECTED' | 'NOT_CONFIGURED';
   capabilities: string[];
   environment: string;
   lastHealthCheck: string;

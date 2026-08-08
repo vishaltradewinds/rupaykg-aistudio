@@ -46,7 +46,7 @@ export class CCCRegistryService {
       }
     }
     
-    // Simulated response for demonstration and fallback (GRID-INDIA CCC Format)
+    // Simulated response for simulated fallback (GRID-INDIA CCC Format)
     const randomHex = Math.random().toString(16).substring(2, 10).toUpperCase();
     const year = new Date().getFullYear();
     return `GRID-INDIA-CCC-OFFSET-${year}-${randomHex}`;

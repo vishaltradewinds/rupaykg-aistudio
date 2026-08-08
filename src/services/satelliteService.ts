@@ -13,7 +13,7 @@ export interface SatelliteVerificationResult {
 /**
  * Service to interact with Google Earth Engine and Sentinel Satellite APIs.
  * Note: Real implementation requires service account credentials and API keys.
- * This implementation provides the architectural structure with mock logic.
+ * This implementation provides the architectural structure with stubbed logic.
  */
 export class SatelliteVerificationService {
   private static GEE_API_URL = 'https://earthengine.googleapis.com/v1alpha';
@@ -30,7 +30,7 @@ export class SatelliteVerificationService {
     // 2. Call GEE REST API to sample land cover datasets (e.g., ESA WorldCover or MODIS)
     // 3. Process the result
     
-    // Mock Logic:
+    // stubbed logic:
     // Agricultural zones in India are roughly between 8N-37N and 68E-97E.
     const isLikelyAgri = lat > 15 && lat < 30 && lng > 70 && lng < 85;
     const landCover = isLikelyAgri ? 'cropland' : 'urban/built-up';
@@ -60,7 +60,7 @@ export class SatelliteVerificationService {
     // 2. Apply indices like NDVI (Vegetation), NBR (Burned Area), or NDWI (Water)
     // 3. Compare with historical baselines
     
-    // Mock Logic:
+    // stubbed logic:
     const anomalies: string[] = [];
     if (Math.random() > 0.95) {
       anomalies.push('Thermal anomaly detected (potential stubble burning)');

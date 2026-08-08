@@ -19,7 +19,7 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// Mock records migrated to Postgres
+
 export const records = pgTable('records', {
   id: text('id').primaryKey(),
   userId: text('user_id').references(() => users.uid).notNull(),

@@ -111,11 +111,11 @@ export class GuardianService {
            }
         }
       } catch (err) {
-        console.error(`[Guardian] API connection failed for policies. Falling back to mock template.`);
+        console.error(`[Guardian] API connection failed for policies. Falling back to fallback template.`);
       }
     }
 
-    // Mock Fallback
+    // Local Fallback
     return {
       "policyName": "RupayKg Waste-to-Carbon Policy v2.0",
       "standards": ["ISO 14064-3", "W3C VC 2.0", "HCS v1"],

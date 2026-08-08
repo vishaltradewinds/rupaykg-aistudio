@@ -20,55 +20,10 @@ interface VerificationRequest {
   location: string;
 }
 
-const mockRequests: VerificationRequest[] = [
-  {
-    id: 'REQ-1092',
-    name: 'GreenTech Recycling Pvt Ltd',
-    role: 'processor',
-    category: 'Processor / Recycler',
-    submittedAt: '2026-08-07T14:30:00Z',
-    status: 'pending',
-    riskScore: 15,
-    location: 'Mumbai, Maharashtra',
-    documents: [
-      { name: 'CPCB Consent to Operate (CTO)', type: 'PDF', url: '#' },
-      { name: 'GST Registration', type: 'PDF', url: '#' },
-      { name: 'Factory License', type: 'PDF', url: '#' }
-    ]
-  },
-  {
-    id: 'REQ-1093',
-    name: 'EcoLogistics SHG',
-    role: 'aggregator',
-    category: 'Logistics & Aggregation',
-    submittedAt: '2026-08-08T09:15:00Z',
-    status: 'pending',
-    riskScore: 5,
-    location: 'Pune, Maharashtra',
-    documents: [
-      { name: 'SHG Registration Certificate', type: 'PDF', url: '#' },
-      { name: 'Aadhaar of President', type: 'Image', url: '#' }
-    ]
-  },
-  {
-    id: 'REQ-1088',
-    name: 'Pune Municipal Corporation',
-    role: 'municipality',
-    category: 'Administrative Authority',
-    submittedAt: '2026-08-05T11:00:00Z',
-    status: 'approved',
-    riskScore: 0,
-    location: 'Pune, Maharashtra',
-    documents: [
-      { name: 'LGD Code Mapping Auth', type: 'PDF', url: '#', verified: true },
-      { name: 'Govt Nodal Officer ID', type: 'PDF', url: '#', verified: true }
-    ]
-  }
-];
 
 export const StakeholderVerificationDashboard: React.FC = () => {
   const { t } = useTranslation();
-  const [requests, setRequests] = useState<VerificationRequest[]>(mockRequests);
+  const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
 
   const filteredRequests = requests.filter(r => filter === 'all' || r.status === filter);

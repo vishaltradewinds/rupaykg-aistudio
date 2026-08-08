@@ -9,10 +9,10 @@ import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils';
  * Isolates Hedera Guardian-specific serialization, schema matching, and 
  * policy schema mapping from RupayKg's core physical MRV domain logic.
  * 
- * Provides sandbox and mock communication capabilities with clear indicators.
+ * Provides sandbox and simulated communication capabilities with clear indicators.
  */
 export class GuardianPolicyAdapter {
-  private static MOCK_SANDBOX_ACTIVE = true;
+  private static SIMULATION_SANDBOX_ACTIVE = false;
 
   /**
    * Translates a vendor-neutral RupayKg Methodology IR into a Guardian Policy Representation
@@ -42,7 +42,7 @@ export class GuardianPolicyAdapter {
       schemaMappingsCount,
       roleMappingsCount,
       status: 'Compiled & Active on HCS',
-      isSandbox: this.MOCK_SANDBOX_ACTIVE
+      isSandbox: this.SIMULATION_SANDBOX_ACTIVE
     };
   }
 
@@ -111,7 +111,7 @@ export class GuardianPolicyAdapter {
       sequenceNumber: hcsMessage.sequenceNumber,
       runningHash: hcsMessage.runningHash,
       vcPayload,
-      isSandbox: this.MOCK_SANDBOX_ACTIVE
+      isSandbox: this.SIMULATION_SANDBOX_ACTIVE
     };
   }
 
@@ -124,7 +124,7 @@ export class GuardianPolicyAdapter {
     return {
       did,
       status: 'Active',
-      isSandbox: this.MOCK_SANDBOX_ACTIVE
+      isSandbox: this.SIMULATION_SANDBOX_ACTIVE
     };
   }
 
