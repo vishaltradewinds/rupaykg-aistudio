@@ -82,6 +82,7 @@ import HederaGuardianSuite from './components/HederaGuardianSuite';
 import { StakeholderGuides } from './components/StakeholderGuides';
 import StakeholderReportsCenter from './components/StakeholderReportsCenter';
 import { OfflineStatusBadge } from './components/OfflineStatusBadge';
+import { StakeholderVerificationDashboard } from './components/StakeholderVerificationDashboard';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -576,7 +577,7 @@ export default function App() {
   const [cccPool, setCccPool] = useState<any>({});
     const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
-  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config' | 'fraud' | 'integrations'>('users');
+  const [adminSubView, setAdminSubView] = useState<'dashboard' | 'users' | 'audit' | 'waste_config' | 'fraud' | 'integrations' | 'verification'>('users');
   const [wasteTypes, setWasteTypes] = useState<WasteType[]>(WASTE_TYPES);
   const [paymentConfig, setPaymentConfig] = useState({ ccc_price_per_kg: 10, logistics_margin_percent: 15 });
   const [comprehensiveMetrics, setComprehensiveMetrics] = useState<any>(null);
@@ -5965,6 +5966,12 @@ export default function App() {
                   >
                     {t('DPI Integrations')}
                   </button>
+                  <button 
+                    onClick={() => setAdminSubView('verification')}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${adminSubView === 'verification' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    {t('Approvals')}
+                  </button>
                 </div>
               )}
 
@@ -6586,6 +6593,8 @@ export default function App() {
                     </div>
                   </Card>
                 </div>
+              ) : adminSubView === 'verification' ? (
+                <StakeholderVerificationDashboard />
               ) : null}
             </motion.div>
           )}
