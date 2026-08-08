@@ -84,7 +84,7 @@ import StakeholderReportsCenter from './components/StakeholderReportsCenter';
 import { OfflineStatusBadge } from './components/OfflineStatusBadge';
 import { StakeholderVerificationDashboard } from './components/StakeholderVerificationDashboard';
 import { InstallPwaPrompt } from './components/InstallPwaPrompt';
-import WhitepaperModal from './components/WhitepaperModal';
+import WhitepaperModal, { GenesisWhitepaperContent } from './components/WhitepaperModal';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -6356,16 +6356,12 @@ export default function App() {
                 <p className="text-xl text-white/60 max-w-2xl mx-auto">
                   {t('The Foundational Structure and Operating Doctrine of RupayKg')}
                 </p>
-                <div className="pt-6">
-                  <button
-                    onClick={() => setShowWhitepaper(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]"
-                  >
-                    <Book size={18} />
-                    {t('Read the Genesis Whitepaper')}
-                  </button>
-                </div>
               </section>
+
+              {/* Inline Genesis Whitepaper Document */}
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-12 shadow-2xl">
+                <GenesisWhitepaperContent />
+              </div>
             </motion.div>
           )}
 
