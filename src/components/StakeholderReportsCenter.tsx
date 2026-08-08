@@ -1231,6 +1231,28 @@ ${statutoryCsvRows}"Core Metrics","Total Waste Processed","${generatedReport.met
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="sm:col-span-2">
+                <label className="block text-emerald-400 font-bold mb-1.5 flex items-center justify-between">
+                  <span>Active Report Configuration Template</span>
+                  <span className="text-[10px] text-white/50 font-normal">Standard: {activeReportConfig.standard}</span>
+                </label>
+                <select
+                  value={selectedReportId}
+                  onChange={(e) => {
+                    setSelectedReportId(e.target.value);
+                    setGeneratedReport(null);
+                  }}
+                  className="w-full bg-neutral-900 border border-emerald-500/40 rounded-xl px-3 py-2.5 text-white font-semibold focus:outline-none focus:border-emerald-500"
+                >
+                  {STAKEHOLDER_REPORT_TYPES.map((r) => (
+                    <option key={r.id} value={r.id} className="bg-neutral-900 text-white">
+                      [{r.standard}] {r.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-white/50 mt-1">{activeReportConfig.subtitle}</p>
+              </div>
+
               <div>
                 <label className="block text-white/50 mb-1.5 font-medium">Reporting Period</label>
                 <select
