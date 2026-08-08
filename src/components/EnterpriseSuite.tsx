@@ -48,7 +48,7 @@ import {
 } from '../services/enterpriseMrvService';
 import { GuardianPolicyAdapter } from '../services/guardianPolicyAdapter';
 import { RegistryGatewayAdapter } from '../services/registryGatewayAdapter';
-import CpcbBwgCompliance from './CpcbBwgCompliance';
+import SwmCompliancePlatform from './SwmCompliancePlatform';
 import HederaGuardianSuite from './HederaGuardianSuite';
 
 import {
@@ -612,7 +612,7 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <CpcbBwgCompliance user={user} />
+                <SwmCompliancePlatform user={user} onBackToDashboard={() => {}} />
               </motion.div>
             )}
 

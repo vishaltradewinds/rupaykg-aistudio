@@ -84,6 +84,7 @@ import StakeholderReportsCenter from './components/StakeholderReportsCenter';
 import { OfflineStatusBadge } from './components/OfflineStatusBadge';
 import { StakeholderVerificationDashboard } from './components/StakeholderVerificationDashboard';
 import { InstallPwaPrompt } from './components/InstallPwaPrompt';
+import WhitepaperModal from './components/WhitepaperModal';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -452,6 +453,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
+  const [showWhitepaper, setShowWhitepaper] = useState(false);
   const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports'>('dashboard');
   
   // Hedera Guardian Portal State Variables
@@ -3478,25 +3480,9 @@ export default function App() {
           
           
           
-          {['regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
-            <button 
-              onClick={() => setView('mrv')}
-              aria-label={t('MRV & Carbon Accounting')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'mrv' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <ShieldCheck size={20} className={view === 'mrv' ? 'text-cyan-400' : ''} />
-              <span className="hidden md:block font-medium">{t('Carbon MRV')}</span>
-            </button>
-          )}
+          
 
-          <button 
-            onClick={() => setView('blockchain')}
-            aria-label={t('Blockchain Ledger')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'blockchain' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <Cpu size={20} className={view === 'blockchain' ? 'text-cyan-400' : ''} />
-            <span className="hidden md:block font-medium">{t('Blockchain Ledger')}</span>
-          </button>
+          
           <button 
             onClick={() => setView('genesis')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
@@ -3519,13 +3505,7 @@ export default function App() {
             <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise OS & CPCB Hub')}</span>
           </button>
           
-          <button 
-            onClick={() => setView('swm_compliance')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'swm_compliance' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <BookOpen size={20} className={view === 'swm_compliance' ? 'text-blue-400' : ''} />
-            <span className="hidden md:block font-bold">National SWM Portal</span>
-          </button>
+          
           
           <button 
             onClick={() => setView('reports')}
@@ -3556,7 +3536,6 @@ export default function App() {
               {view === 'tasks' && t('Operations Management')}
               {view === 'history' && t('Transaction Ledger')}
               {view === 'admin' && t('Admin Controls')}
-              {view === 'blockchain' && t('Hedera HCS Consensus Ledger & Auto-Verify')}
               
               
               
@@ -3565,7 +3544,6 @@ export default function App() {
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
               {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
-              {view === 'swm_compliance' && 'National SWM Compliance Platform'}
               {view === 'reports' && 'Stakeholder Statutory Reports & Returns Hub'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
@@ -5502,414 +5480,6 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'mrv' && ['regulator', 'state_admin', 'super_admin'].includes(user?.role || '') && (
-            <motion.div 
-              key="mrv"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <p className="text-white/40 text-sm">{t('Verify processed waste records to issue CCCs.')}</p>
-                </div>
-                <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
-                  <button
-                    onClick={() => setMrvTab('pending')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mrvTab === 'pending' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
-                  >
-                    {t('Pending')} ({mrvRecords.length})
-                  </button>
-                  <button
-                    onClick={() => setMrvTab('history')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mrvTab === 'history' ? 'bg-emerald-500 text-black' : 'text-white/60 hover:text-white'}`}
-                  >
-                    {t('History')}
-                  </button>
-                  <button
-                    onClick={() => setMrvTab('guardian')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mrvTab === 'guardian' ? 'bg-cyan-500 text-black' : 'text-cyan-400/60 hover:text-cyan-400'} flex items-center gap-2`}
-                  >
-                    <ShieldCheck size={16} />
-                    {t('Guardian API')}
-                  </button>
-                </div>
-              </div>
-
-              {message && (
-                <div className={`p-4 rounded-xl text-sm flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                  {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-                  {message.text}
-                </div>
-              )}
-
-              {mrvTab === 'pending' ? (
-                mrvRecords.length === 0 ? (
-                  <Card className="py-12 text-center border-dashed">
-                    <ShieldCheck size={48} className="mx-auto text-white/20 mb-4" />
-                    <p className="text-white/60 text-lg font-medium">{t('No pending MRV records')}</p>
-                    <p className="text-white/40 text-sm mt-2">{t('All processed waste has been verified.')}</p>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {mrvRecords.map(record => (
-                      <Card key={record.id} className="border-cyan-500/20 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                          <Globe size={100} className="text-cyan-400" />
-                        </div>
-                        <div className="relative z-10">
-                          <div className="flex justify-between items-start mb-6">
-                            <div>
-                              <p className="text-[10px] font-mono text-white/40 mb-1">ID: {record.id}</p>
-                              <h4 className="font-bold text-lg">{record.weight_kg}kg {record.waste_type}</h4>
-                              <p className="text-sm text-white/60 flex items-center gap-1 mt-1">
-                                <MapPin size={12} /> {record.village}
-                              </p>
-                            </div>
-                            <span className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded uppercase font-bold border border-cyan-500/20">
-                              {t('Pending MRV')}
-                            </span>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-black/40 rounded-xl border border-white/5">
-                            <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('CCC Reduction')}</p>
-                              <p className="text-lg font-mono text-cyan-400">{record.ccc_amount_kg?.toFixed(2)} kg</p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('CCC Value')}</p>
-                              <p className="text-lg font-bold text-emerald-400">₹{record.potential_ccc_value?.toFixed(2)}</p>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-white/5 rounded-xl border border-white/5">
-                            <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('Acreage')}</p>
-                              <p className="text-sm font-mono text-white/80">{record.acreage?.toFixed(2)} acres</p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{t('AI Risk Score')}</p>
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <p className={`text-sm font-bold ${
-                                    (record.risk_score || 0) < 0.2 ? 'text-emerald-400' :
-                                    (record.risk_score || 0) < 0.5 ? 'text-amber-400' : 'text-red-400'
-                                  }`}>
-                                    {((record.risk_score || 0) * 100).toFixed(0)}%
-                                  </p>
-                                  <span className={`text-[8px] px-1 rounded uppercase font-bold border ${
-                                    (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                    (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                    'bg-red-500/10 text-red-400 border-red-500/20'
-                                  }`}>
-                                    {(record.risk_score || 0) < 0.2 ? t('Low') : (record.risk_score || 0) < 0.5 ? t('Med') : t('High')}
-                                  </span>
-                                </div>
-                                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                  <div 
-                                    className={`h-full rounded-full ${
-                                      (record.risk_score || 0) < 0.2 ? 'bg-emerald-500' :
-                                      (record.risk_score || 0) < 0.5 ? 'bg-amber-500' : 'bg-red-500'
-                                    }`}
-                                    style={{ width: `${Math.min(100, (record.risk_score || 0) * 100)}%` }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {record.ai_verification_details && (
-                            <div className="mb-6 p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                              <p className="text-[10px] uppercase tracking-widest text-blue-400 mb-2 flex items-center gap-1">
-                                <Activity size={12} />
-                                {t('AI Verification Assessment')}
-                              </p>
-                              <p className="text-sm text-white/80 leading-relaxed">
-                                {record.ai_verification_details}
-                              </p>
-                            </div>
-                          )}
-
-                          {record.satellite_verification && (
-                            <div className="mb-6 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                              <p className="text-[10px] uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1">
-                                <Globe size={12} />
-                                {t('Satellite Verification')}
-                                {record.satellite_verification.is_verified ? (
-                                  <CheckCircle2 size={10} className="text-emerald-400" />
-                                ) : (
-                                  <AlertCircle size={10} className="text-red-400" />
-                                )}
-                              </p>
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div>
-                                  <span className="text-white/40">{t('Land Cover')}: </span>
-                                  <span className="text-white/80 font-medium">{record.satellite_verification.land_cover_type}</span>
-                                </div>
-                                <div>
-                                  <span className="text-white/40">{t('Confidence')}: </span>
-                                  <span className="text-white/80 font-mono">{(record.satellite_verification.confidence * 100).toFixed(0)}%</span>
-                                </div>
-                              </div>
-                              {record.satellite_verification.anomalies_detected && (
-                                <div className="mt-2 flex items-center gap-1 text-[10px] text-red-400 font-bold uppercase">
-                                  <AlertTriangle size={12} />
-                                  {t('Anomalies detected in this area')}
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {record.geo_lat && record.geo_long && (
-                            <div className="mb-6">
-                              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">{t('Location Verification')}</p>
-                              <iframe 
-                                width="100%" 
-                                height="120" 
-                                frameBorder="0" 
-                                scrolling="no" 
-                                marginHeight={0} 
-                                marginWidth={0} 
-                                src={`https://maps.google.com/maps?q=${record.geo_lat},${record.geo_long}&z=14&output=embed`}
-                                className="rounded-lg border border-white/5"
-                              ></iframe>
-                            </div>
-                          )}
-
-                          <div className={`mb-6 p-4 rounded-xl border ${record.double_counting_declaration ? 'bg-blue-500/10 border-blue-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
-                            <p className={`text-[10px] uppercase tracking-widest mb-2 flex items-center gap-1 ${record.double_counting_declaration ? 'text-blue-400' : 'text-red-400'}`}>
-                              {record.double_counting_declaration ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
-                              Double-Counting Safeguard (CCC Regulations, 2026)
-                            </p>
-                            <p className="text-sm text-white/80 leading-relaxed">
-                              {record.double_counting_declaration 
-                                ? "Citizen declared this emission reduction is not claimed under RECs, I-RECs, or any other mechanism." 
-                                : "WARNING: Citizen did not sign the double-counting declaration. This record may be ineligible for CCCs."}
-                            </p>
-                          </div>
-
-                          {mrvRiskAssessments[record.id] && mrvRiskAssessments[record.id].risk_score !== -1 && (
-                            <div className={`mb-6 p-4 rounded-xl border ${mrvRiskAssessments[record.id].risk_score > 50 ? 'bg-red-500/10 border-red-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
-                              <p className={`text-[10px] uppercase tracking-widest mb-2 flex items-center gap-1 ${mrvRiskAssessments[record.id].risk_score > 50 ? 'text-red-400' : 'text-emerald-400'}`}>
-                                <ShieldCheck size={12} />
-                                {t('AI Risk Assessment')} (Score: {mrvRiskAssessments[record.id].risk_score})
-                              </p>
-                              <p className="text-sm text-white/80 leading-relaxed">
-                                {mrvRiskAssessments[record.id].explanation}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* ICM Compliance Section */}
-                          <div className="mb-6 p-4 rounded-xl border bg-black/40 border-emerald-500/30">
-                            <p className="text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1 text-emerald-400">
-                              <ShieldCheck size={12} />
-                              Indian Carbon Market (ICM) Compliance Module
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                              <div>
-                                <label className="block text-[10px] uppercase text-white/40 mb-1">CCTS Sector</label>
-                                <select 
-                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-                                  value={getIcmComplianceValues(record).ccts_sector}
-                                  onChange={(e) => {
-                                    const nextSector = e.target.value as any;
-                                    const defaultMethodology = ICM_METHODOLOGIES[nextSector]?.[0]?.methodologyId || '';
-                                    setIcmComplianceData(prev => ({
-                                      ...prev,
-                                      [record.id]: {
-                                        ...(prev[record.id] || getIcmComplianceValues(record)),
-                                        ccts_sector: nextSector,
-                                        icm_methodology_id: defaultMethodology
-                                      }
-                                    }));
-                                  }}
-                                >
-                                  {ICM_CCTS_SECTORS.map(sec => (
-                                    <option key={sec} value={sec} className="bg-[var(--color-bg)] text-white">{sec}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-[10px] uppercase text-white/40 mb-1">ICM Methodology</label>
-                                <select 
-                                  className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-                                  value={getIcmComplianceValues(record).icm_methodology_id}
-                                  onChange={(e) => setIcmComplianceData(prev => ({
-                                    ...prev,
-                                    [record.id]: {
-                                      ...(prev[record.id] || getIcmComplianceValues(record)),
-                                      icm_methodology_id: e.target.value
-                                    }
-                                  }))}
-                                >
-                                  {(ICM_METHODOLOGIES[getIcmComplianceValues(record).ccts_sector as keyof typeof ICM_METHODOLOGIES] || []).map(m => (
-                                    <option key={m.methodologyId} value={m.methodologyId} className="bg-[var(--color-bg)] text-white">
-                                      {m.methodologyId} ({m.name})
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-[10px] uppercase text-white/40 mb-1">ACVA ID</label>
-                                <input 
-                                  type="text" 
-                                  className={`w-full bg-black/50 border rounded-lg p-2 text-sm text-white focus:outline-none ${
-                                    /^ACVA-(BEE-)?[A-Z0-9]{3,8}$/i.test(getIcmComplianceValues(record).acva_id) 
-                                      ? 'border-emerald-500/40 focus:border-emerald-500' 
-                                      : 'border-red-500/40 focus:border-red-500'
-                                  }`}
-                                  placeholder="Your ACVA ID (e.g. ACVA-BEE-001)"
-                                  value={getIcmComplianceValues(record).acva_id}
-                                  onChange={(e) => setIcmComplianceData(prev => ({
-                                    ...prev,
-                                    [record.id]: {
-                                      ...(prev[record.id] || getIcmComplianceValues(record)),
-                                      acva_id: e.target.value
-                                    }
-                                  }))}
-                                />
-                              </div>
-                            </div>
-                            {/* In-context methodology details */}
-                            <div className="mt-3 pt-3 border-t border-white/5 flex flex-col gap-1.5">
-                              {(() => {
-                                const vals = getIcmComplianceValues(record);
-                                const sectorMethods = ICM_METHODOLOGIES[vals.ccts_sector as keyof typeof ICM_METHODOLOGIES] || [];
-                                const currentMethod = sectorMethods.find(m => m.methodologyId === vals.icm_methodology_id);
-                                const acvaValid = /^ACVA-(BEE-)?[A-Z0-9]{3,8}$/i.test(vals.acva_id);
-                                return (
-                                  <>
-                                    {currentMethod && (
-                                      <div>
-                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Methodology Standard: </span>
-                                        <span className="text-[11px] text-white/80">{currentMethod.name} — {currentMethod.description}</span>
-                                      </div>
-                                    )}
-                                    {!acvaValid && (
-                                      <p className="text-[10px] text-red-400 font-semibold flex items-center gap-1 mt-1">
-                                        <AlertTriangle size={10} /> Valid ACVA ID (Format: ACVA-BEE-XXX) is required for national carbon registration.
-                                      </p>
-                                    )}
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                          
-                          <div className="flex gap-3">
-                            <button 
-                              onClick={() => handleAssessRisk(record)}
-                              disabled={mrvRiskAssessments[record.id]?.risk_score === -1}
-                              className="px-4 py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold rounded-xl text-sm transition-all flex items-center justify-center disabled:opacity-50"
-                              title="Assess Risk with AI"
-                            >
-                              {mrvRiskAssessments[record.id]?.risk_score === -1 ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-                            </button>
-                            <button 
-                              onClick={() => handleMRVAction(record.id, 'verified')}
-                              disabled={loading || !record.double_counting_declaration}
-                              className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                              <CheckCircle2 size={16} />
-                              Verify & Issue CCCs
-                            </button>
-                            <button 
-                              onClick={() => handleMRVAction(record.id, 'rejected')}
-                              disabled={loading}
-                              className="px-4 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl text-sm transition-all flex items-center justify-center disabled:opacity-50"
-                              title="Reject MRV"
-                            >
-                              <AlertCircle size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                )
-              ) : mrvTab === 'history' ? (
-                <Card className="p-0 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-white/5 text-white/60 border-b border-white/10">
-                        <tr>
-                          <th className="p-4 font-medium">{t('Record ID')}</th>
-                          <th className="p-4 font-medium">{t('Details')}</th>
-                          <th className="p-4 font-medium">{t('AI Risk')}</th>
-                          <th className="p-4 font-medium">{t('Status')}</th>
-                          <th className="p-4 font-medium">{t('Verified By')}</th>
-                          <th className="p-4 font-medium">{t('Date')}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {mrvHistory.map(record => (
-                          <tr key={record.id} className="hover:bg-white/5 transition-colors">
-                            <td className="p-4 font-mono text-xs text-white/60">{record.id}</td>
-                            <td className="p-4">
-                              <p className="font-medium">{record.weight_kg}kg {record.waste_type}</p>
-                              <p className="text-xs text-white/40">{labels.sub}: {record.village}</p>
-                            </td>
-                            <td className="p-4">
-                              <div className="flex items-center gap-2">
-                                <span 
-                                  className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold border cursor-help ${
-                                    (record.risk_score || 0) < 0.2 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                    (record.risk_score || 0) < 0.5 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                    'bg-red-500/10 text-red-400 border-red-500/20'
-                                  }`}
-                                  title={record.ai_verification_details || "No AI verification details available"}
-                                >
-                                  {((record.risk_score || 0) * 100).toFixed(0)}%
-                                </span>
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${record.mrv_status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                                {record.mrv_status}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <p className="font-medium">{record.mrv_verified_by_name}</p>
-                              <p className="text-xs text-white/40 capitalize">{record.mrv_verified_by_role?.replace('_', ' ')}</p>
-                              {record.blockchain_hash && (
-                                <button 
-                                  onClick={() => setView('blockchain')}
-                                  className="flex items-center gap-1 text-[9px] text-emerald-400 hover:text-emerald-300 mt-1 font-mono"
-                                >
-                                  <Cpu size={10} />
-                                  {record.blockchain_hash.substring(0, 8)}...
-                                </button>
-                              )}
-                              {record.registry_serial_number && (
-                                <div className="text-[9px] text-blue-400 mt-1 font-mono">
-                                  Reg: {record.registry_serial_number}
-                                </div>
-                              )}
-                            </td>
-                            <td className="p-4 text-white/60">
-                              {record.mrv_verified_at ? new Date(record.mrv_verified_at).toLocaleString() : 'N/A'}
-                            </td>
-                          </tr>
-                        ))}
-                        {mrvHistory.length === 0 && (
-                          <tr>
-                            <td colSpan={6} className="p-8 text-center text-white/40">{t('No MRV history found')}</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </Card>
-              ) : mrvTab === 'guardian' ? (
-                <div className="mt-4">
-                  <HederaGuardianSuite user={user} defaultSubTab="policy" />
-                </div>
-              ) : null}
-            </motion.div>
-          )}
-
           {view === 'admin' && ['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
             <motion.div 
               key="admin"
@@ -6786,210 +6356,14 @@ export default function App() {
                 <p className="text-xl text-white/60 max-w-2xl mx-auto">
                   {t('The Foundational Structure and Operating Doctrine of RupayKg')}
                 </p>
-              </section>
-
-              {/* I. Introduction */}
-              <Card className="p-8 border-white/10 bg-white/5">
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Shield className="text-emerald-400" /> {t('I. Introduction')}
-                </h2>
-                <div className="space-y-4 text-white/70 leading-relaxed">
-                  <p>
-                    {t('RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.')}
-                  </p>
-                  <p>
-                    {t('The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.')}
-                  </p>
-                  <p>
-                    {t('RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.')}
-                  </p>
-                </div>
-              </Card>
-
-              {/* II. Unified Operating System Model */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="p-8 border-white/10 bg-white/5">
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <Layers className="text-emerald-400" /> {t('II. Unified Operating System Model')}
-                  </h2>
-                  <div className="overflow-hidden rounded-xl border border-white/10">
-                    <table className="w-full text-left">
-                      <thead className="bg-white/10">
-                        <tr>
-                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">{t('Context')}</th>
-                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">{t('Anchor')}</th>
-                          <th className="p-4 text-xs uppercase tracking-widest text-white/40">{t('Category')}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        <tr>
-                          <td className="p-4 font-bold">{t('Urban')}</td>
-                          <td className="p-4 text-white/60">{t('Municipal Corp + Ward')}</td>
-                          <td className="p-4 text-emerald-400">{t('MSW')}</td>
-                        </tr>
-                        <tr>
-                          <td className="p-4 font-bold">{t('Rural')}</td>
-                          <td className="p-4 text-white/60">{t('Gram Panchayat + Village')}</td>
-                          <td className="p-4 text-emerald-400">{t('Biomass')}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <p className="mt-4 text-sm text-white/40 italic">
-                    {t('* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.')}
-                  </p>
-                </Card>
-
-                <Card className="p-8 border-white/10 bg-white/5">
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <User className="text-emerald-400" /> {t('III. Unified Stakeholder Architecture')}
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      t("Waste Generator"), t("Aggregator"), t("Processor"), 
-                      t("Administrative Authority"), t("Producers (EPR)"), 
-                      t("CSR Contributors"), t("CCC Buyers"), t("Regulator")
-                    ].map((s) => (
-                      <span key={s} className="px-3 py-1 bg-white/10 rounded-full text-sm border border-white/10">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mt-6 text-sm text-white/60">
-                    {t('The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.')}
-                  </p>
-                </Card>
-              </div>
-
-              {/* IV & V */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="p-8 border-white/10 bg-white/5">
-                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <Zap className="text-emerald-400" /> {t('IV. CCC Origination')}
-                  </h2>
-                  <ul className="space-y-3 text-white/70">
-                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> {t('Methane avoidance through diversion')}</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> {t('Biomass-based fossil substitution')}</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> {t('Recycling substitution')}</li>
-                  </ul>
-                </Card>
-
-                <Card className="p-8 border-white/10 bg-white/5">
-                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <TrendingUp className="text-emerald-400" /> {t('V. Multi-Rail Architecture')}
-                  </h2>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[t("Recycler Rail"), t("CSR Rail"), t("EPR Rail"), t("Governance Layer"), t("CCC Rail")].map((r) => (
-                      <div key={r} className="p-2 bg-white/5 rounded border border-white/5 text-xs text-center">
-                        {r}
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-
-              {/* VI & VII */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="p-8 border-white/10 bg-white/5 border-l-4 border-l-emerald-500">
-                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <Scale className="text-emerald-400" /> {t('VI. Regulator Sovereignty')}
-                  </h2>
-                  <p className="text-white/70 text-sm leading-relaxed">
-                    {t('Issuance authority remains regulator-controlled. RupayKg generates registry-ready MRV data but does not independently issue CCCs. All CCCs must be event-traceable, registry-compatible, and align with national CCC governance frameworks.')}
-                  </p>
-                </Card>
-
-                <Card className="p-8 border-emerald-500/20 bg-emerald-500/5">
-                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                    <Activity className="text-emerald-400" /> {t('VII. Strategic Position')}
-                  </h2>
-                  <p className="text-lg font-medium text-emerald-400 italic">
-                    {t('"India’s Unified Waste-to-CCC Infrastructure Layer for the Compliance CCC Era."')}
-                  </p>
-                </Card>
-              </div>
-
-              {/* VIII. Digital Carbon MRV Doctrine */}
-              <Card className="p-8 border-cyan-500/20 bg-cyan-500/5 mt-8">
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <ShieldCheck className="text-cyan-400" /> {t('VIII. Digital Carbon MRV Doctrine')}
-                </h2>
-                <p className="text-white/70 text-sm leading-relaxed">
-                  {t('The platform operates a Digital MRV (Measurement, Reporting, and Verification) engine where every physical waste event automatically triggers a corresponding Carbon Lifecycle Event. Net emission reductions are calculated based on landfill methane avoidance, biomass substitution, and transport optimization, ensuring that every kilogram of waste and its climate value are immutably linked and audit-ready for national registries.')}
-                </p>
-              </Card>
-
-              {/* IX. Stakeholder Guides Section */}
-              <StakeholderGuides 
-                userRole={user?.role} 
-                onNavigateToView={(v) => setView(v as any)} 
-              />
-
-              {/* Founder's Note */}
-              <section className="bg-white/5 border border-white/10 rounded-3xl p-12 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <Leaf size={200} />
-                </div>
-                <div className="relative z-10 max-w-3xl">
-                  <h2 className="text-3xl font-black mb-8 italic">{t("Founder's Note")}</h2>
-                  <div className="space-y-6 text-xl text-white/80 font-light leading-relaxed">
-                    <p>{t('When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?')}</p>
-                    <p>{t('India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.')}</p>
-                    <p>{t('RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.')}</p>
-                    <p className="text-emerald-400 font-bold">{t('Waste is no longer disposal. It is governance-linked climate infrastructure.')}</p>
-                  </div>
-                  <p className="mt-12 font-bold text-white/40 uppercase tracking-widest">{t('— Founder, RupayKg')}</p>
-                </div>
-              </section>
-
-              {/* Constitutional Declaration */}
-              <section className="border-2 border-white/10 rounded-3xl p-12 bg-white/[0.02] font-serif">
-                <div className="text-center mb-12">
-                  <h2 className="text-sm uppercase tracking-[0.5em] text-white/40 mb-4">{t('Legally Styled')}</h2>
-                  <h3 className="text-4xl font-bold">{t('DECLARATION OF FOUNDATIONAL STRUCTURE')}</h3>
-                  <div className="w-24 h-1 bg-emerald-500 mx-auto mt-6"></div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-sm text-white/60">
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article I — Unified Operating System')}</h4>
-                      <p>{t('RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.')}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article II — Unified Stakeholder Doctrine')}</h4>
-                      <p>{t('The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.')}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article III — Waste Classification')}</h4>
-                      <p>{t('Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.')}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article IV — CCC Engine')}</h4>
-                      <p>{t('All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.')}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article V — Rail Separation')}</h4>
-                      <p>{t('RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, and Carbon Certificate (CCC) issuance. Double counting is explicitly prohibited through cryptographic Environmental Trust scores.')}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article VI — Regulator Sovereignty')}</h4>
-                      <p>{t('Issuance authority shall remain under regulator control. RupayKg serves as the digital evidence layer.')}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white mb-2">{t('Article VII — Digital Carbon MRV')}</h4>
-                      <p>{t('Every waste transaction must generate a carbon event ID with timestamp, stakeholder chain, and emission reduction estimate for sovereign auditability.')}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-12 pt-12 border-t border-white/10 text-center">
-                  <p className="text-emerald-400 font-bold text-xl">{t('Institutional Identity')}</p>
-                  <p className="text-white/40 mt-2 max-w-2xl mx-auto">
-                    {t('RupayKg is hereby defined as: India\'s Circular Economy Operating System, a unified digital platform integrating Waste Management, Digital MRV, and Carbon Accounting under a single national architecture.')}
-                  </p>
+                <div className="pt-6">
+                  <button
+                    onClick={() => setShowWhitepaper(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]"
+                  >
+                    <Book size={18} />
+                    {t('Read the Genesis Whitepaper')}
+                  </button>
                 </div>
               </section>
             </motion.div>
@@ -7006,17 +6380,6 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'swm_compliance' && (
-            <motion.div
-              key="swm_compliance"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <SwmCompliancePlatform user={user} onBackToDashboard={() => setView('dashboard')} />
-            </motion.div>
-          )}
-
           {view === 'reports' && (
             <motion.div
               key="reports"
@@ -7028,17 +6391,6 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === 'blockchain' && (
-            <motion.div
-              key="blockchain"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-6"
-            >
-              <HederaGuardianSuite user={user} defaultSubTab="integrity" />
-            </motion.div>
-          )}
 
           
 
@@ -7261,6 +6613,7 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
+      <WhitepaperModal isOpen={showWhitepaper} onClose={() => setShowWhitepaper(false)} />
     </div>
   );
 }
