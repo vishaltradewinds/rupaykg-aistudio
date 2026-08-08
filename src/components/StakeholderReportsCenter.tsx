@@ -281,12 +281,46 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
   // Auto-detect best initial report for user role
   useEffect(() => {
     const role = user?.role || 'citizen';
-    const match = STAKEHOLDER_REPORT_TYPES.find(r => r.roleTarget.includes(role));
-    if (match) {
-      setSelectedReportId(match.id);
-      setSelectedCategory(match.category);
+    let defaultCat = 'bwg_primary';
+    let defaultReportId = 'bwg_form_ii_iii_audit';
+
+    if (['municipal_admin', 'municipality', 'state_admin', 'regulator'].includes(role)) {
+      defaultCat = 'urban_municipal';
+      defaultReportId = 'cpcb_form_iv';
+    } else if (['panchayat', 'fpo'].includes(role)) {
+      defaultCat = 'rural_panchayat';
+      defaultReportId = 'sbmg_gobardhan_return';
+    } else if (['industry', 'industry_generator', 'commercial', 'commercial_generator', 'epr_partner', 'pro', 'csr_partner'].includes(role)) {
+      defaultCat = 'industry_pro';
+      defaultReportId = 'cpcb_form_10_used_oil_return';
+    } else if (['processor', 'recycler', 'aggregator'].includes(role)) {
+      defaultCat = 'recycler_processor';
+      defaultReportId = 'recycler_mrf_operational_return';
+    } else if (['auditor'].includes(role)) {
+      defaultCat = 'auditor_regulator';
+      defaultReportId = 'unfccc_acm0022_carbon_verification';
+    } else if (['citizen'].includes(role)) {
+      defaultCat = 'citizen_farmer';
+      defaultReportId = 'citizen_farmer_carbon_certificate';
     }
+
+    setSelectedCategory(defaultCat);
+    setSelectedReportId(defaultReportId);
   }, [user]);
+
+  const handleCategorySelect = (catId: string) => {
+    setSelectedCategory(catId);
+    setGeneratedReport(null);
+    const reportsInCat = catId === 'all'
+      ? STAKEHOLDER_REPORT_TYPES
+      : STAKEHOLDER_REPORT_TYPES.filter(r => r.category === catId);
+    if (reportsInCat.length > 0) {
+      const existsInCat = reportsInCat.some(r => r.id === selectedReportId);
+      if (!existsInCat) {
+        setSelectedReportId(reportsInCat[0].id);
+      }
+    }
+  };
 
   const activeReportConfig = STAKEHOLDER_REPORT_TYPES.find(r => r.id === selectedReportId) || STAKEHOLDER_REPORT_TYPES[0];
 
@@ -340,6 +374,29 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
                 { label: 'Authorized Recycler Handover', value: `${Math.round(baseWeight * 0.35).toLocaleString()} kg` },
                 { label: 'Domestic Hazardous TSDF Handover', value: `${Math.round(baseWeight * 0.05).toLocaleString()} kg` },
                 { label: 'ULB Collection Receipt Serial', value: `ULB-REC-${Math.floor(100000 + Math.random() * 900000)}` }
+              ]
+            }
+          ];
+          break;
+
+        case 'bwg_daily_4stream_manifest':
+          statutoryFormName = 'CPCB BWG DAILY 4-STREAM WEIGHBRIDGE MANIFEST (CPCB Guidelines 2017)';
+          statutorySections = [
+            {
+              title: 'Section I: Daily 4-Stream Weighbridge Manifest Summary',
+              items: [
+                { label: 'Wet Organic Stream Logged', value: `${Math.round(baseWeight * 0.55).toLocaleString()} kg` },
+                { label: 'Dry Recyclables Stream Logged', value: `${Math.round(baseWeight * 0.32).toLocaleString()} kg` },
+                { label: 'Domestic Hazardous Waste Logged', value: `${Math.round(baseWeight * 0.08).toLocaleString()} kg` },
+                { label: 'Sanitary Rejects Stream Logged', value: `${Math.round(baseWeight * 0.05).toLocaleString()} kg` }
+              ]
+            },
+            {
+              title: 'Section II: Digital QR Code Chain-of-Custody & Fleet Telemetry',
+              items: [
+                { label: 'Weighbridge IoT Sensor Verification', value: '100% Calibrated & Digitally Signed' },
+                { label: 'GPS Transport Vehicle Tracking ID', value: `GPS-FLEET-${Math.floor(1000 + Math.random() * 9000)}` },
+                { label: 'CPCB QR Manifest Serial Hash', value: `MANIFEST-QR-${Math.floor(100000 + Math.random() * 900000)}` }
               ]
             }
           ];
@@ -438,6 +495,29 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
           ];
           break;
 
+        case 'legacy_dumpsite_biomining':
+          statutoryFormName = 'CPCB LEGACY DUMPSITE BIOMINING & LAND RECLAMATION AUDIT';
+          statutorySections = [
+            {
+              title: 'Section I: Legacy Waste Land Reclamation & Biomining Progress',
+              items: [
+                { label: 'Total Legacy Waste Processed (Trommeling)', value: `${Math.round(baseWeight * 18.5).toLocaleString()} m³` },
+                { label: 'Soil / Inert Soil Recovered for Filling', value: `${Math.round(baseWeight * 11.2).toLocaleString()} m³` },
+                { label: 'RDF Extracted for Cement Kilns', value: `${Math.round(baseWeight * 4.8).toLocaleString()} Tons` },
+                { label: 'Reclaimed Land Area', value: `${(baseWeight / 3200).toFixed(2)} Acres` }
+              ]
+            },
+            {
+              title: 'Section II: Avoided Landfill Methane Emissions & RDF Off-take',
+              items: [
+                { label: 'Avoided Methane Emissions', value: `${Math.round(baseCcc * 4.2).toLocaleString()} kg CO₂e` },
+                { label: 'Bio-remediated Site Safety Clearance', value: '100% Leachate & Odor Compliant' },
+                { label: 'CPCB Dumpsite Remediation Registry ID', value: `DUMPSITE-REC-${Math.floor(100000 + Math.random() * 900000)}` }
+              ]
+            }
+          ];
+          break;
+
         case 'sbmg_gobardhan_return':
           statutoryFormName = 'SBM-G PHASE-II GOBARDHAN PROGRESS FORMAT B';
           statutorySections = [
@@ -460,7 +540,7 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
           ];
           break;
 
-        case 'caqm_stubble_paddy_straw_return':
+        case 'crop_residue_stubble_audit':
           statutoryFormName = 'CAQM DAILY PADDY STRAW DIVERSION AUDIT FORMAT';
           statutorySections = [
             {
@@ -559,7 +639,7 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
           ];
           break;
 
-        case 'sebi_brsr_core_return':
+        case 'brsr_esg_statement':
           statutoryFormName = 'SEBI BRSR CORE PRINCIPLES 1-9 & CIRCULAR ECONOMY RETURN';
           statutorySections = [
             {
@@ -1071,7 +1151,7 @@ ${statutoryCsvRows}"Core Metrics","Total Waste Processed","${generatedReport.met
         {categories.map((cat) => (
           <button
             key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
+            onClick={() => handleCategorySelect(cat.id)}
             className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === cat.id
                 ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
