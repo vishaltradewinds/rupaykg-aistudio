@@ -2,7 +2,7 @@ import { db } from '../db/index.ts';
 import { 
   carbon_projects, methodologies, methodology_versions, 
   methodology_parameters, calculation_datasets, calculation_runs,
-  carbon_claims, certificates, evidence, measurements,
+  carbon_claims, certificates, evidence, measurements, instruments, calibrations,
   monitoring_periods, pdd, pdd_versions, acva_cases, findings,
   records
 } from '../db/schema.ts';
@@ -102,11 +102,18 @@ export class MRVQualityEngine {
   async checkInstrumentCalibration(instrumentId: string, measurementDate: Date) {
     const instrumentRecord = await db.select().from(instruments).where(eq(instruments.id, instrumentId)).limit(1);
     if (!instrumentRecord.length) throw new Error("Instrument not found");
-    const inst = instrumentRecord[0];
     
-    if (!inst.calibrationExpiry || new Date(inst.calibrationExpiry) < measurementDate) {
+    const calibrationRecords = await db.select().from(calibrations).where(eq(calibrations.instrumentId, instrumentId));
+    
+    if (!calibrationRecords.length) {
+      return { valid: false, reason: "No calibration found" };
+    }
+    
+    const validCalibration = calibrationRecords.find(c => new Date(c.expiryDate) > measurementDate);
+    if (!validCalibration) {
       return { valid: false, reason: "Calibration expired" };
     }
+
     return { valid: true };
   }
 
@@ -134,7 +141,6 @@ export class PDDEngine {
     const newPdd = {
       id: crypto.randomUUID(),
       projectId,
-      status: 'PDD_DRAFT'
     };
     await db.insert(pdd).values(newPdd);
     
@@ -144,8 +150,7 @@ export class PDDEngine {
       id: crypto.randomUUID(),
       pddId: newPdd.id,
       version: 1,
-      contentHash: hash,
-      status: 'PDD_DRAFT'
+      content: {}, fileHash: hash,
     });
     
     return newPdd;

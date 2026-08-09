@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { integer, pgTable, serial, text, timestamp, doublePrecision, boolean, jsonb } from 'drizzle-orm/pg-core';
+import { integer, pgTable, serial, text, timestamp, doublePrecision, boolean, jsonb, uuid, varchar, numeric } from 'drizzle-orm/pg-core';
 
 // Users table (representing citizens, officials, etc.)
 export const users = pgTable('users', {
@@ -213,4 +213,76 @@ export const certificates = pgTable('certificates', {
   serialNumber: text('serial_number').notNull().unique(),
   status: text('status').notNull().default('ISSUED'), // ISSUED, AVAILABLE, TRANSFERRED, RETIRED
   issueDate: timestamp('issue_date').defaultNow(),
+});
+
+// --- PHASE 3: PHYSICAL EVIDENCE INTEGRATION ---
+
+export const weighbridge_records = pgTable('weighbridge_records', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  facilityId: uuid('facility_id').notNull().references(() => facilities.id),
+  ticketNumber: varchar('ticket_number', { length: 255 }).notNull(),
+  vehicleId: varchar('vehicle_id', { length: 255 }),
+  grossWeight: numeric('gross_weight').notNull(),
+  tareWeight: numeric('tare_weight').notNull(),
+  netWeight: numeric('net_weight').notNull(),
+  material: varchar('material', { length: 255 }).notNull(),
+  timestamp: timestamp('timestamp').notNull(),
+  sourceRecordId: uuid('source_record_id').references(() => records.id),
+  evidenceHash: varchar('evidence_hash', { length: 255 }),
+});
+
+export const landfill_facilities = pgTable('landfill_facilities', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  facilityId: uuid('facility_id').notNull().references(() => facilities.id),
+  landfillType: varchar('landfill_type', { length: 255 }).notNull(),
+  startDate: timestamp('start_date').notNull(),
+  closureDate: timestamp('closure_date'),
+  gasCaptureSystem: boolean('gas_capture_system').default(false),
+  flare: boolean('flare').default(false),
+  energyRecovery: boolean('energy_recovery').default(false),
+});
+
+export const waste_deposition_history = pgTable('waste_deposition_history', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  landfillFacilityId: uuid('landfill_facility_id').notNull().references(() => landfill_facilities.id),
+  year: integer('year').notNull(),
+  wasteType: varchar('waste_type', { length: 255 }).notNull(),
+  quantity: numeric('quantity').notNull(),
+  doc: numeric('doc'),
+  docf: numeric('docf'),
+  mcf: numeric('mcf'),
+  k: numeric('k'),
+  source: varchar('source', { length: 255 }),
+  evidenceId: uuid('evidence_id').references(() => evidence.id),
+});
+
+export const gas_meter_readings = pgTable('gas_meter_readings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  instrumentId: uuid('instrument_id').notNull().references(() => instruments.id),
+  timestamp: timestamp('timestamp').notNull(),
+  flow: numeric('flow').notNull(),
+  unit: varchar('unit', { length: 50 }).notNull(), // e.g. m3/hr, Nm3/hr
+  temperature: numeric('temperature'),
+  pressure: numeric('pressure'),
+  methaneFraction: numeric('methane_fraction'),
+});
+
+export const methane_measurements = pgTable('methane_measurements', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  instrumentId: uuid('instrument_id').notNull().references(() => instruments.id),
+  timestamp: timestamp('timestamp').notNull(),
+  reading: numeric('reading').notNull(),
+  basis: varchar('basis', { length: 255 }), // wet or dry
+  evidenceId: uuid('evidence_id').references(() => evidence.id),
+});
+
+export const electricity_meter_readings = pgTable('electricity_meter_readings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  instrumentId: uuid('instrument_id').notNull().references(() => instruments.id),
+  periodStart: timestamp('period_start').notNull(),
+  periodEnd: timestamp('period_end').notNull(),
+  generationMwh: numeric('generation_mwh'),
+  exportMwh: numeric('export_mwh'),
+  consumptionMwh: numeric('consumption_mwh'),
+  evidenceId: uuid('evidence_id').references(() => evidence.id),
 });

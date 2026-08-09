@@ -78,7 +78,7 @@ carbonRouter.post('/projects/:id/mrv', async (req, res) => {
 carbonRouter.post('/projects/:id/calculations', async (req, res) => {
   try {
     const { datasetId, methodology, version } = req.body;
-    const result = await carbonCalculationEngine.run(methodology, version, datasetId);
+    const result = await carbonCalculationEngine.run(methodology, version, datasetId, req.body.inputs || {});
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
