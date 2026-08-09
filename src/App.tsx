@@ -87,6 +87,7 @@ import { StakeholderVerificationDashboard } from './components/StakeholderVerifi
 import { InstallPwaPrompt } from './components/InstallPwaPrompt';
 import WhitepaperModal, { GenesisWhitepaperContent } from './components/WhitepaperModal';
 import GroundRealityHub from './components/GroundRealityHub';
+import { CCTSCarbonOS } from './components/CCTSCarbonOS';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -456,7 +457,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
   const [showWhitepaper, setShowWhitepaper] = useState(false);
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality' | 'ccts_carbon_os'>('dashboard');
   
   // Hedera Guardian Portal State Variables
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
@@ -3537,6 +3538,14 @@ export default function App() {
           
           
           <button 
+            onClick={() => setView('ccts_carbon_os')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ccts_carbon_os' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Globe size={20} className="text-emerald-400" />
+            <span className="hidden md:block font-bold text-emerald-300">CCTS Carbon OS</span>
+          </button>
+
+          <button 
             onClick={() => setView('reports')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'reports' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
@@ -3581,6 +3590,7 @@ export default function App() {
               {view === 'genesis' && t('Foundational Doctrine')}
               {view === 'settings' && t('Account Settings')}
               {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
+              {view === 'ccts_carbon_os' && 'RupayKg CCTS Carbon OS — Sovereign Indian Carbon Market Engine'}
               {view === 'reports' && 'Stakeholder Statutory Reports & Returns Hub'}
               {view === 'ground_reality' && 'Informal Sector & Operational Ground Reality Hub'}
             </h2>
@@ -6403,6 +6413,17 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
             >
               <GroundRealityHub userRole={user?.role} userName={user?.name} userDistrict={formData.district || 'Jabalpur'} operatingContext={operatingContext} />
+            </motion.div>
+          )}
+
+          {view === 'ccts_carbon_os' && (
+            <motion.div
+              key="ccts_carbon_os"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <CCTSCarbonOS token={token} user={user} safeFetch={safeFetch} safeParseJson={safeParseJson} />
             </motion.div>
           )}
 
