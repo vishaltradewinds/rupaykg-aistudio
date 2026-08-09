@@ -1,3 +1,4 @@
+import { carbonRouter } from "./src/routes/carbon.ts";
 import { auth as requireAuth } from "./src/middleware/auth.ts";
 import { registerStakeholderUser } from "./src/db/users.ts";
 import { SWMComplianceService } from "./src/services/swmComplianceEngine";
@@ -4827,6 +4828,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
       });
     }
   }, 10000);
+  app.use("/api/v1/carbon", auth(), carbonRouter);
 
   // Catch-all 404 handler for unmatched API routes to prevent HTML SPA fallback
   app.all("/api/*", (req, res) => {

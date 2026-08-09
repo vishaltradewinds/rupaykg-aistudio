@@ -1283,7 +1283,7 @@ export default function App() {
               localStorage.setItem(cacheKey, JSON.stringify({ tips, timestamp: Date.now() }));
             }
           } catch (err: any) {
-            console.error("AI Eco-Tips Error:", err);
+            console.warn("AI Eco-Tips Error:", err);
             
             // If it's a daily limit error, block AI for the rest of this session
             if (err.message?.includes("Daily Quota Exhausted") || err.message?.includes("limit: 20")) {
@@ -1336,7 +1336,7 @@ export default function App() {
             localStorage.setItem(cacheKey, JSON.stringify({ forecast: response.text, timestamp: Date.now() }));
           }
         } catch (err: any) {
-          console.error("AI Forecast Error:", err);
+          console.warn("AI Forecast Error:", err);
           
           if (err.message?.includes("Daily Quota Exhausted") || err.message?.includes("limit: 20")) {
             sessionStorage.setItem('ai_daily_blocked', 'true');
@@ -2335,7 +2335,7 @@ export default function App() {
         text: `CircularNet Identified: ${matchedType}${data.weight_kg ? ` (${data.weight_kg}kg)` : ''}. Contamination: ${data.contamination || 'Unknown'}` 
       });
     } catch (err) {
-      console.error("CircularNet Analysis Error:", err);
+      console.warn("CircularNet Analysis Error:", err);
       setMessage({ type: 'error', text: 'CircularNet analysis failed. Please select manually.' });
     } finally {
       setLoading(false);
@@ -2407,7 +2407,7 @@ export default function App() {
           risk_score = result.risk_score || 0;
           ai_verification_details = result.assessment || "AI Verification Completed";
         } catch (aiErr) {
-          console.error("AI Verification Error:", aiErr);
+          console.warn("AI Verification Error:", aiErr);
           ai_verification_details = "AI Verification Failed: " + (aiErr instanceof Error ? aiErr.message : String(aiErr));
         }
       }
@@ -3265,6 +3265,15 @@ export default function App() {
                         <option value="ccc_buyer">Carbon Project Developer & Credit Buyer</option>
                         <option value="csr_partner">CSR Sustainability Partner</option>
                         <option value="epr_partner">EPR Brand / PRO Partner</option>
+                        <option value="PROJECT_OWNER">Carbon Project Owner</option>
+                        <option value="PROJECT_OPERATOR">Carbon Project Operator</option>
+                        <option value="MRV_MANAGER">MRV Manager</option>
+                        <option value="CARBON_MANAGER">Carbon Manager</option>
+                        <option value="DOCUMENT_MANAGER">Document Manager</option>
+                        <option value="ACVA_USER">ACVA User</option>
+                        <option value="REGULATOR_USER">Regulator User</option>
+                        <option value="AUDITOR">Auditor</option>
+                        <option value="BUYER">Buyer</option>
                       </optgroup>
                     </select>
                   </div>
@@ -5810,6 +5819,15 @@ export default function App() {
                                 <option value="super_admin">{t('Super Admin')}</option>
                                 <option value="csr_partner">{t('CSR Partner')}</option>
                                 <option value="epr_partner">{t('EPR Partner')}</option>
+                        <option value="PROJECT_OWNER">Carbon Project Owner</option>
+                        <option value="PROJECT_OPERATOR">Carbon Project Operator</option>
+                        <option value="MRV_MANAGER">MRV Manager</option>
+                        <option value="CARBON_MANAGER">Carbon Manager</option>
+                        <option value="DOCUMENT_MANAGER">Document Manager</option>
+                        <option value="ACVA_USER">ACVA User</option>
+                        <option value="REGULATOR_USER">Regulator User</option>
+                        <option value="AUDITOR">Auditor</option>
+                        <option value="BUYER">Buyer</option>
                                 <option value="ccc_buyer">{t('CCC Buyer')}</option>
                               </select>
                             </td>

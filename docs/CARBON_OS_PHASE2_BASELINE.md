@@ -1,0 +1,41 @@
+# RupayKg Carbon OS Phase 2 Baseline
+
+## Existing Implementation Status
+- **Files Implemented**:
+  - `src/db/schema.ts` (Carbon OS entities added)
+  - `src/routes/carbon.ts` (Basic CRUD routes)
+  - `src/services/carbonOsService.ts` (Skeleton calculation engine)
+  - `src/db/migrations/0000_regular_cloak.sql`
+- **Files Still Empty/Missing**:
+  - `packages/methodology/*`
+  - Proper testing suite
+  - Deterministic methodology implementations
+  - Proper ACVA workflows
+  - Proper CCTS adapter
+- **Endpoints Working**:
+  - GET `/api/v1/carbon/methodologies`
+  - GET `/api/v1/carbon/projects`
+  - POST `/api/v1/carbon/projects`
+  - GET `/api/v1/carbon/projects/:id`
+  - POST `/api/v1/carbon/projects/:id/eligibility`
+  - POST `/api/v1/carbon/projects/:id/calculations`
+  - POST `/api/v1/carbon/projects/:id/pdd`
+  - POST `/api/v1/carbon/projects/:id/acva`
+- **Endpoints Incomplete**:
+  - `/api/v1/carbon/projects/:id/mrv` (placeholder)
+  - `/api/v1/carbon/projects/:id/verification` (placeholder)
+  - `/api/v1/carbon/projects/:id/claims` (placeholder)
+  - `/api/v1/carbon/projects/:id/certificates` (placeholder)
+- **Database Tables Implemented**:
+  - `carbon_projects`, `facilities`, `methodologies`, `methodology_versions`, `methodology_parameters`
+  - `monitoring_periods`, `instruments`, `calibrations`, `measurements`, `evidence`
+  - `calculation_datasets`, `calculation_runs`, `pdd`, `pdd_versions`, `acva_cases`, `findings`
+  - `carbon_claims`, `certificates`
+- **Migrations Status**: Up to date (`0000_regular_cloak.sql` generated).
+- **Methodology Status**: Skeleton implementation of BM WA03.001 in `carbonOsService.ts`. Others missing.
+- **Tests Passed**: N/A (No tests written yet)
+- **Tests Failed**: N/A
+- **Known Risks**:
+  - Calculation engine is not strictly deterministic or versioned yet.
+  - MRV and Evidence chain not enforced.
+  - No double counting prevention.

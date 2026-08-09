@@ -9,11 +9,16 @@ export const ai = {
   models: {
     generateContent: async (args: any) => {
       try {
-        const response = await safeFetch('/api/ai/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(args)
-        });
+        let response = null;
+        for (let i = 0; i < 3; i++) {
+          response = await safeFetch('/api/ai/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(args)
+          });
+          if (response) break;
+          await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+        }
 
         if (!response) {
           throw new Error('AI service temporarily unavailable. Please try again.');

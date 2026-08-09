@@ -1,0 +1,26 @@
+{
+  "sources": [
+    {
+      "source_name": "BEE_CCTS_APPROVED_METHODOLOGIES",
+      "issuer": "Bureau of Energy Efficiency",
+      "document_title": "List of Approved Methodologies under CCTS",
+      "version": "1.0",
+      "publication_date": "2024-01-01",
+      "effective_date": "2024-01-01",
+      "source_url": "https://beeindia.gov.in/",
+      "retrieval_date": "2026-08-09",
+      "sha256": "placeholder_hash",
+      "status": "ACTIVE",
+      "methodologies": [
+        "BM EN01.001", "BM EN01.002", "BM IN02.001", "BM IN02.002",
+        "BM WA03.001", "BM WA03.002", "BM AG04.001", "BM FR05.001",
+        "BM FR05.002", "BM AG04.002", "BM WA03.003", "BM EN01.003"
+      ],
+      "tools": [
+        "BM-T-001", "BM-T-002", "BM-T-003", "BM-T-004",
+        "BM-T-005", "BM-T-006", "BM-T-008", "BM-T-010",
+        "BM-T-011", "BM-T-013", "BM-T-014", "BM-T-015"
+      ]
+    }
+  ]
+}
