@@ -1815,7 +1815,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     let userRecords = filterByJurisdiction(req.user, records, "records");
 
     if (context && context !== "all") {
-      userRecords = userRecords.filter((r) => r.context === context);
+      const reqCtx = String(context).toLowerCase();
+      userRecords = userRecords.filter((r) => !r.context || String(r.context).toLowerCase() === reqCtx);
     }
 
     if (req.user.role === "citizen" || req.user.role === "fpo") {
@@ -2006,7 +2007,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       const { context } = req.query;
       let filteredRecords = filterByJurisdiction(req.user, records, "records", req.query);
       if (context && context !== "all") {
-        filteredRecords = filteredRecords.filter((r) => r.context === context);
+        const reqCtx = String(context).toLowerCase();
+        filteredRecords = filteredRecords.filter((r) => !r.context || String(r.context).toLowerCase() === reqCtx);
       }
 
       const total_waste = filteredRecords.length;
@@ -2044,7 +2046,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       );
 
       if (context && context !== "all") {
-        filteredRecords = filteredRecords.filter((r) => r.context === context);
+        const reqCtx = String(context).toLowerCase();
+        filteredRecords = filteredRecords.filter((r) => !r.context || String(r.context).toLowerCase() === reqCtx);
       }
 
       res.json({ flagged_events: filteredRecords });
@@ -2111,7 +2114,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       let filteredRecords = filterByJurisdiction(req.user, records, "records").filter((r) => r.mrv_status === "verified");
 
       if (context && context !== "all") {
-        filteredRecords = filteredRecords.filter((r) => r.context === context);
+        const reqCtx = String(context).toLowerCase();
+        filteredRecords = filteredRecords.filter((r) => !r.context || String(r.context).toLowerCase() === reqCtx);
       }
 
       const total_verified = filteredRecords.reduce(
@@ -2149,7 +2153,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
       let filteredRecords = filterByJurisdiction(req.user, records, "records", req.query);
       if (context && context !== "all") {
-        filteredRecords = filteredRecords.filter((r) => r.context === context);
+        const reqCtx = String(context).toLowerCase();
+        filteredRecords = filteredRecords.filter((r) => !r.context || String(r.context).toLowerCase() === reqCtx);
       }
 
       if (role && role !== "all") {
@@ -2375,7 +2380,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       const { context } = req.query;
       let filteredRecords = filterByJurisdiction(req.user, records, "records");
       if (context && context !== "all") {
-        filteredRecords = filteredRecords.filter((r) => r.context === context);
+        const reqCtx = String(context).toLowerCase();
+        filteredRecords = filteredRecords.filter((r) => !r.context || String(r.context).toLowerCase() === reqCtx);
       }
 
       const verifiedRecords = filteredRecords.filter(

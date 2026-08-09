@@ -28,6 +28,7 @@ import {
   ShieldAlert,
   Truck,
   Factory,
+  Building2,
   Sprout,
   Zap,
   Layers,
@@ -85,6 +86,7 @@ import { OfflineStatusBadge } from './components/OfflineStatusBadge';
 import { StakeholderVerificationDashboard } from './components/StakeholderVerificationDashboard';
 import { InstallPwaPrompt } from './components/InstallPwaPrompt';
 import WhitepaperModal, { GenesisWhitepaperContent } from './components/WhitepaperModal';
+import GroundRealityHub from './components/GroundRealityHub';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -454,7 +456,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
   const [showWhitepaper, setShowWhitepaper] = useState(false);
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality'>('dashboard');
   
   // Hedera Guardian Portal State Variables
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
@@ -575,7 +577,14 @@ export default function App() {
   const [availableCCCs, setAvailableCCCs] = useState<any[]>([]);
   const [aggregatorFleet, setAggregatorFleet] = useState<any>(null);
   const [processorInventory, setProcessorInventory] = useState<any>(null);
-  const [operatingContext, setOperatingContext] = useState<'urban' | 'rural'>('urban');
+  const [operatingContext, setOperatingContextState] = useState<'urban' | 'rural'>(() => {
+    return (localStorage.getItem('rupay_operating_context') as 'urban' | 'rural') || 'urban';
+  });
+
+  const setOperatingContext = (ctx: 'urban' | 'rural') => {
+    setOperatingContextState(ctx);
+    localStorage.setItem('rupay_operating_context', ctx);
+  };
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('rupay_theme') as 'dark' | 'light') || 'dark';
   });
@@ -3421,6 +3430,26 @@ export default function App() {
       <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
         <BrandIdentity isLiveConnected={isLiveConnected} variant="sidebar" />
 
+        {/* Operating Context Toggle in Sidebar */}
+        <div className="my-3 p-1 bg-white/5 border border-white/10 rounded-xl flex items-center">
+          <button 
+            onClick={() => setOperatingContext('urban')}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${operatingContext === 'urban' ? 'bg-emerald-500 text-black shadow-lg font-extrabold' : 'text-white/50 hover:text-white'}`}
+            title="Switch to Urban Operating Context (Municipalities, Wards, MSW)"
+          >
+            <Building2 size={13} />
+            <span className="hidden md:inline">URBAN</span>
+          </button>
+          <button 
+            onClick={() => setOperatingContext('rural')}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${operatingContext === 'rural' ? 'bg-emerald-500 text-black shadow-lg font-extrabold' : 'text-white/50 hover:text-white'}`}
+            title="Switch to Rural Operating Context (Panchayats, Villages, Biomass)"
+          >
+            <Sprout size={13} />
+            <span className="hidden md:inline">RURAL</span>
+          </button>
+        </div>
+
         <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
           <button 
             onClick={() => setView('dashboard')}
@@ -3514,6 +3543,14 @@ export default function App() {
             <FileText size={20} className={view === 'reports' ? 'text-purple-400' : ''} />
             <span className="hidden md:block font-bold text-purple-300">Compliance & Reports</span>
           </button>
+
+          <button 
+            onClick={() => setView('ground_reality')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ground_reality' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <Users size={20} className={view === 'ground_reality' ? 'text-amber-400' : ''} />
+            <span className="hidden md:block font-bold text-amber-300">Ground Reality & Safai Hub</span>
+          </button>
         </div>
 
 
@@ -3545,6 +3582,7 @@ export default function App() {
               {view === 'settings' && t('Account Settings')}
               {view === 'enterprise_suite' && t('Enterprise MRV Suite 3.0')}
               {view === 'reports' && 'Stakeholder Statutory Reports & Returns Hub'}
+              {view === 'ground_reality' && 'Informal Sector & Operational Ground Reality Hub'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -3606,18 +3644,20 @@ export default function App() {
                 </>
               )}
             </div>
-            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
+            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 shadow-inner">
               <button 
                 onClick={() => setOperatingContext('urban')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${operatingContext === 'urban' ? 'bg-emerald-500 text-black shadow font-extrabold' : 'text-white/40 hover:text-white'}`}
               >
-                URBAN
+                <Building2 size={13} />
+                <span>URBAN</span>
               </button>
               <button 
                 onClick={() => setOperatingContext('rural')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${operatingContext === 'rural' ? 'bg-emerald-500 text-black shadow font-extrabold' : 'text-white/40 hover:text-white'}`}
               >
-                RURAL
+                <Sprout size={13} />
+                <span>RURAL</span>
               </button>
             </div>
             {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '')) && (
@@ -6352,6 +6392,17 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
             >
               <StakeholderReportsCenter user={user} historyData={history} operatingContext={operatingContext} onNavigateView={(v: string) => setView(v as any)} />
+            </motion.div>
+          )}
+
+          {view === 'ground_reality' && (
+            <motion.div
+              key="ground_reality"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <GroundRealityHub userRole={user?.role} userName={user?.name} userDistrict={formData.district || 'Jabalpur'} operatingContext={operatingContext} />
             </motion.div>
           )}
 
