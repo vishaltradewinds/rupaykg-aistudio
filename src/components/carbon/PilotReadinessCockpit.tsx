@@ -18,7 +18,7 @@ import {
 } from '../../services/ruralBoundaryService.ts';
 
 export const PilotReadinessCockpit: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'cockpit' | 'boundary' | 'rural_boundary' | 'candidates' | 'workflow' | 'reconciliation' | 'learning'>('cockpit');
+  const [activeTab, setActiveTab] = useState<'cockpit' | 'boundary' | 'rural_boundary' | 'candidates' | 'workflow' | 'reconciliation' | 'learning' | 'stakeholders'>('cockpit');
 
   // Candidate Selection State
   const [selectedCandidate, setSelectedCandidate] = useState<'KATHONDA' | 'BHEDAGHAT'>('KATHONDA');
@@ -251,6 +251,14 @@ export const PilotReadinessCockpit: React.FC = () => {
               }`}
             >
               <Calculator size={14} /> Trace Calculator
+            </button>
+            <button 
+              onClick={() => setActiveTab('stakeholders')}
+              className={`px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                activeTab === 'stakeholders' ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-white/70 hover:bg-white/10'
+              }`}
+            >
+              <UserCheck size={14} /> Stakeholders (PoC Registration)
             </button>
             <button 
               onClick={() => setActiveTab('learning')}
@@ -1673,6 +1681,168 @@ export const PilotReadinessCockpit: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      {/* TAB 8: STAKEHOLDERS FOR DEMO TRIAL RUN REGISTRATION */}
+      {activeTab === 'stakeholders' && (
+        <div className="space-y-6">
+          <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 shadow-xl">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-white/10">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <UserCheck size={18} className="text-emerald-400" />
+                  Jabalpur PoC Demo Field Trial Stakeholders Matrix
+                </h3>
+                <p className="text-xs text-white/60 mt-1">
+                  Required stakeholders for registering the Jabalpur Landfill Methane Recovery & Sihora Rural Resource Hub trial run on RupayKg Carbon OS.
+                </p>
+              </div>
+              <span className="px-3 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full text-xs font-bold font-mono">
+                DEMO / POC TRIAL RUN ACTIVE
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              
+              {/* 1. ULB Authority */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold font-mono">
+                    1. URBAN LOCAL BODY
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-bold">REGISTERED</span>
+                </div>
+                <h4 className="text-sm font-bold text-white">Jabalpur Municipal Corporation (JMC)</h4>
+                <div className="space-y-2 text-xs text-white/70">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>ULB Nodal Officer / Commissioner:</strong> Authorizes site boundary mapping & carbon benefit ownership resolution.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>Kathonda SWM Plant Manager:</strong> Oversees daily weighbridge slips, MSW segregation & landfill logbooks.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>JMC Environmental Engineer:</strong> Verifies environmental clearances & legacy remediation compliance.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Rural Panchayati Raj & Agri Cluster */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono">
+                    2. RURAL & AGRI CLUSTER
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-bold">REGISTERED</span>
+                </div>
+                <h4 className="text-sm font-bold text-white">Sihora Panchayat & FPO Hub</h4>
+                <div className="space-y-2 text-xs text-white/70">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>Gram Panchayat Sarpanch / Secretary:</strong> Signs Gram Sabha resolution for bio-resource aggregation.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>Sihora FPO Lead:</strong> Coordinates paddy straw/stubble collection with AgriStack farmer mapping.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>SHG Bio-CNG Coordinators:</strong> Manages Gobar collection, vermicompost & FOM organic slurry distribution.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Demo ACVA & Verification Agency */}
+              <div className="bg-white/5 border border-purple-500/30 rounded-xl p-5 hover:border-purple-500/60 transition space-y-3 bg-purple-950/10">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold font-mono">
+                    3. VERIFICATION AGENCY (ACVA)
+                  </span>
+                  <span className="text-[11px] text-purple-300 font-bold">DEMO MODE ACTIVE</span>
+                </div>
+                <h4 className="text-sm font-bold text-white">RupayKg PoC Trial ACVA Agency</h4>
+                <div className="space-y-2 text-xs text-white/70">
+                  <div className="flex items-start gap-2">
+                    <ShieldCheck size={14} className="text-purple-400 shrink-0 mt-0.5" />
+                    <div><strong>Demo Lead Carbon Auditor:</strong> Performs simulated field audit of Kathonda flare & methane flow meters.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ShieldCheck size={14} className="text-purple-400 shrink-0 mt-0.5" />
+                    <div><strong>Trial Verification Specialist:</strong> Reviews digital evidence hashes, NABL sensor calibration & signs validation report.</div>
+                  </div>
+                  <div className="flex items-start gap-2 text-white/50 italic text-[11px]">
+                    Optionally switchable to BEE Empanelled ACVA (TÜV SÜD South Asia) for formal certification.
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. CCTS & Regulatory Observers */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">
+                    4. REGULATORY & REGISTRY
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-bold">INTEGRATED</span>
+                </div>
+                <h4 className="text-sm font-bold text-white">BEE CCTS Registry & MPPCB</h4>
+                <div className="space-y-2 text-xs text-white/70">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>CCTS Registry Administrator:</strong> Tracks trial project submission under BEE Methodology BM WA03.001.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>MPPCB Compliance Officer:</strong> Monitors environmental clearance parameters, leachate & air quality logs.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Facility & Instrumentation Operators */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold font-mono">
+                    5. PLANT & IOT OPERATORS
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-bold">CONNECTED</span>
+                </div>
+                <h4 className="text-sm font-bold text-white">Kathonda & Sihora Plant Engineers</h4>
+                <div className="space-y-2 text-xs text-white/70">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>Weighbridge Operator:</strong> Transmits SCADA digitized truck weighment slips and moisture sensor feeds.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>LFG / Flare SCADA Engineer:</strong> Streams CH₄ concentration %, flow rates & flare uptime to Carbon OS.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6. Carbon OS Platform Administrators */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold font-mono">
+                    6. SYSTEM & PLATFORM
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-bold">READY</span>
+                </div>
+                <h4 className="text-sm font-bold text-white">RupayKg Carbon OS Core Team</h4>
+                <div className="space-y-2 text-xs text-white/70">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>Carbon OS Admin:</strong> Configures RBAC permissions, double counting checks & calculation engines.</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <div><strong>Satellite & Fraud MRV Lead:</strong> Runs Sentinel-5P CH₄ plume analysis & verifies cryptographic hash ledgers.</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       )}
