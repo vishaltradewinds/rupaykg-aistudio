@@ -357,6 +357,20 @@ export class ACVASelectionEngine {
   async findAccreditedACVAs() {
     return await safeDbCall(() => db.select().from(acva_registry).where(eq(acva_registry.status, 'ACTIVE')), [
       {
+        id: "acva-demo-001",
+        agencyName: "RupayKg PoC Field Trial Verification Agency (Demo ACVA)",
+        accreditationNumber: "DEMO-ACVA-POC-2026-001",
+        accreditationType: "DEMO_TRIAL_AGENCY",
+        mechanism: "CCTS_OFFSET_FIELD_TRIAL",
+        sector: "WASTE_HANDLING_AND_DISPOSAL",
+        status: "ACTIVE",
+        validFrom: new Date("2025-01-01"),
+        validTo: new Date("2028-12-31"),
+        sourceUrl: "https://rupaykg.org/poc-trial/demo-acva",
+        sourceHash: "demo-acva-hash-2026",
+        lastRefreshedAt: new Date()
+      },
+      {
         id: "acva-001",
         agencyName: "TÜV SÜD South Asia",
         accreditationNumber: "BEE-ACVA-2025-001",

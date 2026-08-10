@@ -183,7 +183,10 @@ export const PilotReadinessCockpit: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">
-                PHASE 6 — FIRST REAL PILOT
+                PHASE 6 — FIRST PILOT
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold border border-purple-500/30">
+                DEMO / POC FIELD TRIAL RUN
               </span>
               <span className="text-white/40 text-xs font-mono">PROJECT ID: RKG-JBP-WA03-001-001</span>
             </div>
@@ -336,14 +339,44 @@ export const PilotReadinessCockpit: React.FC = () => {
               <div className="bg-white/5 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-white/60 tracking-wider">ACVA STATUS</span>
-                  <span className="px-2.5 py-1 rounded-full bg-white/10 text-white/60 text-xs font-bold flex items-center gap-1">
-                    <ShieldCheck size={12} /> ⚪ NOT APPOINTED
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
+                    selectedAcva === 'acva-demo-001'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                      : selectedAcva === 'acva-001'
+                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                      : 'bg-white/10 text-white/60'
+                  }`}>
+                    <ShieldCheck size={12} /> {selectedAcva === 'acva-demo-001' ? '🟣 DEMO ACVA APPOINTED' : selectedAcva === 'acva-001' ? '🔵 EMPANELLED ACVA APPOINTED' : '⚪ NOT APPOINTED'}
                   </span>
                 </div>
-                <div className="text-sm font-bold text-white">ACVA Selection Open</div>
-                <p className="text-xs text-white/50 mt-1">Select empanelled ACVA for waste sector after documentary intake completion.</p>
+                <div className="text-sm font-bold text-white">ACVA Selection & Appointment</div>
+                <p className="text-xs text-white/50 mt-1">Select accredited ACVA or Demo ACVA for PoC trial field validation.</p>
+                
+                <div className="mt-3 space-y-2">
+                  <select
+                    value={selectedAcva}
+                    onChange={(e) => setSelectedAcva(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="NOT_APPOINTED">-- Select ACVA Agency --</option>
+                    <option value="acva-demo-001">RupayKg PoC Field Trial Agency (Demo ACVA - PoC)</option>
+                    <option value="acva-001">TÜV SÜD South Asia (BEE-ACVA-2025-001)</option>
+                  </select>
+                  
+                  {selectedAcva === 'acva-demo-001' && (
+                    <div className="p-2 bg-purple-950/40 border border-purple-500/30 rounded-lg text-[11px] text-purple-300">
+                      ⚡ <strong>PoC Trial Mode Active:</strong> Demo ACVA enables simulated field trial audits, instant finding issuance & mock validation reports.
+                    </div>
+                  )}
+                  {selectedAcva === 'acva-001' && (
+                    <div className="p-2 bg-blue-950/40 border border-blue-500/30 rounded-lg text-[11px] text-blue-300">
+                      🏛️ <strong>Official Empanelled ACVA:</strong> Full BEE CCTS accredited agency appointed for formal field validation.
+                    </div>
+                  )}
+                </div>
+
                 <div className="mt-3 pt-3 border-t border-white/5 text-[11px] text-white/40 font-mono">
-                  STATUS: NOT_YET_APPOINTED
+                  ACVA ID: {selectedAcva === 'acva-demo-001' ? 'DEMO-ACVA-POC-2026-001' : selectedAcva === 'acva-001' ? 'BEE-ACVA-2025-001' : 'NOT_YET_APPOINTED'}
                 </div>
               </div>
 
