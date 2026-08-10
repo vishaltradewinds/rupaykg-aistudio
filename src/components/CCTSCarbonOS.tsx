@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  Activity, ShieldCheck, Database, Layers, CheckCircle2, FileText, Cpu, Scale 
+  Activity, ShieldCheck, Database, Layers, CheckCircle2, FileText, Cpu, Scale, Gauge 
 } from 'lucide-react';
 import { CarbonCommandCenter } from './carbon/CarbonCommandCenter';
+import { PilotReadinessCockpit } from './carbon/PilotReadinessCockpit';
 import { ProjectWorkflow } from './carbon/ProjectWorkflow';
 import { MRV } from './carbon/MRV';
 import { Evidence } from './carbon/Evidence';
@@ -18,9 +19,10 @@ interface CCTSCarbonOSProps {
 export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
   token, user, safeFetch, safeParseJson
 }) => {
-  const [activeTab, setActiveTab] = useState<'ccc' | 'project' | 'mrv' | 'evidence' | 'calculation'>('ccc');
+  const [activeTab, setActiveTab] = useState<'pilot' | 'ccc' | 'project' | 'mrv' | 'evidence' | 'calculation'>('pilot');
 
   const tabs = [
+    { id: 'pilot', label: 'Pilot Readiness Cockpit', icon: Gauge },
     { id: 'ccc', label: 'Carbon Command Center', icon: Activity },
     { id: 'project', label: 'Project', icon: Layers },
     { id: 'mrv', label: 'MRV', icon: CheckCircle2 },
@@ -32,10 +34,10 @@ export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
     <div className="space-y-6 pb-20">
       <div className="bg-slate-900 border border-white/10 rounded-2xl p-6">
         <h1 className="text-2xl font-black text-emerald-400 uppercase tracking-wide">
-          RupayKg Carbon OS (Phase 3)
+          RupayKg Carbon OS (Phase 6)
         </h1>
         <p className="text-sm text-white/60 mt-1">
-          Regulatory Verification Gate + Physical Evidence Integration
+          First Real Pilot Onboarding & Operator Site Readiness Cockpit (Jabalpur Landfill BM WA03.001)
         </p>
       </div>
 
@@ -61,6 +63,7 @@ export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
       </div>
 
       <div>
+        {activeTab === 'pilot' && <PilotReadinessCockpit />}
         {activeTab === 'ccc' && <CarbonCommandCenter />}
         {activeTab === 'project' && <ProjectWorkflow />}
         {activeTab === 'mrv' && <MRV />}

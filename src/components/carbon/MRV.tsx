@@ -24,17 +24,24 @@ export const MRV: React.FC = () => {
             <tbody className="divide-y divide-white/5 font-mono">
               <tr className="hover:bg-white/5">
                 <td className="py-3 px-2 text-blue-400 font-bold">F_CH4_PJ_y</td>
-                <td className="py-3 px-2">Flow Meter FM-01</td>
-                <td className="py-3 px-2 text-white">1000</td>
-                <td className="py-3 px-2 text-white/60">tonnes</td>
-                <td className="py-3 px-2 text-emerald-400">VALID</td>
+                <td className="py-3 px-2">Flow Meter FM-JBP-01</td>
+                <td className="py-3 px-2 text-amber-300">NOT_CONFIRMED</td>
+                <td className="py-3 px-2 text-white/60">tonnes CH₄</td>
+                <td className="py-3 px-2 text-amber-400 font-bold">PENDING_AUDIT</td>
+              </tr>
+              <tr className="hover:bg-white/5">
+                <td className="py-3 px-2 text-blue-400 font-bold">CH₄ Concentration</td>
+                <td className="py-3 px-2">Methane Analyzer MA-JBP-01</td>
+                <td className="py-3 px-2 text-amber-300">NOT_CONFIRMED</td>
+                <td className="py-3 px-2 text-white/60">% CH₄</td>
+                <td className="py-3 px-2 text-amber-400 font-bold">PENDING_AUDIT</td>
               </tr>
               <tr className="hover:bg-white/5">
                 <td className="py-3 px-2 text-blue-400 font-bold">Temperature</td>
-                <td className="py-3 px-2">Thermocouple T-01</td>
-                <td className="py-3 px-2 text-white">35.2</td>
+                <td className="py-3 px-2">Thermocouple T-JBP-01</td>
+                <td className="py-3 px-2 text-amber-300">NOT_CONFIRMED</td>
                 <td className="py-3 px-2 text-white/60">°C</td>
-                <td className="py-3 px-2 text-emerald-400">VALID</td>
+                <td className="py-3 px-2 text-amber-400 font-bold">PENDING_AUDIT</td>
               </tr>
             </tbody>
           </table>

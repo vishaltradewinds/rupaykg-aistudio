@@ -211,8 +211,138 @@ export const certificates = pgTable('certificates', {
   id: text('id').primaryKey(),
   carbonClaimId: text('carbon_claim_id').references(() => carbon_claims.id).notNull(),
   serialNumber: text('serial_number').notNull().unique(),
-  status: text('status').notNull().default('ISSUED'), // ISSUED, AVAILABLE, TRANSFERRED, RETIRED
-  issueDate: timestamp('issue_date').defaultNow(),
+  officialCertificateIdentifier: text('official_certificate_identifier'),
+  externalReference: text('external_reference'),
+  status: text('status').notNull().default('CALCULATED'), // POTENTIAL, CALCULATED, VALIDATION_PENDING, VALIDATED, REGISTERED, MONITORING, VERIFICATION_PENDING, VERIFIED, ISSUANCE_REQUESTED, ADMINISTRATIVE_REVIEW, EXPERT_REVIEW, TECHNICAL_COMMITTEE_REVIEW, NSC_ICM_RECOMMENDATION, ISSUED, REJECTED, TRANSFERRED, RETIRED, CANCELLED
+  issueDate: timestamp('issue_date'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// --- PHASE 5: REAL PILOT & EXTERNAL CCTS WORKFLOW TABLES ---
+
+export const ccts_submissions = pgTable('ccts_submissions', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => carbon_projects.id).notNull(),
+  submissionType: text('submission_type').notNull(), // PROJECT_REGISTRATION, VERIFICATION_ISSUANCE
+  monitoringPeriodId: text('monitoring_period_id'),
+  acvaId: text('acva_id'),
+  documents: jsonb('documents').notNull().default([]),
+  verificationReportUrl: text('verification_report_url'),
+  submissionDate: timestamp('submission_date').defaultNow(),
+  externalReference: text('external_reference'),
+  status: text('status').notNull().default('DRAFT'), // DRAFT, READY, SUBMITTED, ACKNOWLEDGED, COMPLETENESS_REVIEW, EXPERT_REVIEW, TECHNICAL_COMMITTEE, NSC_ICM, ISSUANCE_CONFIRMED, REJECTED, QUERY_RAISED
+  adapterType: text('adapter_type').notNull().default('MANUAL'), // MANUAL, OFFICIAL_API
+  response: jsonb('response'),
+  auditHash: text('audit_hash').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const project_intakes = pgTable('project_intakes', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => carbon_projects.id).notNull(),
+  projectOwner: text('project_owner').notNull(),
+  legalEntity: text('legal_entity').notNull(),
+  icmAccountStatus: text('icm_account_status').notNull(),
+  facilityOwner: text('facility_owner').notNull(),
+  facilityOperator: text('facility_operator').notNull(),
+  siteLocation: text('site_location').notNull(),
+  landfillInfo: jsonb('landfill_info').notNull().default({}),
+  wasteHistory: jsonb('waste_history').notNull().default({}),
+  gasCaptureInfra: jsonb('gas_capture_infra').notNull().default({}),
+  flareUtilisationInfra: jsonb('flare_utilisation_infra').notNull().default({}),
+  instrumentsList: jsonb('instruments_list').notNull().default([]),
+  calibrationRecordsList: jsonb('calibration_records_list').notNull().default([]),
+  monitoringSystem: jsonb('monitoring_system').notNull().default({}),
+  landOwnershipRights: jsonb('land_ownership_rights').notNull().default({}),
+  carbonBenefitOwnership: jsonb('carbon_benefit_ownership').notNull().default({}),
+  applicablePermits: jsonb('applicable_permits').notNull().default([]),
+  contracts: jsonb('contracts').notNull().default([]),
+  existingEnvironmentalRecords: jsonb('existing_environmental_records').notNull().default([]),
+  intakeStatus: text('intake_status').notNull().default('INCOMPLETE'), // INCOMPLETE, COMPLETE
+  eligibilityAssessment: text('eligibility_assessment').notNull().default('INSUFFICIENT_DATA'), // ELIGIBLE_CANDIDATE, POTENTIALLY_ELIGIBLE, INSUFFICIENT_DATA, METHODOLOGY_GAP, NOT_ELIGIBLE
+  eligibilityNotes: text('eligibility_notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const icm_accounts = pgTable('icm_accounts', {
+  id: text('id').primaryKey(),
+  entityName: text('entity_name').notNull(),
+  accountRegistrationStatus: text('account_registration_status').notNull().default('PENDING'), // PENDING, REGISTERED, CONFIRMED
+  entityType: text('entity_type').notNull(), // NON_OBLIGATED_ENTITY, OBLIGATED_ENTITY
+  authorizedRepresentative: text('authorized_representative').notNull(),
+  documents: jsonb('documents').notNull().default([]),
+  externalReference: text('external_reference'),
+  confirmedAt: timestamp('confirmed_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const acva_registry = pgTable('acva_registry', {
+  id: text('id').primaryKey(),
+  agencyName: text('agency_name').notNull(),
+  accreditationNumber: text('accreditation_number').notNull().unique(),
+  accreditationType: text('accreditation_type').notNull(),
+  mechanism: text('mechanism').notNull().default('CCTS_OFFSET'),
+  sector: text('sector').notNull().default('WASTE_HANDLING_AND_DISPOSAL'),
+  status: text('status').notNull().default('ACTIVE'), // ACTIVE, SUSPENDED, EXPIRED
+  validFrom: timestamp('valid_from'),
+  validTo: timestamp('valid_to'),
+  sourceUrl: text('source_url'),
+  sourceHash: text('source_hash'),
+  lastRefreshedAt: timestamp('last_refreshed_at').defaultNow(),
+});
+
+export const acva_appointments = pgTable('acva_appointments', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => carbon_projects.id).notNull(),
+  acvaRegistryId: text('acva_registry_id').references(() => acva_registry.id).notNull(),
+  selectionReason: text('selection_reason').notNull(),
+  conflictDeclarationPassed: boolean('conflict_declaration_passed').notNull().default(true),
+  appointmentStatus: text('appointment_status').notNull().default('PROPOSED'), // PROPOSED, APPOINTED, DECLINED
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const monitoring_reports = pgTable('monitoring_reports', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => carbon_projects.id).notNull(),
+  monitoringPeriodId: text('monitoring_period_id').notNull(),
+  methodologyId: text('methodology_id').notNull(),
+  datasetId: text('dataset_id').notNull(),
+  calculationRunId: text('calculation_run_id').notNull(),
+  claimedTco2e: numeric('claimed_tco2e').notNull(),
+  evidenceIndex: jsonb('evidence_index').notNull().default([]),
+  qaQcSummary: text('qa_qc_summary').notNull(),
+  deviations: text('deviations'),
+  correctiveActions: text('corrective_actions'),
+  status: text('status').notNull().default('DRAFT'), // DRAFT, FROZEN, SUBMITTED
+  frozenAt: timestamp('frozen_at'),
+  auditHash: text('audit_hash').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const instrument_readiness = pgTable('instrument_readiness', {
+  id: text('id').primaryKey(),
+  facilityId: text('facility_id').references(() => facilities.id).notNull(),
+  instrumentId: text('instrument_id').references(() => instruments.id).notNull(),
+  installedStatus: boolean('installed_status').notNull().default(false),
+  operationalStatus: boolean('operational_status').notNull().default(false),
+  calibratedStatus: boolean('calibrated_status').notNull().default(false),
+  traceableStatus: boolean('traceable_status').notNull().default(false),
+  dataConnectedStatus: boolean('data_connected_status').notNull().default(false),
+  readinessRating: text('readiness_rating').notNull().default('BLOCKED'), // READY, WARNING, BLOCKED
+  notes: text('notes'),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const audit_packages = pgTable('audit_packages', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => carbon_projects.id).notNull(),
+  monitoringPeriodId: text('monitoring_period_id'),
+  packageHash: text('package_hash').notNull(),
+  downloadUrl: text('download_url'),
+  includedEntities: jsonb('included_entities').notNull().default([]),
+  generatedAt: timestamp('generated_at').defaultNow(),
+  generatedBy: text('generated_by').notNull(),
 });
 
 // --- PHASE 3: PHYSICAL EVIDENCE INTEGRATION ---
@@ -285,4 +415,21 @@ export const electricity_meter_readings = pgTable('electricity_meter_readings', 
   exportMwh: numeric('export_mwh'),
   consumptionMwh: numeric('consumption_mwh'),
   evidenceId: uuid('evidence_id').references(() => evidence.id),
+});
+
+export const pilot_issues = pgTable('pilot_issues', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: varchar('project_id', { length: 255 }).notNull(),
+  issueType: varchar('issue_type', { length: 100 }).notNull(), // WEIGHBRIDGE_MISSING, CALIBRATION_EXPIRED, CARBON_RIGHTS_UNVERIFIED, LFG_FLOW_ANOMALY
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  impact: varchar('impact', { length: 100 }), // HIGH, MEDIUM, LOW
+  rootCause: text('root_cause'),
+  evidenceAccepted: text('evidence_accepted'),
+  resolutionTimeHours: integer('resolution_time_hours'),
+  acvaSatisfied: boolean('acva_satisfied').default(false),
+  futureIntakeGuidanceUpdate: text('future_intake_guidance_update'),
+  status: varchar('status', { length: 50 }).default('OPEN').notNull(), // OPEN, IN_PROGRESS, RESOLVED
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
