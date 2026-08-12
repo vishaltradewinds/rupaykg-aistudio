@@ -459,7 +459,7 @@ export default function App() {
   const [showWhitepaper, setShowWhitepaper] = useState(false);
   const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality' | 'ccts_carbon_os'>('dashboard');
   
-  // Hedera Guardian Portal State Variables
+  const [showPlatformOptions, setShowPlatformOptions] = useState<boolean>(false);
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
   const [guardianAuth, setGuardianAuth] = useState<any>(null);
   const [guardianPolicies, setGuardianPolicies] = useState<any[]>([]);
@@ -3461,114 +3461,131 @@ export default function App() {
         </div>
 
         <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
+          {/* Core Operating System Engines */}
           <button 
             onClick={() => setView('dashboard')}
             aria-label={t('Go to Dashboard')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <LayoutDashboard size={20} />
+            <LayoutDashboard size={20} className={view === 'dashboard' ? 'text-emerald-400' : ''} />
             <span className="hidden md:block font-medium">{t('Dashboard')}</span>
           </button>
-          {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
-            <button 
-              onClick={() => setView('upload')}
-              aria-label={t('Upload Waste Data')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'upload' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <PlusCircle size={20} />
-              <span className="hidden md:block font-medium">{t('Upload Waste')}</span>
-            </button>
-          )}
-          {(user?.role === 'aggregator' || user?.role === 'processor') && (
-            <button 
-              onClick={() => setView('tasks')}
-              aria-label={t('View Task Board')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'tasks' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <ClipboardList size={20} />
-              <span className="hidden md:block font-medium">{t('Task Board')}</span>
-            </button>
-          )}
-          {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality', 'citizen'].includes(user?.role || '') && (
-            <button 
-              onClick={() => setView('history')}
-              aria-label={t('View History')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'history' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <History size={20} />
-              <span className="hidden md:block font-medium">{t('History')}</span>
-            </button>
-          )}
-          {['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
-            <button 
-              onClick={() => {
-                setView('admin');
-                setAdminSubView('users');
-              }}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'admin' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-            >
-              <Settings size={20} />
-              <span className="hidden md:block font-medium">{t('Admin Controls')}</span>
-            </button>
-          )}
-          
-          
-          
-          
 
-          
-          
-          
-          
-
-          
-          <button 
-            onClick={() => setView('genesis')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'genesis' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <Book size={20} />
-            <span className="hidden md:block font-medium">{t('Foundational Doctrine')}</span>
-          </button>
-          <button 
-            onClick={() => setView('settings')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'settings' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <User size={20} />
-            <span className="hidden md:block font-medium">{t('Settings')}</span>
-          </button>
-          <button 
-            onClick={() => setView('enterprise_suite')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-          >
-            <ShieldCheck size={20} className="text-emerald-400" />
-            <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise OS & CPCB Hub')}</span>
-          </button>
-          
-          
-          
           <button 
             onClick={() => setView('ccts_carbon_os')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ccts_carbon_os' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ccts_carbon_os' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <Globe size={20} className="text-emerald-400" />
+            <Globe size={20} className="text-emerald-400 shrink-0" />
             <span className="hidden md:block font-bold text-emerald-300">CCTS Carbon OS</span>
           </button>
 
           <button 
-            onClick={() => setView('reports')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'reports' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            onClick={() => setView('enterprise_suite')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <FileText size={20} className={view === 'reports' ? 'text-purple-400' : ''} />
+            <ShieldCheck size={20} className="text-emerald-400 shrink-0" />
+            <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise OS & CPCB Hub')}</span>
+          </button>
+
+          <button 
+            onClick={() => setView('reports')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'reports' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+          >
+            <FileText size={20} className={view === 'reports' ? 'text-purple-400 shrink-0' : 'shrink-0'} />
             <span className="hidden md:block font-bold text-purple-300">Compliance & Reports</span>
           </button>
 
           <button 
             onClick={() => setView('ground_reality')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ground_reality' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ground_reality' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <Users size={20} className={view === 'ground_reality' ? 'text-amber-400' : ''} />
+            <Users size={20} className={view === 'ground_reality' ? 'text-amber-400 shrink-0' : 'shrink-0'} />
             <span className="hidden md:block font-bold text-amber-300">Ground Reality & Safai Hub</span>
           </button>
+
+          {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
+            <button 
+              onClick={() => setView('upload')}
+              aria-label={t('Upload Waste Data')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'upload' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            >
+              <PlusCircle size={20} className="shrink-0" />
+              <span className="hidden md:block font-medium">{t('Upload Waste')}</span>
+            </button>
+          )}
+
+          {(user?.role === 'aggregator' || user?.role === 'processor') && (
+            <button 
+              onClick={() => setView('tasks')}
+              aria-label={t('View Task Board')}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'tasks' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            >
+              <ClipboardList size={20} className="shrink-0" />
+              <span className="hidden md:block font-medium">{t('Task Board')}</span>
+            </button>
+          )}
+
+          {/* Grouped Platform Options & Utilities Menu */}
+          <div className="mt-4 pt-3 border-t border-white/10 space-y-1">
+            <button 
+              onClick={() => setShowPlatformOptions(!showPlatformOptions)}
+              className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-xs font-semibold uppercase tracking-wider ${
+                ['history', 'admin', 'settings', 'genesis'].includes(view) 
+                  ? 'bg-white/10 text-emerald-400 border border-white/10' 
+                  : 'text-white/50 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Settings size={18} className="shrink-0 text-emerald-400/80" />
+                <span className="hidden md:block text-left">{t('Platform Options')}</span>
+              </div>
+              <ChevronRight size={14} className={`hidden md:block transition-transform duration-200 ${showPlatformOptions || ['history', 'admin', 'settings', 'genesis'].includes(view) ? 'rotate-90' : ''}`} />
+            </button>
+
+            {(showPlatformOptions || ['history', 'admin', 'settings', 'genesis'].includes(view)) && (
+              <div className="pl-2 space-y-1 mt-1 border-l border-emerald-500/20 ml-3">
+                {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality', 'citizen'].includes(user?.role || '') && (
+                  <button 
+                    onClick={() => setView('history')}
+                    aria-label={t('View History')}
+                    className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'history' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                  >
+                    <History size={16} className="shrink-0" />
+                    <span className="hidden md:block">{t('Transaction Ledger')}</span>
+                  </button>
+                )}
+
+                {['super_admin', 'state_admin', 'municipal_admin', 'regulator'].includes(user?.role || '') && (
+                  <button 
+                    onClick={() => {
+                      setView('admin');
+                      setAdminSubView('users');
+                    }}
+                    className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'admin' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                  >
+                    <Shield size={16} className="shrink-0" />
+                    <span className="hidden md:block">{t('Admin Controls')}</span>
+                  </button>
+                )}
+
+                <button 
+                  onClick={() => setView('settings')}
+                  className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'settings' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                >
+                  <User size={16} className="shrink-0" />
+                  <span className="hidden md:block">{t('Account Settings')}</span>
+                </button>
+
+                <button 
+                  onClick={() => setView('genesis')}
+                  className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'genesis' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                >
+                  <Book size={16} className="shrink-0" />
+                  <span className="hidden md:block">{t('Foundational Doctrine')}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
 
