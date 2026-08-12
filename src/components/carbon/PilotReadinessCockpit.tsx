@@ -1688,14 +1688,14 @@ export const PilotReadinessCockpit: React.FC = () => {
       {activeTab === 'stakeholders' && (
         <div className="space-y-6">
           <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 shadow-xl">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-white/10">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <UserCheck size={18} className="text-emerald-400" />
-                  Jabalpur PoC Demo Field Trial Stakeholders Matrix
+                  RupayKg Circular OS & Carbon Demo Trial Stakeholders
                 </h3>
                 <p className="text-xs text-white/60 mt-1">
-                  Required stakeholders for registering the Jabalpur Landfill Methane Recovery & Sihora Rural Resource Hub trial run on RupayKg Carbon OS.
+                  Categorized registration matrix for Jabalpur Urban (Kathonda Landfill/MRF) & Sihora Rural Demo Trial Run.
                 </p>
               </div>
               <span className="px-3 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full text-xs font-bold font-mono">
@@ -1703,142 +1703,184 @@ export const PilotReadinessCockpit: React.FC = () => {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              
-              {/* 1. ULB Authority */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold font-mono">
-                    1. URBAN LOCAL BODY
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-bold">REGISTERED</span>
+            {/* BROAD CATEGORY GROUPS */}
+            <div className="space-y-6">
+
+              {/* CATEGORY 1: AGGREGATORS & PRIMARY COLLECTORS */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-amber-400 uppercase border-b border-amber-500/20 pb-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                  Category 1: Aggregators & Primary Collectors
                 </div>
-                <h4 className="text-sm font-bold text-white">Jabalpur Municipal Corporation (JMC)</h4>
-                <div className="space-y-2 text-xs text-white/70">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>ULB Nodal Officer / Commissioner:</strong> Authorizes site boundary mapping & carbon benefit ownership resolution.</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-amber-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono">
+                      URBAN AGGREGATORS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Kabadiwalas & Ward Scrap Aggregators</h4>
+                    <p className="text-xs text-white/60">
+                      Collect dry recyclables (PET, HDPE, Cardboard, Scrap Metal) directly from households and local commercial shops in Jabalpur wards.
+                    </p>
+                    <div className="pt-2 text-[11px] text-amber-300/80 font-mono">Demo Role: Digital Weighment & QR Intake Tracking</div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>Kathonda SWM Plant Manager:</strong> Oversees daily weighbridge slips, MSW segregation & landfill logbooks.</div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-amber-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono">
+                      RURAL AGGREGATORS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Sihora FPOs & Farmer Collectives</h4>
+                    <p className="text-xs text-white/60">
+                      Aggregate paddy straw, agricultural residue, and mustard crop waste across Sihora block via AgriStack digital farmer linkage.
+                    </p>
+                    <div className="pt-2 text-[11px] text-amber-300/80 font-mono">Demo Role: Biomass Lot & Stubble Avoidance Tracking</div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>JMC Environmental Engineer:</strong> Verifies environmental clearances & legacy remediation compliance.</div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-amber-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono">
+                      COMMUNITY SHGs
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Women Self-Help Groups (SHGs) & Gobar Collectors</h4>
+                    <p className="text-xs text-white/60">
+                      Operate village-level Gauthans / resource centers for Gobar-Dhan collection and organic manure aggregation.
+                    </p>
+                    <div className="pt-2 text-[11px] text-amber-300/80 font-mono">Demo Role: Gobar Slip & Vermicompost Production Logs</div>
                   </div>
                 </div>
               </div>
 
-              {/* 2. Rural Panchayati Raj & Agri Cluster */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono">
-                    2. RURAL & AGRI CLUSTER
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-bold">REGISTERED</span>
+              {/* CATEGORY 2: PROCESSORS & FACILITY OPERATORS */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-cyan-400 uppercase border-b border-cyan-500/20 pb-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                  Category 2: Processors & Facility Operators
                 </div>
-                <h4 className="text-sm font-bold text-white">Sihora Panchayat & FPO Hub</h4>
-                <div className="space-y-2 text-xs text-white/70">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>Gram Panchayat Sarpanch / Secretary:</strong> Signs Gram Sabha resolution for bio-resource aggregation.</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold font-mono">
+                      MRF PROCESSORS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Kathonda Material Recovery Facility (MRF)</h4>
+                    <p className="text-xs text-white/60">
+                      Sorts mixed dry municipal waste into 18+ recyclable polymer fractions, baling plastics, metals, and textiles.
+                    </p>
+                    <div className="pt-2 text-[11px] text-cyan-300/80 font-mono">Demo Role: Baled Material Inventory & Digital Batch Dispatch</div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>Sihora FPO Lead:</strong> Coordinates paddy straw/stubble collection with AgriStack farmer mapping.</div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold font-mono">
+                      ORGANIC & LFG PROCESSORS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Kathonda Landfill Methane & Biomethanation Plant</h4>
+                    <p className="text-xs text-white/60">
+                      Captures landfill gas (LFG) CH₄ for flaring/energy generation and processes wet organic waste into city compost.
+                    </p>
+                    <div className="pt-2 text-[11px] text-cyan-300/80 font-mono">Demo Role: SCADA Sensor Telemetry & Flare Uptime Logging</div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>SHG Bio-CNG Coordinators:</strong> Manages Gobar collection, vermicompost & FOM organic slurry distribution.</div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold font-mono">
+                      BIO-ENERGY PROCESSORS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Sihora Bio-CNG & Biochar Processing Unit</h4>
+                    <p className="text-xs text-white/60">
+                      Converts aggregated biomass and cattle dung into purified Compressed Biogas (CBG) and high-fixed-carbon biochar.
+                    </p>
+                    <div className="pt-2 text-[11px] text-cyan-300/80 font-mono">Demo Role: CBG Pressure Log & Organic Fertilizer Certificates</div>
                   </div>
                 </div>
               </div>
 
-              {/* 3. Demo ACVA & Verification Agency */}
-              <div className="bg-white/5 border border-purple-500/30 rounded-xl p-5 hover:border-purple-500/60 transition space-y-3 bg-purple-950/10">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold font-mono">
-                    3. VERIFICATION AGENCY (ACVA)
-                  </span>
-                  <span className="text-[11px] text-purple-300 font-bold">DEMO MODE ACTIVE</span>
+              {/* CATEGORY 3: RECYCLERS & INDUSTRIAL OFF-TAKERS */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-emerald-400 uppercase border-b border-emerald-500/20 pb-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                  Category 3: Recyclers & Industrial Off-Takers
                 </div>
-                <h4 className="text-sm font-bold text-white">RupayKg PoC Trial ACVA Agency</h4>
-                <div className="space-y-2 text-xs text-white/70">
-                  <div className="flex items-start gap-2">
-                    <ShieldCheck size={14} className="text-purple-400 shrink-0 mt-0.5" />
-                    <div><strong>Demo Lead Carbon Auditor:</strong> Performs simulated field audit of Kathonda flare & methane flow meters.</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-emerald-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">
+                      PLASTIC RECYCLERS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Registered Plastic Washing & Granulation Units</h4>
+                    <p className="text-xs text-white/60">
+                      Processes sorted PET bottles, HDPE containers & PP plastics into rPET flakes and granules for circular manufacturing.
+                    </p>
+                    <div className="pt-2 text-[11px] text-emerald-300/80 font-mono">Demo Role: Recycled Certificate Generation & EPR Credit Minting</div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <ShieldCheck size={14} className="text-purple-400 shrink-0 mt-0.5" />
-                    <div><strong>Trial Verification Specialist:</strong> Reviews digital evidence hashes, NABL sensor calibration & signs validation report.</div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-emerald-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">
+                      RDF & THERMAL OFF-TAKERS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Cement Plant Co-Processing (RDF Off-Takers)</h4>
+                    <p className="text-xs text-white/60">
+                      Receives Refuse Derived Fuel (RDF) from Kathonda MRF to replace fossil coal in cement kilns as alternative fuel.
+                    </p>
+                    <div className="pt-2 text-[11px] text-emerald-300/80 font-mono">Demo Role: Coal Substitution & Avoided Emission Offset Tracking</div>
                   </div>
-                  <div className="flex items-start gap-2 text-white/50 italic text-[11px]">
-                    Optionally switchable to BEE Empanelled ACVA (TÜV SÜD South Asia) for formal certification.
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-emerald-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">
+                      PAPER, METAL & GLASS RECYCLERS
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Paper Mills & Scrap Smelters</h4>
+                    <p className="text-xs text-white/60">
+                      Recycles corrugated boxes, waste paper, aluminum/iron scrap, and glass cullet into secondary raw materials.
+                    </p>
+                    <div className="pt-2 text-[11px] text-emerald-300/80 font-mono">Demo Role: ONDC Marketplace Trade Settlement & EPR Traceability</div>
                   </div>
                 </div>
               </div>
 
-              {/* 4. CCTS & Regulatory Observers */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">
-                    4. REGULATORY & REGISTRY
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-bold">INTEGRATED</span>
+              {/* CATEGORY 4: GOVERNMENT, MUNICIPALITIES & REGULATORS */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-blue-400 uppercase border-b border-blue-500/20 pb-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+                  Category 4: Municipalities, Regulators & Carbon Registry
                 </div>
-                <h4 className="text-sm font-bold text-white">BEE CCTS Registry & MPPCB</h4>
-                <div className="space-y-2 text-xs text-white/70">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>CCTS Registry Administrator:</strong> Tracks trial project submission under BEE Methodology BM WA03.001.</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-blue-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold font-mono">
+                      URBAN & RURAL LOCAL BODIES
+                    </span>
+                    <h4 className="text-sm font-bold text-white">Jabalpur Municipal Corporation (JMC) & Gram Panchayats</h4>
+                    <p className="text-xs text-white/60">
+                      Project proponents providing site boundaries, weighbridge data access, and resolving carbon benefit ownership.
+                    </p>
+                    <div className="pt-2 text-[11px] text-blue-300/80 font-mono">Demo Role: Proponent Authorization & ULB Governance Cockpit</div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>MPPCB Compliance Officer:</strong> Monitors environmental clearance parameters, leachate & air quality logs.</div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-blue-500/40 transition space-y-2">
+                    <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold font-mono">
+                      REGULATORS & CCTS REGISTRY
+                    </span>
+                    <h4 className="text-sm font-bold text-white">BEE CCTS Registry & MP State Pollution Control Board (MPPCB)</h4>
+                    <p className="text-xs text-white/60">
+                      National carbon market regulator tracking offset methodology compliance (BM WA03.001) & environmental clearances.
+                    </p>
+                    <div className="pt-2 text-[11px] text-blue-300/80 font-mono">Demo Role: Project Registration & Compliance Monitoring</div>
                   </div>
                 </div>
               </div>
 
-              {/* 5. Facility & Instrumentation Operators */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold font-mono">
-                    5. PLANT & IOT OPERATORS
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-bold">CONNECTED</span>
+              {/* CATEGORY 5: ACCREDITED VERIFIERS (ACVA) & AUDITORS */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-purple-400 uppercase border-b border-purple-500/20 pb-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+                  Category 5: Accredited Carbon Verification Agencies (ACVA)
                 </div>
-                <h4 className="text-sm font-bold text-white">Kathonda & Sihora Plant Engineers</h4>
-                <div className="space-y-2 text-xs text-white/70">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>Weighbridge Operator:</strong> Transmits SCADA digitized truck weighment slips and moisture sensor feeds.</div>
+                <div className="bg-white/5 border border-purple-500/30 rounded-xl p-4 hover:border-purple-500/60 transition space-y-2 bg-purple-950/10">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold font-mono">
+                      ACVA AUDITORS
+                    </span>
+                    <span className="text-[11px] text-purple-300 font-bold">DEMO ACVA / EMPANELLED AGENCY</span>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>LFG / Flare SCADA Engineer:</strong> Streams CH₄ concentration %, flow rates & flare uptime to Carbon OS.</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 6. Carbon OS Platform Administrators */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-emerald-500/40 transition space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold font-mono">
-                    6. SYSTEM & PLATFORM
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-bold">READY</span>
-                </div>
-                <h4 className="text-sm font-bold text-white">RupayKg Carbon OS Core Team</h4>
-                <div className="space-y-2 text-xs text-white/70">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>Carbon OS Admin:</strong> Configures RBAC permissions, double counting checks & calculation engines.</div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                    <div><strong>Satellite & Fraud MRV Lead:</strong> Runs Sentinel-5P CH₄ plume analysis & verifies cryptographic hash ledgers.</div>
-                  </div>
+                  <h4 className="text-sm font-bold text-white">RupayKg PoC Demo ACVA / TÜV SÜD South Asia</h4>
+                  <p className="text-xs text-white/60">
+                    Independent 3rd party carbon verifiers conducting site audits, inspecting gas flow sensors, verifying weighment ledgers, and signing CCTS offset certificates.
+                  </p>
+                  <div className="pt-2 text-[11px] text-purple-300 font-mono">Demo Role: Simulated Field Audit & Verification Findings Issuance</div>
                 </div>
               </div>
 

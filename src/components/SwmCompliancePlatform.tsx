@@ -637,7 +637,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                         {registeredEntitiesList.length === 0 ? (
                           <tr>
                             <td colSpan={8} className="p-8 text-center text-white/50 text-xs italic">
-                              No registered SWM entities in the platform directory. Register a new entity using the form above or click "Restore Seed Data".
+                              No registered SWM entities in the platform directory. Register a new entity using the form above to get started.
                             </td>
                           </tr>
                         ) : (
@@ -783,7 +783,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {sources.length === 0 ? (
                     <div className="col-span-2 p-8 text-center bg-black/40 border border-white/10 rounded-2xl text-white/50 text-xs italic">
-                      No waste source generation points tracked. Add a new source point above or restore seed data.
+                      No waste source generation points tracked. Add a new source point above to register locations.
                     </div>
                   ) : (
                     sources.map(src => (
@@ -859,7 +859,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {bins.length === 0 ? (
                     <div className="col-span-2 p-8 text-center bg-black/40 border border-white/10 rounded-2xl text-white/50 text-xs italic">
-                      No IoT smart bins registered in fleet. Connect a new RFID/ultrasonic bin sensor or restore seed data.
+                      No IoT smart bins registered in fleet. Connect a new RFID/ultrasonic bin sensor above.
                     </div>
                   ) : (
                     bins.map(bin => (
@@ -1281,7 +1281,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                   <div className="space-y-2 text-xs font-mono">
                     {cpcbSyncLogs.length === 0 ? (
                       <div className="p-8 text-center text-white/50 text-xs italic font-sans">
-                        No CPCB synchronization logs recorded. Trigger a live sync above or restore seed logs.
+                        No CPCB synchronization logs recorded. Trigger a live sync above to transmit real-time telemetry.
                       </div>
                     ) : (
                       cpcbSyncLogs.map((log, idx) => (
