@@ -1310,8 +1310,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           timestamp: new Date().toISOString(),
         });
         res.json({
-          message: `Success! Waste recorded. Payout of ₹${generator_payout.toFixed(2)} pending processor receipt. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`,
+          message: `Success! Waste recorded. Earned ${Math.round(generator_payout)} Green Credit Coins (GCC) pending processor verification. Carbon Engine calculated ${carbonEvent.net_carbon_reduction_kg_co2e.toFixed(1)}kg CO2e.`,
           wallet_balance: user?.wallet_balance,
+          earned_gcc: Math.round(generator_payout),
         });
       } catch (carbonErr) {
         console.error(
@@ -1325,8 +1326,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           timestamp: new Date().toISOString(),
         });
         res.json({
-          message: `Success! Waste recorded. Payout of ₹${generator_payout.toFixed(2)} pending processor receipt. CCC value pending MRV.`,
+          message: `Success! Waste recorded. Earned ${Math.round(generator_payout)} Green Credit Coins (GCC) pending processor verification. CCC value pending MRV.`,
           wallet_balance: user?.wallet_balance,
+          earned_gcc: Math.round(generator_payout),
         });
       }
     },

@@ -348,17 +348,15 @@ export const PilotReadinessCockpit: React.FC = () => {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-white/60 tracking-wider">ACVA STATUS</span>
                   <span className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
-                    selectedAcva === 'acva-demo-001'
-                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                      : selectedAcva === 'acva-001'
+                    selectedAcva === 'acva-001'
                       ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
                       : 'bg-white/10 text-white/60'
                   }`}>
-                    <ShieldCheck size={12} /> {selectedAcva === 'acva-demo-001' ? '🟣 DEMO ACVA APPOINTED' : selectedAcva === 'acva-001' ? '🔵 EMPANELLED ACVA APPOINTED' : '⚪ NOT APPOINTED'}
+                    <ShieldCheck size={12} /> {selectedAcva === 'acva-001' ? '🔵 EMPANELLED ACVA APPOINTED' : '⚪ NOT APPOINTED'}
                   </span>
                 </div>
                 <div className="text-sm font-bold text-white">ACVA Selection & Appointment</div>
-                <p className="text-xs text-white/50 mt-1">Select accredited ACVA or Demo ACVA for PoC trial field validation.</p>
+                <p className="text-xs text-white/50 mt-1">Select empanelled BEE CCTS Accredited Carbon Verification Agency.</p>
                 
                 <div className="mt-3 space-y-2">
                   <select
@@ -367,15 +365,9 @@ export const PilotReadinessCockpit: React.FC = () => {
                     className="w-full bg-slate-950 border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
                   >
                     <option value="NOT_APPOINTED">-- Select ACVA Agency --</option>
-                    <option value="acva-demo-001">RupayKg PoC Field Trial Agency (Demo ACVA - PoC)</option>
                     <option value="acva-001">TÜV SÜD South Asia (BEE-ACVA-2025-001)</option>
                   </select>
                   
-                  {selectedAcva === 'acva-demo-001' && (
-                    <div className="p-2 bg-purple-950/40 border border-purple-500/30 rounded-lg text-[11px] text-purple-300">
-                      ⚡ <strong>PoC Trial Mode Active:</strong> Demo ACVA enables simulated field trial audits, instant finding issuance & mock validation reports.
-                    </div>
-                  )}
                   {selectedAcva === 'acva-001' && (
                     <div className="p-2 bg-blue-950/40 border border-blue-500/30 rounded-lg text-[11px] text-blue-300">
                       🏛️ <strong>Official Empanelled ACVA:</strong> Full BEE CCTS accredited agency appointed for formal field validation.
@@ -384,7 +376,7 @@ export const PilotReadinessCockpit: React.FC = () => {
                 </div>
 
                 <div className="mt-3 pt-3 border-t border-white/5 text-[11px] text-white/40 font-mono">
-                  ACVA ID: {selectedAcva === 'acva-demo-001' ? 'DEMO-ACVA-POC-2026-001' : selectedAcva === 'acva-001' ? 'BEE-ACVA-2025-001' : 'NOT_YET_APPOINTED'}
+                  ACVA ID: {selectedAcva === 'acva-001' ? 'BEE-ACVA-2025-001' : 'NOT_YET_APPOINTED'}
                 </div>
               </div>
 

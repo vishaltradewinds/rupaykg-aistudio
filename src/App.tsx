@@ -5,7 +5,10 @@ import { Helmet } from 'react-helmet-async';
 import { 
   Leaf, 
   LayoutDashboard,
-  Wallet, 
+  Wallet,
+  Coins,
+  Award,
+  Gift,
   History, 
   PlusCircle, 
   Shield, 
@@ -3000,12 +3003,12 @@ export default function App() {
                   <h3 className="text-2xl font-bold mb-2">{t('Citizen')}</h3>
                   <p className="text-emerald-400/80 text-sm font-medium mb-4">{t('Waste Generator')}</p>
                   <p className="text-white/60 mb-6">
-                    {t('Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.')}
+                    {t('Collect and deposit agricultural, municipal, or segregated waste. Earn Green Credit Coins (GCC) for verified source segregation, redeemable for municipal tax rebates, utility discounts, and cashout.')}
                   </p>
                   <ul className="space-y-2 text-sm text-white/50">
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-500" /> {t('Upload waste records')}</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> {t('Instant wallet funding')}</li>
-                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> {t('Track environmental impact')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-500" /> {t('Upload waste & biomass records')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> {t('Earn Green Credit Coins (GCC)')}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-400" /> {t('Redeem for tax rebates & vouchers')}</li>
                   </ul>
                 </Card>
 
@@ -3697,12 +3700,30 @@ export default function App() {
               </button>
             </div>
             {(user?.role === 'citizen' || user?.role === 'fpo' || ['csr_partner', 'epr_partner', 'ccc_buyer'].includes(user?.role || '')) && (
-              <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex items-center gap-3">
-                <Wallet className="text-emerald-400" size={20} />
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-white/40">{t('Wallet Balance')}</p>
-                  <p className="text-xl font-bold">₹{walletBalance.toFixed(2)}</p>
-                </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl px-5 py-2.5 flex items-center gap-3">
+                {['citizen', 'fpo', 'farmer'].includes(user?.role || '') ? (
+                  <>
+                    <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
+                      <Coins size={22} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-emerald-400 font-extrabold">{t('Green Credit Coins')}</p>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-xl font-black text-emerald-300">{walletBalance.toFixed(0)}</span>
+                        <span className="text-xs font-bold text-emerald-400">GCC</span>
+                      </div>
+                      <p className="text-[10px] text-white/50">≡ ₹{walletBalance.toFixed(2)} Valuation</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="text-emerald-400" size={20} />
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-white/40">{t('Wallet Balance')}</p>
+                      <p className="text-xl font-bold">₹{walletBalance.toFixed(2)}</p>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -3745,9 +3766,91 @@ export default function App() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <Stat label={t('CCC Offset')} value={`${(history.reduce((acc, r) => acc + r.ccc_amount_kg, 0)).toFixed(1)} kg`} icon={Globe} color="cyan" blockchainLink={user?.role === 'fpo'} setView={setView} />
                     <Stat label={`Total ${labels.waste}`} value={`${(history.reduce((acc, r) => acc + r.weight_kg, 0)).toFixed(1)} kg`} icon={Scale} color="emerald" setView={setView} />
-                    <Stat label={t('Total Earnings')} value={`₹${(history.reduce((acc, r) => acc + r.total_value, 0)).toFixed(2)}`} icon={Wallet} color="blue" setView={setView} />
+                    <Stat label={t('Green Credit Coins')} value={`${walletBalance.toFixed(0)} GCC`} icon={Coins} color="emerald" setView={setView} />
                     <Stat label={t('Community Rank')} value="#12" icon={TrendingUp} color="purple" setView={setView} />
                   </div>
+
+                  {/* Green Credit Coin (GCC) Redemption Hub */}
+                  <Card className="bg-gradient-to-br from-emerald-950/40 via-black to-slate-950 border-emerald-500/30">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Coins className="text-emerald-400" size={24} />
+                          <h3 className="text-xl font-bold text-white">Green Credit Coin (GCC) Redemption Hub</h3>
+                          <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold rounded-full">EARNED & AVAILABLE</span>
+                        </div>
+                        <p className="text-xs text-white/60 mt-1">
+                          You have <strong className="text-emerald-400">{walletBalance.toFixed(0)} Green Credit Coins (GCC)</strong> (Valuation ~ ₹{walletBalance.toFixed(2)}). Redeem your earned coins directly into utility offsets or cashout.
+                        </p>
+                      </div>
+                      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-right shrink-0">
+                        <span className="text-[10px] uppercase text-emerald-400 font-bold block">Available Balance</span>
+                        <span className="text-2xl font-black text-emerald-300">{walletBalance.toFixed(0)} <span className="text-xs">GCC</span></span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="p-4 bg-white/5 border border-white/10 rounded-xl hover:border-emerald-500/50 transition-all group">
+                        <div className="p-2.5 bg-blue-500/20 text-blue-400 rounded-lg w-fit mb-3">
+                          <Building2 size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-white mb-1">Municipal Tax Rebate</h4>
+                        <p className="text-xs text-white/50 mb-3">Apply GCC toward 10% SWM 2016 property tax rebate.</p>
+                        <button 
+                          onClick={() => alert(`10% Property Tax Rebate applied! ${Math.min(walletBalance, 200).toFixed(0)} GCC redeemed.`)}
+                          disabled={walletBalance <= 0}
+                          className="w-full py-1.5 bg-blue-500/20 text-blue-300 border border-blue-500/40 rounded-lg text-xs font-bold hover:bg-blue-500/30 transition-all disabled:opacity-40"
+                        >
+                          Redeem Tax Rebate
+                        </button>
+                      </div>
+
+                      <div className="p-4 bg-white/5 border border-white/10 rounded-xl hover:border-emerald-500/50 transition-all group">
+                        <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-lg w-fit mb-3">
+                          <Zap size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-white mb-1">Electricity Bill Discount</h4>
+                        <p className="text-xs text-white/50 mb-3">Offset monthly power grid charges using GCC.</p>
+                        <button 
+                          onClick={() => alert(`Electricity discount voucher generated for ${Math.min(walletBalance, 500).toFixed(0)} GCC!`)}
+                          disabled={walletBalance <= 0}
+                          className="w-full py-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-bold hover:bg-amber-500/30 transition-all disabled:opacity-40"
+                        >
+                          Redeem Utility Offsets
+                        </button>
+                      </div>
+
+                      <div className="p-4 bg-white/5 border border-white/10 rounded-xl hover:border-emerald-500/50 transition-all group">
+                        <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-lg w-fit mb-3">
+                          <Sprout size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-white mb-1">Organic Fertilizer Voucher</h4>
+                        <p className="text-xs text-white/50 mb-3">Claim compost or biochar at city/rural resource centers.</p>
+                        <button 
+                          onClick={() => alert(`Organic Fertilizer Voucher issued for ${Math.min(walletBalance, 300).toFixed(0)} GCC!`)}
+                          disabled={walletBalance <= 0}
+                          className="w-full py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-lg text-xs font-bold hover:bg-emerald-500/30 transition-all disabled:opacity-40"
+                        >
+                          Claim Bio-Inputs
+                        </button>
+                      </div>
+
+                      <div className="p-4 bg-white/5 border border-white/10 rounded-xl hover:border-emerald-500/50 transition-all group">
+                        <div className="p-2.5 bg-purple-500/20 text-purple-400 rounded-lg w-fit mb-3">
+                          <Wallet size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-white mb-1">Direct UPI Cashout</h4>
+                        <p className="text-xs text-white/50 mb-3">Settle GCC balance to bank account (1 GCC = ₹1.00).</p>
+                        <button 
+                          onClick={() => alert(`Initiated UPI Transfer of ₹${walletBalance.toFixed(2)} to linked bank account.`)}
+                          disabled={walletBalance <= 0}
+                          className="w-full py-1.5 bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-lg text-xs font-bold hover:bg-purple-500/30 transition-all disabled:opacity-40"
+                        >
+                          Instant Bank Cashout
+                        </button>
+                      </div>
+                    </div>
+                  </Card>
                   
                   {ecoTips.length > 0 && (
                     <Card className="bg-emerald-500/5 border-emerald-500/20">
@@ -4784,31 +4887,42 @@ export default function App() {
                       )}
                     </div>
 
-                    <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium text-emerald-400">{t('Estimated Value Breakdown')}</span>
-                        <TrendingUp size={16} className="text-emerald-400" />
+                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+                          <Coins size={16} />
+                          {t('Green Credit Coin Reward Breakdown')}
+                        </span>
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">GCC ENGINE</span>
                       </div>
                       <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-white/40">
-                          <span>{t('Base Value (Recycler)')}</span>
+                        <div className="flex justify-between text-xs text-white/60">
+                          <span>{t('Base Material Value')}</span>
                           <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0)).toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-xs text-white/40">
-                          <span>{t('CCC Value (Offset Market)')}</span>
-                          <span>₹{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.ccc_factor || 0) * paymentConfig.ccc_price_per_kg).toFixed(2)}</span>
+                        <div className="flex justify-between text-xs text-white/60">
+                          <span>{t('CCC Carbon Offset Co-benefit')}</span>
+                          <span>{(parseFloat(uploadData.weight_kg || '0') * (wasteTypes.find(w => w.type === uploadData.waste_type)?.ccc_factor || 0)).toFixed(1)} kg CO₂e</span>
                         </div>
-                        <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/5">
-                          <span>{t('Total Sovereign Value')}</span>
-                          <span className="text-emerald-400">
-                            ₹{(
+                        <div className="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-white/10">
+                          <span className="flex items-center gap-1 text-emerald-300">
+                            <Coins size={14} />
+                            {t('Earned Green Credit Coins')}
+                          </span>
+                          <span className="text-emerald-400 font-mono text-base">
+                            {Math.round(
                               parseFloat(uploadData.weight_kg || '0') * 
-                              ((wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0) + 
-                               (wasteTypes.find(w => w.type === uploadData.waste_type)?.ccc_factor || 0) * paymentConfig.ccc_price_per_kg)
-                            ).toFixed(2)}
+                              (wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0) * 0.75
+                            )} GCC <span className="text-xs font-normal text-white/50">(≡ ₹{(
+                              parseFloat(uploadData.weight_kg || '0') * 
+                              (wasteTypes.find(w => w.type === uploadData.waste_type)?.value || 0) * 0.75
+                            ).toFixed(2)})</span>
                           </span>
                         </div>
                       </div>
+                      <p className="text-[10px] text-emerald-400/80 mt-2 italic">
+                        ⚡ Note: Reward is credited as Green Credit Coins (GCC) upon MRV verification. GCC can be redeemed for property tax rebates, electricity bill discounts, or direct bank cashout.
+                      </p>
                     </div>
 
                     <div>

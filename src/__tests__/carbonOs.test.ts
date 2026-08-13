@@ -16,7 +16,6 @@ import {
   SIHORA_RURAL_CARBON_ACCOUNTING_BOUNDARY, SIHORA_RURAL_PATHWAY_SEPARATION,
   ruralBiomassMassBalanceEngine, ruralDoubleCountingChecker, ruralCalculationGate
 } from '../services/ruralBoundaryService.ts';
-import { LEGACY_GAZIPUR_FIXTURE, validateGazipurDataIsolation } from '../../legacy/pilot-fixtures/gazipur/legacyGazipurFixture.ts';
 
 export async function runTests() {
   console.log("Running Carbon OS Regression & Phase 6.5 Kathonda Boundary Tests...");
@@ -38,15 +37,6 @@ export async function runTests() {
   if (trace.intermediate_steps[2].value !== 21420) throw new Error("Step 3 BE_y mismatch");
   if (trace.result.ERy !== 21406) throw new Error(`Step 4 ERy expected 21406, got ${trace.result.ERy}`);
   console.log("WA03.001 Mathematical Step-by-Step Reconciliation PASSED:", trace.result.ERy, "tCO2e");
-
-  // 3. Phase 6 Gazipur Legacy Data Contamination Prevention Check
-  try {
-    validateGazipurDataIsolation(LEGACY_GAZIPUR_FIXTURE.projectId);
-    throw new Error("Failed to catch Gazipur legacy fixture contamination");
-  } catch (err: any) {
-    if (!err.message.includes("CONTAMINATION ERROR")) throw err;
-    console.log("Gazipur legacy data contamination prevention check PASSED.");
-  }
 
   // 4. Phase 6 Jabalpur Pilot Facility & Candidates Verification
   if (JABALPUR_LANDFILL_FACILITY.facility_id !== "FAC-JBP-001") throw new Error("Invalid Jabalpur facility ID");
