@@ -19,7 +19,7 @@ import { createClient } from "redis";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES, INDIAN_STATES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
-import { generateCarbonEvent } from "./src/services/carbonEngine";
+import { generateCarbonEvent, cqe, BEE_APPROVED_METHODOLOGIES, CarbonQuantificationEngine, CQEMethodologyRegistry } from "./src/services/carbonEngine";
 import { VCService } from "./src/services/vcService";
 import { GuardianService } from "./src/services/guardianService";
 import { ICMComplianceService, ICM_METHODOLOGIES, ICM_CCTS_SECTORS } from "./src/services/icmComplianceService";
@@ -1728,7 +1728,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json(available);
   });
 
-  app.post("/api/processor/receipt", auth(["processor"]), async (req: any, res) => {
+  app.post("/api/processor/receipt", auth(["processor", "recycler_manager"]), async (req: any, res) => {
     const { record_id } = req.body;
     const record = records.find((r) => r.id === record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
@@ -1737,10 +1737,12 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
     record.status = "processed";
     record.processor_id = req.user.id;
+    record.processed_at = new Date().toISOString();
     
-    // Processor pays for the aggregated material received
+    // Processor pays for the aggregated physical material received
     const recycler = users.find(u => u.id === req.user.id);
-    const material_value = record.base_value; // the total base value
+    const material_value = record.base_value || (record.weight_kg * (dynamicWasteTypes.find(w => w.type === record.waste_type)?.value || 10));
+    
     if (dbStatus === "connected") {
         await WalletEngine.transact(req.user.id, material_value, 'DEBIT', {
             eventId: record.id,
@@ -1750,9 +1752,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         if (recycler) recycler.wallet_balance = (recycler.wallet_balance || 0) - material_value;
     }
 
-    // Generator receives their payout now that the processor has paid
+    // Generator receives their payout (Physical Material Payment to generator)
     const generator = users.find(u => u.id === record.citizen_id);
-    const generator_payout = record.generator_payout || 0; // Fallback to 0 if missing
+    const generator_payout = record.generator_payout || (material_value * ((100 - paymentConfig.logistics_margin_percent - paymentConfig.system_profit_percent) / 100));
     if (generator && generator_payout > 0) {
         if (dbStatus === "connected") {
             await WalletEngine.transact(generator.id, generator_payout, 'CREDIT', {
@@ -1765,10 +1767,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         }
     }
 
-    // Aggregator receives their transit payout based on config
+    // Aggregator receives their transit & collection payout (Physical Material Logistics Payment to aggregator)
     const aggregator = users.find(u => u.id === record.aggregator_id);
     const logistics_payout = record.base_value * (paymentConfig.logistics_margin_percent / 100);
-    if (aggregator) {
+    if (aggregator && logistics_payout > 0) {
         if (dbStatus === "connected") {
             await WalletEngine.transact(aggregator.id, logistics_payout, 'CREDIT', {
                 eventId: record.id,
@@ -1779,13 +1781,35 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         }
     }
 
+    // Platform system fee on material handling (10%)
+    const system_fee = material_value * (paymentConfig.system_profit_percent / 100);
+    const platformAdmin = users.find(u => u.role === "super_admin" || u.id === "admin_1");
+    if (platformAdmin && system_fee > 0) {
+        if (dbStatus === "connected") {
+            await WalletEngine.transact(platformAdmin.id, system_fee, 'CREDIT', {
+                eventId: record.id,
+                category: 'platform_material_handling_fee'
+            });
+        } else {
+            platformAdmin.wallet_balance = (platformAdmin.wallet_balance || 0) + system_fee;
+        }
+    }
+
     logs.push({
       id: Date.now(),
       event: "BIOMASS_PROCESSED",
-      details: `Record ${record.id} processed by ${req.user.id}`,
+      details: `Record ${record.id} processed by ${req.user.id}. Material payment ₹${material_value.toFixed(2)} settled: Generator ₹${generator_payout.toFixed(2)}, Aggregator ₹${logistics_payout.toFixed(2)}, Platform Fee ₹${system_fee.toFixed(2)}.`,
       timestamp: new Date().toISOString(),
     });
-    res.json({ message: "Processing confirmed. Material cost deducted, and generator/aggregator paid." });
+    res.json({ 
+      message: "Processing confirmed. Physical material cost settled to respective stakeholders (Generator & Aggregator) and platform handling fee retained.",
+      payout_details: {
+        total_material_value: material_value,
+        generator_payout,
+        logistics_payout,
+        system_fee
+      }
+    });
   });
 
   app.post("/api/processor/report", auth(["processor"]), (req: any, res) => {
@@ -1951,7 +1975,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.post(
     "/api/partner/purchase-cccs",
     auth(["csr_partner", "epr_partner", "ccc_buyer"]),
-    (req: any, res) => {
+    async (req: any, res) => {
       const { record_ids } = req.body;
       const user = users.find((u) => u.id === req.user.id);
       if (!user) return res.status(404).json({ error: "User not found" });
@@ -1968,24 +1992,57 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       );
 
       if (user.wallet_balance < totalCost) {
-        return res.status(400).json({ error: "Insufficient funds" });
+        return res.status(400).json({ error: "Insufficient funds in wallet to purchase Carbon Credit Certificates." });
       }
 
+      // 1. Debit buyer
       user.wallet_balance -= totalCost;
+
+      // 2. The sale of Carbon Credit Certificates belongs 100% to Platform Income / Treasury
+      const platformAdmin = users.find((u) => u.role === "super_admin" || u.id === "admin_1");
+      if (platformAdmin) {
+        platformAdmin.wallet_balance = (platformAdmin.wallet_balance || 0) + totalCost;
+      }
+
+      if (dbStatus === "connected" && platformAdmin) {
+        try {
+          await WalletEngine.transact(user.id, totalCost, 'DEBIT', {
+            category: 'carbon_credit_purchase',
+            recordCount: recordsToPurchase.length,
+            recordIds: record_ids
+          });
+          await WalletEngine.transact(platformAdmin.id, totalCost, 'CREDIT', {
+            category: 'platform_carbon_credit_sale_income',
+            buyerId: user.id,
+            buyerRole: user.role,
+            recordCount: recordsToPurchase.length
+          });
+        } catch (dbErr) {
+          console.error("WalletEngine error during carbon credit certificate purchase:", dbErr);
+        }
+      }
+
+      // Mark records as purchased and attribute carbon revenue exclusively to platform treasury
       recordsToPurchase.forEach((r) => {
         r.purchased_by = user.id;
+        r.purchased_by_name = user.name || user.organization_name || user.id;
+        r.purchased_at = new Date().toISOString();
+        r.purchase_price = r.potential_ccc_value;
+        r.carbon_revenue_accrued_to = "platform_treasury";
       });
 
       logs.push({
         id: Date.now(),
         event: "CCCS_PURCHASED",
-        details: `${recordsToPurchase.length} CCCs purchased by ${req.user.id} for ₹${totalCost}`,
+        details: `${recordsToPurchase.length} Carbon Credit Certificates purchased by ${user.name || req.user.id} for ₹${totalCost.toFixed(2)}. 100% of proceeds credited to Platform Income.`,
         timestamp: new Date().toISOString(),
       });
 
       res.json({
-        message: `Successfully purchased ${recordsToPurchase.length} CCCs`,
+        message: `Successfully purchased ${recordsToPurchase.length} Carbon Credit Certificates. Total ₹${totalCost.toFixed(2)} credited to Platform Income.`,
         wallet_balance: user.wallet_balance,
+        platform_income_recognized: totalCost,
+        purchased_count: recordsToPurchase.length
       });
     },
   );
@@ -2001,8 +2058,54 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   // ---------------- ADMIN ROUTES ----------------
   // ================================
-  // SERIES A KPI ENDPOINT
+  // SERIES A KPI ENDPOINT & FINANCIAL BREAKDOWN
   // ================================
+  app.get(
+    "/api/admin/financial-breakdown",
+    auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
+    (req: any, res) => {
+      let filteredRecords = filterByJurisdiction(req.user, records, "records", req.query);
+
+      // 1. Material Payouts to Stakeholders (Processed records only)
+      const processedRecords = filteredRecords.filter(r => r.status === "processed");
+      const generator_payouts_total = processedRecords.reduce((sum, r) => sum + (r.generator_payout || 0), 0);
+      const aggregator_payouts_total = processedRecords.reduce((sum, r) => sum + ((r.base_value || 0) * (paymentConfig.logistics_margin_percent / 100)), 0);
+      const material_handling_fees_total = processedRecords.reduce((sum, r) => sum + ((r.base_value || 0) * (paymentConfig.system_profit_percent / 100)), 0);
+      const total_material_value_traded = processedRecords.reduce((sum, r) => sum + (r.base_value || 0), 0);
+
+      // 2. Carbon Credit Certificate (CCC) Sales (Platform Income Only)
+      const purchasedCccRecords = filteredRecords.filter(r => !!r.purchased_by);
+      const platform_ccc_sales_income = purchasedCccRecords.reduce((sum, r) => sum + (r.purchase_price || r.potential_ccc_value || 0), 0);
+      const total_ccc_kg_sold = purchasedCccRecords.reduce((sum, r) => sum + (r.ccc_amount_kg || 0), 0);
+
+      // 3. Platform Total Income
+      const total_platform_income = platform_ccc_sales_income + material_handling_fees_total;
+      const platformAdmin = users.find(u => u.role === "super_admin" || u.id === "admin_1");
+
+      res.json({
+        rules: {
+          material_payout_rule: "Aggregated physical material value is disbursed strictly to respective supply chain stakeholders (Generators & Aggregators/Logistics).",
+          carbon_sale_rule: "100% of Carbon Credit Certificate (CCC) sale proceeds belong exclusively to Platform Income."
+        },
+        stakeholder_material_disbursements: {
+          generator_payouts_inr: Number(generator_payouts_total.toFixed(2)),
+          aggregator_payouts_inr: Number(aggregator_payouts_total.toFixed(2)),
+          total_stakeholder_material_payouts_inr: Number((generator_payouts_total + aggregator_payouts_total).toFixed(2)),
+          total_material_value_traded_inr: Number(total_material_value_traded.toFixed(2)),
+          processed_batches_count: processedRecords.length
+        },
+        platform_income_breakdown: {
+          carbon_credit_certificate_sales_inr: Number(platform_ccc_sales_income.toFixed(2)),
+          material_handling_fees_inr: Number(material_handling_fees_total.toFixed(2)),
+          total_platform_income_inr: Number(total_platform_income.toFixed(2)),
+          platform_treasury_wallet_balance_inr: Number((platformAdmin?.wallet_balance || 0).toFixed(2)),
+          total_ccc_kg_sold: Number(total_ccc_kg_sold.toFixed(2)),
+          purchased_certificates_count: purchasedCccRecords.length
+        }
+      });
+    }
+  );
+
   app.get(
     "/api/admin/kpi",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
@@ -2020,16 +2123,28 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       ).length;
       const total_users = filterByJurisdiction(req.user, users, "users", req.query).length;
 
-      // Calculate total wallet disbursed (sum of all potential_ccc_value of verified records)
-      const total_wallet = filteredRecords
-        .filter((r) => r.mrv_status === "verified")
-        .reduce((sum, r) => sum + (r.potential_ccc_value || 0), 0);
+      // Calculate material payouts to stakeholders (generators + aggregators)
+      const processedRecords = filteredRecords.filter((r) => r.status === "processed");
+      const stakeholder_material_disbursed = processedRecords.reduce(
+        (sum, r) => sum + (r.generator_payout || 0) + ((r.base_value || 0) * (paymentConfig.logistics_margin_percent / 100)),
+        0
+      );
+
+      // Calculate Platform Carbon Income from CCC sales
+      const platform_carbon_income = filteredRecords
+        .filter((r) => !!r.purchased_by)
+        .reduce((sum, r) => sum + (r.purchase_price || r.potential_ccc_value || 0), 0);
+
+      const platformAdmin = users.find((u) => u.role === "super_admin" || u.id === "admin_1");
 
       res.json({
         total_waste_events: total_waste,
         processed_events: processed,
         total_users: total_users,
-        wallet_disbursed: total_wallet,
+        wallet_disbursed: stakeholder_material_disbursed,
+        stakeholder_material_disbursed,
+        platform_carbon_income,
+        platform_treasury_balance: platformAdmin?.wallet_balance || 0
       });
     },
   );
@@ -4830,6 +4945,238 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
       });
     }
   }, 10000);
+
+  // =========================================================================
+  // RUPAYKG CARBON QUANTIFICATION ENGINE — CQE 1.0 API ENDPOINTS
+  // =========================================================================
+
+  // 1. Live Approved BEE Methodology Catalogue & Registry (2026 standards)
+  app.get("/api/carbon/cqe/methodologies", (req, res) => {
+    const { sector, status, search } = req.query as { sector?: string; status?: string; search?: string };
+    const list = CQEMethodologyRegistry.getAll({ sector, status, search });
+    res.json({
+      total: list.length,
+      registryAuthority: "Bureau of Energy Efficiency (BEE), Ministry of Power, Govt. of India",
+      complianceStandard: "CCTS Offset Mechanism (OM) 2026",
+      methodologies: list
+    });
+  });
+
+  // 1b. Single Methodology by ID
+  app.get("/api/carbon/cqe/methodologies/:id", (req, res) => {
+    const item = CQEMethodologyRegistry.getById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ error: `Methodology ${req.params.id} not found.` });
+    }
+    res.json({ success: true, methodology: item });
+  });
+
+  // 1c. Register New Methodology / Definition
+  app.post("/api/carbon/cqe/methodologies", auth(), (req: any, res) => {
+    try {
+      const author = req.user?.name || req.user?.email || "BEE Administrator";
+      const registered = CQEMethodologyRegistry.register(req.body, author);
+      res.status(201).json({
+        success: true,
+        message: `Methodology ${registered.methodologyCode} (${registered.version}) successfully registered under BEE CCTS 2026.`,
+        methodology: registered
+      });
+    } catch (err: any) {
+      console.error("Methodology registration error:", err);
+      res.status(400).json({ error: err.message || "Failed to register methodology." });
+    }
+  });
+
+  // 1d. Update Existing Methodology
+  app.put("/api/carbon/cqe/methodologies/:id", auth(), (req: any, res) => {
+    try {
+      const updated = CQEMethodologyRegistry.update(req.params.id, req.body);
+      res.json({
+        success: true,
+        message: `Methodology ${updated.methodologyCode} (${updated.version}) updated successfully.`,
+        methodology: updated
+      });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message || "Failed to update methodology." });
+    }
+  });
+
+  // 1e. Version Bump / Clone Methodology
+  app.post("/api/carbon/cqe/methodologies/:id/version", auth(), (req: any, res) => {
+    try {
+      const { newVersion, changelog, overrides } = req.body;
+      if (!newVersion) {
+        return res.status(400).json({ error: "newVersion is required (e.g., '1.1' or '2.0')." });
+      }
+      const author = req.user?.name || req.user?.email || "BEE Administrator";
+      const result = CQEMethodologyRegistry.createNewVersion(
+        req.params.id,
+        newVersion,
+        changelog || `Version ${newVersion} published under BEE CCTS OM.`,
+        overrides,
+        author
+      );
+      res.json({
+        success: true,
+        message: `Created version ${newVersion} for ${result.newVersion.methodologyCode}. Previous version marked as SUPERSEDED.`,
+        previousVersion: result.previousVersion,
+        newVersion: result.newVersion
+      });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message || "Failed to bump methodology version." });
+    }
+  });
+
+  // 1f. Import JSON Definition(s)
+  app.post("/api/carbon/cqe/methodologies/import-json", auth(), (req: any, res) => {
+    try {
+      const author = req.user?.name || req.user?.email || "BEE Administrator";
+      const result = CQEMethodologyRegistry.importJSON(req.body, author);
+      res.json({
+        success: true,
+        importedCount: result.imported.length,
+        imported: result.imported,
+        errors: result.errors,
+        message: `Successfully imported ${result.imported.length} BEE methodology definition(s).`
+      });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message || "Failed to import JSON methodology." });
+    }
+  });
+
+  // 1g. Reset Catalogue to Official 2026 Standards
+  app.post("/api/carbon/cqe/methodologies/reset", auth(), (req: any, res) => {
+    try {
+      const list = CQEMethodologyRegistry.resetToStandard();
+      res.json({
+        success: true,
+        total: list.length,
+        message: "CQE 1.0 Methodology Catalogue reset to official 2026 BEE CCTS baseline.",
+        methodologies: list
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to reset methodology registry." });
+    }
+  });
+
+  // 1h. Delete / Archive Methodology
+  app.delete("/api/carbon/cqe/methodologies/:id", auth(), (req: any, res) => {
+    try {
+      const success = CQEMethodologyRegistry.delete(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: `Methodology ${req.params.id} not found.` });
+      }
+      res.json({ success: true, message: `Methodology ${req.params.id} deleted.` });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message || "Failed to delete methodology." });
+    }
+  });
+
+  // 2. Full 12-Layer CQE Quantification
+  app.post("/api/carbon/cqe/quantify", auth(), (req: any, res) => {
+    try {
+      const { activityData, customAssay, scenarioPriceInr, pricingType } = req.body;
+      const price = typeof scenarioPriceInr === "number" ? scenarioPriceInr : 8500;
+      const trace = cqe.quantify(activityData || {}, customAssay, price, pricingType || "SCENARIO_PRICE");
+      res.json({
+        success: true,
+        trace,
+        message: "Activity successfully quantified through CQE 1.0 12-Layer Engine."
+      });
+    } catch (err: any) {
+      console.error("CQE Quantification error:", err);
+      res.status(400).json({ error: err.message || "Failed to execute CQE quantification." });
+    }
+  });
+
+  // 3. Three-Ledger Separation Engine (Material, Carbon, Financial)
+  app.get("/api/carbon/cqe/ledgers", auth(), (req: any, res) => {
+    try {
+      const filtered = filterByJurisdiction(req.user, records, "records");
+      
+      const ledgerRecords = filtered.map((rec) => {
+        const genPayout = rec.generator_payout || 0;
+        const baseVal = rec.base_value || 0;
+        const aggPayout = baseVal * (paymentConfig.logistics_margin_percent / 100);
+        
+        return cqe.generateThreeLedgersRecord(
+          rec.id,
+          {
+            activityId: rec.activity_id || `RK-ACT-${rec.id}`,
+            netMaterialKg: rec.weight_kg || 100,
+            grossVehicleWeightKg: (rec.weight_kg || 100) + 3200,
+            tareWeightKg: 3200,
+            materialCategory: rec.waste_type || "Municipal Organic Waste",
+            facilityId: rec.facility_type || "FAC-GEN-001",
+            geoLat: rec.geo_lat || 23.18,
+            geoLong: rec.geo_long || 79.98,
+            timestamp: rec.timestamp || new Date().toISOString(),
+            source: rec.context === "rural" ? "Gram Panchayat Rural Aggregation Hub" : "Urban Municipal Ward D2D",
+            destination: "Kathonda Waste-to-Energy & Resource Center"
+          },
+          genPayout,
+          aggPayout,
+          8500
+        );
+      });
+
+      // Aggregate ledger statistics
+      const totalMaterialKg = ledgerRecords.reduce((acc, r) => acc + r.materialLedger.netWeightKg, 0);
+      const totalMaterialTonnes = totalMaterialKg / 1000;
+      const totalCarbonTco2e = ledgerRecords.reduce((acc, r) => acc + r.carbonLedger.quantifiedTco2e, 0);
+      const totalMaterialSettlementInr = ledgerRecords.reduce((acc, r) => acc + r.financialLedger.materialSettlement.totalMaterialValueInr, 0);
+      const totalPotentialCarbonValueInr = ledgerRecords.reduce((acc, r) => acc + r.financialLedger.carbonCommoditySettlement.totalCarbonValueInr, 0);
+
+      res.json({
+        summary: {
+          materialLedger: {
+            totalMaterialKg,
+            totalMaterialTonnes: Number(totalMaterialTonnes.toFixed(3)),
+            unit: "kg / Metric Tonnes"
+          },
+          carbonLedger: {
+            totalQuantifiedTco2e: Number(totalCarbonTco2e.toFixed(4)),
+            totalCccEquivalent: Number(totalCarbonTco2e.toFixed(4)),
+            unit: "tCO2e (1 CCC = 1 tCO2e)",
+            acvaVerificationStandard: "Accredited Carbon Verification Agency (ACVA)"
+          },
+          financialLedger: {
+            totalMaterialSettlementInr: Number(totalMaterialSettlementInr.toFixed(2)),
+            totalPotentialCarbonValueInr: Number(totalPotentialCarbonValueInr.toFixed(2)),
+            currency: "INR (₹)",
+            revenueSeparationRule: "Physical material paid to Generator/Aggregator; CCC sale platform-treasury / project owner"
+          }
+        },
+        records: ledgerRecords
+      });
+    } catch (err: any) {
+      console.error("Failed to compile CQE 3-Ledgers:", err);
+      res.status(500).json({ error: "Failed to compile CQE 3-Ledgers." });
+    }
+  });
+
+  // 4. Scenario Pricing & 8-Tier Revenue Waterfall Simulator
+  app.post("/api/carbon/cqe/waterfall", auth(), (req: any, res) => {
+    try {
+      const { tco2eQuantity, scenarioPricePerCccInr, pricingType } = req.body;
+      const qty = typeof tco2eQuantity === "number" ? tco2eQuantity : 100;
+      const price = typeof scenarioPricePerCccInr === "number" ? scenarioPricePerCccInr : 8500;
+      const type = pricingType || "SCENARIO_PRICE";
+
+      const trace = cqe.quantify({ netMaterialKg: qty * 1000 }, undefined, price, type);
+
+      res.json({
+        tco2eQuantity: qty,
+        scenarioPricePerCccInr: price,
+        pricingType: type,
+        grossProceedsInr: trace.grossCarbonValueInr || qty * price,
+        waterfallBreakdown: trace.waterfallBreakdown || {}
+      });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message || "Failed to calculate revenue waterfall." });
+    }
+  });
+
   app.use("/api/v1/carbon", auth(), carbonRouter);
 
   // Catch-all 404 handler for unmatched API routes to prevent HTML SPA fallback

@@ -545,3 +545,276 @@ export interface CPCBSwmIntegrationStatus {
   endpointUrl: string;
 }
 
+// =========================================================================
+// RUPAYKG CARBON QUANTIFICATION ENGINE (CQE 1.0) CANONICAL TYPES
+// =========================================================================
+
+export enum CQEState {
+  INGESTED = 'INGESTED',
+  VALIDATED = 'VALIDATED',
+  CHARACTERISED = 'CHARACTERISED',
+  METHODOLOGY_SELECTED = 'METHODOLOGY_SELECTED',
+  BASELINE_CALCULATED = 'BASELINE_CALCULATED',
+  PROJECT_CALCULATED = 'PROJECT_CALCULATED',
+  LEAKAGE_CALCULATED = 'LEAKAGE_CALCULATED',
+  NET_TCO2E_CALCULATED = 'NET_TCO2E_CALCULATED',
+  QAQC_PASSED = 'QAQC_PASSED',
+  MRV_COMPLETE = 'MRV_COMPLETE',
+  READY_FOR_ACVA = 'READY_FOR_ACVA',
+  UNDER_ACVA_VERIFICATION = 'UNDER_ACVA_VERIFICATION',
+  ACVA_VERIFIED = 'ACVA_VERIFIED',
+  ISSUANCE_SUBMITTED = 'ISSUANCE_SUBMITTED',
+  CCC_ISSUED = 'CCC_ISSUED',
+  TRADEABLE = 'TRADEABLE',
+  TRANSFERRED = 'TRANSFERRED',
+  RETIRED = 'RETIRED'
+}
+
+export type PricingType = 
+  | 'SCENARIO_PRICE'
+  | 'MARKET_PRICE'
+  | 'INDICATIVE_PRICE'
+  | 'CONTRACT_PRICE'
+  | 'EXCHANGE_PRICE'
+  | 'BUYER_OFFER'
+  | 'AUCTION_PRICE'
+  | 'HISTORICAL_PRICE';
+
+export interface CQEActivityData {
+  activityId: string;
+  grossVehicleWeightKg: number;
+  tareWeightKg: number;
+  netMaterialKg: number;
+  materialCategory: string;
+  facilityId: string;
+  facilityName: string;
+  vehicleId: string;
+  weighbridgeId: string;
+  timestamp: string;
+  geoLat: number;
+  geoLong: number;
+  source: string;
+  destination: string;
+  batchId: string;
+  chainOfCustodyHash: string;
+}
+
+export interface CQEMaterialCharacterisation {
+  totalWeightKg: number;
+  compositionType: string;
+  organicFraction: number; // e.g. 0.65 (65%)
+  moisturePercent: number; // e.g. 45 (%)
+  dryMatterPercent: number; // 100 - moisture
+  degradableOrganicCarbon: number; // DOC_j (fraction)
+  fossilCarbonFraction?: number;
+  methaneGenerationPotential_L0?: number; // m3 CH4 / tonne
+  treatmentEfficiency: number; // fraction 0-1
+  isCharacterised: boolean;
+  characterisationSource: 'LAB_ASSAY' | 'METHODOLOGY_DEFAULT' | 'SAMPLED_WASTE_AUDIT';
+}
+
+export interface CQEMethodologyDefinition {
+  methodologyId: string;
+  methodologyCode: string;
+  title: string;
+  version: string;
+  sector: string;
+  applicability: string[];
+  baselineRules: string;
+  projectRules: string;
+  leakageRules: string;
+  monitoringRequirements: string[];
+  parameters: {
+    name: string;
+    code: string;
+    unit: string;
+    defaultValue?: number;
+    description: string;
+    source: string;
+  }[];
+  emissionFactors: {
+    name: string;
+    code: string;
+    value: number;
+    unit: string;
+    source: string;
+  }[];
+  toolsRequired: string[];
+  creditingPeriodRules: string;
+  effectiveDate: string;
+  status: 'ACTIVE' | 'SUPERSEDED' | 'PROPOSED';
+  sourceDocument: string;
+  issuer: string;
+  changelog?: string;
+  baselineEquationLatex?: string;
+  projectEquationLatex?: string;
+  leakageEquationLatex?: string;
+  acvaAccreditationStandard?: string;
+  supersededBy?: string;
+  lastUpdated?: string;
+  uploadedBy?: string;
+}
+
+export interface CQEQAQCAnomaly {
+  code: string;
+  severity: 'INFO' | 'WARNING' | 'BLOCKING';
+  layer: number;
+  parameter: string;
+  detectedValue: any;
+  thresholdOrRule: string;
+  description: string;
+  isPassed: boolean;
+}
+
+export interface CQEQAQCResult {
+  isPassed: boolean;
+  completenessScore: number; // 0-100
+  consistencyScore: number; // 0-100
+  conservativeDeductionPercent: number; // e.g. 5% if high uncertainty
+  anomalies: CQEQAQCAnomaly[];
+  auditTimestamp: string;
+  aiAnomalyDetection: {
+    model: string;
+    anomalyFlagged: boolean;
+    confidence: number;
+    notes: string;
+  };
+}
+
+export interface CQEEvidenceVaultRecord {
+  activityId: string;
+  weighbridgeSlipRef: string;
+  photoRefs: string[];
+  gpsTraceHash: string;
+  vehicleTelemetryHash: string;
+  facilityLogRef: string;
+  labReportRef?: string;
+  fuelConsumptionRef?: string;
+  electricityMeterRef?: string;
+  treatmentRecordRef: string;
+  calculationVersion: string;
+  methodologyVersion: string;
+  evidenceHashes: string[];
+  rootProvenanceHash: string;
+  hederaAnchor?: {
+    topicId: string;
+    consensusTimestamp: string;
+    sequenceNumber: number;
+    transactionId: string;
+  };
+}
+
+export interface CQEWaterfallBreakdown {
+  grossProceedsInr: number;
+  transactionCostsInr: number; // 2%
+  registryIssuanceCostsInr: number; // 3%
+  acvaValidationVerificationCostsInr: number; // 5%
+  projectOwnerShareInr: number; // 55%
+  generatorAggregatorShareInr: number; // 20%
+  financierShareInr: number; // 5%
+  rupayKgRevenueInr: number; // 10% (Platform Net Retained)
+}
+
+export interface CQEQuantificationTrace {
+  activityId: string;
+  methodologyCode: string;
+  methodologyVersion: string;
+  currentState: CQEState;
+  
+  // Layer 4: Baseline
+  baselineEmissionsTco2e: number;
+  baselineBreakdown: Record<string, number>;
+  
+  // Layer 5: Project Emissions
+  projectEmissionsTco2e: number;
+  projectEmissionsBreakdown: {
+    peFuel: number;
+    peElectricity: number;
+    peTransport: number;
+    peProcess: number;
+  };
+  
+  // Layer 6: Leakage
+  leakageEmissionsTco2e: number;
+  leakageBreakdown: Record<string, number>;
+  
+  // Layer 7: Net Quantified
+  grossReductionTco2e: number;
+  uncertaintyDeductionTco2e: number;
+  netVerifiedEligibleTco2e: number;
+  
+  // Layer 8: QA/QC
+  qaqcResult: CQEQAQCResult;
+  
+  // Layer 9: Vault
+  evidenceVault: CQEEvidenceVaultRecord;
+  
+  // Layer 10 & 11: Verification & CCC
+  acvaVerifierOrganization?: string;
+  acvaVerificationDate?: string;
+  icmRegistryReference?: string;
+  issuedCccQuantity: number; // 1 CCC = 1 tCO2e
+  isTradeable: boolean;
+  
+  // Layer 12: Market Pricing & Waterfall
+  pricingType: PricingType;
+  scenarioPricePerCccInr: number; // Scenario price (not hardcoded default)
+  grossCarbonValueInr: number;
+  waterfallBreakdown?: CQEWaterfallBreakdown;
+  
+  calculatedAt: string;
+  calculationHash: string;
+}
+
+export interface CQEThreeLedgersRecord {
+  recordId: string;
+  activityId: string;
+  
+  // 1. Material Ledger
+  materialLedger: {
+    netWeightKg: number;
+    netWeightTonnes: number;
+    grossWeightKg: number;
+    tareWeightKg: number;
+    materialCategory: string;
+    facilityId: string;
+    vehicleId: string;
+    weighbridgeId: string;
+    batchId: string;
+    timestamp: string;
+  };
+  
+  // 2. Carbon Ledger
+  carbonLedger: {
+    quantifiedTco2e: number;
+    baselineEmissionsTco2e: number;
+    projectEmissionsTco2e: number;
+    leakageEmissionsTco2e: number;
+    methodologyCode: string;
+    cqeState: CQEState;
+    acvaStatus: 'PENDING' | 'UNDER_REVIEW' | 'VERIFIED' | 'REJECTED';
+    icmCccIssuedQuantity: number;
+    isIcmRegistryIssued: boolean;
+    hederaProvenanceHash: string;
+  };
+  
+  // 3. Financial Ledger
+  financialLedger: {
+    materialSettlement: {
+      totalMaterialValueInr: number;
+      generatorPayoutInr: number;
+      aggregatorPayoutInr: number;
+      platformMaterialHandlingFeeInr: number;
+      settlementStatus: 'PENDING' | 'SETTLED' | 'ESCROW';
+    };
+    carbonCommoditySettlement: {
+      pricingType: PricingType;
+      unitPricePerCccInr: number;
+      totalCarbonValueInr: number;
+      isCccSold: boolean;
+      carbonRevenueAccruedTo: 'platform_treasury' | 'project_owner' | 'pending_sale';
+      waterfall?: CQEWaterfallBreakdown;
+    };
+  };
+}
+

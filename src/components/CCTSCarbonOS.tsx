@@ -27,17 +27,17 @@ export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
     { id: 'project', label: 'Project', icon: Layers },
     { id: 'mrv', label: 'MRV', icon: CheckCircle2 },
     { id: 'evidence', label: 'Evidence', icon: Scale },
-    { id: 'calculation', label: 'Calculation', icon: Cpu },
+    { id: 'calculation', label: 'CQE 1.0 Engine', icon: Cpu },
   ] as const;
 
   return (
     <div className="space-y-6 pb-20">
       <div className="bg-slate-900 border border-white/10 rounded-2xl p-6">
         <h1 className="text-2xl font-black text-emerald-400 uppercase tracking-wide">
-          RupayKg Carbon OS (Phase 6)
+          RupayKg Carbon OS — CQE 1.0 Canonical
         </h1>
         <p className="text-sm text-white/60 mt-1">
-          First Real Pilot Onboarding & Operator Site Readiness Cockpit (Jabalpur Landfill BM WA03.001)
+          India's Circular Economy Operating System • Deterministic 12-Layer Carbon Quantification & 3-Ledger Architecture
         </p>
       </div>
 
@@ -68,7 +68,7 @@ export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
         {activeTab === 'project' && <ProjectWorkflow />}
         {activeTab === 'mrv' && <MRV />}
         {activeTab === 'evidence' && <Evidence />}
-        {activeTab === 'calculation' && <Calculation />}
+        {activeTab === 'calculation' && <Calculation token={token} />}
       </div>
     </div>
   );

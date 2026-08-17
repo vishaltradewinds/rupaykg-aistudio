@@ -5747,20 +5747,20 @@ export default function App() {
                       </select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <Activity size={80} className="text-white" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <Card className="p-5 border-white/5 bg-white/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Activity size={70} className="text-white" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Total Waste Events')}</h4>
-                      <p className="text-4xl font-black tracking-tighter">{adminKpi.total_waste_events || 0}</p>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-1.5 font-semibold">{t('Total Waste Events')}</h4>
+                      <p className="text-3xl font-black tracking-tighter">{adminKpi.total_waste_events || 0}</p>
                     </Card>
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <CheckCircle2 size={80} className="text-emerald-400" />
+                    <Card className="p-5 border-white/5 bg-white/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <CheckCircle2 size={70} className="text-emerald-400" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Processed Events')}</h4>
-                      <p className="text-4xl font-black tracking-tighter text-emerald-400">{adminKpi.processed_events || 0}</p>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-1.5 font-semibold">{t('Processed Events')}</h4>
+                      <p className="text-3xl font-black tracking-tighter text-emerald-400">{adminKpi.processed_events || 0}</p>
                       <button 
                         onClick={() => setView('blockchain')}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400/40 hover:text-emerald-400"
@@ -5769,19 +5769,28 @@ export default function App() {
                         <Cpu size={12} />
                       </button>
                     </Card>
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <Users size={80} className="text-blue-400" />
+                    <Card className="p-5 border-white/5 bg-white/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Users size={70} className="text-blue-400" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Total Users')}</h4>
-                      <p className="text-4xl font-black tracking-tighter text-blue-400">{adminKpi.total_users || 0}</p>
+                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-1.5 font-semibold">{t('Total Users')}</h4>
+                      <p className="text-3xl font-black tracking-tighter text-blue-400">{adminKpi.total_users || 0}</p>
                     </Card>
-                    <Card className="p-6 border-white/5 bg-white/5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
-                        <Wallet size={80} className="text-amber-400" />
+                    <Card className="p-5 border-emerald-500/20 bg-emerald-950/20 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Wallet size={70} className="text-emerald-400" />
                       </div>
-                      <h4 className="text-white/40 text-xs uppercase tracking-widest mb-2 font-semibold">{t('Wallet Disbursed')}</h4>
-                      <p className="text-4xl font-black tracking-tighter text-amber-400">₹{adminKpi.wallet_disbursed?.toFixed(2) || 0}</p>
+                      <h4 className="text-emerald-400/70 text-xs uppercase tracking-widest mb-1.5 font-semibold">Stakeholder Material Payouts</h4>
+                      <p className="text-3xl font-black tracking-tighter text-emerald-400">₹{(adminKpi.stakeholder_material_disbursed || adminKpi.wallet_disbursed || 0).toFixed(2)}</p>
+                      <p className="text-[10px] text-emerald-400/60 mt-1">Direct to Generators & Aggregators</p>
+                    </Card>
+                    <Card className="p-5 border-amber-500/20 bg-amber-950/20 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Globe size={70} className="text-amber-400" />
+                      </div>
+                      <h4 className="text-amber-400/70 text-xs uppercase tracking-widest mb-1.5 font-semibold">Platform Carbon Income</h4>
+                      <p className="text-3xl font-black tracking-tighter text-amber-400">₹{(adminKpi.platform_carbon_income || 0).toFixed(2)}</p>
+                      <p className="text-[10px] text-amber-400/60 mt-1">100% Retained Platform Revenue</p>
                     </Card>
                   </div>
 
