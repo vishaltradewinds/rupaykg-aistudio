@@ -12,6 +12,7 @@ import {
   CQEThreeLedgersRecord 
 } from '../../types.ts';
 import { MethodologyConfigurator } from './MethodologyConfigurator.tsx';
+import { FinancialDoctrineModal } from './FinancialDoctrineModal.tsx';
 
 interface CQECockpitProps {
   token?: string | null;
@@ -24,6 +25,7 @@ export const CQECockpit: React.FC<CQECockpitProps> = ({ token }) => {
   const [ledgersData, setLedgersData] = useState<{ summary: any; records: CQEThreeLedgersRecord[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [quantificationTrace, setQuantificationTrace] = useState<CQEQuantificationTrace | null>(null);
+  const [isDoctrineModalOpen, setIsDoctrineModalOpen] = useState(false);
 
   // Simulator Form State
   const [simWeightKg, setSimWeightKg] = useState<number>(5000);
@@ -135,31 +137,41 @@ export const CQECockpit: React.FC<CQECockpitProps> = ({ token }) => {
             </p>
           </div>
 
-          {/* Quick 3-Ledger KPI Highlights */}
-          {ledgersData?.summary && (
-            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-3">
-              <div className="text-right">
-                <div className="text-[10px] text-white/40 font-mono uppercase">Material Ledger</div>
-                <div className="text-sm font-bold text-cyan-400 font-mono">
-                  {ledgersData.summary.materialLedger.totalMaterialTonnes} t
+          {/* Quick 3-Ledger KPI Highlights & Doctrine Action */}
+          <div className="flex flex-wrap items-center gap-3">
+            {ledgersData?.summary && (
+              <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-3">
+                <div className="text-right">
+                  <div className="text-[10px] text-white/40 font-mono uppercase">Material Ledger</div>
+                  <div className="text-sm font-bold text-cyan-400 font-mono">
+                    {ledgersData.summary.materialLedger.totalMaterialTonnes} t
+                  </div>
+                </div>
+                <div className="h-8 w-px bg-white/10" />
+                <div className="text-right">
+                  <div className="text-[10px] text-white/40 font-mono uppercase">Carbon Ledger</div>
+                  <div className="text-sm font-bold text-emerald-400 font-mono">
+                    {ledgersData.summary.carbonLedger.totalQuantifiedTco2e} tCO₂e
+                  </div>
+                </div>
+                <div className="h-8 w-px bg-white/10" />
+                <div className="text-right">
+                  <div className="text-[10px] text-white/40 font-mono uppercase">Financial (Mat.)</div>
+                  <div className="text-sm font-bold text-amber-400 font-mono">
+                    ₹{ledgersData.summary.financialLedger.totalMaterialSettlementInr.toLocaleString()}
+                  </div>
                 </div>
               </div>
-              <div className="h-8 w-px bg-white/10" />
-              <div className="text-right">
-                <div className="text-[10px] text-white/40 font-mono uppercase">Carbon Ledger</div>
-                <div className="text-sm font-bold text-emerald-400 font-mono">
-                  {ledgersData.summary.carbonLedger.totalQuantifiedTco2e} tCO₂e
-                </div>
-              </div>
-              <div className="h-8 w-px bg-white/10" />
-              <div className="text-right">
-                <div className="text-[10px] text-white/40 font-mono uppercase">Financial (Mat.)</div>
-                <div className="text-sm font-bold text-amber-400 font-mono">
-                  ₹{ledgersData.summary.financialLedger.totalMaterialSettlementInr.toLocaleString()}
-                </div>
-              </div>
-            </div>
-          )}
+            )}
+
+            <button
+              onClick={() => setIsDoctrineModalOpen(true)}
+              className="px-4 py-3 bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 border border-amber-500/40 rounded-xl flex items-center gap-2 text-amber-300 font-mono text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
+            >
+              <Scale className="w-4 h-4 text-amber-400" />
+              Statutory Doctrine Center
+            </button>
+          </div>
         </div>
       </div>
 
@@ -628,14 +640,24 @@ export const CQECockpit: React.FC<CQECockpitProps> = ({ token }) => {
       {/* ---------------- SUB-TAB 5: SCENARIO PRICING & REVENUE WATERFALL ---------------- */}
       {activeSubTab === 'waterfall' && (
         <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 space-y-6">
-          <div className="border-b border-white/10 pb-4">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <DollarSign size={20} className="text-amber-400" />
-              Layer 12: Scenario Pricing & 8-Tier Revenue Waterfall
-            </h3>
-            <p className="text-xs text-white/50 mt-1">
-              Transparent economic distribution upon CCC execution. Physical material payments belong exclusively to Generators/Aggregators, while CCC proceeds follow the standardized CCTS project waterfall.
-            </p>
+          <div className="border-b border-white/10 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <DollarSign size={20} className="text-amber-400" />
+                Layer 12: Scenario Pricing & 8-Tier Revenue Waterfall
+              </h3>
+              <p className="text-xs text-white/50 mt-1">
+                Transparent economic distribution governed by the RupayKg Operating Doctrine (RKG-DOCTRINE-REV-01). 
+                External shares capped at statutory floors, retaining 53% for continuous platform operations.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsDoctrineModalOpen(true)}
+              className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-mono font-bold flex items-center gap-2 shrink-0 transition-colors"
+            >
+              <Scale size={14} />
+              Open Doctrine Center & Simulator
+            </button>
           </div>
 
           {quantificationTrace?.waterfallBreakdown ? (
@@ -693,6 +715,12 @@ export const CQECockpit: React.FC<CQECockpitProps> = ({ token }) => {
           )}
         </div>
       )}
+
+      {/* Financial Waterfall Operating Doctrine Center Modal */}
+      <FinancialDoctrineModal
+        isOpen={isDoctrineModalOpen}
+        onClose={() => setIsDoctrineModalOpen(false)}
+      />
     </div>
   );
 };

@@ -5,7 +5,8 @@ import {
   CQEMethodologyRegistry, 
   CQEQAQCEngine, 
   CQEMethodologySelectionEngine,
-  CQEMarketPricingEngine
+  CQEMarketPricingEngine,
+  WaterfallDoctrineRegistry
 } from "../services/carbonEngine.ts";
 import { SWMComplianceService } from "../services/swmComplianceEngine.ts";
 import { VCService } from "../services/vcService.ts";
@@ -385,16 +386,28 @@ export async function runRigorousSystemTests() {
   console.log("     -> W3C Verifiable Credential cryptographic tests passed.\n");
 
   // --------------------------------------------------------------------------
-  // TEST SECTION 6: FINANCIAL WATERFALL REVENUE RECONCILIATION
+  // TEST SECTION 6: FINANCIAL WATERFALL OPERATING DOCTRINE & REVENUE RECONCILIATION
   // --------------------------------------------------------------------------
-  console.log("▶ 6. Testing Financial Waterfall Revenue Model (₹10 / ₹12 / ₹15 / ₹20 CCC Scenarios)...");
+  console.log("▶ 6. Testing RupayKg Financial Waterfall Operating Doctrine (RKG-DOCTRINE-REV-01)...");
   
-  const testPrices = [10.0, 12.0, 15.0, 20.0];
+  assert(WaterfallDoctrineRegistry.DOCTRINE_ID === "RKG-DOCTRINE-REV-01", "Doctrine ID is RKG-DOCTRINE-REV-01");
+  const totalPercentage = WaterfallDoctrineRegistry.DOCTRINAL_TIERS.reduce((acc, t) => acc + t.percentage, 0);
+  assert(Math.abs(totalPercentage - 100.0) < 0.001, "Doctrinal tier percentages sum exactly to 100.00%");
+
+  const testPrices = [10.0, 12.0, 15.0, 20.0, 8500.0];
   for (const price of testPrices) {
     const { grossProceedsInr, waterfall } = CQEMarketPricingEngine.calculateWaterfall(1000, price, "CONTRACT_PRICE");
     const expectedGross = 1000 * price;
     assert(grossProceedsInr === expectedGross, `Gross proceeds match for ₹${price}/CCC`);
     
+    // Test that platform revenue is exactly 53%
+    const expectedPlatform = Number((expectedGross * 0.53).toFixed(2));
+    assert(waterfall.rupayKgRevenueInr === expectedPlatform, `Platform revenue is strictly 53% for ₹${price}/CCC (₹${waterfall.rupayKgRevenueInr})`);
+
+    // Test that project owner share is exactly 35%
+    const expectedProjectOwner = Number((expectedGross * 0.35).toFixed(2));
+    assert(waterfall.projectOwnerShareInr === expectedProjectOwner, `Project owner share is strictly 35% for ₹${price}/CCC (₹${waterfall.projectOwnerShareInr})`);
+
     // Sum of split allocations must equal gross proceeds (Monetary conservation across 8 tiers)
     const sumAllocations = 
       waterfall.transactionCostsInr +
@@ -407,8 +420,17 @@ export async function runRigorousSystemTests() {
     
     const delta = Math.abs(sumAllocations - expectedGross);
     assert(delta < 0.05, `Financial waterfall monetary conservation holds for ₹${price}/CCC (Delta: ₹${delta.toFixed(4)})`);
+
+    // Test compliance check
+    const compliance = WaterfallDoctrineRegistry.verifyDoctrinalCompliance(waterfall);
+    assert(compliance.isCompliant, `Doctrinal compliance verified for ₹${price}/CCC`);
+
+    // Test manifest generator
+    const manifest = WaterfallDoctrineRegistry.generateDoctrinalManifest(`TEST-MNFST-${price}`, 1000, price, "CONTRACT_PRICE");
+    assert(manifest.conservationMetrics.isConservationVerified, `Cryptographic manifest verified with 0 leakage for ₹${price}/CCC`);
+    assert(manifest.legalAttestation.isLegallyBinding, `Manifest carries legally binding attestation for ₹${price}/CCC`);
   }
-  console.log("     -> Financial waterfall revenue conservation tests passed.\n");
+  console.log("     -> Financial waterfall doctrine & revenue conservation tests passed.\n");
 
   console.log("================================================================================");
   console.log(`🎉 ALL ${passedTests} RIGOROUS SYSTEM TESTS COMPLETED SUCCESSFULLY (100% PASS RATE) 🎉`);

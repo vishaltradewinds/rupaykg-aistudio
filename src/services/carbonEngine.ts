@@ -900,8 +900,10 @@ export class CQEEvidenceVault {
   }
 }
 
+import { WaterfallDoctrineRegistry } from './waterfallDoctrine';
+
 // ----------------------------------------------------------------------------
-// LAYER 12: MARKET PRICING & REVENUE WATERFALL ENGINE
+// LAYER 12: MARKET PRICING & REVENUE WATERFALL ENGINE (DOCTRINAL STANDARD)
 // ----------------------------------------------------------------------------
 
 export class CQEMarketPricingEngine {
@@ -910,39 +912,11 @@ export class CQEMarketPricingEngine {
     unitPriceInr: number = 8500, // Scenario price per tCO2e / CCC
     pricingType: PricingType = "SCENARIO_PRICE"
   ): { grossProceedsInr: number; waterfall: CQEWaterfallBreakdown } {
-    const grossProceedsInr = Number((tco2eQuantity * unitPriceInr).toFixed(2));
-
-    // Transparent 8-tier Revenue Waterfall (Normative Floor Optimized):
-    // 1. Transaction & Payment Rails: 1.0% (Banking & Escrow Floor)
-    // 2. Registry & Issuance Regulatory Fees: 1.5% (Statutory CCTS Minimum)
-    // 3. Independent ACVA Validation/Verification: 2.5% (ISO 14064-3 Scaled Audit Floor)
-    // 4. Project Owner Share (ULB / Facility Developer): 35.0% (NITI Aayog MCA Concession Floor)
-    // 5. Generator & Aggregator Community Dividend: 5.0% (SBM 2.0 Statutory Incentive Floor)
-    // 6. Project Financier / Green Bond Return: 2.0% (Debt Service Concession Floor)
-    // 7. RupayKg Net Retained Platform Working Revenue: 53.0% (Maximized for Platform Operations & AI Compute)
-
-    const transactionCostsInr = Number((grossProceedsInr * 0.01).toFixed(2));
-    const registryIssuanceCostsInr = Number((grossProceedsInr * 0.015).toFixed(2));
-    const acvaValidationVerificationCostsInr = Number((grossProceedsInr * 0.025).toFixed(2));
-    const projectOwnerShareInr = Number((grossProceedsInr * 0.35).toFixed(2));
-    const generatorAggregatorShareInr = Number((grossProceedsInr * 0.05).toFixed(2));
-    const financierShareInr = Number((grossProceedsInr * 0.02).toFixed(2));
-    const rupayKgRevenueInr = Number((grossProceedsInr * 0.53).toFixed(2));
-
-    const waterfall: CQEWaterfallBreakdown = {
-      grossProceedsInr,
-      transactionCostsInr,
-      registryIssuanceCostsInr,
-      acvaValidationVerificationCostsInr,
-      projectOwnerShareInr,
-      generatorAggregatorShareInr,
-      financierShareInr,
-      rupayKgRevenueInr
-    };
-
-    return { grossProceedsInr, waterfall };
+    return WaterfallDoctrineRegistry.executeDoctrinalWaterfall(tco2eQuantity, unitPriceInr, pricingType);
   }
 }
+
+export { WaterfallDoctrineRegistry };
 
 // ----------------------------------------------------------------------------
 // MASTER CQE 1.0 PIPELINE CONTROLLER
