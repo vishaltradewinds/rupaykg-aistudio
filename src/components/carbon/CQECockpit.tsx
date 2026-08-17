@@ -667,13 +667,13 @@ export const CQECockpit: React.FC<CQECockpitProps> = ({ token }) => {
               {/* Waterfall Steps */}
               <div className="space-y-2 text-xs font-mono">
                 {[
-                  { label: '1. Payment Rails & Settlement Fee', percent: '2%', amount: quantificationTrace.waterfallBreakdown.transactionCostsInr, target: 'Payment Gateway / Banking Rails', color: 'text-white/60' },
-                  { label: '2. CCTS Registry & Issuance Regulatory Fee', percent: '3%', amount: quantificationTrace.waterfallBreakdown.registryIssuanceCostsInr, target: 'BEE / CCTS Registry Authority', color: 'text-white/60' },
-                  { label: '3. Independent ACVA Validation/Verification', percent: '5%', amount: quantificationTrace.waterfallBreakdown.acvaValidationVerificationCostsInr, target: 'Empanelled Carbon Auditor (ACVA)', color: 'text-white/60' },
-                  { label: '4. Project Owner Share (ULB / Facility Developer)', percent: '55%', amount: quantificationTrace.waterfallBreakdown.projectOwnerShareInr, target: 'Municipal Corporation / Facility Owner', color: 'text-cyan-400 font-bold' },
-                  { label: '5. Generator / Aggregator Community Dividend', percent: '20%', amount: quantificationTrace.waterfallBreakdown.generatorAggregatorShareInr, target: 'Community Green Welfare Pool', color: 'text-emerald-400 font-bold' },
-                  { label: '6. Project Financier / Green Bond Return', percent: '5%', amount: quantificationTrace.waterfallBreakdown.financierShareInr, target: 'Green Debt / Impact Investors', color: 'text-purple-400' },
-                  { label: '7. RupayKg Net Retained Platform Revenue', percent: '10%', amount: quantificationTrace.waterfallBreakdown.rupayKgRevenueInr, target: 'RupayKg Platform Treasury', color: 'text-amber-400 font-bold' }
+                  { label: '1. Payment Rails & Settlement Fee (Floor)', percent: '1.0%', amount: quantificationTrace.waterfallBreakdown.transactionCostsInr, target: 'Payment Gateway / Banking Rails', color: 'text-white/60' },
+                  { label: '2. CCTS Registry & Regulatory Fee (Floor)', percent: '1.5%', amount: quantificationTrace.waterfallBreakdown.registryIssuanceCostsInr, target: 'BEE / CCTS Registry Authority', color: 'text-white/60' },
+                  { label: '3. Independent ACVA Audit Reserve (Floor)', percent: '2.5%', amount: quantificationTrace.waterfallBreakdown.acvaValidationVerificationCostsInr, target: 'Empanelled Carbon Auditor (ACVA)', color: 'text-white/60' },
+                  { label: '4. Project Owner Share (ULB / Concession Floor)', percent: '35.0%', amount: quantificationTrace.waterfallBreakdown.projectOwnerShareInr, target: 'Municipal Corporation / Facility Owner', color: 'text-cyan-400 font-bold' },
+                  { label: '5. Generator / Aggregator Dividend (Floor)', percent: '5.0%', amount: quantificationTrace.waterfallBreakdown.generatorAggregatorShareInr, target: 'Community Green Welfare Pool', color: 'text-emerald-400 font-bold' },
+                  { label: '6. Project Financier / Green Bond Return (Floor)', percent: '2.0%', amount: quantificationTrace.waterfallBreakdown.financierShareInr, target: 'Green Debt / Impact Investors', color: 'text-purple-400' },
+                  { label: '7. RupayKg Net Retained Platform Revenue (Maximized)', percent: '53.0%', amount: quantificationTrace.waterfallBreakdown.rupayKgRevenueInr, target: 'RupayKg Platform Operating Treasury', color: 'text-amber-400 font-bold' }
                 ].map((tier, idx) => (
                   <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between">
                     <div>

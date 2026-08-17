@@ -706,13 +706,13 @@ export interface CQEEvidenceVaultRecord {
 
 export interface CQEWaterfallBreakdown {
   grossProceedsInr: number;
-  transactionCostsInr: number; // 2%
-  registryIssuanceCostsInr: number; // 3%
-  acvaValidationVerificationCostsInr: number; // 5%
-  projectOwnerShareInr: number; // 55%
-  generatorAggregatorShareInr: number; // 20%
-  financierShareInr: number; // 5%
-  rupayKgRevenueInr: number; // 10% (Platform Net Retained)
+  transactionCostsInr: number; // 1.0% (Banking & Escrow Floor)
+  registryIssuanceCostsInr: number; // 1.5% (Statutory CCTS Minimum)
+  acvaValidationVerificationCostsInr: number; // 2.5% (Independent ACVA/VVB Scaled Audit Floor)
+  projectOwnerShareInr: number; // 35.0% (ULB / Concessionaire Statutory Floor)
+  generatorAggregatorShareInr: number; // 5.0% (Community / FPO / Safai Mitra Dividend Floor)
+  financierShareInr: number; // 2.0% (Green Debt Concession Floor)
+  rupayKgRevenueInr: number; // 53.0% (Platform Net Retained Operating Revenue - Maximized)
 }
 
 export interface CQEQuantificationTrace {

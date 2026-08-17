@@ -912,22 +912,22 @@ export class CQEMarketPricingEngine {
   ): { grossProceedsInr: number; waterfall: CQEWaterfallBreakdown } {
     const grossProceedsInr = Number((tco2eQuantity * unitPriceInr).toFixed(2));
 
-    // Transparent 8-tier Revenue Waterfall:
-    // 1. Transaction & Payment Rails: 2%
-    // 2. Registry & Issuance Regulatory Fees: 3%
-    // 3. Independent ACVA Validation/Verification: 5%
-    // 4. Project Owner Share (ULB / Facility Developer): 55%
-    // 5. Generator & Aggregator Community Dividend: 20%
-    // 6. Project Financier / Green Bond Return: 5%
-    // 7. RupayKg Net Retained Platform Revenue: 10%
+    // Transparent 8-tier Revenue Waterfall (Normative Floor Optimized):
+    // 1. Transaction & Payment Rails: 1.0% (Banking & Escrow Floor)
+    // 2. Registry & Issuance Regulatory Fees: 1.5% (Statutory CCTS Minimum)
+    // 3. Independent ACVA Validation/Verification: 2.5% (ISO 14064-3 Scaled Audit Floor)
+    // 4. Project Owner Share (ULB / Facility Developer): 35.0% (NITI Aayog MCA Concession Floor)
+    // 5. Generator & Aggregator Community Dividend: 5.0% (SBM 2.0 Statutory Incentive Floor)
+    // 6. Project Financier / Green Bond Return: 2.0% (Debt Service Concession Floor)
+    // 7. RupayKg Net Retained Platform Working Revenue: 53.0% (Maximized for Platform Operations & AI Compute)
 
-    const transactionCostsInr = Number((grossProceedsInr * 0.02).toFixed(2));
-    const registryIssuanceCostsInr = Number((grossProceedsInr * 0.03).toFixed(2));
-    const acvaValidationVerificationCostsInr = Number((grossProceedsInr * 0.05).toFixed(2));
-    const projectOwnerShareInr = Number((grossProceedsInr * 0.55).toFixed(2));
-    const generatorAggregatorShareInr = Number((grossProceedsInr * 0.20).toFixed(2));
-    const financierShareInr = Number((grossProceedsInr * 0.05).toFixed(2));
-    const rupayKgRevenueInr = Number((grossProceedsInr * 0.10).toFixed(2));
+    const transactionCostsInr = Number((grossProceedsInr * 0.01).toFixed(2));
+    const registryIssuanceCostsInr = Number((grossProceedsInr * 0.015).toFixed(2));
+    const acvaValidationVerificationCostsInr = Number((grossProceedsInr * 0.025).toFixed(2));
+    const projectOwnerShareInr = Number((grossProceedsInr * 0.35).toFixed(2));
+    const generatorAggregatorShareInr = Number((grossProceedsInr * 0.05).toFixed(2));
+    const financierShareInr = Number((grossProceedsInr * 0.02).toFixed(2));
+    const rupayKgRevenueInr = Number((grossProceedsInr * 0.53).toFixed(2));
 
     const waterfall: CQEWaterfallBreakdown = {
       grossProceedsInr,
