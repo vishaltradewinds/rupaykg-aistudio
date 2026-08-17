@@ -1,5 +1,6 @@
 import { carbonRouter } from "./src/routes/carbon.ts";
 import { auth as requireAuth } from "./src/middleware/auth.ts";
+import { sanitizeMiddleware } from "./src/middleware/sanitize.ts";
 import { registerStakeholderUser } from "./src/db/users.ts";
 import { SWMComplianceService } from "./src/services/swmComplianceEngine";
 import express from "express";
@@ -153,7 +154,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     }),
   );
 
-  app.use(express.json());
+  app.use(express.json({ limit: "10mb" }));
+  app.use(sanitizeMiddleware);
 
   // MUST run on port 3000 in this environment
   const PORT = 3000;
@@ -5166,6 +5168,21 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   app.use("/api/v1/carbon", auth(), carbonRouter);
+
+  // Global Express error handler for API exceptions
+  app.use((err: any, req: any, res: any, next: any) => {
+    if (res.headersSent) {
+      return next(err);
+    }
+    console.error("Unhandled API Error:", err);
+    if (req.path && req.path.startsWith("/api/")) {
+      return res.status(err.status || 500).json({
+        error: err.message || "Internal Server Error",
+        status: "error"
+      });
+    }
+    next(err);
+  });
 
   // Catch-all 404 handler for unmatched API routes to prevent HTML SPA fallback
   app.all("/api/*", (req, res) => {
