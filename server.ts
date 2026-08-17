@@ -2862,23 +2862,6 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   });
 
   // ---------------- RUPAYKG SWM 18-LAYER OPERATIONAL ENDPOINTS ----------------
-  app.post("/api/swm/register", (req, res) => {
-    const entity = req.body;
-    const registryId = `REG-CPCB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    const token = `CPCB-AUTH-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-    res.json({
-      success: true,
-      message: "Entity registered successfully under CPCB SWM 2016 framework",
-      registeredEntity: {
-        registryId,
-        cpcbToken: token,
-        cpcbSyncStatus: "Synced",
-        ...entity,
-        registeredAt: new Date().toISOString()
-      }
-    });
-  });
-
   app.post("/api/swm/cpcb-sync", (req, res) => {
     const { channel, entityId, payload } = req.body;
     res.json({
@@ -4616,7 +4599,12 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   app.post("/api/swm/register", async (req: any, res) => {
     try {
       const registration = await swmService.registerEntity(req.body);
-      res.json(registration);
+      res.json({
+        success: true,
+        message: "Entity registered successfully under CPCB SWM 2016 framework",
+        registeredEntity: registration,
+        ...((registration as any)._doc || registration)
+      });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
