@@ -1075,44 +1075,62 @@ export const PlatformWorkingManual: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
               
               <div className="p-4 bg-slate-950/80 rounded-xl border border-white/10 space-y-2">
-                <div className="text-cyan-400 font-bold">1. Solid Waste Management Rules, 2016 (EPA 1986)</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-cyan-400 font-bold">1. SWM Rules, 2026 (Primary) & SWM Rules, 2016 (Legacy)</div>
+                  <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-mono">S.O. 388(E) 2026</span>
+                </div>
                 <p className="text-slate-300 text-[11px] font-sans">
-                  Mandates 4-stream segregation for Bulk Waste Generators (Rule 4), decentralized organic processing, and prohibition of open burning. Enforced via automated CPCB Rule 4.1 penalties.
+                  SWM Rules 2026 (notified 27 January 2026) establishes multi-criteria BWG thresholds and digital custody. RupayKg maintains an auditable digital evidence layer of waste generation, segregation, on-site processing, and authorized handovers to support ULB/SPCB compliance without manufacturing artificial immunity.
                 </p>
               </div>
 
               <div className="p-4 bg-slate-950/80 rounded-xl border border-white/10 space-y-2">
-                <div className="text-amber-400 font-bold">2. Energy Conservation (Amendment) Act, 2022 & CCTS</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-amber-400 font-bold">2. Energy Conservation Act, 2022 & BEE CCTS (2023–2026)</div>
+                  <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-mono">BEE Registry</span>
+                </div>
                 <p className="text-slate-300 text-[11px] font-sans">
-                  Empowers Ministry of Power & Bureau of Energy Efficiency (BEE) to establish the Indian Carbon Market (ICM). Governs registry listing, ACVA accreditation, and CCC certificate issuance.
+                  Empowers Ministry of Power & Bureau of Energy Efficiency (BEE) to govern the Indian Carbon Market (ICM). Quantifies emission reductions under approved methodologies, subject to ACVA audit, before serialized CCC issuance.
                 </p>
               </div>
 
               <div className="p-4 bg-slate-950/80 rounded-xl border border-white/10 space-y-2">
-                <div className="text-emerald-400 font-bold">3. Indian Contract Act, 1872 (Sections 10 & 14)</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-emerald-400 font-bold">3. Fertilizer (Inorganic, Organic, Mixed) Control Order (FCO)</div>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">FCO Standards</span>
+                </div>
                 <p className="text-slate-300 text-[11px] font-sans">
-                  Establishes freedom of contract for technology licensing, SaaS margins, and PPP concession revenue splits without statutory percentage caps.
+                  Department of Fertilizers notified specifications for city compost and vermicompost. RupayKg logs batch laboratory assays against FCO limits (C:N ratio, moisture, pathogens, heavy metals) for traceability.
                 </p>
               </div>
 
               <div className="p-4 bg-slate-950/80 rounded-xl border border-white/10 space-y-2">
-                <div className="text-purple-400 font-bold">4. NITI Aayog Model Concession Agreements (MCA)</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-purple-400 font-bold">4. Extended Producer Responsibility (EPR) Regulations</div>
+                  <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded font-mono">CPCB EPR Portal</span>
+                </div>
                 <p className="text-slate-300 text-[11px] font-sans">
-                  Advisory standard for municipal solid waste public-private partnerships, providing the 35%–50% non-core resource revenue sharing model with Urban Local Bodies.
+                  Independent statutory frameworks for Plastic, Battery, E-Waste, Tyre, and Used Oil. RupayKg logs material-to-recycler provenance to support registered PIBO compliance documentation.
                 </p>
               </div>
 
               <div className="p-4 bg-slate-950/80 rounded-xl border border-white/10 space-y-2">
-                <div className="text-rose-400 font-bold">5. RBI Payment & Settlement Systems Act, 2007 (PSSA)</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-rose-400 font-bold">5. RBI Payment & Settlement Systems Act, 2007 (PSSA)</div>
+                  <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-mono">Escrow / DBT</span>
+                </div>
                 <p className="text-slate-300 text-[11px] font-sans">
-                  Governs scheduled commercial bank escrow accounts, multi-party automated disbursements, and Direct Benefit Transfers (DBT) to waste pickers and farmers without leakages.
+                  Governs scheduled commercial bank escrow accounts, multi-party automated disbursements, and Direct Benefit Transfers (DBT) to waste pickers, farmers, and aggregators with full reconciliation.
                 </p>
               </div>
 
               <div className="p-4 bg-slate-950/80 rounded-xl border border-white/10 space-y-2">
-                <div className="text-blue-400 font-bold">6. SEBI BRSR Core & Green Debt Regulations</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-blue-400 font-bold">6. SEBI BRSR Core & International ESG Standards (GRI / CDP)</div>
+                  <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-mono">Principle 6</span>
+                </div>
                 <p className="text-slate-300 text-[11px] font-sans">
-                  Mandatory ESG circular supply chain disclosures for top 1,000 listed entities, linking circular procurement directly to corporate BRSR compliance reports.
+                  Produces structured, traceable waste generation, recycling, and greenhouse gas datasets that support corporate sustainability disclosures, subject to entity assurance processes.
                 </p>
               </div>
 

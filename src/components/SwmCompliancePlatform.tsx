@@ -673,23 +673,47 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
             {activeTab === 'layer2_compliance' && (
               <motion.div key="layer2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
                 <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+                      SWM Rules 2026 (Primary) • S.O. 388(E)
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-white/50 bg-white/5 border border-white/10">
+                      SWM 2016 (Legacy Mapping)
+                    </span>
+                  </div>
                   <h3 className="text-xl font-bold text-white flex items-center gap-2">
                     <CheckCircle className="text-emerald-400" />
-                    Layer 2: SWM Rules Compliance Engine
+                    Layer 2: SWM Regulatory Compliance & Evidence Engine
                   </h3>
                   <p className="text-xs text-white/60 mt-1">
-                    Automatically determines BWG qualification, checks SWM 2016 rules compliance, pending renewals, and annual Form IV returns.
+                    Generates verifiable digital chain-of-custody, determines BWG classification under SWM Rules 2026 & legacy 2016 criteria, and compiles structured compliance data packages to support ULB/SPCB reporting.
                   </p>
                 </div>
 
-                {/* BWG Qualification Calculator */}
-                <div className="bg-black/40 border border-white/10 rounded-2xl p-5 space-y-4">
-                  <h4 className="font-bold text-white text-sm flex items-center justify-between border-b border-white/10 pb-2">
-                    <span>Automated Bulk Waste Generator (BWG) Qualification Engine</span>
-                    <span className="text-xs text-emerald-400 font-mono">SWM Rules 2016 (Rule 3(1)(e))</span>
-                  </h4>
+                {/* Core Positioning Callout */}
+                <div className="p-4 bg-slate-900/90 border border-amber-500/30 rounded-2xl text-xs space-y-1.5">
+                  <div className="font-bold text-amber-300 flex items-center gap-2">
+                    <Scale className="w-4 h-4 text-amber-400" />
+                    <span>Statutory Compliance Evidence Doctrine</span>
+                  </div>
+                  <p className="text-white/70 leading-relaxed">
+                    RupayKg does not promise regulatory immunity or manufacture compliance. It creates a continuous, auditable digital evidence layer showing what waste was generated, segregated, processed, transferred, recovered, and monetized—and which regulatory requirements that evidence supports.
+                  </p>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                {/* BWG Multi-Criteria Qualification Calculator */}
+                <div className="bg-black/40 border border-white/10 rounded-2xl p-5 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-2">
+                    <div>
+                      <h4 className="font-bold text-white text-sm">Automated Bulk Waste Generator (BWG) Classification Engine</h4>
+                      <p className="text-[11px] text-white/50">Multi-criteria assessment under SWM Rules 2026 (Primary) & SWM Rules 2016 Rule 3(8) / 4(7)</p>
+                    </div>
+                    <span className="text-xs text-emerald-400 font-mono bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                      Dual Regulatory Matrix
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     <div>
                       <label className="text-white/60 block mb-1">Daily Waste Generation (kg/day)</label>
                       <input
@@ -697,62 +721,125 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                         value={bwgCalcWasteKg}
                         onChange={e => setBwgCalcWasteKg(Number(e.target.value))}
                         className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-white font-mono focus:border-emerald-500"
+                        placeholder="e.g. 150"
                       />
-                      <span className="text-[10px] text-white/40 mt-1 block">Threshold: ≥ 100 kg/day triggers mandatory BWG status</span>
+                      <span className="text-[10px] text-white/40 mt-1 block">2016 Rule 3(8): ≥ 100 kg/day average threshold</span>
                     </div>
                     <div>
-                      <label className="text-white/60 block mb-1">Built-Up Occupancy Area (sqm)</label>
+                      <label className="text-white/60 block mb-1">Built-Up / Floor Area (sqm)</label>
                       <input
                         type="number"
                         value={bwgCalcAreaSqm}
                         onChange={e => setBwgCalcAreaSqm(Number(e.target.value))}
                         className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-white font-mono focus:border-emerald-500"
+                        placeholder="e.g. 6000"
                       />
-                      <span className="text-[10px] text-white/40 mt-1 block">Threshold: ≥ 5,000 sqm triggers mandatory BWG status</span>
+                      <span className="text-[10px] text-white/40 mt-1 block">2016 Rule 4(7) / 2026: Gated/institutional in-situ duty</span>
+                    </div>
+                    <div>
+                      <label className="text-white/60 block mb-1">Water Consumption (kL/day)</label>
+                      <input
+                        type="number"
+                        defaultValue={25}
+                        className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-white font-mono focus:border-emerald-500"
+                        placeholder="e.g. 25"
+                      />
+                      <span className="text-[10px] text-white/40 mt-1 block">2026 Multi-criteria parameter for commercial hubs</span>
                     </div>
                   </div>
 
                   {/* Result Box */}
                   {(() => {
-                    const isBwg = bwgCalcWasteKg >= 100 || bwgCalcAreaSqm >= 5000;
+                    const isWasteBwg = bwgCalcWasteKg >= 100;
+                    const isInstitutionalAreaDuty = bwgCalcAreaSqm >= 5000;
+                    const isBwg2026 = isWasteBwg || isInstitutionalAreaDuty;
+
                     return (
-                      <div className={`p-4 rounded-xl border flex items-center justify-between ${isBwg ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
-                        <div>
-                          <p className="font-bold text-sm">
-                            {isBwg ? 'Qualifies as Mandatory Bulk Waste Generator (BWG)' : 'Standard Commercial/Residential Waste Generator'}
+                      <div className={`p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-3 ${isBwg2026 ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
+                        <div className="space-y-1">
+                          <p className="font-bold text-sm flex items-center gap-2">
+                            {isBwg2026 ? (
+                              <>
+                                <AlertTriangle className="w-4 h-4 text-amber-400" />
+                                <span>Qualifies as Bulk Waste Generator (BWG) under SWM 2026 & SWM 2016</span>
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                <span>Standard Waste Generator (Non-BWG Category)</span>
+                              </>
+                            )}
                           </p>
-                          <p className="text-xs opacity-80 mt-1">
-                            {isBwg
-                              ? 'Must maintain mandatory 4-stream segregation, on-site wet waste processing, and annual CPCB Form IV return.'
-                              : 'Eligible for standard municipal door-to-door collection agreement.'}
+                          <p className="text-xs opacity-80 leading-relaxed">
+                            {isBwg2026
+                              ? `Compliance duties activated: ${isWasteBwg ? 'Mandatory source segregation & separate authorized handover. ' : ''}${isInstitutionalAreaDuty ? 'Specific in-situ biodegradable processing/composting duty applies under institutional threshold.' : ''}`
+                              : 'Standard segregated handover to municipal door-to-door collection system.'}
                           </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full font-bold text-xs ${isBwg ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                          {isBwg ? 'MANDATORY BWG' : 'STANDARD'}
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`px-3 py-1 rounded-full font-bold text-xs font-mono ${isBwg2026 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
+                            {isBwg2026 ? 'BWG STATUTORY DUTIES' : 'STANDARD TARIFF'}
+                          </span>
+                        </div>
                       </div>
                     );
                   })()}
                 </div>
 
-                {/* SWM Rules Checklist */}
+                {/* SWM Regulatory Evidence & Tracking Checklist */}
                 <div className="space-y-3">
-                  <h4 className="font-bold text-white text-sm">Mandatory SWM 2016 Statutory Rules Matrix</h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-white text-sm">Regulatory Evidence & Audit Verification Matrix</h4>
+                    <span className="text-[11px] text-white/50 font-mono">Digital Provenance Trace</span>
+                  </div>
                   {[
-                    { rule: 'Rule 4(1): Four-Stream Source Segregation (Wet, Dry, Hazardous, Sanitary)', status: 'COMPLIANT', score: '100%' },
-                    { rule: 'Rule 4(6): On-Site Wet Waste Processing (Biomethanation / Composting)', status: 'COMPLIANT', score: '98%' },
-                    { rule: 'Rule 13: SPCB Consent to Operate (CTO) & Water Act Compliance', status: 'RENEWAL DUE', score: '85%' },
-                    { rule: 'Rule 15: Municipal Infrastructure Provision & Authorized Pickers Handover', status: 'COMPLIANT', score: '95%' },
-                    { rule: 'Rule 24: Annual Return Form IV Submission to CPCB', status: 'FILING READY', score: '100%' }
+                    { 
+                      rule: 'Source Segregation Verification (Wet, Dry, Domestic Hazardous, Sanitary)', 
+                      citation: 'SWM 2026 / SWM 2016 Rule 4(1)',
+                      desc: 'QR-coded bin inspections and collection vehicle intake purity scoring',
+                      status: 'AUDIT READY', 
+                      score: '100%' 
+                    },
+                    { 
+                      rule: 'In-Situ Biodegradable Processing (Composting / Biomethanation)', 
+                      citation: 'SWM 2026 / SWM 2016 Rule 4(7) & 4(8)',
+                      desc: 'On-site digestor/composter mass balance & temperature logs',
+                      status: 'AUDIT READY', 
+                      score: '98%' 
+                    },
+                    { 
+                      rule: 'Authorised Recycler / Aggregator Handover Manifests', 
+                      citation: 'SWM 2026 / SWM 2016 Rule 4(7)',
+                      desc: 'Cryptographic weighbridge slips with GPS & vehicle license registration',
+                      status: 'AUDIT READY', 
+                      score: '96%' 
+                    },
+                    { 
+                      rule: 'Compost Quality Tracking against FCO Specifications', 
+                      citation: 'Fertilizer (Inorganic, Organic or Mixed) (Control) Order Framework',
+                      desc: 'Batch laboratory assay logs (C:N ratio, moisture, heavy metals)',
+                      status: 'EVIDENCE LOGGED', 
+                      score: '92%' 
+                    },
+                    { 
+                      rule: 'BWG Compliance Data Package Compilation for ULB/SPCB Reporting', 
+                      citation: 'Supporting ULB submissions under SWM statutory schedules',
+                      desc: 'Exportable monthly/annual compliance dossiers and manifest ledgers',
+                      status: 'PACKAGE READY', 
+                      score: '100%' 
+                    }
                   ].map((r, i) => (
-                    <div key={i} className="p-3 bg-black/40 border border-white/10 rounded-xl flex items-center justify-between text-xs">
+                    <div key={i} className="p-3 bg-black/40 border border-white/10 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs">
                       <div>
-                        <span className="font-semibold text-white block">{r.rule}</span>
-                        <span className="text-white/40 text-[10px]">Audited via RupayKg SCADA & Weighbridge Ledger</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">{r.rule}</span>
+                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">{r.citation}</span>
+                        </div>
+                        <span className="text-white/50 text-[11px] block mt-0.5">{r.desc}</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 shrink-0">
                         <span className="font-mono text-emerald-400 font-bold">{r.score}</span>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${r.status === 'COMPLIANT' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           {r.status}
                         </span>
                       </div>
