@@ -3631,6 +3631,7 @@ export default function App() {
               {view === 'ccts_carbon_os' && 'RupayKg CCTS Carbon OS — Sovereign Indian Carbon Market Engine'}
               {view === 'reports' && 'Stakeholder Statutory Reports & Returns Hub'}
               {view === 'ground_reality' && 'Informal Sector & Operational Ground Reality Hub'}
+              {view === 'platform_manual' && 'Platform Working Manual & Carbon Project Lifecycle SOP'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}

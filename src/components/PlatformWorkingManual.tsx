@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   BookOpen, 
   Layers, 
@@ -26,15 +26,32 @@ import {
   Sparkles,
   ExternalLink,
   Shield,
-  HelpCircle
+  HelpCircle,
+  Calculator,
+  RefreshCw,
+  Info,
+  Sliders,
+  Landmark,
+  FileCheck
 } from 'lucide-react';
 import { WaterfallDoctrineRegistry } from '../services/waterfallDoctrine';
 
 export const PlatformWorkingManual: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<'overview' | 'ccc_cycle' | 'non_ccc' | 'stakeholders' | 'statutory' | 'three_ledgers'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'ccc_cycle' | 'non_ccc' | 'stakeholders' | 'three_ledgers' | 'statutory'>('overview');
   const [selectedStakeholder, setSelectedStakeholder] = useState<string>('ulb');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedPhase, setExpandedPhase] = useState<number | null>(1);
+  const [allExpanded, setAllExpanded] = useState<boolean>(false);
+
+  // Live Simulator States for Section 1 (CCC Waterfall)
+  const [simCccVolume, setSimCccVolume] = useState<number>(1000);
+  const [simCccPrice, setSimCccPrice] = useState<number>(850);
+
+  // Live Simulator States for Section 3 (Non-CCC Physical Trade)
+  const [simScrapTonnage, setSimScrapTonnage] = useState<number>(10);
+  const [simScrapRate, setSimScrapRate] = useState<number>(2.50);
+  const [simPlatformMarginPct, setSimPlatformMarginPct] = useState<number>(8);
+  const [simAggregatorMarginPct, setSimAggregatorMarginPct] = useState<number>(20);
 
   const STAKEHOLDERS_DATA = [
     {
@@ -52,7 +69,7 @@ export const PlatformWorkingManual: React.FC = () => {
         'Facility asset mapping (MRFs, Transfer Stations, Compost Plants, Waste-to-Energy).',
         'Receiving automated non-tax municipal revenue from carbon monetization.'
       ],
-      cccCycleRole: 'Host Project Owner & Primary Statutory Beneficiary (35% Floor).',
+      cccCycleRole: 'Host Project Owner & Primary Statutory Beneficiary (35.0% Floor).',
       nonCccCycleRole: 'Concession supervisor & tipping fee administrator.'
     },
     {
@@ -70,13 +87,13 @@ export const PlatformWorkingManual: React.FC = () => {
         'Community biogas / Gobar collection and decentralized vermicomposting.',
         'Direct beneficiary identification for carbon dividend distribution.'
       ],
-      cccCycleRole: 'Rural Project Host & Community Welfare Facilitator.',
+      cccCycleRole: 'Rural Project Host & Community Welfare Facilitator (5.0% Dividend Share).',
       nonCccCycleRole: 'Physical biomass MSP and collection rate coordinator.'
     },
     {
       id: 'generator',
-      title: 'Primary Waste Generators & Farmers',
-      roleSubtitle: 'Safai Mitras, Waste Pickers, Smallholder Farmers, Bulk Waste Generators (BWGs)',
+      title: 'Primary Waste Generators, Safai Mitras & Farmers',
+      roleSubtitle: 'Safai Sathis, Waste Pickers, Smallholder Farmers, Bulk Waste Generators (BWGs)',
       icon: Users,
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10',
@@ -88,7 +105,7 @@ export const PlatformWorkingManual: React.FC = () => {
         'Instant Aadhaar/UPI biometric payout on digital weighbridge.',
         'Receiving secondary community carbon welfare dividends (5.0% Floor).'
       ],
-      cccCycleRole: 'Primary baseline avoidance catalysts (5% Community Dividend).',
+      cccCycleRole: 'Primary baseline avoidance catalysts (5.0% Community Dividend).',
       nonCccCycleRole: 'Direct recipient of primary commodity scrap / biomass sale payout (70%–80%).'
     },
     {
@@ -156,7 +173,7 @@ export const PlatformWorkingManual: React.FC = () => {
       primaryAction: 'Operating Doctrine Enforcement, Edge-AI Compute & Margin Matrix Governance',
       keyDuties: [
         'Governing the 53.0% platform working treasury to maintain real-time digital twins & satellite SAR compute.',
-        'Setting non-CCC material margin matrices ($M_{platform}, R_{aggregator}, R_{generator}$).',
+        'Setting non-CCC material margin matrices (M_platform, R_aggregator, R_generator).',
         'Enforcing zero-leakage mathematical conservation across all transactions.',
         'Maintaining W3C Verifiable Credentials and Hedera Guardian consensus nodes.'
       ],
@@ -168,8 +185,8 @@ export const PlatformWorkingManual: React.FC = () => {
   const CCC_LIFECYCLE_PHASES = [
     {
       phase: 1,
-      title: 'Phase 1: Project Registration & Spatial Boundary Definition',
-      description: 'The project owner (ULB, Gram Panchayat, or Concessionaire) onboard their facility and registers geographic polygons with Ministry of Panchayati Raj Local Government Directory (LGD) coding.',
+      title: 'Phase 1: Project Registration & Spatial Boundary Definition (Layer 1)',
+      description: 'The project owner (ULB, Gram Panchayat, or Concessionaire) onboards their facility and registers geographic polygons with Ministry of Panchayati Raj Local Government Directory (LGD) coding.',
       regulatoryRef: 'BEE CCTS 2023 Reg. 6 & National Geospatial Policy 2022',
       deliverables: ['LGD-Mapped Spatial GeoJSON Boundary', 'Baseline Emission Scenario Formulation', 'Facility Weighbridge IoT Registration'],
       duration: 'Day 1 to Day 15'
@@ -224,47 +241,161 @@ export const PlatformWorkingManual: React.FC = () => {
     }
   ];
 
+  // Calculated Live Waterfall Simulator for Section 1
+  const liveWaterfallSim = useMemo(() => {
+    const grossInr = simCccVolume * simCccPrice;
+    const tiers = WaterfallDoctrineRegistry.DOCTRINAL_TIERS.map(t => {
+      const amountInr = (grossInr * t.percentage) / 100;
+      return {
+        ...t,
+        amountInr
+      };
+    });
+    const totalAllocated = tiers.reduce((acc, t) => acc + t.amountInr, 0);
+    const platformShare = (grossInr * 53.0) / 100;
+    const ulbShare = (grossInr * 35.0) / 100;
+    const communityShare = (grossInr * 5.0) / 100;
+    const regulatoryShare = (grossInr * 7.0) / 100;
+
+    return {
+      grossInr,
+      tiers,
+      totalAllocated,
+      platformShare,
+      ulbShare,
+      communityShare,
+      regulatoryShare,
+      delta: Math.abs(grossInr - totalAllocated)
+    };
+  }, [simCccVolume, simCccPrice]);
+
+  // Calculated Live Physical Scrap Trade Simulator for Section 3
+  const livePhysicalTradeSim = useMemo(() => {
+    const totalWeightKg = simScrapTonnage * 1000;
+    const grossPurchaserValue = totalWeightKg * simScrapRate;
+    const platformAmt = (grossPurchaserValue * simPlatformMarginPct) / 100;
+    const aggregatorAmt = (grossPurchaserValue * simAggregatorMarginPct) / 100;
+    const generatorPct = 100 - (simPlatformMarginPct + simAggregatorMarginPct);
+    const generatorAmt = (grossPurchaserValue * generatorPct) / 100;
+
+    return {
+      totalWeightKg,
+      grossPurchaserValue,
+      platformAmt,
+      aggregatorAmt,
+      generatorPct,
+      generatorAmt,
+      rateGenerator: (simScrapRate * generatorPct) / 100,
+      rateAggregator: (simScrapRate * simAggregatorMarginPct) / 100,
+      ratePlatform: (simScrapRate * simPlatformMarginPct) / 100
+    };
+  }, [simScrapTonnage, simScrapRate, simPlatformMarginPct, simAggregatorMarginPct]);
+
+  // Filtered Phases based on Search
+  const filteredPhases = useMemo(() => {
+    if (!searchQuery.trim()) return CCC_LIFECYCLE_PHASES;
+    const q = searchQuery.toLowerCase();
+    return CCC_LIFECYCLE_PHASES.filter(
+      p => p.title.toLowerCase().includes(q) || 
+           p.description.toLowerCase().includes(q) || 
+           p.regulatoryRef.toLowerCase().includes(q) ||
+           p.deliverables.some(d => d.toLowerCase().includes(q))
+    );
+  }, [searchQuery]);
+
+  const handleToggleExpandAll = () => {
+    if (allExpanded) {
+      setExpandedPhase(null);
+      setAllExpanded(false);
+    } else {
+      setAllExpanded(true);
+      setExpandedPhase(999); // Expand all indicator
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="w-full space-y-6 text-slate-100 font-sans pb-16">
       
       {/* Top Header Banner */}
       <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/40 border border-white/10 rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-2xl">
-        <div className="relative z-10 max-w-4xl space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-mono font-bold tracking-wider uppercase flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" />
-              RupayKg Master Operating Manual
-            </span>
-            <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 rounded-full text-xs font-mono font-bold">
-              Rev 3.0 (2026)
-            </span>
+        <div className="relative z-10 space-y-4 max-w-5xl">
+          
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-sm">
+                <BookOpen className="w-3.5 h-3.5" />
+                RupayKg Master Operating Manual
+              </span>
+              <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 rounded-full text-xs font-mono font-bold">
+                Rev 3.0 (2026 Enterprise)
+              </span>
+            </div>
+
+            {/* Quick Action Tools */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrint}
+                className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl text-xs font-mono font-bold text-slate-200 flex items-center gap-1.5 transition-all shadow-sm"
+                title="Print or export as PDF SOP Manual"
+              >
+                <Printer className="w-3.5 h-3.5 text-amber-400" />
+                <span>Print / PDF Export</span>
+              </button>
+            </div>
           </div>
 
           <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">
             Comprehensive Platform Working & Carbon Project Lifecycle Manual
           </h1>
 
-          <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-3xl">
-            Authoritative operating handbook governing CCC Carbon Project lifecycles, non-CCC physical commodity settlements, multi-stakeholder governance, and statutory Indian compliance.
+          <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-4xl">
+            Authoritative operating handbook governing CCC Carbon Project lifecycles, non-CCC physical commodity settlements, multi-stakeholder governance, and statutory Indian compliance under BEE CCTS 2023 & SWM 2016.
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
             <div className="px-3.5 py-1.5 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-slate-300 flex items-center gap-2">
-              <Scale className="w-4 h-4 text-amber-400" />
+              <Scale className="w-4 h-4 text-amber-400 shrink-0" />
               Statutory Doctrine: <strong className="text-amber-300">53% Platform / 35% ULB / 5% Community / 7% Regulatory</strong>
             </div>
             <div className="px-3.5 py-1.5 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-slate-300 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" />
+              <Layers className="w-4 h-4 text-cyan-400 shrink-0" />
               Accounting: <strong className="text-cyan-300">Three-Ledger Absolute Isolation</strong>
             </div>
           </div>
+
+          {/* Interactive Search Bar */}
+          <div className="pt-2">
+            <div className="relative max-w-md">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search manual topics, BEE methodologies, statutory rules..."
+                className="w-full pl-10 pr-4 py-2 bg-black/50 border border-white/15 focus:border-amber-500 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
         </div>
 
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-amber-500/10 to-transparent pointer-events-none" />
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-3 overflow-x-auto">
         {[
           { id: 'overview', label: '1. Executive Doctrine & Core Architecture', icon: Scale },
           { id: 'ccc_cycle', label: '2. CCC Carbon Project Work Cycle (12-Layers)', icon: Flame },
@@ -279,9 +410,9 @@ export const PlatformWorkingManual: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveSection(tab.id as any)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all shrink-0 ${
                 isActive
-                  ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                  ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 font-black'
                   : 'bg-slate-900/80 text-slate-300 hover:bg-slate-800 border border-white/5'
               }`}
             >
@@ -337,7 +468,7 @@ export const PlatformWorkingManual: React.FC = () => {
                 </div>
                 <h3 className="font-bold text-white text-sm">Zero-Leakage Invariant</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Every transaction across physical materials and carbon units must mathematically conserve 100.000% of gross proceeds with zero unallocated residual ($\Delta = ₹0.0000$), verifiable via W3C credentials.
+                  Every transaction across physical materials and carbon units must mathematically conserve 100.000% of gross proceeds with zero unallocated residual (Delta = ₹0.00), verifiable via W3C credentials.
                 </p>
               </div>
             </div>
@@ -389,11 +520,84 @@ export const PlatformWorkingManual: React.FC = () => {
                       <td className="p-3 text-amber-400">Total Gross Realized Carbon Yield</td>
                       <td className="p-3 text-center text-amber-400">100.0%</td>
                       <td className="p-3 text-slate-300">Sum of All 7 Doctrinal Tiers</td>
-                      <td className="p-3 text-emerald-400">Zero Monetary Leakage (Δ = ₹0.00)</td>
+                      <td className="p-3 text-emerald-400">Zero Monetary Leakage (Delta = ₹0.00)</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            {/* Interactive Live Carbon Waterfall Simulator */}
+            <div className="p-5 bg-black/60 rounded-xl border border-amber-500/30 space-y-4 font-mono text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2 text-amber-300 font-bold">
+                  <Calculator className="w-4 h-4" />
+                  <span>Interactive Doctrinal Waterfall Simulator (Real-Time INR Disbursement)</span>
+                </div>
+                <span className="text-[11px] text-slate-400">Governed by RKG-DOCTRINE-REV-01</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-slate-300 text-xs flex justify-between">
+                    <span>Verified Carbon Credits (CCC Volume):</span>
+                    <strong className="text-cyan-400">{simCccVolume.toLocaleString()} tCO₂e</strong>
+                  </label>
+                  <input
+                    type="range"
+                    min="100"
+                    max="10000"
+                    step="100"
+                    value={simCccVolume}
+                    onChange={(e) => setSimCccVolume(Number(e.target.value))}
+                    className="w-full accent-cyan-400 cursor-pointer"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-slate-300 text-xs flex justify-between">
+                    <span>Market Spot Price per CCC (tCO₂e):</span>
+                    <strong className="text-emerald-400">₹{simCccPrice.toLocaleString()} / CCC</strong>
+                  </label>
+                  <input
+                    type="range"
+                    min="300"
+                    max="3000"
+                    step="50"
+                    value={simCccPrice}
+                    onChange={(e) => setSimCccPrice(Number(e.target.value))}
+                    className="w-full accent-emerald-400 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Simulation Result Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+                <div className="p-3 bg-slate-900 rounded-lg border border-amber-500/20">
+                  <div className="text-[10px] text-slate-400 uppercase">Gross Monetized Escrow</div>
+                  <div className="text-base font-bold text-white mt-1">₹{liveWaterfallSim.grossInr.toLocaleString()}</div>
+                  <div className="text-[10px] text-amber-400 mt-0.5">100.0% Realized</div>
+                </div>
+
+                <div className="p-3 bg-amber-950/40 rounded-lg border border-amber-500/40">
+                  <div className="text-[10px] text-amber-300 uppercase">Platform Treasury (53%)</div>
+                  <div className="text-base font-bold text-amber-300 mt-1">₹{liveWaterfallSim.platformShare.toLocaleString()}</div>
+                  <div className="text-[10px] text-amber-400 mt-0.5">Retained Working Capital</div>
+                </div>
+
+                <div className="p-3 bg-cyan-950/40 rounded-lg border border-cyan-500/40">
+                  <div className="text-[10px] text-cyan-300 uppercase">ULB Sovereign Royalty (35%)</div>
+                  <div className="text-base font-bold text-cyan-300 mt-1">₹{liveWaterfallSim.ulbShare.toLocaleString()}</div>
+                  <div className="text-[10px] text-cyan-400 mt-0.5">Municipal Non-Tax Revenue</div>
+                </div>
+
+                <div className="p-3 bg-emerald-950/40 rounded-lg border border-emerald-500/40">
+                  <div className="text-[10px] text-emerald-300 uppercase">Community & Audit (12%)</div>
+                  <div className="text-base font-bold text-emerald-300 mt-1">₹{(liveWaterfallSim.communityShare + liveWaterfallSim.regulatoryShare).toLocaleString()}</div>
+                  <div className="text-[10px] text-emerald-400 mt-0.5">5% Safai + 7% ACVA/Rail</div>
+                </div>
+              </div>
+
             </div>
 
           </div>
@@ -407,24 +611,34 @@ export const PlatformWorkingManual: React.FC = () => {
         <div className="space-y-6">
           <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 space-y-6">
             
-            <div className="border-b border-white/10 pb-4">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Flame className="text-amber-400" />
-                The 7-Phase Carbon Project Work Cycle (12-Layer Engine)
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                From physical waste intake at municipal MRFs or rural biomass hubs to Bureau of Energy Efficiency (BEE) CCTS credit serialization and automated escrow payout.
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <Flame className="text-amber-400" />
+                  The 7-Phase Carbon Project Work Cycle (12-Layer Engine)
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  From physical waste intake at municipal MRFs or rural biomass hubs to Bureau of Energy Efficiency (BEE) CCTS credit serialization and automated escrow payout.
+                </p>
+              </div>
+
+              <button
+                onClick={handleToggleExpandAll}
+                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono text-amber-300 flex items-center gap-1.5 transition-all"
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                {allExpanded ? 'Collapse All Phases' : 'Expand All Phases'}
+              </button>
             </div>
 
             {/* Interactive Timeline Phases */}
-            <div className="space-y-4">
-              {CCC_LIFECYCLE_PHASES.map((p) => {
-                const isExpanded = expandedPhase === p.phase;
+            <div className="space-y-3">
+              {filteredPhases.map((p) => {
+                const isExpanded = allExpanded || expandedPhase === p.phase;
                 return (
                   <div 
                     key={p.phase}
-                    className="border border-white/10 rounded-xl overflow-hidden bg-slate-950/60 transition-all"
+                    className="border border-white/10 rounded-xl overflow-hidden bg-slate-950/60 transition-all hover:border-white/20"
                   >
                     <button
                       onClick={() => setExpandedPhase(isExpanded ? null : p.phase)}
@@ -439,7 +653,7 @@ export const PlatformWorkingManual: React.FC = () => {
                           <div className="text-[11px] text-slate-400">{p.regulatoryRef} • {p.duration}</div>
                         </div>
                       </div>
-                      {isExpanded ? <ChevronDown className="w-5 h-5 text-amber-400" /> : <ChevronRight className="w-5 h-5 text-slate-500" />}
+                      {isExpanded ? <ChevronDown className="w-5 h-5 text-amber-400 shrink-0" /> : <ChevronRight className="w-5 h-5 text-slate-500 shrink-0" />}
                     </button>
 
                     {isExpanded && (
@@ -506,7 +720,7 @@ export const PlatformWorkingManual: React.FC = () => {
             </div>
 
             {/* Diagram of Flow */}
-            <div className="p-6 bg-slate-950/80 rounded-xl border border-white/10 space-y-4">
+            <div className="p-5 bg-black/60 rounded-xl border border-white/10 space-y-4">
               <div className="text-xs font-bold text-slate-300 font-mono uppercase tracking-wider text-center">
                 End-to-End Physical Settlement Pipeline
               </div>
@@ -540,7 +754,7 @@ export const PlatformWorkingManual: React.FC = () => {
                 <div className="p-4 bg-slate-900 rounded-xl border border-emerald-500/30 space-y-2">
                   <div className="text-emerald-400 font-bold">Step 4: Automated Payout</div>
                   <p className="text-[11px] text-slate-400 font-sans">
-                    Instant Bank/UPI DBT to waste pickers/farmers ($70\%–80\%$), aggregator margin ($15\%–20\%$).
+                    Instant Bank/UPI DBT to waste pickers/farmers (70%–80%), aggregator margin (15%–20%).
                   </p>
                   <div className="text-[10px] text-emerald-300 font-bold">Instant DBT Settled</div>
                 </div>
@@ -548,50 +762,106 @@ export const PlatformWorkingManual: React.FC = () => {
               </div>
             </div>
 
-            {/* Material Payout Table Example */}
-            <div className="space-y-3">
-              <div className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                Illustrative Physical Settlement Matrix (10 Tonne Paddy Straw Trade @ ₹2.50/kg)
+            {/* Interactive Physical Trade Calculator */}
+            <div className="p-5 bg-black/60 rounded-xl border border-emerald-500/30 space-y-4 font-mono text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2 text-emerald-300 font-bold">
+                  <Calculator className="w-4 h-4" />
+                  <span>Interactive Physical Commodity Payout Calculator</span>
+                </div>
+                <span className="text-[11px] text-slate-400">Admin Margin Sovereign Control</span>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 text-xs">Lot Weight (Metric Tonnes):</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={simScrapTonnage}
+                    onChange={(e) => setSimScrapTonnage(Math.max(1, Number(e.target.value)))}
+                    className="w-full p-2 bg-slate-900 border border-white/20 rounded-lg text-white font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 text-xs">Gross Price (₹ / kg):</label>
+                  <input
+                    type="number"
+                    min="0.5"
+                    max="50"
+                    step="0.1"
+                    value={simScrapRate}
+                    onChange={(e) => setSimScrapRate(Math.max(0.1, Number(e.target.value)))}
+                    className="w-full p-2 bg-slate-900 border border-white/20 rounded-lg text-white font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 text-xs">Platform Margin (%):</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={simPlatformMarginPct}
+                    onChange={(e) => setSimPlatformMarginPct(Math.min(20, Math.max(1, Number(e.target.value))))}
+                    className="w-full p-2 bg-slate-900 border border-white/20 rounded-lg text-amber-400 font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 text-xs">Aggregator/FPO Share (%):</label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="30"
+                    value={simAggregatorMarginPct}
+                    onChange={(e) => setSimAggregatorMarginPct(Math.min(30, Math.max(5, Number(e.target.value))))}
+                    className="w-full p-2 bg-slate-900 border border-white/20 rounded-lg text-purple-400 font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Dynamic Live Payout Table */}
+              <div className="overflow-x-auto pt-2">
                 <table className="w-full text-xs font-mono border border-white/10 rounded-xl overflow-hidden">
                   <thead className="bg-slate-950 text-slate-300 text-left border-b border-white/10">
                     <tr>
                       <th className="p-3">Party / Beneficiary</th>
                       <th className="p-3">Settlement Share</th>
                       <th className="p-3 text-right">Per Kg Rate</th>
-                      <th className="p-3 text-right">Total Net Payout (10,000 kg)</th>
+                      <th className="p-3 text-right">Total Net Payout ({livePhysicalTradeSim.totalWeightKg.toLocaleString()} kg)</th>
                       <th className="p-3">Disbursement Channel</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 bg-slate-900/60">
                     <tr>
-                      <td className="p-3 font-bold text-white">Farmer / Primary Generator</td>
-                      <td className="p-3 text-emerald-400 font-bold">72.0%</td>
-                      <td className="p-3 text-right">₹1.80 / kg</td>
-                      <td className="p-3 text-right font-bold text-emerald-400">₹18,000.00</td>
+                      <td className="p-3 font-bold text-white">Farmer / Primary Waste Generator</td>
+                      <td className="p-3 text-emerald-400 font-bold">{livePhysicalTradeSim.generatorPct.toFixed(1)}%</td>
+                      <td className="p-3 text-right">₹{livePhysicalTradeSim.rateGenerator.toFixed(2)} / kg</td>
+                      <td className="p-3 text-right font-bold text-emerald-400">₹{livePhysicalTradeSim.generatorAmt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td className="p-3 text-slate-400">Direct Aadhaar / UPI DBT (T+0)</td>
                     </tr>
                     <tr>
                       <td className="p-3 font-bold text-white">FPO / Village Resource Centre (Aggregator)</td>
-                      <td className="p-3 text-purple-400 font-bold">20.0%</td>
-                      <td className="p-3 text-right">₹0.50 / kg</td>
-                      <td className="p-3 text-right font-bold text-purple-400">₹5,000.00</td>
+                      <td className="p-3 text-purple-400 font-bold">{simAggregatorMarginPct.toFixed(1)}%</td>
+                      <td className="p-3 text-right">₹{livePhysicalTradeSim.rateAggregator.toFixed(2)} / kg</td>
+                      <td className="p-3 text-right font-bold text-purple-400">₹{livePhysicalTradeSim.aggregatorAmt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td className="p-3 text-slate-400">Bank Account RTGS (T+1)</td>
                     </tr>
                     <tr>
                       <td className="p-3 font-bold text-white">RupayKg Platform Margin</td>
-                      <td className="p-3 text-amber-400 font-bold">8.0%</td>
-                      <td className="p-3 text-right">₹0.20 / kg</td>
-                      <td className="p-3 text-right font-bold text-amber-400">₹2,000.00</td>
+                      <td className="p-3 text-amber-400 font-bold">{simPlatformMarginPct.toFixed(1)}%</td>
+                      <td className="p-3 text-right">₹{livePhysicalTradeSim.ratePlatform.toFixed(2)} / kg</td>
+                      <td className="p-3 text-right font-bold text-amber-400">₹{livePhysicalTradeSim.platformAmt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td className="p-3 text-slate-400">Platform Operating Treasury</td>
                     </tr>
                     <tr className="bg-slate-950 font-bold text-white border-t border-white/20">
-                      <td className="p-3 text-cyan-400">Total Paid by Bio-CNG Plant (Processor)</td>
+                      <td className="p-3 text-cyan-400">Total Paid by Recycler / Offtaker</td>
                       <td className="p-3 text-cyan-400">100.0%</td>
-                      <td className="p-3 text-right text-cyan-400">₹2.50 / kg</td>
-                      <td className="p-3 text-right text-cyan-400">₹25,000.00</td>
+                      <td className="p-3 text-right text-cyan-400">₹{simScrapRate.toFixed(2)} / kg</td>
+                      <td className="p-3 text-right text-cyan-400 font-black">₹{livePhysicalTradeSim.grossPurchaserValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td className="p-3 text-slate-400">RupayKg Escrow Gateway</td>
                     </tr>
                   </tbody>
@@ -623,16 +893,16 @@ export const PlatformWorkingManual: React.FC = () => {
             {/* Stakeholder Selector Pills */}
             <div className="flex flex-wrap gap-2">
               {STAKEHOLDERS_DATA.map((stk) => {
-                const Icon = stk.icon;
                 const isSelected = selectedStakeholder === stk.id;
+                const Icon = stk.icon;
                 return (
                   <button
                     key={stk.id}
                     onClick={() => setSelectedStakeholder(stk.id)}
                     className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all ${
                       isSelected
-                        ? `${stk.bgColor} ${stk.color} border ${stk.borderColor} shadow-lg`
-                        : 'bg-slate-950/60 text-slate-400 border border-white/5 hover:bg-slate-800'
+                        ? `${stk.bgColor} ${stk.color} border ${stk.borderColor} shadow-lg scale-[1.02]`
+                        : 'bg-slate-950/60 text-slate-400 hover:text-white border border-white/5'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -644,13 +914,12 @@ export const PlatformWorkingManual: React.FC = () => {
 
             {/* Selected Stakeholder Detail Card */}
             {(() => {
-              const active = STAKEHOLDERS_DATA.find(s => s.id === selectedStakeholder)!;
+              const active = STAKEHOLDERS_DATA.find(s => s.id === selectedStakeholder) || STAKEHOLDERS_DATA[0];
               const Icon = active.icon;
-
               return (
-                <div className={`p-6 rounded-2xl border ${active.borderColor} ${active.bgColor} space-y-6`}>
+                <div className={`p-6 rounded-2xl border ${active.borderColor} ${active.bgColor} space-y-6 transition-all`}>
                   
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
                     <div className="flex items-center gap-3">
                       <div className={`p-3 rounded-xl bg-black/40 border ${active.borderColor} ${active.color}`}>
                         <Icon className="w-6 h-6" />
@@ -661,15 +930,15 @@ export const PlatformWorkingManual: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="px-3.5 py-1.5 bg-black/40 border border-white/10 rounded-xl text-xs font-mono text-white">
+                    <span className="px-3 py-1.5 rounded-full bg-black/40 border border-white/10 text-xs font-mono font-bold text-amber-300">
                       {active.primaryAction}
-                    </div>
+                    </span>
                   </div>
 
                   {/* Duties Grid */}
                   <div className="space-y-2">
-                    <div className="text-xs font-bold text-white uppercase font-mono tracking-wider">
-                      Core Operational Duties:
+                    <div className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                      Core Operational Responsibilities
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {active.keyDuties.map((duty, idx) => (
@@ -682,21 +951,19 @@ export const PlatformWorkingManual: React.FC = () => {
                   </div>
 
                   {/* Revenue Touchpoints */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 font-mono text-xs">
-                    <div className="p-4 bg-black/50 rounded-xl border border-white/10 space-y-1">
-                      <div className="text-amber-400 font-bold flex items-center gap-1.5">
-                        <Flame className="w-3.5 h-3.5" />
-                        Role in CCC Carbon Cycle
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-white/10 font-mono text-xs">
+                    <div className="p-3.5 bg-black/30 rounded-xl space-y-1">
+                      <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">
+                        CCC Carbon Waterfall Role
                       </div>
                       <div className="text-slate-300 text-[11px] font-sans">
                         {active.cccCycleRole}
                       </div>
                     </div>
 
-                    <div className="p-4 bg-black/50 rounded-xl border border-white/10 space-y-1">
-                      <div className="text-emerald-400 font-bold flex items-center gap-1.5">
-                        <DollarSign className="w-3.5 h-3.5" />
-                        Role in Non-CCC Material Settlements
+                    <div className="p-3.5 bg-black/30 rounded-xl space-y-1">
+                      <div className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">
+                        Physical Material Trade Role
                       </div>
                       <div className="text-slate-300 text-[11px] font-sans">
                         {active.nonCccCycleRole}
@@ -858,4 +1125,5 @@ export const PlatformWorkingManual: React.FC = () => {
     </div>
   );
 };
+
 export default PlatformWorkingManual;
