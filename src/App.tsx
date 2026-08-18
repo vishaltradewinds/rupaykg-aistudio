@@ -48,7 +48,6 @@ import {
   Loader2,
   ClipboardList,
   Book,
-  BookOpen,
   FileText,
   Download,
   Plus,
@@ -462,7 +461,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
   const [showWhitepaper, setShowWhitepaper] = useState(false);
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality' | 'ccts_carbon_os'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality' | 'ccts_carbon_os' | 'platform_manual'>('dashboard');
   
   const [showPlatformOptions, setShowPlatformOptions] = useState<boolean>(false);
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');

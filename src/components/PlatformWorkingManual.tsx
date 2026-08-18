@@ -474,13 +474,13 @@ export const PlatformWorkingManual: React.FC = () => {
                 Canonical Carbon Accounting Formula (BEE CCTS Standard)
               </div>
               <div className="p-3 bg-slate-900 rounded-lg text-emerald-400 font-bold text-center text-sm border border-emerald-500/20">
-                $$ER_y = BE_y - PE_y - LE_y$$
+                ER_y = BE_y - PE_y - LE_y
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-[11px] text-slate-400 pt-1">
-                <div><strong className="text-white">$ER_y$:</strong> Net Verified Emission Reductions ($t\text{CO}_2\text{e}$)</div>
-                <div><strong className="text-white">$BE_y$:</strong> Baseline Emissions (Landfill methane / stubble burn)</div>
-                <div><strong className="text-white">$PE_y$:</strong> Project Emissions (Compost fuel / electricity)</div>
-                <div><strong className="text-white">$LE_y$:</strong> Leakage Emissions (Transport distance beyond baseline)</div>
+                <div><strong className="text-white">ER_y:</strong> Net Verified Emission Reductions (tCO₂e)</div>
+                <div><strong className="text-white">BE_y:</strong> Baseline Emissions (Landfill methane / stubble burn)</div>
+                <div><strong className="text-white">PE_y:</strong> Project Emissions (Compost fuel / electricity)</div>
+                <div><strong className="text-white">LE_y:</strong> Leakage Emissions (Transport distance beyond baseline)</div>
               </div>
             </div>
 
@@ -516,7 +516,7 @@ export const PlatformWorkingManual: React.FC = () => {
                 <div className="p-4 bg-slate-900 rounded-xl border border-blue-500/30 space-y-2">
                   <div className="text-blue-400 font-bold">Step 1: Recycler Purchase</div>
                   <p className="text-[11px] text-slate-400 font-sans">
-                    Processor/Recycler deposits gross purchase value ($P_{gross}$) into RupayKg Escrow.
+                    Processor/Recycler deposits gross purchase value (P_gross) into RupayKg Escrow.
                   </p>
                   <div className="text-[10px] text-blue-300 font-bold">100% Escrow Funded</div>
                 </div>
@@ -524,7 +524,7 @@ export const PlatformWorkingManual: React.FC = () => {
                 <div className="p-4 bg-slate-900 rounded-xl border border-amber-500/30 space-y-2">
                   <div className="text-amber-400 font-bold">Step 2: Admin Margin Matrix</div>
                   <p className="text-[11px] text-slate-400 font-sans">
-                    Platform Super Admin configures the split ($M_{platform}, R_{aggregator}, R_{generator}$).
+                    Platform Super Admin configures the split (M_platform, R_aggregator, R_generator).
                   </p>
                   <div className="text-[10px] text-amber-300 font-bold">Admin Sovereignty</div>
                 </div>
@@ -725,7 +725,7 @@ export const PlatformWorkingManual: React.FC = () => {
                 The Three-Ledger Separation Protocol
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                Strict separation of Physical Mass ($kg/t$), Carbon Credits ($t\text{CO}_2\text{e}$), and Fiat Cash ($₹\text{ INR}$) to prevent carbon double-counting and financial fraud.
+                Strict separation of Physical Mass (kg / tonnes), Carbon Credits (tCO₂e), and Fiat Cash (₹ INR) to prevent carbon double-counting and financial fraud.
               </p>
             </div>
 
@@ -741,7 +741,7 @@ export const PlatformWorkingManual: React.FC = () => {
                   Records physical tonnage measured directly by calibrated weighbridge sensors.
                 </p>
                 <div className="space-y-1.5 text-[11px] text-slate-400 pt-2 border-t border-cyan-500/20">
-                  <div>• Gross & Tare Weights ($kg$)</div>
+                  <div>• Gross & Tare Weights (kg / MT)</div>
                   <div>• Moisture & Ash Content (%)</div>
                   <div>• Vehicle & Facility LGD ID</div>
                   <div>• Material Stream Classification</div>
@@ -758,8 +758,8 @@ export const PlatformWorkingManual: React.FC = () => {
                   Quantifies net greenhouse gas emission reductions under BEE-approved methodologies.
                 </p>
                 <div className="space-y-1.5 text-[11px] text-slate-400 pt-2 border-t border-emerald-500/20">
-                  <div>• Baseline Emissions ($t\text{CO}_2\text{e}$)</div>
-                  <div>• Net Avoidance ($t\text{CO}_2\text{e}$)</div>
+                  <div>• Baseline Emissions (BE_y in tCO₂e)</div>
+                  <div>• Net Avoidance (ER_y in tCO₂e)</div>
                   <div>• BEE Methodology Code</div>
                   <div>• ACVA Verification Opinion</div>
                 </div>
@@ -775,8 +775,8 @@ export const PlatformWorkingManual: React.FC = () => {
                   Houses separate sub-ledgers for physical scrap payments and carbon waterfall payouts.
                 </p>
                 <div className="space-y-1.5 text-[11px] text-slate-400 pt-2 border-t border-amber-500/20">
-                  <div>• Physical Material Settlement ($₹$)</div>
-                  <div>• Carbon 8-Tier Waterfall ($₹$)</div>
+                  <div>• Physical Material Settlement (₹ INR)</div>
+                  <div>• Carbon 8-Tier Waterfall (₹ INR)</div>
                   <div>• Bank Escrow Reference ID</div>
                   <div>• Direct Benefit Transfer (DBT) Status</div>
                 </div>
