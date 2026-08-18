@@ -48,6 +48,7 @@ import {
   Loader2,
   ClipboardList,
   Book,
+  BookOpen,
   FileText,
   Download,
   Plus,
@@ -91,6 +92,7 @@ import { InstallPwaPrompt } from './components/InstallPwaPrompt';
 import WhitepaperModal, { GenesisWhitepaperContent } from './components/WhitepaperModal';
 import GroundRealityHub from './components/GroundRealityHub';
 import { CCTSCarbonOS } from './components/CCTSCarbonOS';
+import { PlatformWorkingManual } from './components/PlatformWorkingManual';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -3506,6 +3508,14 @@ export default function App() {
             <span className="hidden md:block font-bold text-amber-300">Ground Reality & Safai Hub</span>
           </button>
 
+          <button 
+            onClick={() => setView('platform_manual')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'platform_manual' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+          >
+            <BookOpen size={20} className={view === 'platform_manual' ? 'text-amber-400 shrink-0' : 'text-amber-400/70 shrink-0'} />
+            <span className="hidden md:block font-bold text-amber-300">Platform Working Manual</span>
+          </button>
+
           {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
             <button 
               onClick={() => setView('upload')}
@@ -6582,6 +6592,17 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
             >
               <CCTSCarbonOS token={token} user={user} safeFetch={safeFetch} safeParseJson={safeParseJson} />
+            </motion.div>
+          )}
+
+          {view === 'platform_manual' && (
+            <motion.div
+              key="platform_manual"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <PlatformWorkingManual />
             </motion.div>
           )}
 
