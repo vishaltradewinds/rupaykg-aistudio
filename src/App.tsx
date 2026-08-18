@@ -17,6 +17,7 @@ import {
   Scale, 
   LogOut, 
   User,
+  UserPlus,
   Users,
   Activity,
   BarChart3,
@@ -92,6 +93,7 @@ import WhitepaperModal, { GenesisWhitepaperContent } from './components/Whitepap
 import GroundRealityHub from './components/GroundRealityHub';
 import { CCTSCarbonOS } from './components/CCTSCarbonOS';
 import { PlatformWorkingManual } from './components/PlatformWorkingManual';
+import { StakeholderOnboardingHub } from './components/StakeholderOnboardingHub';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -461,7 +463,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('rupay_token'));
   const [showWhitepaper, setShowWhitepaper] = useState(false);
-  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality' | 'ccts_carbon_os' | 'platform_manual'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'upload' | 'history' | 'admin' | 'tasks' | 'mrv' | 'partner' | 'municipal' | 'genesis' | 'settings' | 'register_farmer' | 'blockchain' | 'operations' | 'market' | 'projects' | 'enterprise_suite' | 'swm_compliance' | 'reports' | 'ground_reality' | 'ccts_carbon_os' | 'platform_manual' | 'stakeholder_registration'>('dashboard');
   
   const [showPlatformOptions, setShowPlatformOptions] = useState<boolean>(false);
   const [blockchainSubTab, setBlockchainSubTab] = useState<'ledger' | 'guardian'>('ledger');
@@ -2100,10 +2102,16 @@ export default function App() {
         const data = await safeParseJson(res);
         if (!res.ok) throw new Error(data?.error || 'Stakeholder registration failed.');
 
-        setUser(data.user);
+        if (data.token) {
+          localStorage.setItem('rupay_token', data.token);
+          setToken(data.token);
+        }
+        if (data.user) {
+          setUser(data.user);
+        }
         setShowAuth(false);
         setAuthMode('login');
-        setMessage({ type: 'success', text: `Stakeholder registered successfully as ${data.user.role}. Welcome to RupayKg!` });
+        setMessage({ type: 'success', text: `Stakeholder registered successfully as ${data.user?.role || formData.role}. Welcome to RupayKg!` });
       } else {
         if (!formData.phone && !formData.name) {
           throw new Error('Please enter your Phone / Login ID and Name.');
@@ -2731,8 +2739,18 @@ export default function App() {
                 )}
               </div>
               <button 
+                onClick={() => {
+                  setAuthMode('register');
+                  setShowAuth(true);
+                }}
+                className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-semibold text-xs hover:bg-emerald-500/20 transition-all"
+              >
+                <ShieldCheck size={14} />
+                {t('Register Stakeholder')}
+              </button>
+              <button 
                 onClick={() => setShowAuth(true)}
-                className="bg-white text-black px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-white/90 transition-all flex items-center gap-2"
+                className="bg-white text-black px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-white/90 transition-all flex items-center gap-2 shadow-lg"
               >
                 {t('Launch OS')} <ArrowRight size={16} />
               </button>
@@ -2761,9 +2779,19 @@ export default function App() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
                   onClick={() => setShowAuth(true)}
-                  className="w-full sm:w-auto bg-emerald-500 text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto bg-emerald-500 text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20"
                 >
                   {t('Access the OS')} <ArrowRight size={20} />
+                </button>
+                <button 
+                  onClick={() => {
+                    setAuthMode('register');
+                    setShowAuth(true);
+                  }}
+                  className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <ShieldCheck size={20} />
+                  {t('Register Stakeholder')}
                 </button>
                 <div className="relative w-full sm:w-auto">
                   <button 
@@ -3508,6 +3536,14 @@ export default function App() {
           </button>
 
           <button 
+            onClick={() => setView('stakeholder_registration')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'stakeholder_registration' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+          >
+            <UserPlus size={20} className={view === 'stakeholder_registration' ? 'text-emerald-400 shrink-0' : 'text-emerald-400/70 shrink-0'} />
+            <span className="hidden md:block font-bold text-emerald-300">Stakeholder Onboarding</span>
+          </button>
+
+          <button 
             onClick={() => setView('platform_manual')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'platform_manual' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
@@ -3632,6 +3668,7 @@ export default function App() {
               {view === 'reports' && 'Stakeholder Statutory Reports & Returns Hub'}
               {view === 'ground_reality' && 'Informal Sector & Operational Ground Reality Hub'}
               {view === 'platform_manual' && 'Platform Working Manual & Carbon Project Lifecycle SOP'}
+              {view === 'stakeholder_registration' && 'Enterprise Stakeholder Onboarding & Sovereign Role Activation'}
             </h2>
             <p className="text-white/40 text-sm flex items-center gap-2 mt-1">
               {t('Welcome back')}, {user?.name || 'Citizen'}
@@ -6603,6 +6640,26 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
             >
               <PlatformWorkingManual />
+            </motion.div>
+          )}
+
+          {view === 'stakeholder_registration' && (
+            <motion.div
+              key="stakeholder_registration"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <StakeholderOnboardingHub
+                currentUser={user}
+                token={token}
+                onRegistered={(registeredUser, newToken) => {
+                  setUser(registeredUser);
+                  setToken(newToken);
+                  setView('dashboard');
+                }}
+                onNavigateToView={(v: string) => setView(v as any)}
+              />
             </motion.div>
           )}
 

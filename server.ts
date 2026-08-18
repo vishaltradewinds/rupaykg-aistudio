@@ -633,25 +633,74 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     return newBlock;
   }
 
-  const PUBLIC_ROLES = [
+  const ALL_STAKEHOLDER_ROLES = [
+    // Public / Generator Roles
     "citizen",
+    "farmer",
+    "safai_mitra",
+    "vle",
     "fpo",
     "industry_generator",
     "commercial_generator",
     "institution_generator",
-    "municipal_generator"
-  ];
-  const ADMIN_ROLES = [
+    "municipal_generator",
+    "bulk_generator",
+    "industry",
+    "commercial",
+    "institution",
+    "municipality",
+
+    // Administrative & Governance
     "super_admin",
+    "national_admin",
     "state_admin",
+    "district_admin",
+    "panchayat_admin",
     "municipal_admin",
-    "regulator",
+
+    // Logistics, Processing & Recycling
     "aggregator",
     "processor",
+    "recycler",
+    "recycler_manager",
+
+    // Markets, Compliance & ESG
+    "regulator",
     "csr_partner",
     "epr_partner",
-    "ccc_buyer"
+    "pro",
+    "ccc_buyer",
+    "auditor",
+
+    // CCTS / Carbon OS Roles
+    "PROJECT_OWNER",
+    "PROJECT_OPERATOR",
+    "MRV_MANAGER",
+    "CARBON_MANAGER",
+    "DOCUMENT_MANAGER",
+    "ACVA_USER",
+    "REGULATOR_USER",
+    "AUDITOR",
+    "BUYER"
   ];
+
+  const PUBLIC_ROLES = [
+    "citizen",
+    "farmer",
+    "safai_mitra",
+    "vle",
+    "fpo",
+    "industry_generator",
+    "commercial_generator",
+    "institution_generator",
+    "municipal_generator",
+    "bulk_generator",
+    "industry",
+    "commercial",
+    "institution",
+    "municipality"
+  ];
+  const ADMIN_ROLES = ALL_STAKEHOLDER_ROLES.filter(r => !PUBLIC_ROLES.includes(r));
 
   function auth(roles: string[] = []) {
     return requireAuth(roles);
@@ -665,8 +714,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       return res.status(400).json({ error: "Login ID (or Phone) and password are required" });
     }
 
-    if (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role)) {
-      return res.status(400).json({ error: "Invalid role specified" });
+    if (!ALL_STAKEHOLDER_ROLES.includes(role) && !PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role)) {
+      return res.status(400).json({ error: "Invalid stakeholder role specified. Please select a valid category." });
     }
 
     if (dbStatus === "connected") {
@@ -691,16 +740,18 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     const userId = Date.now().toString();
     const newUser = {
       id: userId,
+      uid: userId,
       phone: phone || identifier,
       loginId: loginId || identifier,
       email: email || "",
       password: hashedPassword,
-      role,
+      role: role || "citizen",
       name: name || "User",
       district: district || "",
       state: state || "",
       subdistrict: subdistrict || null,
       local_area: local_area || village || null,
+      village: village || local_area || null,
       organization_name: organization_name || null,
       wallet_balance: 0,
     };
@@ -711,14 +762,34 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       users.push(newUser);
     }
 
+    try {
+      await registerStakeholderUser({
+        uid: userId,
+        email: email || `${identifier}@rupaykg.org`,
+        name: name || "User",
+        role: role || "citizen",
+        phone: phone || identifier,
+        state: state || "",
+        district: district || "",
+        subdistrict: subdistrict || "",
+        local_area: local_area || village || "",
+        village: village || local_area || "",
+        organization_name: organization_name || ""
+      });
+    } catch (dbErr) {
+      console.warn("Postgres user registration sync notice:", dbErr);
+    }
+
     const tokenPayload = {
       id: userId,
+      uid: userId,
       role: newUser.role,
       name: newUser.name,
       district: newUser.district,
       state: newUser.state,
       organization_name: newUser.organization_name,
       phone: newUser.phone,
+      email: newUser.email,
     };
 
     const jti = crypto.randomUUID();
@@ -728,7 +799,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       jwtid: jti
     });
 
-    res.json({ message: "Registered successfully", role, user: tokenPayload, token });
+    res.json({ message: "Registered successfully", role: newUser.role, user: tokenPayload, token });
   });
 
   app.post("/api/login", async (req, res) => {
@@ -885,20 +956,32 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       );
     }
 
+    const tokenPayload = {
+      id: uid,
+      uid,
+      role,
+      name: name || req.user.name || "User",
+      district: district || req.user.district || "",
+      state: state || req.user.state || "",
+      organization_name: organization_name || req.user.organization_name || "",
+      phone: phone || req.user.phone || "",
+      email: email || req.user.email || ""
+    };
+
+    const jti = crypto.randomUUID();
+    const token = jwt.sign(tokenPayload, privateKey, {
+      algorithm: "RS256",
+      expiresIn: "24h",
+      jwtid: jti
+    });
+
     res.json({
       message: `Stakeholder account successfully registered under role: ${role}`,
+      token,
       user: {
-        id: uid,
-        uid,
-        email,
-        name: name || req.user.name,
-        role,
-        phone,
-        state,
-        district,
-        subdistrict,
-        local_area: local_area || village,
-        organization_name,
+        ...tokenPayload,
+        subdistrict: subdistrict || req.user.subdistrict || "",
+        local_area: local_area || village || req.user.local_area || "",
         is_registered: true
       }
     });
