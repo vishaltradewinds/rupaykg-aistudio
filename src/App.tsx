@@ -3435,12 +3435,6 @@ export default function App() {
     );
   }
 
-  ;
-
-  ;
-
-  ;
-
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-white font-sans">
       <InstallPwaPrompt />
