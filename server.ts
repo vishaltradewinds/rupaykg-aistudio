@@ -181,24 +181,45 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   let dbStatus = "disconnected";
   let dbError = "";
 
+  mongoose.connection.on("connected", () => {
+    dbStatus = "connected";
+    dbError = "";
+    console.log("MongoDB connection event: CONNECTED");
+  });
+
+  mongoose.connection.on("error", (err: any) => {
+    dbStatus = "error";
+    dbError = err.message || "Connection error";
+    console.error("MongoDB connection event error:", err.message);
+  });
+
+  mongoose.connection.on("disconnected", () => {
+    if (dbStatus === "connected") {
+      dbStatus = "disconnected";
+      console.warn("MongoDB connection event: DISCONNECTED");
+    }
+  });
+
   async function connectDB() {
     if (MONGO_URI) {
       try {
         dbStatus = "connecting";
-        await mongoose.connect(MONGO_URI);
+        await mongoose.connect(MONGO_URI, {
+          serverSelectionTimeoutMS: 5000,
+          socketTimeoutMS: 45000,
+        });
         dbStatus = "connected";
         dbError = "";
-        console.log("Connected to MongoDB");
-
+        console.log("Connected to MongoDB successfully");
       } catch (err: any) {
         dbStatus = "failed";
         dbError = err.message;
-        console.log("MongoDB connection failed:", err.message);
+        console.warn("MongoDB initial connection failed:", err.message);
       }
     } else {
       dbStatus = "no_uri";
       console.log(
-        "No MONGO_URI provided. Using in-memory fallback .",
+        "No MONGO_URI provided. Using in-memory & PostgreSQL fallback.",
       );
     }
   }
@@ -209,7 +230,37 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   );
 
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
+    res.json({
+      status: "ok",
+      version: "3.0.0-Enterprise",
+      services: {
+        mongodb: {
+          status: dbStatus,
+          error: dbError || undefined,
+          configured: !!MONGO_URI,
+        },
+        postgres: {
+          status: process.env.SQL_HOST ? "configured" : "in-memory-fallback",
+          host: process.env.SQL_HOST || "none",
+        },
+        security_keys: {
+          status: "active_rs256",
+          algorithm: "RS256",
+        },
+        gemini_ai: {
+          status: process.env.GEMINI_API_KEY ? "enabled" : "mock_ready",
+        },
+        carbon_engine: {
+          status: "active",
+          mode: process.env.CARBON_REGISTRY_API_URL ? "external_registry" : "ccts_sandbox",
+        },
+        guardian_dmrv: {
+          status: "active",
+          mode: process.env.GUARDIAN_API_URL ? "live_hcs" : "simulated_vc",
+        },
+      },
+      timestamp: new Date().toISOString(),
+    });
   });
 
   // ---------------- PUBLIC API ----------------

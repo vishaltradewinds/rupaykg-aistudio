@@ -3278,34 +3278,32 @@ export default function App() {
                       <optgroup label="Urban Governance & Municipal Bodies">
                         <option value="municipal_admin">Municipal Authority / Urban Local Body Admin</option>
                         <option value="municipal_generator">Bulk Municipal Waste Generator</option>
+                        <option value="state_admin">State Urban Development / SPCB Officer</option>
                       </optgroup>
-                      <optgroup label="Rural Economy & Agriculture">
+                      <optgroup label="Rural Governance & Agriculture">
                         <option value="fpo">Gram Panchayat / FPO / Rural Enterprise</option>
-                        <option value="citizen">Citizen / Individual Generator / Farmer</option>
+                        <option value="farmer">Farmer / Biomass Aggregator</option>
+                        <option value="safai_mitra">Safai Mitra / Frontline Waste Worker</option>
+                        <option value="citizen">Citizen / Domestic Waste Generator</option>
                       </optgroup>
                       <optgroup label="Circular Logistics & Processing Operations">
                         <option value="aggregator">Waste Aggregator / Collection Logistics Partner</option>
-                        <option value="processor">Recycler / MRF / Compost Plant Operator</option>
+                        <option value="processor">Recycler / MRF / Processing Plant Operator</option>
                       </optgroup>
-                      <optgroup label="Bulk Generators (Commercial & Industrial)">
+                      <optgroup label="Bulk Waste Generators (BWGs)">
                         <option value="industry_generator">Industrial Facility Generator</option>
                         <option value="commercial_generator">Commercial Establishment Generator</option>
                         <option value="institution_generator">Institutional Facility Generator</option>
                       </optgroup>
-                      <optgroup label="Regulators & Carbon Markets">
-                        <option value="regulator">Environmental Regulator / Auditor</option>
-                        <option value="ccc_buyer">Carbon Project Developer & Credit Buyer</option>
-                        <option value="csr_partner">CSR Sustainability Partner</option>
-                        <option value="epr_partner">EPR Brand / PRO Partner</option>
-                        <option value="PROJECT_OWNER">Carbon Project Owner</option>
-                        <option value="PROJECT_OPERATOR">Carbon Project Operator</option>
-                        <option value="MRV_MANAGER">MRV Manager</option>
-                        <option value="CARBON_MANAGER">Carbon Manager</option>
-                        <option value="DOCUMENT_MANAGER">Document Manager</option>
-                        <option value="ACVA_USER">ACVA User</option>
-                        <option value="REGULATOR_USER">Regulator User</option>
-                        <option value="AUDITOR">Auditor</option>
-                        <option value="BUYER">Buyer</option>
+                      <optgroup label="CCTS Carbon Market & Sovereign MRV">
+                        <option value="PROJECT_OWNER">Carbon Project Developer / Owner</option>
+                        <option value="ACVA_USER">Accredited Carbon Verification Agency (ACVA)</option>
+                        <option value="ccc_buyer">Carbon Credit / ESG Offset Buyer</option>
+                      </optgroup>
+                      <optgroup label="Regulators, PROs & EPR Brands">
+                        <option value="regulator">Environmental Regulator / CPCB Officer</option>
+                        <option value="epr_partner">EPR Brand Owner / PRO Partner</option>
+                        <option value="csr_partner">CSR Sustainability Contributor</option>
                       </optgroup>
                     </select>
                   </div>
@@ -5997,25 +5995,25 @@ export default function App() {
                                 onChange={(e) => handleUpdateUserRole(u.id, e.target.value)}
                                 className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-emerald-500/50"
                               >
-                                <option value="citizen">{t('Citizen')}</option>
-                                <option value="aggregator">{t('Aggregator')}</option>
-                                <option value="processor">{t('Processor')}</option>
-                                <option value="regulator">{t('Regulator')}</option>
+                                <option value="citizen">{t('Citizen / Domestic')}</option>
+                                <option value="farmer">{t('Farmer / Biomass')}</option>
+                                <option value="safai_mitra">{t('Safai Mitra')}</option>
+                                <option value="fpo">{t('Gram Panchayat / FPO')}</option>
                                 <option value="municipal_admin">{t('Municipal Admin')}</option>
+                                <option value="municipal_generator">{t('Municipal Facility')}</option>
                                 <option value="state_admin">{t('State Admin')}</option>
                                 <option value="super_admin">{t('Super Admin')}</option>
+                                <option value="aggregator">{t('Aggregator / Logistics')}</option>
+                                <option value="processor">{t('Processor / Recycler')}</option>
+                                <option value="industry_generator">{t('Industrial Generator')}</option>
+                                <option value="commercial_generator">{t('Commercial Generator')}</option>
+                                <option value="institution_generator">{t('Institutional Generator')}</option>
+                                <option value="PROJECT_OWNER">{t('Carbon Project Owner')}</option>
+                                <option value="ACVA_USER">{t('ACVA Carbon Verifier')}</option>
+                                <option value="ccc_buyer">{t('Carbon Credit Buyer')}</option>
+                                <option value="regulator">{t('Regulator / CPCB')}</option>
+                                <option value="epr_partner">{t('EPR Brand Partner')}</option>
                                 <option value="csr_partner">{t('CSR Partner')}</option>
-                                <option value="epr_partner">{t('EPR Partner')}</option>
-                        <option value="PROJECT_OWNER">Carbon Project Owner</option>
-                        <option value="PROJECT_OPERATOR">Carbon Project Operator</option>
-                        <option value="MRV_MANAGER">MRV Manager</option>
-                        <option value="CARBON_MANAGER">Carbon Manager</option>
-                        <option value="DOCUMENT_MANAGER">Document Manager</option>
-                        <option value="ACVA_USER">ACVA User</option>
-                        <option value="REGULATOR_USER">Regulator User</option>
-                        <option value="AUDITOR">Auditor</option>
-                        <option value="BUYER">Buyer</option>
-                                <option value="ccc_buyer">{t('CCC Buyer')}</option>
                               </select>
                             </td>
                             <td className="py-4">

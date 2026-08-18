@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
-import { adminAuth } from '../lib/firebase-admin';
-import { getOrCreateUser } from '../db/users';
+import { adminAuth } from '../lib/firebase-admin.ts';
+import { getOrCreateUser } from '../db/users.ts';
 
 export interface AuthRequest extends Request {
   user?: any;
