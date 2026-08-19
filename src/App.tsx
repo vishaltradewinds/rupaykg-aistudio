@@ -62,6 +62,7 @@ import {
   CloudRain,
   Key,
   Lock,
+  Sparkles,
   Server,
   Workflow,
   FileCode,
@@ -719,15 +720,9 @@ export default function App() {
       viewTitle: t('Village-Level Analytics'),
       citizenLabel: t('Farmer / FPO (Biomass Generator)'),
       allowedCategories: ["Agricultural", "Forestry", "Livestock", "Aquatic"],
-      allowedRoles: ['citizen', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'municipal_admin', 'state_admin', 'regulator', 'super_admin']
+      allowedRoles: ['citizen', 'farmer', 'safai_mitra', 'fpo', 'aggregator', 'processor', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'PROJECT_OWNER', 'ACVA_USER', 'ccc_buyer', 'csr_partner', 'epr_partner', 'municipal_admin', 'state_admin', 'regulator', 'super_admin']
     }
   }[operatingContext];
-
-  useEffect(() => {
-    if (!labels.allowedRoles.includes(formData.role)) {
-      setFormData(prev => ({ ...prev, role: labels.allowedRoles[0] }));
-    }
-  }, [operatingContext]);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
@@ -2062,6 +2057,22 @@ export default function App() {
 
       setUser(data.user);
       setShowAuth(false);
+      
+      // Real-world operational context & default view mapping
+      if (['farmer', 'fpo'].includes(data.user.role)) {
+        setOperatingContext('rural');
+      } else if (['safai_mitra', 'municipal_admin', 'commercial_generator', 'industry_generator', 'institution_generator', 'municipal_generator'].includes(data.user.role)) {
+        setOperatingContext('urban');
+      }
+      
+      if (['ACVA_USER', 'PROJECT_OWNER'].includes(data.user.role)) {
+        setView('ccts_carbon_os');
+      } else if (['aggregator', 'processor'].includes(data.user.role)) {
+        setView('tasks');
+      } else {
+        setView('dashboard');
+      }
+
       setMessage({ type: 'success', text: `Logged in as ${data.user.role || data.user.name}` });
       setLoginId('');
       setLoginPassword('');
@@ -2108,6 +2119,14 @@ export default function App() {
         }
         if (data.user) {
           setUser(data.user);
+          if (['farmer', 'fpo'].includes(data.user.role)) {
+            setOperatingContext('rural');
+          } else if (['safai_mitra', 'municipal_admin', 'commercial_generator', 'industry_generator'].includes(data.user.role)) {
+            setOperatingContext('urban');
+          }
+          if (['ACVA_USER', 'PROJECT_OWNER'].includes(data.user.role)) {
+            setView('ccts_carbon_os');
+          }
         }
         setShowAuth(false);
         setAuthMode('login');
@@ -2142,6 +2161,14 @@ export default function App() {
           localStorage.setItem('rupay_token', data.token);
           setToken(data.token);
           setUser(data.user);
+          if (['farmer', 'fpo'].includes(data.user.role)) {
+            setOperatingContext('rural');
+          } else if (['safai_mitra', 'municipal_admin', 'commercial_generator', 'industry_generator'].includes(data.user.role)) {
+            setOperatingContext('urban');
+          }
+          if (['ACVA_USER', 'PROJECT_OWNER'].includes(data.user.role)) {
+            setView('ccts_carbon_os');
+          }
           setShowAuth(false);
           setMessage({ type: 'success', text: `Registered & logged in successfully as ${data.user.role}. Welcome to RupayKg!` });
         } else {
@@ -3153,54 +3180,98 @@ export default function App() {
           <BrandIdentity isLiveConnected={isLiveConnected} variant="login" />
 
           <Card>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex gap-2 p-1 bg-white/5 rounded-xl">
+            {/* Context & Mode Selectors */}
+            <div className="flex items-center justify-between gap-2 mb-5 pb-3 border-b border-white/10">
+              <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
                 <button 
+                  type="button"
                   onClick={() => setOperatingContext('urban')}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-wider transition-all ${operatingContext === 'urban' ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20' : 'text-white/50 hover:text-white'}`}
                 >
-                  URBAN
+                  🏙️ URBAN
                 </button>
                 <button 
+                  type="button"
                   onClick={() => setOperatingContext('rural')}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-wider transition-all ${operatingContext === 'rural' ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20' : 'text-white/50 hover:text-white'}`}
                 >
-                  RURAL
+                  🌾 RURAL
                 </button>
               </div>
-              <div className="flex gap-2 bg-white/5 p-1 rounded-xl text-[10px] font-bold">
+
+              <div className="flex gap-1 bg-white/5 p-1 rounded-xl text-[10px] font-bold">
                 <button
-                  onClick={() => setAuthMode('login')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${authMode === 'login' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                  type="button"
+                  onClick={() => { setAuthMode('login'); setMessage(null); }}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${authMode === 'login' ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20' : 'text-white/50 hover:text-white'}`}
                 >
                   LOGIN
                 </button>
                 <button
-                  onClick={() => setAuthMode('register')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${authMode === 'register' ? 'bg-emerald-500 text-black' : 'text-white/40 hover:text-white'}`}
+                  type="button"
+                  onClick={() => { setAuthMode('register'); setMessage(null); }}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${authMode === 'register' ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20' : 'text-white/50 hover:text-white'}`}
                 >
-                  REGISTER STAKEHOLDER
+                  REGISTER
                 </button>
               </div>
             </div>
 
             {authMode === 'login' ? (
-              <form onSubmit={handleLogin} className="flex flex-col gap-4 mt-4">
+              <form onSubmit={handleLogin} className="flex flex-col gap-4">
                 <div className="text-center mb-1">
-                  <h3 className="text-lg font-bold text-white">Account Login</h3>
-                  <p className="text-xs text-white/50 mt-1">Enter your Login ID and password to access RupayKg Enterprise</p>
+                  <h3 className="text-lg font-bold text-white tracking-tight">Stakeholder Account Login</h3>
+                  <p className="text-xs text-white/50 mt-0.5">Secure access to Sovereign MRV & Circular Supply Chain Operating System</p>
                 </div>
 
-                <div className="space-y-3.5">
+                {/* Quick 1-Click Demo Login Personas */}
+                <div className="p-3 bg-white/[0.03] border border-white/5 rounded-2xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles size={12} /> 1-Click Persona Access (Test & Evaluate)
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                    {[
+                      { label: '🏛️ ULB Admin', id: 'municipal', pass: 'demo123' },
+                      { label: '🌾 Biomass Farmer', id: 'farmer_ramesh', pass: 'demo123' },
+                      { label: '🧹 Safai Mitra', id: 'safai_sunita', pass: 'demo123' },
+                      { label: '🌾 FPO Leader', id: 'fpo_leader', pass: 'demo123' },
+                      { label: '🚚 Scrap Aggregator', id: 'kabadiwala', pass: 'demo123' },
+                      { label: '🏭 Recycler MRF', id: 'recycler', pass: 'demo123' },
+                      { label: '🏢 Hotel Bulk Gen', id: 'hotel_radisson', pass: 'demo123' },
+                      { label: '🌿 ACVA Auditor', id: 'verifier', pass: 'demo123' },
+                      { label: '🌍 Carbon Developer', id: 'carbon_dev', pass: 'demo123' },
+                      { label: '⚖️ CPCB Regulator', id: 'cpcb_officer', pass: 'demo123' },
+                      { label: '📦 EPR Brand Owner', id: 'brand_dabur', pass: 'demo123' },
+                      { label: '🛡️ Super Admin', id: 'admin', pass: 'admin_password' },
+                    ].map((persona) => (
+                      <button
+                        key={persona.id}
+                        type="button"
+                        onClick={() => {
+                          setLoginId(persona.id);
+                          setLoginPassword(persona.pass);
+                          setMessage({ type: 'info', text: `Autofilled credentials for ${persona.label}. Click 'Secure Login' to enter.` });
+                        }}
+                        className="p-1.5 bg-white/5 hover:bg-emerald-500/20 hover:border-emerald-500/40 border border-white/5 rounded-xl text-[10px] font-semibold text-white/80 hover:text-emerald-300 transition-all text-center truncate"
+                      >
+                        {persona.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
                   <div>
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
-                      Login ID / Phone / Email *
+                      Login ID / Mobile / Email *
                     </label>
                     <input
                       type="text"
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
-                      placeholder="e.g. 9999999999 or admin"
+                      placeholder="e.g. admin or 9827011001"
                       required
                       className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-emerald-500 outline-none transition-colors"
                     />
@@ -3224,43 +3295,42 @@ export default function App() {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-lg shadow-emerald-500/20 mt-1"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 mt-1"
                 >
-                  <Lock size={18} />
-                  {loading ? t("Logging in...") : t("Login")}
+                  <Lock size={16} />
+                  {loading ? t("Authenticating...") : t("Secure Login")}
                 </button>
 
                 {message && (
-                  <div className={`p-3 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400" : message.type === "info" ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"}`}>
-                    {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  <div className={`p-3 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : message.type === "info" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
+                    {message.type === "success" ? <CheckCircle2 size={16} className="shrink-0" /> : <AlertCircle size={16} className="shrink-0" />}
                     <span>{message.text}</span>
                   </div>
                 )}
                 
-                <div className="border-t border-white/10 pt-4 text-center">
-                  <p className="text-xs text-white/40 mb-3">First time on RupayKg Enterprise?</p>
+                <div className="border-t border-white/10 pt-3 text-center flex flex-col gap-2">
+                  <p className="text-xs text-white/40">New Stakeholder on RupayKg?</p>
                   <button 
                     type="button"
-                    onClick={() => setAuthMode('register')}
-                    className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all"
+                    onClick={() => { setAuthMode('register'); setMessage(null); }}
+                    className="w-full py-2 px-3 bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all"
                   >
-                    Register as Specific Stakeholder Role →
+                    Register New Stakeholder Account →
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setShowAuth(false)}
+                    className="text-white/40 hover:text-white text-xs transition-colors mt-1"
+                  >
+                    ← {t("Back to Home")}
                   </button>
                 </div>
-
-                <button 
-                  type="button"
-                  onClick={() => setShowAuth(false)}
-                  className="w-full text-white/40 hover:text-white text-xs mt-2 transition-colors"
-                >
-                  ← {t("Back to Home")}
-                </button>
               </form>
             ) : (
-              <form onSubmit={handleStakeholderRegister} className="flex flex-col gap-4 mt-4">
-                <div className="text-center mb-1">
-                  <h3 className="text-base font-bold text-white">Stakeholder Role Registration</h3>
-                  <p className="text-[11px] text-white/50">Mandatory Role & Territorial Boundary Registration. No default role assigned.</p>
+              <form onSubmit={handleStakeholderRegister} className="flex flex-col gap-3.5">
+                <div className="text-center">
+                  <h3 className="text-base font-bold text-white tracking-tight">Stakeholder Registration</h3>
+                  <p className="text-[11px] text-white/50 mt-0.5">Select your role and operational jurisdiction to initialize permissions</p>
                 </div>
 
                 <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
@@ -3272,68 +3342,75 @@ export default function App() {
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       required
-                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-emerald-500 outline-none"
                     >
-                      <option value="">-- Select Stakeholder Category --</option>
-                      <optgroup label="Urban Governance & Municipal Bodies">
-                        <option value="municipal_admin">Municipal Authority / Urban Local Body Admin</option>
-                        <option value="municipal_generator">Bulk Municipal Waste Generator</option>
-                        <option value="state_admin">State Urban Development / SPCB Officer</option>
-                      </optgroup>
-                      <optgroup label="Rural Governance & Agriculture">
-                        <option value="fpo">Gram Panchayat / FPO / Rural Enterprise</option>
-                        <option value="farmer">Farmer / Biomass Aggregator</option>
-                        <option value="safai_mitra">Safai Mitra / Frontline Waste Worker</option>
-                        <option value="citizen">Citizen / Domestic Waste Generator</option>
-                      </optgroup>
-                      <optgroup label="Circular Logistics & Processing Operations">
-                        <option value="aggregator">Waste Aggregator / Collection Logistics Partner</option>
-                        <option value="processor">Recycler / MRF / Processing Plant Operator</option>
-                      </optgroup>
-                      <optgroup label="Bulk Waste Generators (BWGs)">
-                        <option value="industry_generator">Industrial Facility Generator</option>
-                        <option value="commercial_generator">Commercial Establishment Generator</option>
-                        <option value="institution_generator">Institutional Facility Generator</option>
-                      </optgroup>
-                      <optgroup label="CCTS Carbon Market & Sovereign MRV">
-                        <option value="PROJECT_OWNER">Carbon Project Developer / Owner</option>
-                        <option value="ACVA_USER">Accredited Carbon Verification Agency (ACVA)</option>
-                        <option value="ccc_buyer">Carbon Credit / ESG Offset Buyer</option>
-                      </optgroup>
-                      <optgroup label="Regulators, PROs & EPR Brands">
-                        <option value="regulator">Environmental Regulator / CPCB Officer</option>
-                        <option value="epr_partner">EPR Brand Owner / PRO Partner</option>
-                        <option value="csr_partner">CSR Sustainability Contributor</option>
-                      </optgroup>
+                      <option value="">-- Select Stakeholder --</option>
+                      {operatingContext === 'urban' ? (
+                        <>
+                          <option value="municipal_admin">Municipal Authority / Urban Local Body Admin</option>
+                          <option value="aggregator">Waste Aggregator / Logistics Partner (Bada Kabadiwala)</option>
+                          <option value="processor">Recycler / MRF / Processing Plant Operator</option>
+                          <option value="safai_mitra">Safai Mitra / Frontline Waste Worker</option>
+                          <option value="citizen">Citizen / Domestic Waste Generator</option>
+                          <option value="commercial_generator">Commercial Establishment Generator (Hotels/Malls)</option>
+                          <option value="industry_generator">Industrial Facility Generator</option>
+                          <option value="institution_generator">Institutional Facility Generator</option>
+                          <option value="municipal_generator">Bulk Municipal Facility Generator</option>
+                          <option value="state_admin">State Urban Development / SPCB Officer</option>
+                          <option value="regulator">Environmental Regulator / CPCB Officer</option>
+                          <option value="PROJECT_OWNER">Carbon Project Developer / Owner</option>
+                          <option value="ACVA_USER">Accredited Carbon Verification Agency (ACVA)</option>
+                          <option value="ccc_buyer">Carbon Credit / ESG Offset Buyer</option>
+                          <option value="epr_partner">EPR Brand Owner / PRO Partner</option>
+                          <option value="csr_partner">CSR Sustainability Contributor</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="fpo">Gram Panchayat / FPO / Rural Enterprise</option>
+                          <option value="farmer">Farmer / Biomass Aggregator (Crop Residue / Stubble)</option>
+                          <option value="safai_mitra">Safai Mitra / Frontline Rural Worker</option>
+                          <option value="aggregator">Rural Biomass & VRC Aggregator</option>
+                          <option value="processor">Bio-CNG / Pellet / Compost Processing Plant</option>
+                          <option value="citizen">Citizen / Domestic Generator</option>
+                          <option value="state_admin">State Rural Development Officer</option>
+                          <option value="regulator">Environmental Regulator / Agriculture Officer</option>
+                          <option value="PROJECT_OWNER">Carbon Project Developer / Owner</option>
+                          <option value="ACVA_USER">Accredited Carbon Verification Agency (ACVA)</option>
+                          <option value="ccc_buyer">Carbon Credit / ESG Offset Buyer</option>
+                          <option value="epr_partner">EPR Brand Owner / PRO Partner</option>
+                          <option value="csr_partner">CSR Sustainability Contributor</option>
+                        </>
+                      )}
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Full Name *</label>
-                    <input
-                      type="text"
-                      value={formData.name || user?.name || ''}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Rajesh Kumar"
-                      required
-                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
-                    />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">Full Name *</label>
+                      <input
+                        type="text"
+                        value={formData.name || user?.name || ''}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Rajesh Kumar"
+                        required
+                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">Mobile Phone / Login ID *</label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="e.g. 9876543210"
+                        required
+                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Mobile Phone / Login ID *</label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="e.g. 9876543210"
-                      required
-                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Password *</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">Password *</label>
                     <input
                       type="password"
                       value={formData.password}
@@ -3345,68 +3422,105 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-1">Organization / Enterprise Name</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">Organization / Enterprise Name</label>
                     <input
                       type="text"
                       value={formData.organization_name}
                       onChange={(e) => setFormData({ ...formData, organization_name: e.target.value })}
-                      placeholder="e.g. Jabalpur Green Recyclers Ltd / Ward 12 Authority"
+                      placeholder="e.g. Green Recyclers Ltd / Sihora FPO / Ward 14"
                       className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[10px] font-bold text-white/60 mb-1">State *</label>
-                      <input
-                        type="text"
-                        value={formData.state}
-                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                        placeholder="Madhya Pradesh"
-                        required
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-                      />
+                  {/* Territory with Auto-Detect */}
+                  <div className="p-2.5 bg-white/[0.02] border border-white/5 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-white/60 uppercase">Territorial Jurisdiction</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                              (pos) => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  state: prev.state || 'Madhya Pradesh',
+                                  district: prev.district || 'Jabalpur',
+                                  subdistrict: prev.subdistrict || (operatingContext === 'urban' ? 'Jabalpur Urban' : 'Sihora Block'),
+                                  local_area: prev.local_area || (operatingContext === 'urban' ? 'Ward 14' : 'Khajuri GP')
+                                }));
+                                setMessage({ type: 'info', text: 'GPS detected. Default territory mapped.' });
+                              },
+                              () => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  state: prev.state || 'Madhya Pradesh',
+                                  district: prev.district || 'Jabalpur',
+                                  subdistrict: prev.subdistrict || (operatingContext === 'urban' ? 'Jabalpur Urban' : 'Sihora Block')
+                                }));
+                              }
+                            );
+                          }
+                        }}
+                        className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                      >
+                        <MapPin size={10} /> Auto-Detect GPS
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-white/60 mb-1">District *</label>
-                      <input
-                        type="text"
-                        value={formData.district}
-                        onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                        placeholder="Jabalpur"
-                        required
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[10px] font-bold text-white/60 mb-1">Sub-District / Block</label>
-                      <input
-                        type="text"
-                        value={formData.subdistrict}
-                        onChange={(e) => setFormData({ ...formData, subdistrict: e.target.value })}
-                        placeholder="Patan"
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-                      />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[9px] font-semibold text-white/50 mb-0.5">State *</label>
+                        <input
+                          type="text"
+                          value={formData.state}
+                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                          placeholder="Madhya Pradesh"
+                          required
+                          className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-semibold text-white/50 mb-0.5">District *</label>
+                        <input
+                          type="text"
+                          value={formData.district}
+                          onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                          placeholder="Jabalpur"
+                          required
+                          className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-white/60 mb-1">Ward / Village / Local Area</label>
-                      <input
-                        type="text"
-                        value={formData.local_area}
-                        onChange={(e) => setFormData({ ...formData, local_area: e.target.value })}
-                        placeholder="Ward 14 / Village Khajuri"
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-                      />
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[9px] font-semibold text-white/50 mb-0.5">Sub-District / Block</label>
+                        <input
+                          type="text"
+                          value={formData.subdistrict}
+                          onChange={(e) => setFormData({ ...formData, subdistrict: e.target.value })}
+                          placeholder={operatingContext === 'urban' ? 'Jabalpur Urban' : 'Sihora'}
+                          className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-semibold text-white/50 mb-0.5">Ward / Village Area</label>
+                        <input
+                          type="text"
+                          value={formData.local_area}
+                          onChange={(e) => setFormData({ ...formData, local_area: e.target.value })}
+                          placeholder={operatingContext === 'urban' ? 'Ward 14' : 'Khajuri GP'}
+                          className="w-full bg-[#18181B] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {message && (
-                  <div className={`p-2.5 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400" : message.type === "info" ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"}`}>
-                    {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  <div className={`p-2.5 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : message.type === "info" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
+                    {message.type === "success" ? <CheckCircle2 size={16} className="shrink-0" /> : <AlertCircle size={16} className="shrink-0" />}
                     <span>{message.text}</span>
                   </div>
                 )}
@@ -3414,19 +3528,28 @@ export default function App() {
                 <button 
                   type="submit"
                   disabled={loading || !formData.role}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs shadow-lg shadow-emerald-500/20 mt-2"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 mt-1"
                 >
-                  <ShieldCheck size={18} />
-                  {loading ? t("Registering Stakeholder...") : t("Complete Stakeholder Registration")}
+                  <ShieldCheck size={16} />
+                  {loading ? t("Registering Stakeholder...") : t("Complete Registration")}
                 </button>
 
-                <button 
-                  type="button"
-                  onClick={() => setShowAuth(false)}
-                  className="w-full text-white/40 hover:text-white text-xs mt-1 transition-colors"
-                >
-                  ← {t("Back to Home")}
-                </button>
+                <div className="flex items-center justify-between text-xs text-white/40 pt-1">
+                  <button 
+                    type="button"
+                    onClick={() => { setAuthMode('login'); setMessage(null); }}
+                    className="hover:text-emerald-400 transition-colors"
+                  >
+                    Already have an account? Login
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setShowAuth(false)}
+                    className="hover:text-white transition-colors"
+                  >
+                    ← {t("Back to Home")}
+                  </button>
+                </div>
               </form>
             )}
           </Card>
