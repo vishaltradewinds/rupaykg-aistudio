@@ -3230,57 +3230,6 @@ export default function App() {
                   {loading ? t("Logging in...") : t("Login")}
                 </button>
 
-                {/* Operational Stakeholder Directory Reference */}
-                <div className="border border-white/10 bg-white/[0.02] rounded-xl p-3 space-y-2 mt-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-white/70 flex items-center gap-1.5">
-                      <Shield size={12} className="text-emerald-400" />
-                      Live Operational Credentials Directory
-                    </span>
-                    <span className="text-[10px] text-emerald-400/80 font-mono">Password: password123</span>
-                  </div>
-                  <p className="text-[10px] text-white/40 leading-relaxed">
-                    Click any verified operational stakeholder identity below to populate credentials and authenticate via live RS256 token issuance:
-                  </p>
-                  <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                    {[
-                      { role: 'ULB Municipal Officer', id: 'ulb_admin', pwd: 'password123', tag: 'Urban Local Body' },
-                      { role: 'State SBM Officer', id: 'state_officer', pwd: 'password123', tag: 'State Govt' },
-                      { role: 'Gram Panchayat Admin', id: 'panchayat_admin', pwd: 'password123', tag: 'Rural / GP' },
-                      { role: 'FPO / Farmer Leader', id: 'fpo_leader', pwd: 'password123', tag: 'Biochar / FPO' },
-                      { role: 'Safai Mitra Worker', id: 'safai_mitra', pwd: 'password123', tag: 'Ground Collector' },
-                      { role: 'Aggregator Depot', id: 'aggregator_depot', pwd: 'password123', tag: 'Scrap & Biomass' },
-                      { role: 'Recycler / Processor', id: 'recycler_plant', pwd: 'password123', tag: 'Pellet & Pyrolysis' },
-                      { role: 'Bulk Waste Generator', id: 'bulk_generator', pwd: 'password123', tag: 'Rule 4(7) BWG' },
-                      { role: 'CCTS Carbon Dev', id: 'carbon_dev', pwd: 'password123', tag: 'Carbon Market' },
-                      { role: 'BEE ACVA Auditor', id: 'acva_verifier', pwd: 'password123', tag: 'Verifier / ACVA' },
-                      { role: 'CPCB EPR Brand', id: 'epr_brand', pwd: 'password123', tag: 'EPR Obligated' },
-                      { role: 'Resident Citizen', id: 'citizen_user', pwd: 'password123', tag: 'Civic User' },
-                      { role: 'System Admin', id: 'admin', pwd: 'admin_password', tag: 'Super Admin' },
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => {
-                          setLoginId(item.id);
-                          setLoginPassword(item.pwd);
-                          setMessage({
-                            type: 'info',
-                            text: `Selected credentials for ${item.role} (${item.id}). Click 'Login' to authenticate.`
-                          });
-                        }}
-                        className="text-left p-2 rounded-lg bg-white/5 hover:bg-emerald-500/20 border border-white/5 hover:border-emerald-500/40 transition-all group"
-                      >
-                        <div className="text-[11px] font-bold text-white group-hover:text-emerald-300 truncate">{item.role}</div>
-                        <div className="text-[9px] text-white/40 flex justify-between font-mono mt-0.5">
-                          <span className="text-emerald-400/80">{item.id}</span>
-                          <span className="text-[8px] bg-white/10 px-1 rounded">{item.tag}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {message && (
                   <div className={`p-3 rounded-xl text-xs flex items-center gap-2 ${message.type === "success" ? "bg-emerald-500/20 text-emerald-400" : message.type === "info" ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"}`}>
                     {message.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
