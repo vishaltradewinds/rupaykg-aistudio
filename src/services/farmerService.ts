@@ -51,55 +51,31 @@ export class FarmerService {
       updatedAt: new Date(farmerData.updatedAt || farmerData.updated_at || Date.now()),
     };
 
-    try {
-      await db.insert(farmers).values(mapped).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in FarmerService.addFarmer:', err);
-    }
+    await db.insert(farmers).values(mapped).onConflictDoNothing();
     return this.formatFarmer(mapped);
   }
 
   static async getFarmer(id: string) {
-    try {
-      const result = await db.select().from(farmers).where(eq(farmers.id, id));
-      return result[0] ? this.formatFarmer(result[0]) : null;
-    } catch (err) {
-      console.warn('DB read warning in FarmerService.getFarmer:', err);
-      return null;
-    }
+    const result = await db.select().from(farmers).where(eq(farmers.id, id));
+    return result[0] ? this.formatFarmer(result[0]) : null;
   }
 
   static async getAllFarmers() {
-    try {
-      const rows = await db.select().from(farmers).orderBy(desc(farmers.createdAt));
-      return rows.map(r => this.formatFarmer(r));
-    } catch (err) {
-      console.warn('DB read warning in FarmerService.getAllFarmers:', err);
-      return [];
-    }
+    const rows = await db.select().from(farmers).orderBy(desc(farmers.createdAt));
+    return rows.map(r => this.formatFarmer(r));
   }
 
   static async updateFarmer(id: string, updates: any) {
-    try {
-      await db.update(farmers).set({
-        ...updates,
-        updatedAt: new Date(),
-      }).where(eq(farmers.id, id));
-      return await this.getFarmer(id);
-    } catch (err) {
-      console.warn('DB update warning in FarmerService.updateFarmer:', err);
-      return null;
-    }
+    await db.update(farmers).set({
+      ...updates,
+      updatedAt: new Date(),
+    }).where(eq(farmers.id, id));
+    return await this.getFarmer(id);
   }
 
   static async deleteFarmer(id: string) {
-    try {
-      await db.delete(farmers).where(eq(farmers.id, id));
-      return true;
-    } catch (err) {
-      console.warn('DB delete warning in FarmerService.deleteFarmer:', err);
-      return false;
-    }
+    await db.delete(farmers).where(eq(farmers.id, id));
+    return true;
   }
 }
 

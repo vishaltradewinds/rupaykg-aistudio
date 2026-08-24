@@ -36,11 +36,7 @@ export class CarbonEventService {
       createdAt: new Date(eventData.createdAt || eventData.created_at || eventData.timestamp || Date.now()),
     };
 
-    try {
-      await db.insert(carbon_events).values(mapped).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in CarbonEventService.addCarbonEvent:', err);
-    }
+    await db.insert(carbon_events).values(mapped).onConflictDoNothing();
     return mapped;
   }
 
@@ -48,23 +44,12 @@ export class CarbonEventService {
     return await this.addCarbonEvent(eventData);
   }
 
-
   static async getCarbonEvent(id: string) {
-    try {
-      const result = await db.select().from(carbon_events).where(eq(carbon_events.id, id));
-      return result[0] || null;
-    } catch (err) {
-      console.warn('DB read warning in CarbonEventService.getCarbonEvent:', err);
-      return null;
-    }
+    const result = await db.select().from(carbon_events).where(eq(carbon_events.id, id));
+    return result[0] || null;
   }
 
   static async getAllCarbonEvents() {
-    try {
-      return await db.select().from(carbon_events).orderBy(desc(carbon_events.createdAt));
-    } catch (err) {
-      console.warn('DB read warning in CarbonEventService.getAllCarbonEvents:', err);
-      return [];
-    }
+    return await db.select().from(carbon_events).orderBy(desc(carbon_events.createdAt));
   }
 }

@@ -16,40 +16,21 @@ export class NotificationService {
       createdAt: new Date(data.createdAt || data.created_at || Date.now()),
     };
 
-    try {
-      await db.insert(system_notifications).values(mapped).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in NotificationService.addNotification:', err);
-    }
+    await db.insert(system_notifications).values(mapped).onConflictDoNothing();
     return mapped;
   }
 
   static async getUserNotifications(userId: string) {
-    try {
-      return await db.select().from(system_notifications).where(eq(system_notifications.userId, userId)).orderBy(desc(system_notifications.createdAt));
-    } catch (err) {
-      console.warn('DB read warning in NotificationService.getUserNotifications:', err);
-      return [];
-    }
+    return await db.select().from(system_notifications).where(eq(system_notifications.userId, userId)).orderBy(desc(system_notifications.createdAt));
   }
 
   static async getAllNotifications() {
-    try {
-      return await db.select().from(system_notifications).orderBy(desc(system_notifications.createdAt));
-    } catch (err) {
-      console.warn('DB read warning in NotificationService.getAllNotifications:', err);
-      return [];
-    }
+    return await db.select().from(system_notifications).orderBy(desc(system_notifications.createdAt));
   }
 
   static async markAsRead(id: string) {
-    try {
-      await db.update(system_notifications).set({ read: true }).where(eq(system_notifications.id, id));
-      return true;
-    } catch (err) {
-      console.warn('DB update warning in NotificationService.markAsRead:', err);
-      return false;
-    }
+    await db.update(system_notifications).set({ read: true }).where(eq(system_notifications.id, id));
+    return true;
   }
 
   static async broadcast(message: string, targetRole: string = 'all', type: string = 'BROADCAST') {

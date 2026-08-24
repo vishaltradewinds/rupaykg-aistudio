@@ -46,22 +46,13 @@ export class PilotService {
       updatedAt: new Date(data.updatedAt || data.updated_at || Date.now()),
     };
 
-    try {
-      await db.insert(pilot_onboardings).values(mapped).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in PilotService.addPilotOnboarding:', err);
-    }
+    await db.insert(pilot_onboardings).values(mapped).onConflictDoNothing();
     return this.formatOnboarding(mapped);
   }
 
   static async getPilotOnboardings() {
-    try {
-      const rows = await db.select().from(pilot_onboardings).orderBy(desc(pilot_onboardings.createdAt));
-      return rows.map(r => this.formatOnboarding(r));
-    } catch (err) {
-      console.warn('DB read warning in PilotService.getPilotOnboardings:', err);
-      return [];
-    }
+    const rows = await db.select().from(pilot_onboardings).orderBy(desc(pilot_onboardings.createdAt));
+    return rows.map(r => this.formatOnboarding(r));
   }
 
 
@@ -80,24 +71,15 @@ export class PilotService {
       createdAt: new Date(data.createdAt || data.created_at || Date.now()),
     };
 
-    try {
-      await db.insert(pilot_records).values(mapped).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in PilotService.addPilotRecord:', err);
-    }
+    await db.insert(pilot_records).values(mapped).onConflictDoNothing();
     return mapped;
   }
 
   static async getPilotRecords(pilotId?: string) {
-    try {
-      if (pilotId) {
-        return await db.select().from(pilot_records).where(eq(pilot_records.pilotId, pilotId)).orderBy(desc(pilot_records.createdAt));
-      }
-      return await db.select().from(pilot_records).orderBy(desc(pilot_records.createdAt));
-    } catch (err) {
-      console.warn('DB read warning in PilotService.getPilotRecords:', err);
-      return [];
+    if (pilotId) {
+      return await db.select().from(pilot_records).where(eq(pilot_records.pilotId, pilotId)).orderBy(desc(pilot_records.createdAt));
     }
+    return await db.select().from(pilot_records).orderBy(desc(pilot_records.createdAt));
   }
 
   // Alias methods for uniform controller access
@@ -135,26 +117,21 @@ export class PilotService {
   }
 
   static async validateRecord(id: string, score: number, explanation: string) {
-    try {
-      const records = await this.getPilotRecords();
-      const target = records.find(r => r.id === id);
-      if (!target) return null;
-      const meta = (typeof target.metadata === 'object' && target.metadata !== null) ? target.metadata : {};
-      const updatedMeta = {
-        ...meta,
-        validationScore: score,
-        validationExplanation: explanation,
-        validatedAt: new Date().toISOString(),
-      };
-      await db.update(pilot_records).set({
-        status: score >= 0.7 ? 'VALIDATED' : 'FLAGGED',
-        metadata: updatedMeta,
-      }).where(eq(pilot_records.id, id));
-      return { id, score, explanation, status: score >= 0.7 ? 'VALIDATED' : 'FLAGGED' };
-    } catch (err) {
-      console.warn('DB update warning in PilotService.validateRecord:', err);
-      return null;
-    }
+    const records = await this.getPilotRecords();
+    const target = records.find(r => r.id === id);
+    if (!target) return null;
+    const meta = (typeof target.metadata === 'object' && target.metadata !== null) ? target.metadata : {};
+    const updatedMeta = {
+      ...meta,
+      validationScore: score,
+      validationExplanation: explanation,
+      validatedAt: new Date().toISOString(),
+    };
+    await db.update(pilot_records).set({
+      status: score >= 0.7 ? 'VALIDATED' : 'FLAGGED',
+      metadata: updatedMeta,
+    }).where(eq(pilot_records.id, id));
+    return { id, score, explanation, status: score >= 0.7 ? 'VALIDATED' : 'FLAGGED' };
   }
 }
 

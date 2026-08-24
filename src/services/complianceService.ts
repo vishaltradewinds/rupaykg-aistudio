@@ -21,54 +21,30 @@ export class ComplianceService {
       updatedAt: new Date(data.updatedAt || data.updated_at || Date.now()),
     };
 
-    try {
-      await db.insert(compliance_records).values(mapped).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in ComplianceService.addRecord:', err);
-    }
+    await db.insert(compliance_records).values(mapped).onConflictDoNothing();
     return mapped;
   }
 
   static async getRecord(id: string) {
-    try {
-      const result = await db.select().from(compliance_records).where(eq(compliance_records.id, id));
-      return result[0] || null;
-    } catch (err) {
-      console.warn('DB read warning in ComplianceService.getRecord:', err);
-      return null;
-    }
+    const result = await db.select().from(compliance_records).where(eq(compliance_records.id, id));
+    return result[0] || null;
   }
 
   static async getAllRecords() {
-    try {
-      return await db.select().from(compliance_records).orderBy(desc(compliance_records.createdAt));
-    } catch (err) {
-      console.warn('DB read warning in ComplianceService.getAllRecords:', err);
-      return [];
-    }
+    return await db.select().from(compliance_records).orderBy(desc(compliance_records.createdAt));
   }
 
   static async updateRecord(id: string, updates: any) {
-    try {
-      await db.update(compliance_records).set({
-        ...updates,
-        updatedAt: new Date(),
-      }).where(eq(compliance_records.id, id));
-      return await this.getRecord(id);
-    } catch (err) {
-      console.warn('DB update warning in ComplianceService.updateRecord:', err);
-      return null;
-    }
+    await db.update(compliance_records).set({
+      ...updates,
+      updatedAt: new Date(),
+    }).where(eq(compliance_records.id, id));
+    return await this.getRecord(id);
   }
 
   static async getRecordsByGenerator(generatorId: string) {
-    try {
-      const records = await db.select().from(compliance_records).orderBy(desc(compliance_records.createdAt));
-      return records.filter(r => r.entityId === generatorId || (r.metadata as any)?.generator_id === generatorId);
-    } catch (err) {
-      console.warn('DB read warning in ComplianceService.getRecordsByGenerator:', err);
-      return [];
-    }
+    const records = await db.select().from(compliance_records).orderBy(desc(compliance_records.createdAt));
+    return records.filter(r => r.entityId === generatorId || (r.metadata as any)?.generator_id === generatorId);
   }
 }
 

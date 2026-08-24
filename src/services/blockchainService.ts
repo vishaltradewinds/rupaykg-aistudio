@@ -9,34 +9,32 @@ export class BlockchainService {
   }
 
   static async getBlocks() {
-    try {
-      const blocks = await db.select().from(blockchain_blocks).orderBy(blockchain_blocks.blockIndex);
-      if (blocks.length > 0) {
-        return blocks.map(b => ({
-          index: b.blockIndex,
-          timestamp: b.timestamp ? new Date(b.timestamp).getTime() : Date.now(),
-          data: b.data,
-          previousHash: b.previousHash,
-          hash: b.hash,
-        }));
-      }
-    } catch (err) {
-      console.warn('DB read warning in BlockchainService.getBlocks:', err);
-    }
-    // Return genesis block if table is empty
-    return [
-      {
-        index: 0,
-        timestamp: 1714550000000,
+    let blocks = await db.select().from(blockchain_blocks).orderBy(blockchain_blocks.blockIndex);
+    if (blocks.length === 0) {
+      // Seed genesis block in PostgreSQL
+      const genesis = {
+        id: 'blk_genesis_0',
+        blockIndex: 0,
+        previousHash: '0',
+        hash: 'a192e1424adc1dc71ecfdfe4cc43c15f040f4f8f0c337d2415bd137ff0f3249a',
         data: {
-          message: "Genesis Block",
-          hcs_topic_id: "0.0.4592011",
-          protocol: "Hedera Open Source Blockchain Interface"
+          message: 'Genesis Block',
+          hcs_topic_id: '0.0.4592011',
+          protocol: 'Hedera Open Source Blockchain Interface',
         },
-        previousHash: "0",
-        hash: "a192e1424adc1dc71ecfdfe4cc43c15f040f4f8f0c337d2415bd137ff0f3249a"
-      }
-    ];
+        timestamp: new Date(1714550000000),
+      };
+      await db.insert(blockchain_blocks).values(genesis).onConflictDoNothing();
+      blocks = await db.select().from(blockchain_blocks).orderBy(blockchain_blocks.blockIndex);
+    }
+
+    return blocks.map(b => ({
+      index: b.blockIndex,
+      timestamp: b.timestamp ? new Date(b.timestamp).getTime() : Date.now(),
+      data: b.data,
+      previousHash: b.previousHash,
+      hash: b.hash,
+    }));
   }
 
   static async appendBlock(data: any) {
@@ -63,11 +61,7 @@ export class BlockchainService {
       timestamp: new Date(timestamp),
     };
 
-    try {
-      await db.insert(blockchain_blocks).values(blockRecord).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in BlockchainService.appendBlock:', err);
-    }
+    await db.insert(blockchain_blocks).values(blockRecord).onConflictDoNothing();
 
     return {
       index: newIndex,

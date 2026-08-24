@@ -87,101 +87,72 @@ export class RecordService {
       timestamp: new Date(record.timestamp || Date.now()),
     };
 
-    try {
-      await db.insert(records).values(mapped).onConflictDoNothing();
-    } catch (err) {
-      console.warn('DB write warning in RecordService.addRecord:', err);
-    }
+    await db.insert(records).values(mapped).onConflictDoNothing();
     return this.formatRecord(mapped);
   }
 
   static async getRecord(id: string) {
-    try {
-      const result = await db.select().from(records).where(eq(records.id, id));
-      return result[0] ? this.formatRecord(result[0]) : null;
-    } catch (err) {
-      console.warn('DB read warning in RecordService.getRecord:', err);
-      return null;
-    }
+    const result = await db.select().from(records).where(eq(records.id, id));
+    return result[0] ? this.formatRecord(result[0]) : null;
   }
 
   static async updateRecord(id: string, updates: any) {
-    try {
-      const existing = await db.select().from(records).where(eq(records.id, id));
-      if (!existing || existing.length === 0) return null;
-      const current = existing[0];
-      const currentMeta = (typeof current.evidenceUrls === 'object' && current.evidenceUrls !== null && !Array.isArray(current.evidenceUrls))
-        ? current.evidenceUrls
-        : {};
+    const existing = await db.select().from(records).where(eq(records.id, id));
+    if (!existing || existing.length === 0) return null;
+    const current = existing[0];
+    const currentMeta = (typeof current.evidenceUrls === 'object' && current.evidenceUrls !== null && !Array.isArray(current.evidenceUrls))
+      ? current.evidenceUrls
+      : {};
 
-      const updatePayload: any = {};
-      if (updates.status !== undefined) updatePayload.status = updates.status;
-      if (updates.mrv_status !== undefined) updatePayload.mrvStatus = updates.mrv_status;
-      if (updates.mrvStatus !== undefined) updatePayload.mrvStatus = updates.mrvStatus;
-      if (updates.mrv_verified_by !== undefined) updatePayload.mrvVerifiedBy = updates.mrv_verified_by;
-      if (updates.mrvVerifiedBy !== undefined) updatePayload.mrvVerifiedBy = updates.mrvVerifiedBy;
-      if (updates.total_value !== undefined) updatePayload.totalValue = Number(updates.total_value);
-      if (updates.totalValue !== undefined) updatePayload.totalValue = Number(updates.totalValue);
-      if (updates.ccc_amount_kg !== undefined) updatePayload.cccAmountKg = Number(updates.ccc_amount_kg);
-      if (updates.cccAmountKg !== undefined) updatePayload.cccAmountKg = Number(updates.cccAmountKg);
-      if (updates.risk_score !== undefined) updatePayload.riskScore = Number(updates.risk_score);
-      if (updates.riskScore !== undefined) updatePayload.riskScore = Number(updates.riskScore);
+    const updatePayload: any = {};
+    if (updates.status !== undefined) updatePayload.status = updates.status;
+    if (updates.mrv_status !== undefined) updatePayload.mrvStatus = updates.mrv_status;
+    if (updates.mrvStatus !== undefined) updatePayload.mrvStatus = updates.mrvStatus;
+    if (updates.mrv_verified_by !== undefined) updatePayload.mrvVerifiedBy = updates.mrv_verified_by;
+    if (updates.mrvVerifiedBy !== undefined) updatePayload.mrvVerifiedBy = updates.mrvVerifiedBy;
+    if (updates.total_value !== undefined) updatePayload.totalValue = Number(updates.total_value);
+    if (updates.totalValue !== undefined) updatePayload.totalValue = Number(updates.totalValue);
+    if (updates.ccc_amount_kg !== undefined) updatePayload.cccAmountKg = Number(updates.ccc_amount_kg);
+    if (updates.cccAmountKg !== undefined) updatePayload.cccAmountKg = Number(updates.cccAmountKg);
+    if (updates.risk_score !== undefined) updatePayload.riskScore = Number(updates.risk_score);
+    if (updates.riskScore !== undefined) updatePayload.riskScore = Number(updates.riskScore);
 
-      const newMeta = {
-        ...currentMeta,
-        ...(updates.context !== undefined && { context: updates.context }),
-        ...(updates.aggregator_id !== undefined && { aggregator_id: updates.aggregator_id }),
-        ...(updates.processor_id !== undefined && { processor_id: updates.processor_id }),
-        ...(updates.purchased_by !== undefined && { purchased_by: updates.purchased_by }),
-        ...(updates.purchased_by_name !== undefined && { purchased_by_name: updates.purchased_by_name }),
-        ...(updates.purchased_at !== undefined && { purchased_at: updates.purchased_at }),
-        ...(updates.purchase_price !== undefined && { purchase_price: updates.purchase_price }),
-        ...(updates.carbon_revenue_accrued_to !== undefined && { carbon_revenue_accrued_to: updates.carbon_revenue_accrued_to }),
-        ...(updates.generator_payout !== undefined && { generator_payout: updates.generator_payout }),
-        ...(updates.base_value !== undefined && { base_value: updates.base_value }),
-        ...(updates.geo_lat !== undefined && { geo_lat: updates.geo_lat }),
-        ...(updates.geo_long !== undefined && { geo_long: updates.geo_long }),
-        ...(updates.blockchain_hash !== undefined && { blockchain_hash: updates.blockchain_hash }),
-        ...(updates.evidence_urls !== undefined && { urls: updates.evidence_urls }),
-      };
-      updatePayload.evidenceUrls = newMeta;
+    const newMeta = {
+      ...currentMeta,
+      ...(updates.context !== undefined && { context: updates.context }),
+      ...(updates.aggregator_id !== undefined && { aggregator_id: updates.aggregator_id }),
+      ...(updates.processor_id !== undefined && { processor_id: updates.processor_id }),
+      ...(updates.purchased_by !== undefined && { purchased_by: updates.purchased_by }),
+      ...(updates.purchased_by_name !== undefined && { purchased_by_name: updates.purchased_by_name }),
+      ...(updates.purchased_at !== undefined && { purchased_at: updates.purchased_at }),
+      ...(updates.purchase_price !== undefined && { purchase_price: updates.purchase_price }),
+      ...(updates.carbon_revenue_accrued_to !== undefined && { carbon_revenue_accrued_to: updates.carbon_revenue_accrued_to }),
+      ...(updates.generator_payout !== undefined && { generator_payout: updates.generator_payout }),
+      ...(updates.base_value !== undefined && { base_value: updates.base_value }),
+      ...(updates.geo_lat !== undefined && { geo_lat: updates.geo_lat }),
+      ...(updates.geo_long !== undefined && { geo_long: updates.geo_long }),
+      ...(updates.blockchain_hash !== undefined && { blockchain_hash: updates.blockchain_hash }),
+      ...(updates.evidence_urls !== undefined && { urls: updates.evidence_urls }),
+    };
+    updatePayload.evidenceUrls = newMeta;
 
-      await db.update(records).set(updatePayload).where(eq(records.id, id));
-      return await this.getRecord(id);
-    } catch (err) {
-      console.warn('DB update warning in RecordService.updateRecord:', err);
-      return null;
-    }
+    await db.update(records).set(updatePayload).where(eq(records.id, id));
+    return await this.getRecord(id);
   }
 
   static async deleteRecord(id: string) {
-    try {
-      await db.delete(records).where(eq(records.id, id));
-      return true;
-    } catch (err) {
-      console.warn('DB delete warning in RecordService.deleteRecord:', err);
-      return false;
-    }
+    await db.delete(records).where(eq(records.id, id));
+    return true;
   }
 
   static async getAllRecords() {
-    try {
-      const rows = await db.select().from(records).orderBy(desc(records.timestamp));
-      return rows.map(r => this.formatRecord(r));
-    } catch (err) {
-      console.warn('DB read warning in RecordService.getAllRecords:', err);
-      return [];
-    }
+    const rows = await db.select().from(records).orderBy(desc(records.timestamp));
+    return rows.map(r => this.formatRecord(r));
   }
 
   static async getUserRecords(userId: string) {
-    try {
-      const rows = await db.select().from(records).where(eq(records.userId, userId)).orderBy(desc(records.timestamp));
-      return rows.map(r => this.formatRecord(r));
-    } catch (err) {
-      console.warn('DB read warning in RecordService.getUserRecords:', err);
-      return [];
-    }
+    const rows = await db.select().from(records).where(eq(records.userId, userId)).orderBy(desc(records.timestamp));
+    return rows.map(r => this.formatRecord(r));
   }
 }
 
