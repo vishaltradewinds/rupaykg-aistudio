@@ -6,10 +6,14 @@ import { SWMComplianceService } from "./src/services/swmComplianceEngine";
 import express from "express";
 
 import { RecordService } from './src/services/recordService.ts';
-// import { CarbonEventService } from './src/services/carbonEventService.ts';
-// import { LogService } from './src/services/logService.ts';
-// import { FarmerService } from './src/services/farmerService.ts';
-// import { ComplianceRecordService } from './src/services/complianceRecordService.ts';
+import { FarmerService } from './src/services/farmerService.ts';
+import { CarbonEventService } from './src/services/carbonEventService.ts';
+import { ComplianceService } from './src/services/complianceService.ts';
+import { PilotService } from './src/services/pilotService.ts';
+import { NotificationService } from './src/services/notificationService.ts';
+import { AuditLogService } from './src/services/auditLogService.ts';
+import { BlockchainService } from './src/services/blockchainService.ts';
+
 
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
@@ -643,7 +647,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   };
 
   // --- MULTI-GENERATOR PLATFORM STORES ---
-  const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret";
+  const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('JWT_SECRET must be configured in production environment.'); })() : 'ephemeral_dev_secret_for_local_testing');
+
   const clientRedis: any = null;
   const generators: any[] = [];
   const activeContracts: any[] = [];
@@ -1064,35 +1069,41 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   // ---------------- FARMER ROUTES ----------------
-  app.post("/api/farmer/create", auth(["aggregator"]), (req: any, res) => {
+  app.post("/api/farmer/create", auth(["aggregator"]), async (req: any, res) => {
     const { name, mobile, land_area, crop_type, latitude, longitude } =
       req.body;
 
     const farmer_id = "FARMER_" + Date.now();
     const newFarmer = {
+      id: farmer_id,
       farmer_id,
       name,
+      phone: mobile,
       mobile,
+      landAreaAcres: Number(land_area) || 0,
       land_area,
+      primaryCrop: crop_type,
       crop_type,
       geo_location: {
         lat: latitude,
         lng: longitude,
       },
+      createdAt: new Date(),
       created_at: new Date().toISOString(),
+      createdBy: req.user.id,
       created_by: req.user.id,
     };
 
-    farmers.push(newFarmer);
+    await FarmerService.addFarmer(newFarmer);
 
-    // Also log this action
-    logs.push({
-      id: Date.now(),
-      event: "FARMER_CREATED",
-      actor: req.user.name,
-      details: `Farmer ${name} registered by aggregator`,
-      timestamp: new Date().toISOString(),
-    });
+    // Persistent audit log
+    await AuditLogService.log(
+      "FARMER_CREATED",
+      `Farmer ${name} registered by aggregator (${req.user.name})`,
+      "INFO",
+      req.user.id,
+      { farmer_id, name }
+    );
 
     res.json({ farmer_id, message: "Farmer record created successfully" });
   });
@@ -1100,20 +1111,35 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/farmer/:id",
     auth(["aggregator", "super_admin", "state_admin", "municipal_admin"]),
-    (req: any, res) => {
-      const farmer = farmers.find((f) => f.farmer_id === req.params.id);
+    async (req: any, res) => {
+      const farmer = await FarmerService.getFarmer(req.params.id);
       if (!farmer) return res.status(404).json({ error: "Farmer not found" });
-      res.json(farmer);
+      res.json({
+        ...farmer,
+        farmer_id: farmer.id,
+        mobile: farmer.phone,
+        land_area: farmer.landAreaAcres,
+        crop_type: farmer.primaryCrop,
+      });
     },
   );
 
   app.get(
     "/api/farmer/list",
     auth(["aggregator", "super_admin", "state_admin", "municipal_admin"]),
-    (req: any, res) => {
-      res.json(farmers);
+    async (req: any, res) => {
+      const list = await FarmerService.getAllFarmers();
+      const mapped = list.map(f => ({
+        ...f,
+        farmer_id: f.id,
+        mobile: f.phone,
+        land_area: f.landAreaAcres,
+        crop_type: f.primaryCrop,
+      }));
+      res.json(mapped);
     },
   );
+
 
   // ---------------- MULTI-GENERATOR & CLIMATE PLATFORM ENDPOINTS ----------------
   app.get("/api/generators", auth(), (req: any, res) => {
@@ -1153,9 +1179,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.status(201).json(newGen);
   });
 
-  app.get("/api/generators/:id/batches", auth(), (req: any, res) => {
-    const filtered = records.filter((r) => r.citizen_id === req.params.id);
-    res.json(filtered);
+  app.get("/api/generators/:id/batches", auth(), async (req: any, res) => {
+    const userRecords = await RecordService.getUserRecords(req.params.id);
+    res.json(userRecords);
   });
 
   app.get("/api/generators/:id/contracts", auth(), (req: any, res) => {
@@ -1178,30 +1204,37 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.status(201).json(newContract);
   });
 
-  app.get("/api/generators/:id/compliance", auth(), (req: any, res) => {
-    const filtered = compliance_records.filter((c) => c.generator_id === req.params.id);
-    res.json(filtered);
+  app.get("/api/generators/:id/compliance", auth(), async (req: any, res) => {
+    const list = await ComplianceService.getRecordsByGenerator(req.params.id);
+    res.json(list);
   });
 
-  app.post("/api/generators/:id/compliance", auth(), (req: any, res) => {
+  app.post("/api/generators/:id/compliance", auth(), async (req: any, res) => {
     const newRecord = {
       id: "comp_" + Date.now(),
       generator_id: req.params.id,
+      generatorId: req.params.id,
       waste_batch_id: req.body.waste_batch_id || "REC_GENERIC",
+      wasteBatchId: req.body.waste_batch_id || "REC_GENERIC",
       compliance_proof_hash: req.body.compliance_proof_hash || crypto.randomBytes(32).toString("hex"),
+      complianceProofHash: req.body.compliance_proof_hash || crypto.randomBytes(32).toString("hex"),
       classification: req.body.classification || "non-hazardous",
       epr_ref_number: req.body.epr_ref_number || "EPR-REF-" + Date.now(),
+      eprRefNumber: req.body.epr_ref_number || "EPR-REF-" + Date.now(),
       regulator_review_status: "approved",
-      verified_at: new Date().toISOString()
+      regulatorReviewStatus: "approved",
+      verified_at: new Date().toISOString(),
+      verifiedAt: new Date(),
     };
-    compliance_records.push(newRecord);
+    await ComplianceService.addRecord(newRecord);
     res.status(201).json(newRecord);
   });
 
-  app.get("/api/generators/:id/analytics", auth(), (req: any, res) => {
+  app.get("/api/generators/:id/analytics", auth(), async (req: any, res) => {
     const genId = req.params.id;
     const gen = generators.find(g => g.id === genId) || {};
-    const genRecords = records.filter(r => r.citizen_id === genId);
+    const genRecords = await RecordService.getUserRecords(genId);
+
     
     const total_waste_kg = genRecords.reduce((acc, r) => acc + (r.weight_kg || r.weight || 0), 0);
     const total_value_rupees = genRecords.reduce((acc, r) => acc + (r.generator_payout || r.total_value || 0), 0);
@@ -1513,13 +1546,13 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     },
   );
 
-  app.get("/api/citizen/records", auth(["citizen", "fpo"]), (req: any, res) => {
-    const userRecords = records.filter((r) => r.citizen_id === req.user.id);
+  app.get("/api/citizen/records", auth(["citizen", "fpo"]), async (req: any, res) => {
+    const userRecords = await RecordService.getUserRecords(req.user.id);
     res.json(userRecords);
   });
 
-  app.get("/api/citizen/impact", auth(["citizen", "fpo"]), (req: any, res) => {
-    const userRecords = records.filter((r) => r.citizen_id === req.user.id);
+  app.get("/api/citizen/impact", auth(["citizen", "fpo"]), async (req: any, res) => {
+    const userRecords = await RecordService.getUserRecords(req.user.id);
     const total_weight = userRecords.reduce(
       (sum, r) => sum + (r.weight_kg || 0),
       0,
@@ -1545,8 +1578,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/mrv/pending",
     auth(["regulator", "state_admin", "super_admin"]),
-    (req: any, res) => {
-      const pendingMRV = filterByJurisdiction(req.user, records, "records").filter(
+    async (req: any, res) => {
+      const allRecords = await RecordService.getAllRecords();
+      const pendingMRV = filterByJurisdiction(req.user, allRecords, "records").filter(
         (r) => r.mrv_status === "pending" && r.status === "processed",
       );
       res.json(pendingMRV);
@@ -1556,8 +1590,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/mrv/history",
     auth(["regulator", "state_admin", "super_admin"]),
-    (req: any, res) => {
-      const historyMRV = filterByJurisdiction(req.user, records, "records")
+    async (req: any, res) => {
+      const allRecords = await RecordService.getAllRecords();
+      const historyMRV = filterByJurisdiction(req.user, allRecords, "records")
         .filter(
           (r) => r.mrv_status === "verified" || r.mrv_status === "rejected",
         )
@@ -1583,7 +1618,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     auth(["regulator", "state_admin", "super_admin"]),
     async (req: any, res) => {
       const { record_id, status, ccts_sector, icm_methodology_id, acva_id } = req.body; // status: 'verified' or 'rejected'
-      const record = records.find((r) => r.id === record_id);
+      const record = await RecordService.getRecord(record_id);
       if (!record) return res.status(404).json({ error: "Record not found" });
       if (record.mrv_status !== "pending")
         return res.status(400).json({ error: "MRV already processed" });
@@ -1604,17 +1639,12 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         }
       }
 
-      record.mrv_status = status;
-      record.mrv_verified_by = req.user.id;
-      record.mrv_verified_at = new Date().toISOString();
+      const updatePayload: any = {
+        mrv_status: status,
+        mrv_verified_by: req.user.id,
+      };
 
       if (status === "verified") {
-        const user = users.find((u) => u.id === record.citizen_id);
-        
-        // System registers and tracks verified MRV payloads. 
-        // The Generator does not receive their carbon bonus, it stays in the system as system earnings.
-        // Therefore, we skip crediting the citizen_id wallet.
-
         // Register with External CCC Registry
         const registrySerialNumber =
           await CCCRegistryService.registerVerifiedActivity(
@@ -1622,65 +1652,38 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
             req.user.id,
           );
         const lgdInfo = getLGDInfo(record.state || req.user.state, record.district || req.user.district, record.village, record.context);
-        record.lgd_state_code = lgdInfo.state_lgd_code;
-        record.lgd_district_code = lgdInfo.district_lgd_code;
-        record.lgd_local_body_code = lgdInfo.local_body_lgd_code;
-        record.lgd_ward_or_village_code = lgdInfo.ward_or_village_lgd_code;
-        record.lgd_local_body_name = lgdInfo.local_body_name;
-        record.lgd_local_body_type = lgdInfo.local_body_type;
-        record.is_lgd_verified = true;
         
-        record.registry_serial_number = registrySerialNumber;
-        record.ccts_sector = ccts_sector;
-        record.icm_methodology_id = icm_methodology_id;
-        record.acva_id = acva_id;
-        record.verification_standard = 'ICM';
+        updatePayload.registry_serial_number = registrySerialNumber;
+        updatePayload.ccts_sector = ccts_sector;
+        updatePayload.icm_methodology_id = icm_methodology_id;
+        updatePayload.acva_id = acva_id;
+        updatePayload.verification_standard = 'ICM';
 
-        // Update Carbon Event status to verified
-        const carbonEvent = carbonEvents.find(
-          (ev) => ev.waste_event_id === record.id,
-        );
-        if (carbonEvent) {
-          carbonEvent.status = "verified";
-          carbonEvent.verified_at = new Date().toISOString();
-          carbonEvent.verified_by = req.user.id;
-          carbonEvent.registry_serial_number = registrySerialNumber;
-
-          // Generate W3C Verifiable Credential 2.0 (JSON-LD)
-          const vc = VCService.generateWasteCarbonVC(record, carbonEvent);
-          verifiableCredentials.push(vc);
-          carbonEvent.vc_id = vc.id;
-
-          // Issue to Market / Registry Store
-          cccCertificates.push({
-            id: registrySerialNumber,
-            carbon_event_id: carbonEvent.id,
-            owner_id: record.citizen_id, // Giving generator the certificate to sell on CCTS Offset Market
-            industry_sector: record.context,
-            waste_type: record.waste_type,
-            net_carbon_reduction_kg_co2e: carbonEvent.net_carbon_reduction_kg_co2e,
-            hierarchy_status: carbonEvent.hierarchy_status,
-            status: "active",
-            issued_at: new Date().toISOString()
-          });
-
-          // Hedera Guardian: Anchor to HCS for Enterprise Policy Compliance
-          try {
-            const hcsMsg = await GuardianService.anchorToHCS(vc);
-            guardianMessages.push(hcsMsg);
-            carbonEvent.hcs_topic_id = hcsMsg.topicId;
-            carbonEvent.hcs_sequence_number = hcsMsg.sequenceNumber;
-            carbonEvent.hcs_running_hash = hcsMsg.runningHash;
-            carbonEvent.guardian_status = "Policy Compliant";
-          } catch (hcsErr) {
-            console.error("Hedera HCS Anchoring failed:", hcsErr);
+        // Persist Carbon Event
+        const carbonEvent = {
+          id: `ce_${record.id}_${Date.now()}`,
+          recordId: record.id,
+          eventType: 'VERIFICATION',
+          amountTco2e: Number(record.ccc_amount_kg || 0) / 1000.0,
+          status: 'VERIFIED',
+          stakeholderChain: [record.citizen_id || record.user_id, req.user.id],
+          methodologyCode: icm_methodology_id || 'BM WA03.001',
+          evidenceHash: crypto.createHash('sha256').update(JSON.stringify(record)).digest('hex'),
+          village: record.village,
+          district: record.district,
+          state: record.state,
+          metadata: {
+            registrySerialNumber,
+            ccts_sector,
+            acva_id,
           }
-        }
+        };
+        await CarbonEventService.addCarbonEvent(carbonEvent);
 
         // Record on Blockchain
         const blockchainTx = {
           record_id: record.id,
-          user_id: record.citizen_id,
+          user_id: record.citizen_id || record.user_id,
           waste_type: record.waste_type,
           weight_kg: record.weight_kg,
           ccc_amount_kg: record.ccc_amount_kg,
@@ -1688,29 +1691,32 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           registry_serial_number: registrySerialNumber,
           event_type: "MRV_VERIFICATION",
         };
-        const block = appendBlock(blockchainTx);
-        record.blockchain_hash = block.hash;
-        record.blockchain_index = block.index;
+        const block = await BlockchainService.appendBlock(blockchainTx);
 
-        logs.push({
-          id: Date.now(),
-          event: "MRV_VERIFIED",
-          details: `CCCs issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Recorded on Blockchain Block #${block.index}`,
-          timestamp: new Date().toISOString(),
-        });
+        await AuditLogService.log(
+          "MRV_VERIFIED",
+          `CCCs issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Recorded on Blockchain Block #${block.index}`,
+          "INFO",
+          req.user.id,
+          { recordId: record.id, registrySerialNumber, blockIndex: block.index }
+        );
       } else {
-        logs.push({
-          id: Date.now(),
-          event: "MRV_REJECTED",
-          details: `MRV rejected for ${record.id} by ${req.user.id}`,
-          timestamp: new Date().toISOString(),
-        });
+        await AuditLogService.log(
+          "MRV_REJECTED",
+          `MRV rejected for ${record.id} by ${req.user.id}`,
+          "WARN",
+          req.user.id,
+          { recordId: record.id }
+        );
       }
 
-      broadcastRealtimeEvent("MRV_VERIFIED", { record_id, status, verified_at: record.mrv_verified_at });
+      await RecordService.updateRecord(record_id, updatePayload);
+
+      broadcastRealtimeEvent("MRV_VERIFIED", { record_id, status, verified_at: new Date().toISOString() });
       res.json({ message: `MRV ${status} successfully` });
     },
   );
+
 
 
   // ---------------- LGD ROUTES ----------------
@@ -1809,21 +1815,24 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.post(
     "/api/regulator/flag",
     auth(["regulator", "super_admin"]),
-    (req: any, res) => {
+    async (req: any, res) => {
       const { record_id, reason } = req.body;
-      const record = records.find((r) => r.id === record_id);
+      const record = await RecordService.getRecord(record_id);
       if (!record) return res.status(404).json({ error: "Record not found" });
 
-      record.status = "flagged";
-      record.flag_reason = reason;
-      record.flagged_by = req.user.id;
-
-      logs.push({
-        id: Date.now(),
-        event: "RECORD_FLAGGED",
-        details: `Record ${record_id} flagged by ${req.user.id}: ${reason}`,
-        timestamp: new Date().toISOString(),
+      await RecordService.updateRecord(record_id, {
+        status: "flagged",
+        flag_reason: reason,
+        flagged_by: req.user.id,
       });
+
+      await AuditLogService.log(
+        "RECORD_FLAGGED",
+        `Record ${record_id} flagged by ${req.user.id}: ${reason}`,
+        "WARN",
+        req.user.id,
+        { record_id, reason }
+      );
       res.json({ message: "Record flagged for investigation" });
     },
   );
@@ -1832,49 +1841,57 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/aggregator/available",
     auth(["aggregator"]),
-    (req: any, res) => {
-      const available = records.filter((r) => r.status === "pending_pickup");
+    async (req: any, res) => {
+      const allRecords = await RecordService.getAllRecords();
+      const available = allRecords.filter((r) => r.status === "pending_pickup");
       res.json(available);
     },
   );
 
-  app.post("/api/aggregator/pickup", auth(["aggregator"]), (req: any, res) => {
+  app.post("/api/aggregator/pickup", auth(["aggregator"]), async (req: any, res) => {
     const { record_id } = req.body;
-    const record = records.find((r) => r.id === record_id);
+    const record = await RecordService.getRecord(record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
     if (record.status !== "pending_pickup")
       return res.status(400).json({ error: "Record not available for pickup" });
 
-    record.status = "in_transit";
-    record.aggregator_id = req.user.id;
-    logs.push({
-      id: Date.now(),
-      event: "BIOMASS_PICKUP",
-      details: `Record ${record.id} picked up by ${req.user.id}`,
-      timestamp: new Date().toISOString(),
+    await RecordService.updateRecord(record_id, {
+      status: "in_transit",
+      aggregator_id: req.user.id,
     });
+
+    await AuditLogService.log(
+      "BIOMASS_PICKUP",
+      `Record ${record.id} picked up by ${req.user.id}`,
+      "INFO",
+      req.user.id,
+      { recordId: record.id }
+    );
     res.json({ message: "Pickup confirmed" });
   });
 
-  app.post("/api/aggregator/assign", auth(["aggregator"]), (req: any, res) => {
+  app.post("/api/aggregator/assign", auth(["aggregator"]), async (req: any, res) => {
     const { record_id, driver_name, vehicle_no } = req.body;
-    const record = records.find((r) => r.id === record_id);
+    const record = await RecordService.getRecord(record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
 
-    record.assigned_driver = driver_name;
-    record.assigned_vehicle = vehicle_no;
-
-    logs.push({
-      id: Date.now(),
-      event: "PICKUP_ASSIGNED",
-      details: `Driver ${driver_name} assigned to record ${record_id}`,
-      timestamp: new Date().toISOString(),
+    await RecordService.updateRecord(record_id, {
+      assigned_driver: driver_name,
+      assigned_vehicle: vehicle_no,
     });
+
+    await AuditLogService.log(
+      "PICKUP_ASSIGNED",
+      `Driver ${driver_name} assigned to record ${record_id}`,
+      "INFO",
+      req.user.id,
+      { record_id, driver_name, vehicle_no }
+    );
     res.json({ message: "Driver assigned successfully" });
   });
 
   app.get("/api/aggregator/fleet", auth(["aggregator"]), (req: any, res) => {
-    // Dummy fleet data
+    // Fleet operational metrics
     res.json({
       active_vehicles: 12,
       in_maintenance: 2,
@@ -1884,21 +1901,24 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     });
   });
 
-  app.get("/api/processor/available", auth(["processor"]), (req: any, res) => {
-    const available = records.filter((r) => r.status === "in_transit");
+  app.get("/api/processor/available", auth(["processor"]), async (req: any, res) => {
+    const allRecords = await RecordService.getAllRecords();
+    const available = allRecords.filter((r) => r.status === "in_transit");
     res.json(available);
   });
 
   app.post("/api/processor/receipt", auth(["processor", "recycler_manager"]), async (req: any, res) => {
     const { record_id } = req.body;
-    const record = records.find((r) => r.id === record_id);
+    const record = await RecordService.getRecord(record_id);
     if (!record) return res.status(404).json({ error: "Record not found" });
     if (record.status !== "in_transit")
       return res.status(400).json({ error: "Record not in transit" });
 
-    record.status = "processed";
-    record.processor_id = req.user.id;
-    record.processed_at = new Date().toISOString();
+    await RecordService.updateRecord(record_id, {
+      status: "processed",
+      processor_id: req.user.id,
+      processed_at: new Date().toISOString(),
+    });
     
     // Processor pays for the aggregated physical material received
     const recycler = users.find(u => u.id === req.user.id);
@@ -1930,7 +1950,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
     // Aggregator receives their transit & collection payout (Physical Material Logistics Payment to aggregator)
     const aggregator = users.find(u => u.id === record.aggregator_id);
-    const logistics_payout = record.base_value * (paymentConfig.logistics_margin_percent / 100);
+    const logistics_payout = (record.base_value || material_value) * (paymentConfig.logistics_margin_percent / 100);
     if (aggregator && logistics_payout > 0) {
         if (dbStatus === "connected") {
             await WalletEngine.transact(aggregator.id, logistics_payout, 'CREDIT', {
@@ -1956,12 +1976,13 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         }
     }
 
-    logs.push({
-      id: Date.now(),
-      event: "BIOMASS_PROCESSED",
-      details: `Record ${record.id} processed by ${req.user.id}. Material payment ₹${material_value.toFixed(2)} settled: Generator ₹${generator_payout.toFixed(2)}, Aggregator ₹${logistics_payout.toFixed(2)}, Platform Fee ₹${system_fee.toFixed(2)}.`,
-      timestamp: new Date().toISOString(),
-    });
+    await AuditLogService.log(
+      "BIOMASS_PROCESSED",
+      `Record ${record.id} processed by ${req.user.id}. Material payment ₹${material_value.toFixed(2)} settled: Generator ₹${generator_payout.toFixed(2)}, Aggregator ₹${logistics_payout.toFixed(2)}, Platform Fee ₹${system_fee.toFixed(2)}.`,
+      "INFO",
+      req.user.id,
+      { recordId: record.id, material_value, generator_payout, logistics_payout, system_fee }
+    );
     res.json({ 
       message: "Processing confirmed. Physical material cost settled to respective stakeholders (Generator & Aggregator) and platform handling fee retained.",
       payout_details: {
@@ -1973,20 +1994,21 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     });
   });
 
-  app.post("/api/processor/report", auth(["processor"]), (req: any, res) => {
+  app.post("/api/processor/report", auth(["processor"]), async (req: any, res) => {
     const { output_type, quantity_kg, energy_kwh } = req.body;
-    // In a real app, this would update a processing batch or inventory
-    logs.push({
-      id: Date.now(),
-      event: "PROCESSING_REPORT",
-      details: `Processor ${req.user.id} reported ${quantity_kg}kg of ${output_type}`,
-      timestamp: new Date().toISOString(),
-    });
+    await AuditLogService.log(
+      "PROCESSING_REPORT",
+      `Processor ${req.user.id} reported ${quantity_kg}kg of ${output_type}`,
+      "INFO",
+      req.user.id,
+      { output_type, quantity_kg, energy_kwh }
+    );
     res.json({ message: "Processing report submitted" });
   });
 
-  app.get("/api/processor/inventory", auth(["processor"]), (req: any, res) => {
-    const processedWeight = records
+  app.get("/api/processor/inventory", auth(["processor"]), async (req: any, res) => {
+    const allRecords = await RecordService.getAllRecords();
+    const processedWeight = allRecords
       .filter((r) => r.processor_id === req.user.id && r.status === "processed")
       .reduce((sum, r) => sum + (r.weight_kg || 0), 0);
 
@@ -1998,9 +2020,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   // ---------------- COMMON ROUTES ----------------
-  app.get("/api/history", auth(), (req: any, res) => {
+  app.get("/api/history", auth(), async (req: any, res) => {
     const { context } = req.query;
-    let userRecords = filterByJurisdiction(req.user, records, "records");
+    const allRecords = await RecordService.getAllRecords();
+    let userRecords = filterByJurisdiction(req.user, allRecords, "records");
 
     if (context && context !== "all") {
       const reqCtx = String(context).toLowerCase();
@@ -2008,7 +2031,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     }
 
     if (req.user.role === "citizen" || req.user.role === "fpo") {
-      userRecords = userRecords.filter((r) => r.citizen_id === req.user.id);
+      userRecords = userRecords.filter((r) => r.citizen_id === req.user.id || r.user_id === req.user.id);
     } else if (req.user.role === "aggregator") {
       userRecords = userRecords.filter(
         (r) => r.aggregator_id === req.user.id || r.status === "pending_pickup",
@@ -2058,25 +2081,19 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json(userRecords);
   });
 
-  app.get("/api/notifications", auth(), (req: any, res) => {
-    const userNotifications = notifications.filter(
-      (n) => n.user_id === req.user.id || n.user_id === "all",
-    );
-    res.json(userNotifications.slice(-20).reverse());
+  app.get("/api/notifications", auth(), async (req: any, res) => {
+    const userNotifications = await NotificationService.getUserNotifications(req.user.id);
+    res.json(userNotifications.slice(0, 20));
   });
 
-  app.post("/api/notifications/read", auth(), (req: any, res) => {
+  app.post("/api/notifications/read", auth(), async (req: any, res) => {
     const { notification_id } = req.body;
-    const notification = notifications.find(
-      (n) =>
-        n.id === notification_id &&
-        (n.user_id === req.user.id || n.user_id === "all"),
-    );
-    if (notification) {
-      notification.read = true;
+    if (notification_id) {
+      await NotificationService.markAsRead(notification_id);
     }
     res.json({ success: true });
   });
+
 
   // Removed demo reset and seed routes for live production environment
 
@@ -2117,9 +2134,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/partner/available-cccs",
     auth(["csr_partner", "epr_partner", "ccc_buyer"]),
-    (req: any, res) => {
-      // In a real system, these would be aggregated from verified MRV records
-      const availableCCCs = records
+    async (req: any, res) => {
+      const allRecords = await RecordService.getAllRecords();
+      const availableCCCs = allRecords
         .filter((r) => r.mrv_status === "verified" && !r.purchased_by)
         .map((r) => ({
           id: r.id,
@@ -2141,7 +2158,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       const user = users.find((u) => u.id === req.user.id);
       if (!user) return res.status(404).json({ error: "User not found" });
 
-      const recordsToPurchase = records.filter(
+      const allRecords = await RecordService.getAllRecords();
+      const recordsToPurchase = allRecords.filter(
         (r) =>
           record_ids.includes(r.id) &&
           r.mrv_status === "verified" &&
@@ -2184,20 +2202,23 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       }
 
       // Mark records as purchased and attribute carbon revenue exclusively to platform treasury
-      recordsToPurchase.forEach((r) => {
-        r.purchased_by = user.id;
-        r.purchased_by_name = user.name || user.organization_name || user.id;
-        r.purchased_at = new Date().toISOString();
-        r.purchase_price = r.potential_ccc_value;
-        r.carbon_revenue_accrued_to = "platform_treasury";
-      });
+      for (const r of recordsToPurchase) {
+        const updates = {
+          purchased_by: user.id,
+          purchased_by_name: user.name || user.organization_name || user.id,
+          purchased_at: new Date().toISOString(),
+          purchase_price: r.potential_ccc_value,
+          carbon_revenue_accrued_to: "platform_treasury",
+        };
+        Object.assign(r, updates);
+        await RecordService.updateRecord(r.id, updates);
+      }
 
-      logs.push({
-        id: Date.now(),
-        event: "CCCS_PURCHASED",
-        details: `${recordsToPurchase.length} Carbon Credit Certificates purchased by ${user.name || req.user.id} for ₹${totalCost.toFixed(2)}. 100% of proceeds credited to Platform Income.`,
-        timestamp: new Date().toISOString(),
-      });
+      await AuditLogService.log(
+        "CCCS_PURCHASED",
+        `${recordsToPurchase.length} Carbon Credit Certificates purchased by ${user.name || req.user.id} for ₹${totalCost.toFixed(2)}. 100% of proceeds credited to Platform Income.`,
+        req.user.id
+      );
 
       res.json({
         message: `Successfully purchased ${recordsToPurchase.length} Carbon Credit Certificates. Total ₹${totalCost.toFixed(2)} credited to Platform Income.`,
@@ -2211,11 +2232,13 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/partner/purchases",
     auth(["csr_partner", "epr_partner", "ccc_buyer"]),
-    (req: any, res) => {
-      const purchases = records.filter((r) => r.purchased_by === req.user.id);
+    async (req: any, res) => {
+      const allRecords = await RecordService.getAllRecords();
+      const purchases = allRecords.filter((r) => r.purchased_by === req.user.id);
       res.json(purchases);
     },
   );
+
 
   // ---------------- ADMIN ROUTES ----------------
   // ================================
@@ -2224,8 +2247,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/admin/financial-breakdown",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
-    (req: any, res) => {
-      let filteredRecords = filterByJurisdiction(req.user, records, "records", req.query);
+    async (req: any, res) => {
+      const allRecords = await RecordService.getAllRecords();
+      let filteredRecords = filterByJurisdiction(req.user, allRecords, "records", req.query);
 
       // 1. Material Payouts to Stakeholders (Processed records only)
       const processedRecords = filteredRecords.filter(r => r.status === "processed");
@@ -2270,9 +2294,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/admin/kpi",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
-    (req: any, res) => {
+    async (req: any, res) => {
       const { context } = req.query;
-      let filteredRecords = filterByJurisdiction(req.user, records, "records", req.query);
+      const allRecords = await RecordService.getAllRecords();
+      let filteredRecords = filterByJurisdiction(req.user, allRecords, "records", req.query);
       if (context && context !== "all") {
         const reqCtx = String(context).toLowerCase();
         filteredRecords = filteredRecords.filter((r) => !r.context || String(r.context).toLowerCase() === reqCtx);
@@ -2310,17 +2335,16 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     },
   );
 
-  
-
   // ================================
   // FRAUD HEATMAP DATA
   // ================================
   app.get(
     "/api/admin/fraud-map",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
-    (req: any, res) => {
+    async (req: any, res) => {
       const { context } = req.query;
-      let filteredRecords = filterByJurisdiction(req.user, records, "records").filter(
+      const allRecords = await RecordService.getAllRecords();
+      let filteredRecords = filterByJurisdiction(req.user, allRecords, "records").filter(
         (r) => r.mrv_status === "rejected" || r.status === "flagged",
       );
 
@@ -2332,6 +2356,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       res.json({ flagged_events: filteredRecords });
     },
   );
+
 
   // ================================
   // DPI INTEGRATIONS (AGRISTACK & ONDC)
@@ -2526,18 +2551,14 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.post(
     "/api/admin/broadcast",
     auth(["super_admin", "state_admin"]),
-    (req: any, res) => {
+    async (req: any, res) => {
       const { message, target_role } = req.body;
-      const newNotification = {
-        id: "NOTIF_" + Date.now(),
-        user_id: target_role || "all",
+      const notif = await NotificationService.broadcast(
         message,
-        read: false,
-        timestamp: new Date().toISOString(),
-        type: "broadcast",
-      };
-      notifications.push(newNotification);
-      res.json({ message: "Broadcast sent successfully" });
+        target_role || "all",
+        "broadcast"
+      );
+      res.json({ message: "Broadcast sent successfully", notification: notif });
     },
   );
 
@@ -2562,9 +2583,11 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/dashboard/kpi",
     auth(["super_admin", "state_admin", "municipal_admin", "aggregator"]),
-    (req: any, res) => {
-      const filteredFarmers = filterByJurisdiction(req.user, farmers, "farmers", req.query);
-      const filteredRecords = filterByJurisdiction(req.user, records, "records", req.query);
+    async (req: any, res) => {
+      const allFarmers = await FarmerService.getAllFarmers();
+      const allRecords = await RecordService.getAllRecords();
+      const filteredFarmers = filterByJurisdiction(req.user, allFarmers, "farmers", req.query);
+      const filteredRecords = filterByJurisdiction(req.user, allRecords, "records", req.query);
 
       const total_farmers = filteredFarmers.length;
       const total_events = filteredRecords.length;
@@ -2595,10 +2618,12 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       "epr_partner",
       "ccc_buyer",
     ]),
-    (req: any, res) => {
-      res.json(logs.slice(-50).reverse());
+    async (req: any, res) => {
+      const dbLogs = await AuditLogService.getLogs(50);
+      res.json(dbLogs);
     },
   );
+
 
   // ---------------- ANALYTICS & METRICS ----------------
   // ================================
@@ -3103,26 +3128,28 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
   app.get(
     "/api/blockchain/ledger",
-    (req: any, res) => {
+    async (req: any, res) => {
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : undefined;
+      const allBlocks = await BlockchainService.getBlocks();
       
       if (limit !== undefined || offset !== undefined) {
         const start = offset || 0;
-        const end = limit !== undefined ? start + limit : blockchain.length;
-        const items = blockchain.slice(start, end);
+        const end = limit !== undefined ? start + limit : allBlocks.length;
+        const items = allBlocks.slice(start, end);
         return res.json({
-          total: blockchain.length,
-          limit: limit || blockchain.length,
+          total: allBlocks.length,
+          limit: limit || allBlocks.length,
           offset: start,
-          hasMore: end < blockchain.length,
+          hasMore: end < allBlocks.length,
           items
         });
       }
 
-      res.json(blockchain);
+      res.json(allBlocks);
     },
   );
+
 
   // ---------------- HEDERA GUARDIAN API STATE & ROUTES ----------------
   let guardianAuthority: any = null;
@@ -3351,23 +3378,24 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   app.get(
     "/api/map/environmental-activity",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
-    (req: any, res) => {
-      // Stub for geospatial map data (combining Mapbox, OpenStreetMap, Earth Engine)
+    async (req: any, res) => {
+      const allRecords = await RecordService.getAllRecords();
+      const allFarmers = await FarmerService.getAllFarmers();
       const mapData = {
-        waste_points: records.map((r) => ({
+        waste_points: allRecords.map((r) => ({
           lat: r.geo_lat,
           lng: r.geo_long,
           type: r.waste_type,
           weight: r.weight_kg,
         })),
-        biomass_zones: farmers.map((f) => ({
+        biomass_zones: allFarmers.map((f) => ({
           lat: f.geo_lat,
           lng: f.geo_long,
           crop: f.crop_type,
           area: f.land_area,
         })),
         heatmaps: {
-          ccc_generation: records
+          ccc_generation: allRecords
             .filter((r) => r.mrv_status === "verified")
             .map((r) => ({
               lat: r.geo_lat,
@@ -3398,8 +3426,9 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
         (await PilotOnboarding.findOne({ phone })) ||
         (await User.findOne({ phone }));
     } else {
+      const onboardings = await PilotService.getAllOnboardings();
       user =
-        pilotOnboarding.find((u) => u.phone === phone) ||
+        onboardings.find((u) => u.phone === phone) ||
         users.find((u) => u.phone === phone);
     }
 
@@ -3454,9 +3483,8 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
         if (dbStatus === "connected") {
           await PilotRecord.create(logEntry);
-        } else {
-          pilotRecords.push(logEntry);
         }
+        await PilotService.addRecord(logEntry);
         responseMessage = `✅ Successfully logged ${logEntry.weight}kg of ${wasteType} waste! Estimated CCC Impact: ${estimatedCCC.toFixed(3)} tCO2e.`;
       }
     } else if (messageText === "stats") {
@@ -3464,7 +3492,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       if (dbStatus === "connected") {
         userLogs = await PilotRecord.find({ collectorId: user.id });
       } else {
-        userLogs = pilotRecords.filter((r) => r.collectorId === user.id);
+        userLogs = await PilotService.getRecordsByCollector(user.id);
       }
       const totalWeight = userLogs.reduce(
         (sum: any, r: any) => sum + Number(r.weight),
@@ -3502,9 +3530,8 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
       if (dbStatus === "connected") {
         await PilotOnboarding.create(onboardEntry);
-      } else {
-        pilotOnboarding.push(onboardEntry);
       }
+      await PilotService.addOnboarding(onboardEntry);
 
       res.json({ message: "Onboarded successfully", entry: onboardEntry });
     },
@@ -3538,9 +3565,8 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
       if (dbStatus === "connected") {
         await PilotRecord.create(logEntry);
-      } else {
-        pilotRecords.push(logEntry);
       }
+      await PilotService.addRecord(logEntry);
 
       try {
         // Enrich pilot log with Carbon Intelligence
@@ -3563,7 +3589,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
           value: 5,
           ccc_factor: emission_factor,
         });
-        /* await CarbonEventService.addEvent(carbonEvent); */
+        await CarbonEventService.addEvent(carbonEvent);
         (logEntry as any).carbon_event_id = carbonEvent.id;
         (logEntry as any).net_carbon_reduction =
           carbonEvent.net_carbon_reduction_kg_co2e;
@@ -3589,8 +3615,8 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
         currentPilotRecords = await PilotRecord.find();
         currentPilotOnboarding = await PilotOnboarding.find();
       } else {
-        currentPilotRecords = pilotRecords;
-        currentPilotOnboarding = pilotOnboarding;
+        currentPilotRecords = await PilotService.getAllRecords();
+        currentPilotOnboarding = await PilotService.getAllOnboardings();
       }
 
       const totalWeight = currentPilotRecords.reduce(
@@ -3612,7 +3638,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
         date.setDate(date.getDate() - (6 - i));
         const dateStr = date.toISOString().split("T")[0];
         const dayWeight = currentPilotRecords
-          .filter((r: any) => r.timestamp.startsWith(dateStr))
+          .filter((r: any) => r.timestamp && r.timestamp.startsWith(dateStr))
           .reduce((sum: any, r: any) => sum + (r.weight || 0), 0);
         return {
           date: date.toLocaleDateString("default", {
@@ -3640,15 +3666,6 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     async (req, res) => {
       const { record_id, validationScore, validationExplanation } = req.body;
 
-      let record;
-      if (dbStatus === "connected") {
-        record = await PilotRecord.findOne({ id: record_id });
-      } else {
-        record = pilotRecords.find((r) => r.id === record_id);
-      }
-
-      if (!record) return res.status(404).json({ error: "Record not found" });
-
       const score = validationScore || 100;
       const explanation = validationExplanation || "Manual validation";
 
@@ -3661,11 +3678,8 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
             status: score > 70 ? "validated" : "flagged",
           },
         );
-      } else {
-        record.validationScore = score;
-        record.validationExplanation = explanation;
-        record.status = score > 70 ? "validated" : "flagged";
       }
+      await PilotService.validateRecord(record_id, score, explanation);
 
       res.json({
         message: "Validation complete",
@@ -3714,9 +3728,10 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   // CARBON API INTEGRATION
   // ========================================================
 
-  app.get("/api/carbon/dashboard", auth(), (req: any, res) => {
+  app.get("/api/carbon/dashboard", auth(), async (req: any, res) => {
     try {
-      const filteredCarbonEvents = filterByJurisdiction(req.user, carbonEvents, "carbon");
+      const allEvents = await CarbonEventService.getAllCarbonEvents();
+      const filteredCarbonEvents = filterByJurisdiction(req.user, allEvents, "carbon");
 
       const totalReduction = filteredCarbonEvents.reduce(
         (acc, ev) => acc + (ev.net_carbon_reduction_kg_co2e || 0),
@@ -3752,6 +3767,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       res.status(500).json({ error: "Failed to calculate carbon dashboard" });
     }
   });
+
 
   app.get("/api/carbon/guardian/policy", async (req, res) => {
     res.json(await GuardianService.getPolicyTemplate());

@@ -706,3 +706,115 @@ export const waste_manifests = pgTable('waste_manifests', {
   deliveredAt: timestamp('delivered_at'),
   status: text('status').notNull().default('IN_TRANSIT'), // IN_TRANSIT, DELIVERED, REJECTED, PROCESSED, RESIDUAL_DISPATCHED
 });
+
+// ==========================================
+// RUPAYKG ENTERPRISE 3.0: PERSISTENT TRANSACTION & PILOT TABLES
+// ==========================================
+
+export const farmers = pgTable('farmers', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  aadhaarHash: text('aadhaar_hash'),
+  village: text('village'),
+  subdistrict: text('subdistrict'),
+  district: text('district'),
+  state: text('state'),
+  landAreaAcres: doublePrecision('land_area_acres').default(0),
+  primaryCrop: text('primary_crop'),
+  bankAccount: text('bank_account'),
+  ifsc: text('ifsc'),
+  shgId: text('shg_id'),
+  fpoId: text('fpo_id'),
+  createdBy: text('created_by'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const carbon_events = pgTable('carbon_events', {
+  id: text('id').primaryKey(),
+  recordId: text('record_id').references(() => records.id),
+  eventType: text('event_type').notNull(), // GENERATION, COLLECTION, PROCESSING, VERIFICATION, ISSUANCE
+  amountTco2e: doublePrecision('amount_tco2e').notNull(),
+  status: text('status').notNull().default('RECORDED'),
+  stakeholderChain: jsonb('stakeholder_chain'),
+  methodologyCode: text('methodology_code'),
+  evidenceHash: text('evidence_hash'),
+  village: text('village'),
+  district: text('district'),
+  state: text('state'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const compliance_records = pgTable('compliance_records', {
+  id: text('id').primaryKey(),
+  entityId: text('entity_id'),
+  complianceType: text('compliance_type').notNull(), // EPR_PLASTIC, BATTERY, SWM_2016, CPCB_RETURN, CCTS_SUBMISSION
+  reportingPeriod: text('reporting_period'),
+  status: text('status').notNull().default('COMPLIANT'),
+  targetQuantity: doublePrecision('target_quantity'),
+  achievedQuantity: doublePrecision('achieved_quantity'),
+  evidenceUrls: jsonb('evidence_urls'),
+  verifiedBy: text('verified_by'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const pilot_records = pgTable('pilot_records', {
+  id: text('id').primaryKey(),
+  pilotId: text('pilot_id').notNull(),
+  facilityId: text('facility_id').references(() => facilities.id),
+  materialType: text('material_type').notNull(),
+  weightKg: doublePrecision('weight_kg').notNull(),
+  weighbridgeTicket: text('weighbridge_ticket'),
+  gpsCoordinates: jsonb('gps_coordinates'),
+  status: text('status').notNull().default('RECORDED'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const pilot_onboardings = pgTable('pilot_onboardings', {
+  id: text('id').primaryKey(),
+  pilotName: text('pilot_name').notNull(),
+  pilotType: text('pilot_type').notNull(), // URBAN_ULB, RURAL_PANCHAYAT, INDUSTRIAL_CLUSTER
+  location: jsonb('location'),
+  operatorEntityId: text('operator_entity_id').references(() => legal_entities.id),
+  status: text('status').notNull().default('ACTIVE'),
+  onboardingDate: timestamp('onboarding_date').defaultNow(),
+  baselineData: jsonb('baseline_data'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const system_notifications = pgTable('system_notifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  type: text('type').notNull().default('INFO'),
+  read: boolean('read').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const operational_logs = pgTable('operational_logs', {
+  id: text('id').primaryKey(),
+  level: text('level').notNull().default('INFO'),
+  category: text('category').notNull(),
+  message: text('message').notNull(),
+  userId: text('user_id'),
+  metadata: jsonb('metadata'),
+  timestamp: timestamp('timestamp').defaultNow(),
+});
+
+export const blockchain_blocks = pgTable('blockchain_blocks', {
+  id: text('id').primaryKey(),
+  blockIndex: integer('block_index').notNull().unique(),
+  previousHash: text('previous_hash').notNull(),
+  hash: text('hash').notNull(),
+  data: jsonb('data').notNull(),
+  timestamp: timestamp('timestamp').defaultNow(),
+});
+

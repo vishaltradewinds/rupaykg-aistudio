@@ -75,55 +75,152 @@ export const carbonCalculationEngine = new CarbonCalculationEngine();
 
 export class MRVQualityEngine {
   async evaluateReadiness(monitoringPeriodId: string) {
-    return {
-      dataCompleteness: 0.97,
-      evidenceCompleteness: 0.95,
-      calibrationValidity: 1.0,
-      parameterCoverage: 1.0,
-      status: 'READY'
-    };
+    try {
+      const periodRows = await db.select().from(monitoring_periods).where(eq(monitoring_periods.id, monitoringPeriodId)).limit(1);
+      if (!periodRows || periodRows.length === 0) {
+        return {
+          status: 'NOT_READY',
+          reason: 'Monitoring period not found',
+          dataCompleteness: 0,
+          evidenceCompleteness: 0,
+          calibrationValidity: 0,
+        };
+      }
+      const period = periodRows[0];
+
+      const periodMeasurements = await db.select().from(measurements).where(eq(measurements.monitoringPeriodId, period.id));
+      const projectEvidence = await db.select().from(evidence).where(eq(evidence.projectId, period.projectId));
+      const periodCalibrations = await db.select().from(calibrations);
+
+      const dataCompleteness = periodMeasurements.length > 0 ? Math.min(1.0, periodMeasurements.length / 10.0) : 0;
+      const evidenceCompleteness = projectEvidence.length > 0 ? 1.0 : 0;
+      const calibrationValidity = periodCalibrations.length > 0 ? 1.0 : 0.8;
+
+      const isReady = dataCompleteness >= 0.5 && evidenceCompleteness >= 0.5;
+
+      return {
+        dataCompleteness,
+        evidenceCompleteness,
+        calibrationValidity,
+        parameterCoverage: 1.0,
+        status: isReady ? 'READY' : 'NOT_READY',
+      };
+    } catch (err: any) {
+      return {
+        status: 'NOT_READY',
+        reason: `Readiness check error: ${err.message}`,
+        dataCompleteness: 0,
+        evidenceCompleteness: 0,
+        calibrationValidity: 0,
+      };
+    }
   }
 
   async checkInstrumentCalibration(instrumentId: string, measurementDate: Date) {
-    const instrumentRecord = await safeDbCall(() => db.select().from(instruments).where(eq(instruments.id, instrumentId)).limit(1), []);
-    const calibrationRecords = await safeDbCall(() => db.select().from(calibrations).where(eq(calibrations.instrumentId, instrumentId)), []);
-    
-    if (!calibrationRecords.length) {
-      return { valid: true, note: "Default calibration active" };
-    }
-    
-    const validCalibration = calibrationRecords.find(c => new Date(c.expiryDate) > measurementDate);
-    if (!validCalibration) {
-      return { valid: false, reason: "Calibration expired" };
-    }
+    try {
+      const instrumentRecord = await db.select().from(instruments).where(eq(instruments.id, instrumentId)).limit(1);
+      const calibrationRecords = await db.select().from(calibrations).where(eq(calibrations.instrumentId, instrumentId));
+      
+      if (!calibrationRecords.length) {
+        return { valid: true, note: "Default calibration active" };
+      }
+      
+      const validCalibration = calibrationRecords.find(c => new Date(c.expiryDate) > measurementDate);
+      if (!validCalibration) {
+        return { valid: false, reason: "Calibration expired" };
+      }
 
-    return { valid: true };
+      return { valid: true };
+    } catch (err: any) {
+      return { valid: false, reason: `Calibration verification failure: ${err.message}` };
+    }
   }
 
   async checkEvidenceChain(calculationId: string) {
-    const calcRun = await safeDbCall(() => db.select().from(calculation_runs).where(eq(calculation_runs.id, calculationId)), []);
-    if (!calcRun || calcRun.length === 0) return { status: 'INVALID', reason: 'Calculation run not found' };
-    
-    // Find associated inputs and their evidence
-    const inputs = ([] as any[]);
-    
-    let allClear = true;
-    let missing = [];
-    
-    for (const input of inputs) {
-      if (input.sourceRecordId) {
-        // Here we would typically fetch the record and check its evidence hash
-        // For demonstration, we assume if it exists, it's present.
-        // If we had an evidence table check:
-        // const ev = await db.select().from(evidence).where(eq(evidence.id, input.evidenceId));
-        // if (!ev) { allClear = false; missing.push(input.id); }
+    try {
+      const calcRunRows = await db.select().from(calculation_runs).where(eq(calculation_runs.id, calculationId)).limit(1);
+      if (!calcRunRows || calcRunRows.length === 0) {
+        return { status: 'BLOCKED', reason: 'Calculation run not found' };
       }
+      const calcRun = calcRunRows[0];
+
+      // Find dataset
+      const datasetRows = await db.select().from(calculation_datasets).where(eq(calculation_datasets.id, calcRun.datasetId)).limit(1);
+      if (!datasetRows || datasetRows.length === 0) {
+        return { status: 'BLOCKED', reason: 'Associated calculation dataset not found' };
+      }
+      const dataset = datasetRows[0];
+
+      // Find monitoring period
+      const periodRows = await db.select().from(monitoring_periods).where(eq(monitoring_periods.id, dataset.monitoringPeriodId)).limit(1);
+      if (!periodRows || periodRows.length === 0) {
+        return { status: 'BLOCKED', reason: 'Associated monitoring period not found' };
+      }
+      const period = periodRows[0];
+
+      // Query measurements and evidence
+      const periodMeasurements = await db.select().from(measurements).where(eq(measurements.monitoringPeriodId, period.id));
+      const projectEvidence = await db.select().from(evidence).where(eq(evidence.projectId, period.projectId));
+
+      if (periodMeasurements.length === 0 && projectEvidence.length === 0) {
+        return { 
+          status: 'BLOCKED', 
+          reason: 'Zero verified measurements or evidence documents recorded for this monitoring period',
+          missing_inputs: ['measurements', 'evidence'] 
+        };
+      }
+
+      const tampered: string[] = [];
+      const missingEvidence: string[] = [];
+
+      // Validate each evidence entry cryptographic hash
+      for (const ev of projectEvidence) {
+        if (!ev.fileHash || ev.fileHash.trim() === '') {
+          tampered.push(ev.id);
+          continue;
+        }
+        // Validate SHA-256 hash formatting (64 hex characters)
+        if (!/^[a-fA-F0-9]{64}$/.test(ev.fileHash)) {
+          tampered.push(ev.id);
+        }
+      }
+
+      // Validate measurement evidence links
+      for (const m of periodMeasurements) {
+        const linked = projectEvidence.find(e => e.measurementId === m.id);
+        if (!linked && projectEvidence.length === 0) {
+          missingEvidence.push(m.id);
+        }
+      }
+
+      if (tampered.length > 0) {
+        return {
+          status: 'BLOCKED',
+          reason: 'Tampered evidence detected: invalid or corrupt cryptographic hash',
+          tamperedEvidenceIds: tampered,
+        };
+      }
+
+      if (missingEvidence.length > 0) {
+        return {
+          status: 'BLOCKED',
+          reason: 'Missing evidence records for monitoring measurements',
+          missing_inputs: missingEvidence,
+        };
+      }
+
+      return { 
+        status: 'CLEAR', 
+        verifiedEvidenceCount: projectEvidence.length, 
+        measurementCount: periodMeasurements.length,
+        datasetHash: dataset.datasetHash 
+      };
+    } catch (err: any) {
+      return { 
+        status: 'BLOCKED', 
+        reason: `Database error during MRV evidence chain verification: ${err.message}` 
+      };
     }
-    
-    if (allClear) {
-      return { status: 'CLEAR' };
-    }
-    return { status: 'BLOCKED', reason: 'Missing or tampered evidence', missing_inputs: missing };
   }
 }
 
@@ -131,21 +228,65 @@ export const mrvQualityEngine = new MRVQualityEngine();
 
 export class DoubleCountingEngine {
   async check(projectId: string, facilityId: string, monitoringPeriodId: string) {
-    // Check if there's already an active calculation or MRV for this facility/period in ANOTHER project
-    const existing = ([] as any[]);
-      
-    const conflicts = (existing || []).filter(e => e.projectId !== projectId);
-    
-    if (conflicts.length > 0) {
+    try {
+      // Query the requested monitoring period
+      const currentPeriodRows = await db.select().from(monitoring_periods).where(eq(monitoring_periods.id, monitoringPeriodId)).limit(1);
+      if (!currentPeriodRows || currentPeriodRows.length === 0) {
+        return { status: 'BLOCKED', reason: 'Target monitoring period not found' };
+      }
+      const currentPeriod = currentPeriodRows[0];
+
+      // 1. Check for overlapping monitoring periods across OTHER projects
+      const allPeriods = await db.select().from(monitoring_periods);
+      const overlappingPeriods = allPeriods.filter(p => {
+        if (p.projectId === projectId || p.id === monitoringPeriodId) return false;
+        // Check overlapping date range
+        const startA = new Date(currentPeriod.startDate).getTime();
+        const endA = new Date(currentPeriod.endDate).getTime();
+        const startB = new Date(p.startDate).getTime();
+        const endB = new Date(p.endDate).getTime();
+        return (startA <= endB && endA >= startB);
+      });
+
+      // 2. Check for duplicate carbon claims for the same period or facility
+      const datasets = await db.select().from(calculation_datasets);
+      const runs = await db.select().from(calculation_runs);
+      const existingClaims = await db.select().from(carbon_claims);
+
+      const conflictingClaims = existingClaims.filter(c => {
+        const run = runs.find(r => r.id === c.calculationRunId);
+        if (!run) return false;
+        const ds = datasets.find(d => d.id === run.datasetId);
+        if (!ds) return false;
+        return ds.projectId !== projectId && ds.monitoringPeriodId === monitoringPeriodId;
+      });
+
+      const conflictingRecordIds = [
+        ...overlappingPeriods.map(p => p.id),
+        ...conflictingClaims.map(c => c.id)
+      ];
+
+      if (conflictingRecordIds.length > 0) {
+        return {
+          status: 'BLOCKED',
+          reason: 'Double counting detected: Overlapping monitoring period or duplicate carbon claim exists in another project',
+          conflictingRecordIds,
+        };
+      }
+
+      return { 
+        status: 'CLEAR', 
+        checkedScope: { projectId, facilityId, monitoringPeriodId } 
+      };
+    } catch (err: any) {
       return { 
         status: 'BLOCKED', 
-        reason: 'Double counting detected: Facility/Period already claimed by another project', 
-        conflictingRecordIds: conflicts.map(c => c.id) 
+        reason: `Database error during double counting verification: ${err.message}` 
       };
     }
-    return { status: 'CLEAR' };
   }
 }
+
 
 export const doubleCountingEngine = new DoubleCountingEngine();
 
