@@ -9,6 +9,8 @@ import { MRV } from './carbon/MRV';
 import { Evidence } from './carbon/Evidence';
 import { Calculation } from './carbon/Calculation';
 import { BiogasMRV } from './carbon/BiogasMRV';
+import { RiceMRV } from './carbon/RiceMRV';
+import { Sprout } from 'lucide-react';
 
 interface CCTSCarbonOSProps {
   token: string | null;
@@ -20,7 +22,7 @@ interface CCTSCarbonOSProps {
 export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
   token, user, safeFetch, safeParseJson
 }) => {
-  const [activeTab, setActiveTab] = useState<'pilot' | 'ccc' | 'project' | 'mrv' | 'evidence' | 'calculation' | 'biogas'>('pilot');
+  const [activeTab, setActiveTab] = useState<'pilot' | 'ccc' | 'project' | 'mrv' | 'evidence' | 'calculation' | 'biogas' | 'rice'>('pilot');
 
   const tabs = [
     { id: 'pilot', label: 'Pilot Readiness Cockpit', icon: Gauge },
@@ -30,6 +32,7 @@ export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
     { id: 'evidence', label: 'Evidence', icon: Scale },
     { id: 'calculation', label: 'CQE 1.0 Engine', icon: Cpu },
     { id: 'biogas', label: 'Biogas MRV (BM AG04.001)', icon: Database },
+    { id: 'rice', label: 'Rice MRV (BM AG04.002)', icon: Sprout },
   ] as const;
 
   return (
@@ -72,6 +75,7 @@ export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({
         {activeTab === 'evidence' && <Evidence />}
         {activeTab === 'calculation' && <Calculation token={token} />}
         {activeTab === 'biogas' && <BiogasMRV />}
+        {activeTab === 'rice' && <RiceMRV />}
       </div>
     </div>
   );
