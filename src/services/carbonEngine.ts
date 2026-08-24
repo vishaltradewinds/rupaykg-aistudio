@@ -616,24 +616,40 @@ export class CQEBaselineEngine {
     activity: CQEActivityData,
     characterisation: CQEMaterialCharacterisation,
     methodology: CQEMethodologyDefinition
-  ): { baselineEmissionsTco2e: number; breakdown: Record<string, number> } {
+  ): { baselineEmissionsTco2e: number; breakdown: Record<string, number>; status?: string; reason?: string } {
     const weightTonnes = activity.netMaterialKg / 1000.0;
     let beTco2e = 0;
     const breakdown: Record<string, number> = {};
 
+    // Do NOT fabricate baseline if methodology requires monitoring we don't have
+    if (!(activity as any).monitoringInputs || Object.keys((activity as any).monitoringInputs).length === 0) {
+      return { 
+        baselineEmissionsTco2e: 0, 
+        breakdown: { estimated_potential: weightTonnes * 1.5 },
+        status: 'CALCULATION_BLOCKED',
+        reason: 'Missing required monitored parameters (e.g. gas flow meter data, energy output)'
+      };
+    }
+
     switch (methodology.methodologyCode) {
       case "BM WA03.001": {
-        // Landfill Methane Recovery: BE = Methane captured * GWP * (1 - OX)
-        // Simulated: 1 tonne wet organic MSW in deep anaerobic landfill generates ~ 0.035 tCH4
-        const ch4GeneratedTons = weightTonnes * characterisation.degradableOrganicCarbon * 0.5 * 0.8;
+        // Landfill Methane Recovery requires monitored gas volumes
+        if (!(activity as any).monitoringInputs.ch4RecoveredTonnes) {
+            return {
+                baselineEmissionsTco2e: 0, 
+                breakdown: {},
+                status: 'CALCULATION_BLOCKED',
+                reason: 'Missing monitored ch4RecoveredTonnes'
+            };
+        }
         const gwpCH4 = 28.0;
         const ox = 0.10;
-        beTco2e = ch4GeneratedTons * gwpCH4 * (1 - ox);
+        beTco2e = (activity as any).monitoringInputs.ch4RecoveredTonnes * gwpCH4 * (1 - ox);
         breakdown.landfillMethaneAvoided = Number(beTco2e.toFixed(4));
         break;
       }
       case "BM WA03.002": {
-        // Composting FOD avoidance: BE_y = W_j * DOC_j * DOC_f * F * 16/12 * MCF * GWP_CH4 * (1 - OX)
+        // Composting FOD avoidance
         const doc_j = characterisation.degradableOrganicCarbon || 0.15;
         const doc_f = 0.5; // fraction of DOC dissimilated
         const f = 0.5; // fraction of CH4 in landfill gas
@@ -646,43 +662,14 @@ export class CQEBaselineEngine {
         break;
       }
       case "BM AG04.002": {
-        // Crop residue in-situ burning avoidance: BE_y = Biomass_tons * EF_burning (1.45 tCO2e/t)
+        // Crop residue in-situ burning avoidance
         const efBurning = 1.45; // tCO2e per tonne crop residue
         beTco2e = weightTonnes * efBurning;
         breakdown.avoidedOpenFieldCombustion = Number(beTco2e.toFixed(4));
         break;
       }
-      case "BM AG04.001": {
-        // Cattle manure lagoon methane avoidance: Bo * VS * MCF * GWP
-        const vsTons = weightTonnes * characterisation.organicFraction * (characterisation.dryMatterPercent / 100);
-        const bo = 0.13 * 1000; // m3 CH4 / tonne VS
-        const densityCH4 = 0.0007168; // tonnes / m3
-        const mcf = 0.73; // open lagoon
-        const gwpCH4 = 28.0;
-        const ch4Tons = vsTons * (bo * densityCH4) * mcf;
-        beTco2e = ch4Tons * gwpCH4;
-        breakdown.avoidedAnaerobicLagoonMethane = Number(beTco2e.toFixed(4));
-        break;
-      }
-      case "BM WA03.003": {
-        // CBG Production: Avoided baseline fossil CNG combustion + Avoided dumpsite decay
-        const cbgYieldKg = activity.netMaterialKg * 0.06; // 60kg CBG per tonne organic waste
-        const cbgEnergyTJ = (cbgYieldKg * 50.0) / 1000000; // 50 MJ/kg
-        const efCng = 56.1; // tCO2e / TJ
-        const fossilDisplacement = cbgEnergyTJ * efCng;
-        const landfillAvoidance = weightTonnes * 0.45;
-        beTco2e = fossilDisplacement + landfillAvoidance;
-        breakdown.fossilCngDisplacement = Number(fossilDisplacement.toFixed(4));
-        breakdown.dumpsiteDecayAvoidance = Number(landfillAvoidance.toFixed(4));
-        break;
-      }
-      default: {
-        beTco2e = weightTonnes * 0.85;
-        breakdown.defaultBaselineEmissions = Number(beTco2e.toFixed(4));
-      }
     }
-
-    return { baselineEmissionsTco2e: Number(beTco2e.toFixed(4)), breakdown };
+    return { baselineEmissionsTco2e: Number(beTco2e.toFixed(4)), breakdown, status: 'CALCULATED' };
   }
 }
 

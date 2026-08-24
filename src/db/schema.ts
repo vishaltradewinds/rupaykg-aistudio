@@ -437,8 +437,8 @@ export const audit_packages = pgTable('audit_packages', {
 // --- PHASE 3: PHYSICAL EVIDENCE INTEGRATION ---
 
 export const weighbridge_records = pgTable('weighbridge_records', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  facilityId: uuid('facility_id').notNull().references(() => facilities.id),
+  id: text('id').primaryKey(),
+  facilityId: text('facility_id').notNull().references(() => facilities.id),
   ticketNumber: varchar('ticket_number', { length: 255 }).notNull(),
   vehicleId: varchar('vehicle_id', { length: 255 }),
   grossWeight: numeric('gross_weight').notNull(),
@@ -446,13 +446,13 @@ export const weighbridge_records = pgTable('weighbridge_records', {
   netWeight: numeric('net_weight').notNull(),
   material: varchar('material', { length: 255 }).notNull(),
   timestamp: timestamp('timestamp').notNull(),
-  sourceRecordId: uuid('source_record_id').references(() => records.id),
+  sourceRecordId: text('source_record_id').references(() => records.id),
   evidenceHash: varchar('evidence_hash', { length: 255 }),
 });
 
 export const landfill_facilities = pgTable('landfill_facilities', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  facilityId: uuid('facility_id').notNull().references(() => facilities.id),
+  id: text('id').primaryKey(),
+  facilityId: text('facility_id').notNull().references(() => facilities.id),
   landfillType: varchar('landfill_type', { length: 255 }).notNull(),
   startDate: timestamp('start_date').notNull(),
   closureDate: timestamp('closure_date'),
@@ -462,8 +462,8 @@ export const landfill_facilities = pgTable('landfill_facilities', {
 });
 
 export const waste_deposition_history = pgTable('waste_deposition_history', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  landfillFacilityId: uuid('landfill_facility_id').notNull().references(() => landfill_facilities.id),
+  id: text('id').primaryKey(),
+  landfillFacilityId: text('landfill_facility_id').notNull().references(() => landfill_facilities.id),
   year: integer('year').notNull(),
   wasteType: varchar('waste_type', { length: 255 }).notNull(),
   quantity: numeric('quantity').notNull(),
@@ -472,12 +472,12 @@ export const waste_deposition_history = pgTable('waste_deposition_history', {
   mcf: numeric('mcf'),
   k: numeric('k'),
   source: varchar('source', { length: 255 }),
-  evidenceId: uuid('evidence_id').references(() => evidence.id),
+  evidenceId: text('evidence_id').references(() => evidence.id),
 });
 
 export const gas_meter_readings = pgTable('gas_meter_readings', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  instrumentId: uuid('instrument_id').notNull().references(() => instruments.id),
+  id: text('id').primaryKey(),
+  instrumentId: text('instrument_id').notNull().references(() => instruments.id),
   timestamp: timestamp('timestamp').notNull(),
   flow: numeric('flow').notNull(),
   unit: varchar('unit', { length: 50 }).notNull(), // e.g. m3/hr, Nm3/hr
@@ -487,27 +487,27 @@ export const gas_meter_readings = pgTable('gas_meter_readings', {
 });
 
 export const methane_measurements = pgTable('methane_measurements', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  instrumentId: uuid('instrument_id').notNull().references(() => instruments.id),
+  id: text('id').primaryKey(),
+  instrumentId: text('instrument_id').notNull().references(() => instruments.id),
   timestamp: timestamp('timestamp').notNull(),
   reading: numeric('reading').notNull(),
   basis: varchar('basis', { length: 255 }), // wet or dry
-  evidenceId: uuid('evidence_id').references(() => evidence.id),
+  evidenceId: text('evidence_id').references(() => evidence.id),
 });
 
 export const electricity_meter_readings = pgTable('electricity_meter_readings', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  instrumentId: uuid('instrument_id').notNull().references(() => instruments.id),
+  id: text('id').primaryKey(),
+  instrumentId: text('instrument_id').notNull().references(() => instruments.id),
   periodStart: timestamp('period_start').notNull(),
   periodEnd: timestamp('period_end').notNull(),
   generationMwh: numeric('generation_mwh'),
   exportMwh: numeric('export_mwh'),
   consumptionMwh: numeric('consumption_mwh'),
-  evidenceId: uuid('evidence_id').references(() => evidence.id),
+  evidenceId: text('evidence_id').references(() => evidence.id),
 });
 
 export const pilot_issues = pgTable('pilot_issues', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: text('id').primaryKey(),
   projectId: varchar('project_id', { length: 255 }).notNull(),
   issueType: varchar('issue_type', { length: 100 }).notNull(), // WEIGHBRIDGE_MISSING, CALIBRATION_EXPIRED, CARBON_RIGHTS_UNVERIFIED, LFG_FLOW_ANOMALY
   title: varchar('title', { length: 255 }).notNull(),
@@ -633,4 +633,76 @@ export const mrv_packages = pgTable('mrv_packages', {
   auditTrail: jsonb('audit_trail').default([]),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ==========================================
+// RUPAYKG ENTERPRISE 3.0: URBAN ARCHITECTURE
+// ==========================================
+
+export const urban_ulbs = pgTable('urban_ulbs', {
+  id: text('id').primaryKey(),
+  legalEntityId: text('legal_entity_id').references(() => legal_entities.id),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // MUNICIPAL_CORPORATION, MUNICIPAL_COUNCIL, NAGAR_PANCHAYAT
+  district: text('district').notNull(),
+  state: text('state').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const urban_zones = pgTable('urban_zones', {
+  id: text('id').primaryKey(),
+  ulbId: text('ulb_id').references(() => urban_ulbs.id).notNull(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const urban_wards = pgTable('urban_wards', {
+  id: text('id').primaryKey(),
+  zoneId: text('zone_id').references(() => urban_zones.id).notNull(),
+  wardNumber: text('ward_number').notNull(),
+  name: text('name'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const urban_generators = pgTable('urban_generators', {
+  id: text('id').primaryKey(),
+  wardId: text('ward_id').references(() => urban_wards.id),
+  type: text('type').notNull(), // HOUSEHOLD, COMMERCIAL, BULK_WASTE_GENERATOR, INSTITUTIONAL
+  name: text('name'),
+  rfidOrQr: text('rfid_or_qr'),
+});
+
+export const urban_collection_operators = pgTable('urban_collection_operators', {
+  id: text('id').primaryKey(),
+  legalEntityId: text('legal_entity_id').references(() => legal_entities.id),
+  name: text('name').notNull(),
+});
+
+export const urban_transport_operators = pgTable('urban_transport_operators', {
+  id: text('id').primaryKey(),
+  legalEntityId: text('legal_entity_id').references(() => legal_entities.id),
+  name: text('name').notNull(),
+});
+
+export const urban_vehicles = pgTable('urban_vehicles', {
+  id: text('id').primaryKey(),
+  transportOperatorId: text('transport_operator_id').references(() => urban_transport_operators.id),
+  registrationNumber: text('registration_number').notNull(),
+  type: text('type'),
+  gpsEnabled: boolean('gps_enabled').default(false),
+});
+
+export const waste_manifests = pgTable('waste_manifests', {
+  id: text('id').primaryKey(),
+  generatorId: text('generator_id').references(() => urban_generators.id),
+  collectionOperatorId: text('collection_operator_id').references(() => urban_collection_operators.id),
+  transportOperatorId: text('transport_operator_id').references(() => urban_transport_operators.id),
+  vehicleId: text('vehicle_id').references(() => urban_vehicles.id),
+  weighbridgeRecordId: text('weighbridge_record_id'),
+  destinationFacilityId: text('destination_facility_id').references(() => facilities.id),
+  materialType: text('material_type').notNull(),
+  weightKg: numeric('weight_kg'),
+  collectedAt: timestamp('collected_at'),
+  deliveredAt: timestamp('delivered_at'),
+  status: text('status').notNull().default('IN_TRANSIT'), // IN_TRANSIT, DELIVERED, REJECTED, PROCESSED, RESIDUAL_DISPATCHED
 });

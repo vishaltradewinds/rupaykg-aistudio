@@ -4,6 +4,13 @@ import { sanitizeMiddleware } from "./src/middleware/sanitize.ts";
 import { registerStakeholderUser } from "./src/db/users.ts";
 import { SWMComplianceService } from "./src/services/swmComplianceEngine";
 import express from "express";
+
+import { RecordService } from './src/services/recordService.ts';
+// import { CarbonEventService } from './src/services/carbonEventService.ts';
+// import { LogService } from './src/services/logService.ts';
+// import { FarmerService } from './src/services/farmerService.ts';
+// import { ComplianceRecordService } from './src/services/complianceRecordService.ts';
+
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import fs from "fs";
@@ -140,6 +147,17 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
   app.use("/api/", limiter);
 
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20, // 20 requests per 15 minutes for auth endpoints
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many authentication requests, please try again later." }
+  });
+  app.use("/api/auth", authLimiter);
+  app.use("/api/login", authLimiter);
+
+
   // Security Hardenings
   app.use(
     helmet({
@@ -148,7 +166,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   );
   app.use(
     cors({
-      origin: "*",
+      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : ["http://localhost:3000"],
       methods: ["GET", "POST", "PUT", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],
     }),
@@ -161,7 +179,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const PORT = 3000;
   const MONGO_URI = process.env.MONGO_URI;
   const INTERNAL_TOKEN =
-    process.env.INTERNAL_SERVICE_TOKEN || "super_internal_token";
+    process.env.INTERNAL_SERVICE_TOKEN ;
 
   // Ensure public.pem and private.pem exist for RS256
   if (!fs.existsSync("./private.pem") || !fs.existsSync("./public.pem")) {
@@ -229,7 +247,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     console.error("Background DB connection failed:", err),
   );
 
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health", async (req, res) => {
     res.json({
       status: "ok",
       version: "3.0.0-Enterprise",
@@ -264,7 +282,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   // ---------------- PUBLIC API ----------------
-  app.get("/api/public/impact", (req, res) => {
+  app.get("/api/public/impact", async (req, res) => {
     try {
       res.setHeader("X-Server-Status", "alive");
       const verifiedRecords = records.filter(
@@ -494,8 +512,14 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       wallet_balance: 0,
     }
   ];
-  const records: any[] = [];
+  
   const logs: any[] = [];
+  const records: any[] = [];
+  const carbonEvents: any[] = [];
+  // Arrays replaced by DB
+
+  
+  
   const farmers: any[] = [];
   const notifications: any[] = [];
   const blockchain: any[] = [
@@ -629,7 +653,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const contracts: any[] = [];
   const compliance_records: any[] = [];
   const pickup_schedules: any[] = [];
-  const carbonEvents: any[] = [];
+  
   const verifiableCredentials: any[] = [];
   const cccCertificates: any[] = [];
   const guardianMessages: any[] = [];
@@ -1427,7 +1451,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         is_recurring: req.body.is_recurring || false,
         pickup_frequency: req.body.pickup_frequency || ''
       };
-      records.push(record);
+      await RecordService.addRecord(record);
 
       // Hedera HCS Anchor - Trust Rail Audit
       const eventHash = crypto.createHash('sha256').update(JSON.stringify(record)).digest('hex');
@@ -1439,7 +1463,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       try {
         // Core Integration Principle: ENRICH existing workflows with carbon intelligence
         const carbonEvent = generateCarbonEvent(record, wasteConfig);
-        carbonEvents.push(carbonEvent);
+        /* await CarbonEventService.addEvent(carbonEvent); */
         logs.push({
           id: Date.now(),
           event: "WASTE_UPLOADED",
@@ -1690,7 +1714,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
 
   // ---------------- LGD ROUTES ----------------
-  app.get("/api/lgd/states", (req, res) => {
+  app.get("/api/lgd/states", async (req, res) => {
     const states = getLgdStates();
     res.json(states);
   });
@@ -1709,7 +1733,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json(subdistricts);
   });
 
-  app.get("/api/lgd/localbodies", (req, res) => {
+  app.get("/api/lgd/localbodies", async (req, res) => {
     const { state, district, subdistrict } = req.query;
     if (!state || !district || !subdistrict) {
       return res.status(400).json({ error: "State, district, and subdistrict parameters are required" });
@@ -1718,7 +1742,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json(localbodies);
   });
 
-  app.get("/api/lgd/sync-status", (req, res) => {
+  app.get("/api/lgd/sync-status", async (req, res) => {
     res.json(getLgdSyncStatus());
   });
 
@@ -2740,7 +2764,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   );
 
   // ---------------- WASTE CONFIGURATION ----------------
-  app.get("/api/waste-types", (req, res) => {
+  app.get("/api/waste-types", async (req, res) => {
     res.json(dynamicWasteTypes);
   });
 
@@ -2764,7 +2788,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     });
   });
 
-  app.get("/api/payment-config", (req, res) => {
+  app.get("/api/payment-config", async (req, res) => {
     res.json(paymentConfig);
   });
 
@@ -2793,7 +2817,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   // ---------------- CPCB SWM & BWG COMPLIANCE OPERATING SYSTEM ROUTES ----------------
   let cpcbBwgLogs: any[] = [];
 
-  app.post("/api/cpcb/bwg-assess", (req, res) => {
+  app.post("/api/cpcb/bwg-assess", async (req, res) => {
     const { entityName, category, dailyWasteKg, builtUpAreaSqm } = req.body;
     const wasteNum = Number(dailyWasteKg) || 0;
     const areaNum = Number(builtUpAreaSqm) || 0;
@@ -2821,11 +2845,11 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     });
   });
 
-  app.get("/api/cpcb/logs", (req, res) => {
+  app.get("/api/cpcb/logs", async (req, res) => {
     res.json(cpcbBwgLogs);
   });
 
-  app.post("/api/cpcb/logs", (req, res) => {
+  app.post("/api/cpcb/logs", async (req, res) => {
     const { stream, wasteType, weightKg, trackingCode, vehicleNo, destinationFacility, geoLat, geoLng, verifiedBy } = req.body;
     const weightNum = Number(weightKg) || 0;
 
@@ -2865,7 +2889,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     res.json(newLog);
   });
 
-  app.get("/api/cpcb/calendar", (req, res) => {
+  app.get("/api/cpcb/calendar", async (req, res) => {
     res.json([
       {
         id: "CAL_001",
@@ -2961,7 +2985,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     }
   });
 
-  app.post("/api/cpcb/export-submission", (req, res) => {
+  app.post("/api/cpcb/export-submission", async (req, res) => {
     const { entityName, category } = req.body;
     const totalLogs = cpcbBwgLogs.length;
     const totalWeightKg = cpcbBwgLogs.reduce((sum, l) => sum + l.weightKg, 0);
@@ -2999,7 +3023,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   });
 
   // ---------------- RUPAYKG SWM 18-LAYER OPERATIONAL ENDPOINTS ----------------
-  app.post("/api/swm/cpcb-sync", (req, res) => {
+  app.post("/api/swm/cpcb-sync", async (req, res) => {
     const { channel, entityId, payload } = req.body;
     res.json({
       success: true,
@@ -3012,7 +3036,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.post("/api/swm/weighbridge/slip", (req, res) => {
+  app.post("/api/swm/weighbridge/slip", async (req, res) => {
     const { grossWeightKg, tareWeightKg, vehicleNo, facilityName } = req.body;
     const gross = Number(grossWeightKg) || 12400;
     const tare = Number(tareWeightKg) || 4800;
@@ -3033,7 +3057,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.post("/api/swm/ai-forecast", (req, res) => {
+  app.post("/api/swm/ai-forecast", async (req, res) => {
     const { zone, pastDailyAvgKg } = req.body;
     const base = Number(pastDailyAvgKg) || 450;
     const forecast30Days = Array.from({ length: 30 }, (_, i) => {
@@ -3060,7 +3084,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   });
 
   // ---------------- STATUS & INTERNAL ----------------
-  app.get("/api/status", (req, res) => {
+  app.get("/api/status", async (req, res) => {
     res.json({
       service: "RUPAYKG",
       issuer: "ALLIANCEVENTURES",
@@ -3105,7 +3129,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   const guardianPolicies: any[] = [];
   const guardianSubmissions: any[] = [];
 
-  app.post("/api/v1/guardian/authority", (req, res) => {
+  app.post("/api/v1/guardian/authority", async (req, res) => {
     const { username, hederaAccountId, hederaPrivateKey } = req.body;
     if (!username || !hederaAccountId || !hederaPrivateKey) {
       return res.status(400).json({ error: "Missing required fields: username, hederaAccountId, hederaPrivateKey" });
@@ -3146,14 +3170,14 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.get("/api/v1/guardian/authority", (req, res) => {
+  app.get("/api/v1/guardian/authority", async (req, res) => {
     if (!guardianAuthority) {
       return res.json({ success: false, message: "Authority not initialized yet" });
     }
     res.json({ success: true, ...guardianAuthority });
   });
 
-  app.get("/api/v1/policies", (req, res) => {
+  app.get("/api/v1/policies", async (req, res) => {
     res.json(guardianPolicies);
   });
 
@@ -3199,7 +3223,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.post("/api/v1/policies/:policy_id/blocks/:block_id", (req, res) => {
+  app.post("/api/v1/policies/:policy_id/blocks/:block_id", async (req, res) => {
     const { policy_id, block_id } = req.params;
     const { document } = req.body;
 
@@ -3288,11 +3312,11 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     });
   });
 
-  app.get("/api/v1/guardian/submissions", (req, res) => {
+  app.get("/api/v1/guardian/submissions", async (req, res) => {
     res.json(guardianSubmissions);
   });
 
-  app.get("/api/blockchain/verify", (req, res) => {
+  app.get("/api/blockchain/verify", async (req, res) => {
     let isValid = true;
     for (let i = 1; i < blockchain.length; i++) {
       const currentBlock = blockchain[i];
@@ -3539,7 +3563,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
           value: 5,
           ccc_factor: emission_factor,
         });
-        carbonEvents.push(carbonEvent);
+        /* await CarbonEventService.addEvent(carbonEvent); */
         (logEntry as any).carbon_event_id = carbonEvent.id;
         (logEntry as any).net_carbon_reduction =
           carbonEvent.net_carbon_reduction_kg_co2e;
@@ -3650,7 +3674,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     },
   );
 
-  app.get("/api/pilot/playbook", (req, res) => {
+  app.get("/api/pilot/playbook", async (req, res) => {
     res.json({
       onboarding: [
         {
@@ -4053,7 +4077,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     res.json(vc);
   });
 
-  app.get("/api/carbon/context.jsonld", (req, res) => {
+  app.get("/api/carbon/context.jsonld", async (req, res) => {
     // Public endpoint for VVB programmatic parsing
     res.json(VCService.getWasteCarbonContext());
   });
@@ -4185,11 +4209,11 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     res.json({ message: "Verified MRV Audit Payload successfully compiled and ready for National Registry submission!", certificate: newCert });
   });
 
-  app.get("/api/offset-projects/methodologies", auth(), (req, res) => {
+  app.get("/api/offset-projects/methodologies", auth(), async (req, res) => {
     res.json(methodologyLibrary);
   });
 
-  app.post("/api/offset-projects/methodologies/import", auth(), (req, res) => {
+  app.post("/api/offset-projects/methodologies/import", auth(), async (req, res) => {
     const { name, sector, description, rules, standards_body, version } = req.body;
     
     if (!name || !sector || !description) {
@@ -5040,7 +5064,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // ---------------- REAL-TIME LIVE SSE STREAM ----------------
-  app.get("/api/live/stream", (req, res) => {
+  app.get("/api/live/stream", async (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache, no-transform");
     res.setHeader("Connection", "keep-alive");
@@ -5076,7 +5100,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   // =========================================================================
 
   // 1. Live Approved BEE Methodology Catalogue & Registry (2026 standards)
-  app.get("/api/carbon/cqe/methodologies", (req, res) => {
+  app.get("/api/carbon/cqe/methodologies", async (req, res) => {
     const { sector, status, search } = req.query as { sector?: string; status?: string; search?: string };
     const list = CQEMethodologyRegistry.getAll({ sector, status, search });
     res.json({
@@ -5088,7 +5112,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // 1b. Single Methodology by ID
-  app.get("/api/carbon/cqe/methodologies/:id", (req, res) => {
+  app.get("/api/carbon/cqe/methodologies/:id", async (req, res) => {
     const item = CQEMethodologyRegistry.getById(req.params.id);
     if (!item) {
       return res.status(404).json({ error: `Methodology ${req.params.id} not found.` });
@@ -5338,14 +5362,14 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
     const distPath = path.join(process.cwd(), "dist");
     if (fs.existsSync(distPath)) {
       app.use(express.static(distPath));
-      app.get("*", (req, res) => {
+      app.get("*", async (req, res) => {
         res.sendFile(path.join(distPath, "index.html"));
       });
     } else {
       console.warn(
         "Production mode detected but 'dist' folder not found. Please run 'npm run build' first.",
       );
-      app.get("*", (req, res) => {
+      app.get("*", async (req, res) => {
         res
           .status(500)
           .send("Application not built. Please contact administrator.");

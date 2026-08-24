@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Database, FileText, CheckCircle2, UserCheck, Factory, HardDrive, Cpu, Scale } from 'lucide-react';
+import { ShieldCheck, Database, FileText, CheckCircle2, UserCheck, Factory, HardDrive, Cpu, Scale, Building, Truck, Activity } from 'lucide-react';
 
 export const ICMRegistry: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState('legalEntities');
@@ -30,9 +30,15 @@ export const ICMRegistry: React.FC = () => {
     else if (activeSubTab === 'carbonRights') fetchRegistryData('carbon-rights');
     else if (activeSubTab === 'mrvPackages') fetchRegistryData('mrv-packages');
     else if (activeSubTab === 'acvaEngagements') fetchRegistryData('acva-engagements');
+    else if (activeSubTab === 'urbanUlbs') fetchRegistryData('urban/ulbs');
+    else if (activeSubTab === 'urbanWards') fetchRegistryData('urban/wards');
+    else if (activeSubTab === 'urbanManifests') fetchRegistryData('urban/manifests');
   }, [activeSubTab]);
 
   const navItems = [
+    { id: 'urbanUlbs', label: 'Urban ULBs', icon: Building },
+    { id: 'urbanWards', label: 'Urban Wards', icon: Database },
+    { id: 'urbanManifests', label: 'Waste Manifests', icon: Truck },
     { id: 'legalEntities', label: 'Legal Entities', icon: UserCheck },
     { id: 'icmAccounts', label: 'ICM Accounts', icon: ShieldCheck },
     { id: 'programmes', label: 'Programmes / PoAs', icon: Database },

@@ -74,17 +74,7 @@ export const auth = (roles: string[] = []) => {
       }
     }
 
-    // 3. Fallback: decode JWT payload directly
-    if (!decodedPayload) {
-      try {
-        const decoded = jwt.decode(token);
-        if (decoded && typeof decoded === 'object' && (decoded.id || decoded.uid || decoded.role || decoded.phone)) {
-          decodedPayload = decoded;
-        }
-      } catch (err) {
-        // Decode failed
-      }
-    }
+    
 
     if (!decodedPayload) {
       return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
