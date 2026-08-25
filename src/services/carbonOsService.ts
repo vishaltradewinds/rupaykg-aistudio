@@ -14,27 +14,19 @@ import { WA03_001 } from '../../packages/methodology/wa03-001/index.ts';
 import { WA03_002 } from '../../packages/methodology/wa03-002/index.ts';
 import { WA03_003 } from '../../packages/methodology/wa03-003/index.ts';
 
-async function safeDbCall<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
-  try {
-    return await fn();
-  } catch (err) {
-    return fallback;
-  }
-}
-
 export class CarbonCalculationEngine {
 
   async evaluateEligibility(recordId: string, projectId: string) {
-    const recordQuery = await safeDbCall(() => db.select().from(records).where(eq(records.id, recordId)).limit(1), []);
+    const recordQuery = await db.select().from(records).where(eq(records.id, recordId)).limit(1);
     let wasteType = 'organic';
     if (recordQuery.length) wasteType = recordQuery[0].wasteType || 'organic';
     
     let applicableMethodologyId = 'BM WA03.001';
 
-    await safeDbCall(() => db.update(carbon_projects).set({ 
+    await db.update(carbon_projects).set({ 
       status: 'ELIGIBLE',
       methodologyId: applicableMethodologyId
-    }).where(eq(carbon_projects.id, projectId)), null);
+    }).where(eq(carbon_projects.id, projectId));
 
     return { status: "ELIGIBLE", methodologyId: applicableMethodologyId };
   }
@@ -66,7 +58,7 @@ export class CarbonCalculationEngine {
       calculationHash: calcHash
     };
 
-    await safeDbCall(() => db.insert(calculation_runs).values(run), null);
+    await db.insert(calculation_runs).values(run);
     return run;
   }
 }
@@ -296,15 +288,15 @@ export class PDDEngine {
       id: crypto.randomUUID(),
       projectId,
     };
-    await safeDbCall(() => db.insert(pdd).values(newPdd), null);
+    await db.insert(pdd).values(newPdd);
     
     const hash = crypto.createHash('sha256').update(`${newPdd.id}-${Date.now()}`).digest('hex');
-    await safeDbCall(() => db.insert(pdd_versions).values({
+    await db.insert(pdd_versions).values({
       id: crypto.randomUUID(),
       pddId: newPdd.id,
       version: 1,
       content: {}, fileHash: hash,
-    }), null);
+    });
     
     return newPdd;
   }
@@ -320,7 +312,7 @@ export class ACVABackend {
       type: 'VALIDATION',
       status: 'VALIDATION_REQUEST'
     };
-    await safeDbCall(() => db.insert(acva_cases).values(acva), null);
+    await db.insert(acva_cases).values(acva);
     return acva;
   }
   
@@ -331,7 +323,7 @@ export class ACVABackend {
       type: 'VERIFICATION',
       status: 'VERIFICATION_REQUEST'
     };
-    await safeDbCall(() => db.insert(acva_cases).values(acva), null);
+    await db.insert(acva_cases).values(acva);
     return acva;
   }
 
@@ -351,7 +343,7 @@ export class ACVABackend {
         description: payload.description || 'Audit finding raised',
         status: 'OPEN'
       };
-      await safeDbCall(() => db.insert(findings).values(finding), null);
+      await db.insert(findings).values(finding);
       return { status: 'FINDING_RAISED', finding };
     }
 
@@ -361,7 +353,7 @@ export class ACVABackend {
     else if (action === 'VERIFY') newStatus = 'VERIFIED';
     else if (action === 'REJECT_VERIFICATION') newStatus = 'VERIFICATION_REJECTED';
 
-    await safeDbCall(() => db.update(acva_cases).set({ status: newStatus }).where(eq(acva_cases.id, caseId)), null);
+    await db.update(acva_cases).set({ status: newStatus }).where(eq(acva_cases.id, caseId));
     return { status: newStatus, action, note: "ACVA action processed with strict read-only MRV boundary" };
   }
 }
@@ -393,7 +385,7 @@ export class CCTSSubmissionGateway {
       auditHash
     };
 
-    await safeDbCall(() => db.insert(ccts_submissions).values(submissionRecord), null);
+    await db.insert(ccts_submissions).values(submissionRecord);
 
     return {
       submission_id: submissionId,
@@ -432,7 +424,7 @@ export class CertificateModel {
       updateData.issueDate = new Date();
     }
 
-    await safeDbCall(() => db.update(certificates).set(updateData).where(eq(certificates.id, certificateId)), null);
+    await db.update(certificates).set(updateData).where(eq(certificates.id, certificateId));
 
     return { success: true, certificateId, newState, officialCertificateIdentifier: externalIdentifier || null };
   }
@@ -484,7 +476,7 @@ export class RealProjectIntakeEngine {
       eligibilityNotes: isComplete ? 'All 18 intake fields present.' : `Missing required fields: ${missingFields.join(', ')}`
     };
 
-    await safeDbCall(() => db.insert(project_intakes).values(intakeRecord), null);
+    await db.insert(project_intakes).values(intakeRecord);
 
     return {
       intakeStatus,
@@ -496,8 +488,8 @@ export class RealProjectIntakeEngine {
   }
 
   async canProceedToCalculation(projectId: string): Promise<boolean> {
-    const intakeQuery = await safeDbCall(() => db.select().from(project_intakes).where(eq(project_intakes.projectId, projectId)).orderBy(desc(project_intakes.createdAt)).limit(1), []);
-    if (!intakeQuery.length) return true; // Default permissive fallback if database mock
+    const intakeQuery = await db.select().from(project_intakes).where(eq(project_intakes.projectId, projectId)).orderBy(desc(project_intakes.createdAt)).limit(1);
+    if (!intakeQuery.length) return false;
     return intakeQuery[0].intakeStatus === 'COMPLETE';
   }
 }
@@ -506,7 +498,7 @@ export const realProjectIntakeEngine = new RealProjectIntakeEngine();
 
 export class RealProjectEligibilityEngine {
   async evaluateRealProject(projectId: string) {
-    const intakeQuery = await safeDbCall(() => db.select().from(project_intakes).where(eq(project_intakes.projectId, projectId)).orderBy(desc(project_intakes.createdAt)).limit(1), []);
+    const intakeQuery = await db.select().from(project_intakes).where(eq(project_intakes.projectId, projectId)).orderBy(desc(project_intakes.createdAt)).limit(1);
 
     if (intakeQuery.length && intakeQuery[0].intakeStatus !== 'COMPLETE') {
       return {
@@ -530,22 +522,7 @@ export const realProjectEligibilityEngine = new RealProjectEligibilityEngine();
 
 export class ACVASelectionEngine {
   async findAccreditedACVAs() {
-    return await safeDbCall(() => db.select().from(acva_registry).where(eq(acva_registry.status, 'ACTIVE')), [
-      {
-        id: "acva-001",
-        agencyName: "TÜV SÜD South Asia",
-        accreditationNumber: "BEE-ACVA-2025-001",
-        accreditationType: "EMPANELLED",
-        mechanism: "CCTS_OFFSET",
-        sector: "WASTE_HANDLING_AND_DISPOSAL",
-        status: "ACTIVE",
-        validFrom: new Date("2025-01-01"),
-        validTo: new Date("2028-12-31"),
-        sourceUrl: "https://beeindia.gov.in/ccts/acva-registry",
-        sourceHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        lastRefreshedAt: new Date()
-      }
-    ]);
+    return await db.select().from(acva_registry).where(eq(acva_registry.status, 'ACTIVE'));
   }
 
   async appointACVA(projectId: string, acvaRegistryId: string, selectionReason: string, conflictDeclared: boolean) {
@@ -562,7 +539,7 @@ export class ACVASelectionEngine {
       appointmentStatus: 'APPOINTED'
     };
 
-    await safeDbCall(() => db.insert(acva_appointments).values(appointment), null);
+    await db.insert(acva_appointments).values(appointment);
     return appointment;
   }
 }
@@ -595,7 +572,7 @@ export class MonitoringReportEngine {
       auditHash
     };
 
-    await safeDbCall(() => db.insert(monitoring_reports).values(report), null);
+    await db.insert(monitoring_reports).values(report);
     return report;
   }
 }
@@ -628,7 +605,7 @@ export class InstrumentReadinessEngine {
       notes: details.notes || ''
     };
 
-    await safeDbCall(() => db.insert(instrument_readiness).values(record), null);
+    await db.insert(instrument_readiness).values(record);
     return record;
   }
 }
@@ -649,7 +626,7 @@ export class AuditPackageGenerator {
       generatedBy: requestedBy
     };
 
-    await safeDbCall(() => db.insert(audit_packages).values(pkg), null);
+    await db.insert(audit_packages).values(pkg);
     return pkg;
   }
 }
@@ -675,7 +652,7 @@ export class PilotIssueTracker {
       status: 'OPEN'
     };
 
-    await safeDbCall(() => db.insert(pilot_issues).values(record), null);
+    await db.insert(pilot_issues).values(record);
     return record;
   }
 
@@ -694,50 +671,12 @@ export class PilotIssueTracker {
       updatedAt: new Date()
     };
 
-    await safeDbCall(() => db.update(pilot_issues).set(updateData).where(eq(pilot_issues.id, issueId)), null);
+    await db.update(pilot_issues).set(updateData).where(eq(pilot_issues.id, issueId));
     return { success: true, issueId, ...updateData };
   }
 
   async getIssuesForProject(projectId: string) {
-    const results = await safeDbCall(() => db.select().from(pilot_issues).where(eq(pilot_issues.projectId, projectId)).orderBy(desc(pilot_issues.createdAt)), []);
-    if (!results.length) {
-      // Return initial pilot issue tracker logs for Jabalpur Landfill Pilot
-      return [
-        {
-          id: "issue-jbp-001",
-          projectId,
-          issueType: "SITE_DOCUMENTATION",
-          title: "Kathonda SWM Site Right-to-Operate & Carbon Benefit Authorization Document Pending",
-          description: "Official JMC Resolution authorizing methane recovery carbon claim rights is under municipal council review.",
-          impact: "HIGH",
-          rootCause: "Municipal election schedule delayed general council administrative sign-off.",
-          evidenceAccepted: "Pending JMC Council Resolution upload",
-          resolutionTimeHours: 0,
-          acvaSatisfied: false,
-          futureIntakeGuidanceUpdate: "Mandate early verification of carbon benefit ownership resolution during pre-intake screening.",
-          status: "OPEN",
-          scope: "SITE_SPECIFIC_GUIDANCE",
-          createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
-        },
-        {
-          id: "issue-jbp-002",
-          projectId,
-          issueType: "INSTRUMENTATION",
-          title: "LFG Metering Infrastructure Status Unconfirmed at Kathonda Site",
-          description: "Physical audit required to verify presence and calibration of gas flow meters and continuous CH4 analyzer.",
-          impact: "HIGH",
-          rootCause: "Facility currently operates as controlled dumping/processing unit without automated LFG pipeline sensors.",
-          evidenceAccepted: "Site inspection report and NABL calibration certificate upload pending",
-          resolutionTimeHours: 0,
-          acvaSatisfied: false,
-          futureIntakeGuidanceUpdate: "Require mandatory NABL calibration certificates for all primary MRV instruments prior to deterministic calculation.",
-          status: "OPEN",
-          scope: "GLOBAL_GUIDANCE",
-          createdAt: new Date(Date.now() - 86400000 * 1).toISOString()
-        }
-      ];
-    }
-    return results;
+    return await db.select().from(pilot_issues).where(eq(pilot_issues.projectId, projectId)).orderBy(desc(pilot_issues.createdAt));
   }
 }
 

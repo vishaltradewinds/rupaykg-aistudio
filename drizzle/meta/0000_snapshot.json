@@ -1,9 +1,94 @@
 {
-  "id": "7cbfdde2-ff36-46db-8efe-edfeb37d6701",
+  "id": "253fb8f3-d615-47c0-88c8-2feaa4df189a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.acva_appointments": {
+      "name": "acva_appointments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "acva_registry_id": {
+          "name": "acva_registry_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "selection_reason": {
+          "name": "selection_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "conflict_declaration_passed": {
+          "name": "conflict_declaration_passed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "appointment_status": {
+          "name": "appointment_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PROPOSED'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "acva_appointments_project_id_carbon_projects_id_fk": {
+          "name": "acva_appointments_project_id_carbon_projects_id_fk",
+          "tableFrom": "acva_appointments",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "acva_appointments_acva_registry_id_acva_registry_id_fk": {
+          "name": "acva_appointments_acva_registry_id_acva_registry_id_fk",
+          "tableFrom": "acva_appointments",
+          "tableTo": "acva_registry",
+          "columnsFrom": [
+            "acva_registry_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.acva_cases": {
       "name": "acva_cases",
       "schema": "",
@@ -78,6 +163,486 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.acva_engagements": {
+      "name": "acva_engagements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cpa_id": {
+          "name": "cpa_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'VALIDATION'"
+        },
+        "acva_organisation": {
+          "name": "acva_organisation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'NOT_STARTED'"
+        },
+        "engagement_date": {
+          "name": "engagement_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "report": {
+          "name": "report",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "findings": {
+          "name": "findings",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "corrective_actions": {
+          "name": "corrective_actions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "final_opinion": {
+          "name": "final_opinion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "acva_engagements_project_id_carbon_projects_id_fk": {
+          "name": "acva_engagements_project_id_carbon_projects_id_fk",
+          "tableFrom": "acva_engagements",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "acva_engagements_cpa_id_component_project_activities_id_fk": {
+          "name": "acva_engagements_cpa_id_component_project_activities_id_fk",
+          "tableFrom": "acva_engagements",
+          "tableTo": "component_project_activities",
+          "columnsFrom": [
+            "cpa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.acva_registry": {
+      "name": "acva_registry",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "agency_name": {
+          "name": "agency_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accreditation_number": {
+          "name": "accreditation_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accreditation_type": {
+          "name": "accreditation_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mechanism": {
+          "name": "mechanism",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'CCTS_OFFSET'"
+        },
+        "sector": {
+          "name": "sector",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'WASTE_HANDLING_AND_DISPOSAL'"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_url": {
+          "name": "source_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_hash": {
+          "name": "source_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_refreshed_at": {
+          "name": "last_refreshed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "acva_registry_accreditation_number_unique": {
+          "name": "acva_registry_accreditation_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "accreditation_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.audit_packages": {
+      "name": "audit_packages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monitoring_period_id": {
+          "name": "monitoring_period_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "package_hash": {
+          "name": "package_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "download_url": {
+          "name": "download_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "included_entities": {
+          "name": "included_entities",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "generated_at": {
+          "name": "generated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "generated_by": {
+          "name": "generated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "audit_packages_project_id_carbon_projects_id_fk": {
+          "name": "audit_packages_project_id_carbon_projects_id_fk",
+          "tableFrom": "audit_packages",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bee_methodologies": {
+      "name": "bee_methodologies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "official_code": {
+          "name": "official_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "official_title": {
+          "name": "official_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version": {
+          "name": "version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "methodology_type": {
+          "name": "methodology_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "applicability": {
+          "name": "applicability",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_document": {
+          "name": "source_document",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_url": {
+          "name": "source_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "publication_date": {
+          "name": "publication_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "effective_date": {
+          "name": "effective_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "calculation_reference": {
+          "name": "calculation_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "monitoring_requirements": {
+          "name": "monitoring_requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence_requirements": {
+          "name": "evidence_requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.blockchain_blocks": {
+      "name": "blockchain_blocks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "block_index": {
+          "name": "block_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previous_hash": {
+          "name": "previous_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hash": {
+          "name": "hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "blockchain_blocks_block_index_unique": {
+          "name": "blockchain_blocks_block_index_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "block_index"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -366,6 +931,265 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.carbon_events": {
+      "name": "carbon_events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "record_id": {
+          "name": "record_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount_tco2e": {
+          "name": "amount_tco2e",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'RECORDED'"
+        },
+        "stakeholder_chain": {
+          "name": "stakeholder_chain",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "methodology_code": {
+          "name": "methodology_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence_hash": {
+          "name": "evidence_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "village": {
+          "name": "village",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "district": {
+          "name": "district",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "carbon_events_record_id_records_id_fk": {
+          "name": "carbon_events_record_id_records_id_fk",
+          "tableFrom": "carbon_events",
+          "tableTo": "records",
+          "columnsFrom": [
+            "record_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.carbon_programmes": {
+      "name": "carbon_programmes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "icm_account_id": {
+          "name": "icm_account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "programme_type": {
+          "name": "programme_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PoA'"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "geographical_scope": {
+          "name": "geographical_scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "technology_scope": {
+          "name": "technology_scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "methodology_scope": {
+          "name": "methodology_scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baseline_approach": {
+          "name": "baseline_approach",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "additionality_approach": {
+          "name": "additionality_approach",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "crediting_period_years": {
+          "name": "crediting_period_years",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pdd_document": {
+          "name": "pdd_document",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration_status": {
+          "name": "registration_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INTERNAL'"
+        },
+        "icm_reference": {
+          "name": "icm_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validation_status": {
+          "name": "validation_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_status": {
+          "name": "verification_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "carbon_programmes_icm_account_id_icm_accounts_id_fk": {
+          "name": "carbon_programmes_icm_account_id_icm_accounts_id_fk",
+          "tableFrom": "carbon_programmes",
+          "tableTo": "icm_accounts",
+          "columnsFrom": [
+            "icm_account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.carbon_projects": {
       "name": "carbon_projects",
       "schema": "",
@@ -413,6 +1237,36 @@
           "primaryKey": false,
           "notNull": false
         },
+        "icm_account_id": {
+          "name": "icm_account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "programme_id": {
+          "name": "programme_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "generic_cpa_id": {
+          "name": "generic_cpa_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cpa_id": {
+          "name": "cpa_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "legal_entity_id": {
+          "name": "legal_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -455,6 +1309,378 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "carbon_projects_icm_account_id_icm_accounts_id_fk": {
+          "name": "carbon_projects_icm_account_id_icm_accounts_id_fk",
+          "tableFrom": "carbon_projects",
+          "tableTo": "icm_accounts",
+          "columnsFrom": [
+            "icm_account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_projects_programme_id_carbon_programmes_id_fk": {
+          "name": "carbon_projects_programme_id_carbon_programmes_id_fk",
+          "tableFrom": "carbon_projects",
+          "tableTo": "carbon_programmes",
+          "columnsFrom": [
+            "programme_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_projects_generic_cpa_id_generic_cpas_id_fk": {
+          "name": "carbon_projects_generic_cpa_id_generic_cpas_id_fk",
+          "tableFrom": "carbon_projects",
+          "tableTo": "generic_cpas",
+          "columnsFrom": [
+            "generic_cpa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_projects_cpa_id_component_project_activities_id_fk": {
+          "name": "carbon_projects_cpa_id_component_project_activities_id_fk",
+          "tableFrom": "carbon_projects",
+          "tableTo": "component_project_activities",
+          "columnsFrom": [
+            "cpa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_projects_legal_entity_id_legal_entities_id_fk": {
+          "name": "carbon_projects_legal_entity_id_legal_entities_id_fk",
+          "tableFrom": "carbon_projects",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "legal_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.carbon_rights": {
+      "name": "carbon_rights",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cpa_id": {
+          "name": "cpa_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rights_holder_entity_id": {
+          "name": "rights_holder_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_owner_entity_id": {
+          "name": "asset_owner_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operator_entity_id": {
+          "name": "operator_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "beneficiary_entity_id": {
+          "name": "beneficiary_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ownership_percentage": {
+          "name": "ownership_percentage",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rights_type": {
+          "name": "rights_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "agreement_reference": {
+          "name": "agreement_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "agreement_document": {
+          "name": "agreement_document",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "effective_date": {
+          "name": "effective_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expiry_date": {
+          "name": "expiry_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "carbon_rights_project_id_carbon_projects_id_fk": {
+          "name": "carbon_rights_project_id_carbon_projects_id_fk",
+          "tableFrom": "carbon_rights",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_rights_cpa_id_component_project_activities_id_fk": {
+          "name": "carbon_rights_cpa_id_component_project_activities_id_fk",
+          "tableFrom": "carbon_rights",
+          "tableTo": "component_project_activities",
+          "columnsFrom": [
+            "cpa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_rights_rights_holder_entity_id_legal_entities_id_fk": {
+          "name": "carbon_rights_rights_holder_entity_id_legal_entities_id_fk",
+          "tableFrom": "carbon_rights",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "rights_holder_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_rights_asset_owner_entity_id_legal_entities_id_fk": {
+          "name": "carbon_rights_asset_owner_entity_id_legal_entities_id_fk",
+          "tableFrom": "carbon_rights",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "asset_owner_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_rights_operator_entity_id_legal_entities_id_fk": {
+          "name": "carbon_rights_operator_entity_id_legal_entities_id_fk",
+          "tableFrom": "carbon_rights",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "operator_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "carbon_rights_beneficiary_entity_id_legal_entities_id_fk": {
+          "name": "carbon_rights_beneficiary_entity_id_legal_entities_id_fk",
+          "tableFrom": "carbon_rights",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "beneficiary_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ccts_submissions": {
+      "name": "ccts_submissions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "submission_type": {
+          "name": "submission_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monitoring_period_id": {
+          "name": "monitoring_period_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acva_id": {
+          "name": "acva_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "documents": {
+          "name": "documents",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "verification_report_url": {
+          "name": "verification_report_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "submission_date": {
+          "name": "submission_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "external_reference": {
+          "name": "external_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "adapter_type": {
+          "name": "adapter_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'MANUAL'"
+        },
+        "response": {
+          "name": "response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "audit_hash": {
+          "name": "audit_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ccts_submissions_project_id_carbon_projects_id_fk": {
+          "name": "ccts_submissions_project_id_carbon_projects_id_fk",
+          "tableFrom": "ccts_submissions",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -485,15 +1711,33 @@
           "primaryKey": false,
           "notNull": true
         },
+        "official_certificate_identifier": {
+          "name": "official_certificate_identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "external_reference": {
+          "name": "external_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "status": {
           "name": "status",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ISSUED'"
+          "default": "'CALCULATED'"
         },
         "issue_date": {
           "name": "issue_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
@@ -530,20 +1774,265 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.compliance_records": {
+      "name": "compliance_records",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "compliance_type": {
+          "name": "compliance_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reporting_period": {
+          "name": "reporting_period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'COMPLIANT'"
+        },
+        "target_quantity": {
+          "name": "target_quantity",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "achieved_quantity": {
+          "name": "achieved_quantity",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence_urls": {
+          "name": "evidence_urls",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_by": {
+          "name": "verified_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.component_project_activities": {
+      "name": "component_project_activities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "generic_cpa_id": {
+          "name": "generic_cpa_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "operator_entity_id": {
+          "name": "operator_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "site_id": {
+          "name": "site_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geographical_boundary": {
+          "name": "geographical_boundary",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "crediting_period_years": {
+          "name": "crediting_period_years",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "technology": {
+          "name": "technology",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baseline": {
+          "name": "baseline",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "monitoring_plan": {
+          "name": "monitoring_plan",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "registration_status": {
+          "name": "registration_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INTERNAL'"
+        },
+        "validation_status": {
+          "name": "validation_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_status": {
+          "name": "verification_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "component_project_activities_generic_cpa_id_generic_cpas_id_fk": {
+          "name": "component_project_activities_generic_cpa_id_generic_cpas_id_fk",
+          "tableFrom": "component_project_activities",
+          "tableTo": "generic_cpas",
+          "columnsFrom": [
+            "generic_cpa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "component_project_activities_operator_entity_id_legal_entities_id_fk": {
+          "name": "component_project_activities_operator_entity_id_legal_entities_id_fk",
+          "tableFrom": "component_project_activities",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "operator_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.electricity_meter_readings": {
       "name": "electricity_meter_readings",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "instrument_id": {
           "name": "instrument_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -579,7 +2068,7 @@
         },
         "evidence_id": {
           "name": "evidence_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -786,6 +2275,130 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.farmers": {
+      "name": "farmers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aadhaar_hash": {
+          "name": "aadhaar_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "village": {
+          "name": "village",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subdistrict": {
+          "name": "subdistrict",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "district": {
+          "name": "district",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "land_area_acres": {
+          "name": "land_area_acres",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "primary_crop": {
+          "name": "primary_crop",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_account": {
+          "name": "bank_account",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ifsc": {
+          "name": "ifsc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shg_id": {
+          "name": "shg_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fpo_id": {
+          "name": "fpo_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.findings": {
       "name": "findings",
       "schema": "",
@@ -851,14 +2464,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "instrument_id": {
           "name": "instrument_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -904,6 +2516,369 @@
         "gas_meter_readings_instrument_id_instruments_id_fk": {
           "name": "gas_meter_readings_instrument_id_instruments_id_fk",
           "tableFrom": "gas_meter_readings",
+          "tableTo": "instruments",
+          "columnsFrom": [
+            "instrument_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.generic_cpas": {
+      "name": "generic_cpas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "programme_id": {
+          "name": "programme_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activity_type": {
+          "name": "activity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "technology_type": {
+          "name": "technology_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "methodology_id": {
+          "name": "methodology_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baseline_methodology": {
+          "name": "baseline_methodology",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "additionality_methodology": {
+          "name": "additionality_methodology",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "eligibility_criteria": {
+          "name": "eligibility_criteria",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "geographic_criteria": {
+          "name": "geographic_criteria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "monitoring_requirements": {
+          "name": "monitoring_requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "evidence_requirements": {
+          "name": "evidence_requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "calculation_method": {
+          "name": "calculation_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "generic_cpas_programme_id_carbon_programmes_id_fk": {
+          "name": "generic_cpas_programme_id_carbon_programmes_id_fk",
+          "tableFrom": "generic_cpas",
+          "tableTo": "carbon_programmes",
+          "columnsFrom": [
+            "programme_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.icm_accounts": {
+      "name": "icm_accounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "legal_entity_id": {
+          "name": "legal_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entity_name": {
+          "name": "entity_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_registration_status": {
+          "name": "account_registration_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "authorized_representative": {
+          "name": "authorized_representative",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "documents": {
+          "name": "documents",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "external_reference": {
+          "name": "external_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "administrator_reference": {
+          "name": "administrator_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration_date": {
+          "name": "registration_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval_date": {
+          "name": "approval_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmed_at": {
+          "name": "confirmed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "icm_accounts_legal_entity_id_legal_entities_id_fk": {
+          "name": "icm_accounts_legal_entity_id_legal_entities_id_fk",
+          "tableFrom": "icm_accounts",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "legal_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.instrument_readiness": {
+      "name": "instrument_readiness",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "facility_id": {
+          "name": "facility_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_id": {
+          "name": "instrument_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "installed_status": {
+          "name": "installed_status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "operational_status": {
+          "name": "operational_status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "calibrated_status": {
+          "name": "calibrated_status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "traceable_status": {
+          "name": "traceable_status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "data_connected_status": {
+          "name": "data_connected_status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "readiness_rating": {
+          "name": "readiness_rating",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'BLOCKED'"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "instrument_readiness_facility_id_facilities_id_fk": {
+          "name": "instrument_readiness_facility_id_facilities_id_fk",
+          "tableFrom": "instrument_readiness",
+          "tableTo": "facilities",
+          "columnsFrom": [
+            "facility_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "instrument_readiness_instrument_id_instruments_id_fk": {
+          "name": "instrument_readiness_instrument_id_instruments_id_fk",
+          "tableFrom": "instrument_readiness",
           "tableTo": "instruments",
           "columnsFrom": [
             "instrument_id"
@@ -985,14 +2960,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "facility_id": {
           "name": "facility_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1052,6 +3026,119 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.legal_entities": {
+      "name": "legal_entities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "legal_name": {
+          "name": "legal_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "brand_name": {
+          "name": "brand_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country": {
+          "name": "country",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration_number": {
+          "name": "registration_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tax_identifier": {
+          "name": "tax_identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registered_address": {
+          "name": "registered_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contact_email": {
+          "name": "contact_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contact_phone": {
+          "name": "contact_phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "authorized_representative": {
+          "name": "authorized_representative",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "authorized_representative_designation": {
+          "name": "authorized_representative_designation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "documents": {
+          "name": "documents",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1172,14 +3259,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "instrument_id": {
           "name": "instrument_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1203,7 +3289,7 @@
         },
         "evidence_id": {
           "name": "evidence_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -1427,6 +3513,119 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.monitoring_datasets": {
+      "name": "monitoring_datasets",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "monitoring_period_id": {
+          "name": "monitoring_period_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parameter": {
+          "name": "parameter",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "measurement_method": {
+          "name": "measurement_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'MEASURED'"
+        },
+        "instrument_id": {
+          "name": "instrument_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "measurement_timestamp": {
+          "name": "measurement_timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data_source": {
+          "name": "data_source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operator": {
+          "name": "operator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_status": {
+          "name": "quality_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence_id": {
+          "name": "evidence_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "monitoring_datasets_monitoring_period_id_monitoring_periods_id_fk": {
+          "name": "monitoring_datasets_monitoring_period_id_monitoring_periods_id_fk",
+          "tableFrom": "monitoring_datasets",
+          "tableTo": "monitoring_periods",
+          "columnsFrom": [
+            "monitoring_period_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.monitoring_periods": {
       "name": "monitoring_periods",
       "schema": "",
@@ -1441,7 +3640,13 @@
           "name": "project_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "cpa_id": {
+          "name": "cpa_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "start_date": {
           "name": "start_date",
@@ -1460,7 +3665,49 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ACTIVE'"
+          "default": "'OPEN'"
+        },
+        "data_completeness": {
+          "name": "data_completeness",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "evidence_completeness": {
+          "name": "evidence_completeness",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "calculation_status": {
+          "name": "calculation_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'PENDING'"
+        },
+        "verification_status": {
+          "name": "verification_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'PENDING'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -1477,8 +3724,381 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "monitoring_periods_cpa_id_component_project_activities_id_fk": {
+          "name": "monitoring_periods_cpa_id_component_project_activities_id_fk",
+          "tableFrom": "monitoring_periods",
+          "tableTo": "component_project_activities",
+          "columnsFrom": [
+            "cpa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.monitoring_reports": {
+      "name": "monitoring_reports",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monitoring_period_id": {
+          "name": "monitoring_period_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "methodology_id": {
+          "name": "methodology_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dataset_id": {
+          "name": "dataset_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calculation_run_id": {
+          "name": "calculation_run_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "claimed_tco2e": {
+          "name": "claimed_tco2e",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "evidence_index": {
+          "name": "evidence_index",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "qa_qc_summary": {
+          "name": "qa_qc_summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deviations": {
+          "name": "deviations",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "corrective_actions": {
+          "name": "corrective_actions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "frozen_at": {
+          "name": "frozen_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "audit_hash": {
+          "name": "audit_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "monitoring_reports_project_id_carbon_projects_id_fk": {
+          "name": "monitoring_reports_project_id_carbon_projects_id_fk",
+          "tableFrom": "monitoring_reports",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.mrv_packages": {
+      "name": "mrv_packages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cpa_id": {
+          "name": "cpa_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "monitoring_period_id": {
+          "name": "monitoring_period_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "methodology_id": {
+          "name": "methodology_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baseline": {
+          "name": "baseline",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "additionality": {
+          "name": "additionality",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "monitoring_datasets": {
+          "name": "monitoring_datasets",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculations": {
+          "name": "calculations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence": {
+          "name": "evidence",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mass_balance": {
+          "name": "mass_balance",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qa_qc": {
+          "name": "qa_qc",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "double_counting": {
+          "name": "double_counting",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "carbon_rights": {
+          "name": "carbon_rights",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acva_status": {
+          "name": "acva_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "documents": {
+          "name": "documents",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hashes": {
+          "name": "hashes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "audit_trail": {
+          "name": "audit_trail",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "mrv_packages_project_id_carbon_projects_id_fk": {
+          "name": "mrv_packages_project_id_carbon_projects_id_fk",
+          "tableFrom": "mrv_packages",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "mrv_packages_cpa_id_component_project_activities_id_fk": {
+          "name": "mrv_packages_cpa_id_component_project_activities_id_fk",
+          "tableFrom": "mrv_packages",
+          "tableTo": "component_project_activities",
+          "columnsFrom": [
+            "cpa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "mrv_packages_monitoring_period_id_monitoring_periods_id_fk": {
+          "name": "mrv_packages_monitoring_period_id_monitoring_periods_id_fk",
+          "tableFrom": "mrv_packages",
+          "tableTo": "monitoring_periods",
+          "columnsFrom": [
+            "monitoring_period_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.operational_logs": {
+      "name": "operational_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INFO'"
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1588,6 +4208,480 @@
           "tableTo": "pdd",
           "columnsFrom": [
             "pdd_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pilot_issues": {
+      "name": "pilot_issues",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "issue_type": {
+          "name": "issue_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "impact": {
+          "name": "impact",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "root_cause": {
+          "name": "root_cause",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence_accepted": {
+          "name": "evidence_accepted",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolution_time_hours": {
+          "name": "resolution_time_hours",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acva_satisfied": {
+          "name": "acva_satisfied",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "future_intake_guidance_update": {
+          "name": "future_intake_guidance_update",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'OPEN'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pilot_onboardings": {
+      "name": "pilot_onboardings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pilot_name": {
+          "name": "pilot_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pilot_type": {
+          "name": "pilot_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operator_entity_id": {
+          "name": "operator_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "onboarding_date": {
+          "name": "onboarding_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "baseline_data": {
+          "name": "baseline_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pilot_onboardings_operator_entity_id_legal_entities_id_fk": {
+          "name": "pilot_onboardings_operator_entity_id_legal_entities_id_fk",
+          "tableFrom": "pilot_onboardings",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "operator_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pilot_records": {
+      "name": "pilot_records",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pilot_id": {
+          "name": "pilot_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "facility_id": {
+          "name": "facility_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "material_type": {
+          "name": "material_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weight_kg": {
+          "name": "weight_kg",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weighbridge_ticket": {
+          "name": "weighbridge_ticket",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gps_coordinates": {
+          "name": "gps_coordinates",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'RECORDED'"
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pilot_records_facility_id_facilities_id_fk": {
+          "name": "pilot_records_facility_id_facilities_id_fk",
+          "tableFrom": "pilot_records",
+          "tableTo": "facilities",
+          "columnsFrom": [
+            "facility_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.project_intakes": {
+      "name": "project_intakes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_owner": {
+          "name": "project_owner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "legal_entity": {
+          "name": "legal_entity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "icm_account_status": {
+          "name": "icm_account_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "facility_owner": {
+          "name": "facility_owner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "facility_operator": {
+          "name": "facility_operator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "site_location": {
+          "name": "site_location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "landfill_info": {
+          "name": "landfill_info",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "waste_history": {
+          "name": "waste_history",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "gas_capture_infra": {
+          "name": "gas_capture_infra",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "flare_utilisation_infra": {
+          "name": "flare_utilisation_infra",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "instruments_list": {
+          "name": "instruments_list",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "calibration_records_list": {
+          "name": "calibration_records_list",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "monitoring_system": {
+          "name": "monitoring_system",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "land_ownership_rights": {
+          "name": "land_ownership_rights",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "carbon_benefit_ownership": {
+          "name": "carbon_benefit_ownership",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "applicable_permits": {
+          "name": "applicable_permits",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "contracts": {
+          "name": "contracts",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "existing_environmental_records": {
+          "name": "existing_environmental_records",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "intake_status": {
+          "name": "intake_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INCOMPLETE'"
+        },
+        "eligibility_assessment": {
+          "name": "eligibility_assessment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INSUFFICIENT_DATA'"
+        },
+        "eligibility_notes": {
+          "name": "eligibility_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "project_intakes_project_id_carbon_projects_id_fk": {
+          "name": "project_intakes_project_id_carbon_projects_id_fk",
+          "tableFrom": "project_intakes",
+          "tableTo": "carbon_projects",
+          "columnsFrom": [
+            "project_id"
           ],
           "columnsTo": [
             "id"
@@ -1719,6 +4813,449 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.system_notifications": {
+      "name": "system_notifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INFO'"
+        },
+        "read": {
+          "name": "read",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.urban_collection_operators": {
+      "name": "urban_collection_operators",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "legal_entity_id": {
+          "name": "legal_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "urban_collection_operators_legal_entity_id_legal_entities_id_fk": {
+          "name": "urban_collection_operators_legal_entity_id_legal_entities_id_fk",
+          "tableFrom": "urban_collection_operators",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "legal_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.urban_generators": {
+      "name": "urban_generators",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ward_id": {
+          "name": "ward_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rfid_or_qr": {
+          "name": "rfid_or_qr",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "urban_generators_ward_id_urban_wards_id_fk": {
+          "name": "urban_generators_ward_id_urban_wards_id_fk",
+          "tableFrom": "urban_generators",
+          "tableTo": "urban_wards",
+          "columnsFrom": [
+            "ward_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.urban_transport_operators": {
+      "name": "urban_transport_operators",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "legal_entity_id": {
+          "name": "legal_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "urban_transport_operators_legal_entity_id_legal_entities_id_fk": {
+          "name": "urban_transport_operators_legal_entity_id_legal_entities_id_fk",
+          "tableFrom": "urban_transport_operators",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "legal_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.urban_ulbs": {
+      "name": "urban_ulbs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "legal_entity_id": {
+          "name": "legal_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "district": {
+          "name": "district",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "urban_ulbs_legal_entity_id_legal_entities_id_fk": {
+          "name": "urban_ulbs_legal_entity_id_legal_entities_id_fk",
+          "tableFrom": "urban_ulbs",
+          "tableTo": "legal_entities",
+          "columnsFrom": [
+            "legal_entity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.urban_vehicles": {
+      "name": "urban_vehicles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "transport_operator_id": {
+          "name": "transport_operator_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration_number": {
+          "name": "registration_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gps_enabled": {
+          "name": "gps_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "urban_vehicles_transport_operator_id_urban_transport_operators_id_fk": {
+          "name": "urban_vehicles_transport_operator_id_urban_transport_operators_id_fk",
+          "tableFrom": "urban_vehicles",
+          "tableTo": "urban_transport_operators",
+          "columnsFrom": [
+            "transport_operator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.urban_wards": {
+      "name": "urban_wards",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "zone_id": {
+          "name": "zone_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ward_number": {
+          "name": "ward_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "urban_wards_zone_id_urban_zones_id_fk": {
+          "name": "urban_wards_zone_id_urban_zones_id_fk",
+          "tableFrom": "urban_wards",
+          "tableTo": "urban_zones",
+          "columnsFrom": [
+            "zone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.urban_zones": {
+      "name": "urban_zones",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ulb_id": {
+          "name": "ulb_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "urban_zones_ulb_id_urban_ulbs_id_fk": {
+          "name": "urban_zones_ulb_id_urban_ulbs_id_fk",
+          "tableFrom": "urban_zones",
+          "tableTo": "urban_ulbs",
+          "columnsFrom": [
+            "ulb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -1832,14 +5369,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "landfill_facility_id": {
           "name": "landfill_facility_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1893,7 +5429,7 @@
         },
         "evidence_id": {
           "name": "evidence_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -1933,20 +5469,184 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.waste_manifests": {
+      "name": "waste_manifests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "generator_id": {
+          "name": "generator_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "collection_operator_id": {
+          "name": "collection_operator_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transport_operator_id": {
+          "name": "transport_operator_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vehicle_id": {
+          "name": "vehicle_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weighbridge_record_id": {
+          "name": "weighbridge_record_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "destination_facility_id": {
+          "name": "destination_facility_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "material_type": {
+          "name": "material_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weight_kg": {
+          "name": "weight_kg",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "collected_at": {
+          "name": "collected_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "delivered_at": {
+          "name": "delivered_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'IN_TRANSIT'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "waste_manifests_generator_id_urban_generators_id_fk": {
+          "name": "waste_manifests_generator_id_urban_generators_id_fk",
+          "tableFrom": "waste_manifests",
+          "tableTo": "urban_generators",
+          "columnsFrom": [
+            "generator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "waste_manifests_collection_operator_id_urban_collection_operators_id_fk": {
+          "name": "waste_manifests_collection_operator_id_urban_collection_operators_id_fk",
+          "tableFrom": "waste_manifests",
+          "tableTo": "urban_collection_operators",
+          "columnsFrom": [
+            "collection_operator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "waste_manifests_transport_operator_id_urban_transport_operators_id_fk": {
+          "name": "waste_manifests_transport_operator_id_urban_transport_operators_id_fk",
+          "tableFrom": "waste_manifests",
+          "tableTo": "urban_transport_operators",
+          "columnsFrom": [
+            "transport_operator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "waste_manifests_vehicle_id_urban_vehicles_id_fk": {
+          "name": "waste_manifests_vehicle_id_urban_vehicles_id_fk",
+          "tableFrom": "waste_manifests",
+          "tableTo": "urban_vehicles",
+          "columnsFrom": [
+            "vehicle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "waste_manifests_weighbridge_record_id_weighbridge_records_id_fk": {
+          "name": "waste_manifests_weighbridge_record_id_weighbridge_records_id_fk",
+          "tableFrom": "waste_manifests",
+          "tableTo": "weighbridge_records",
+          "columnsFrom": [
+            "weighbridge_record_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "waste_manifests_destination_facility_id_facilities_id_fk": {
+          "name": "waste_manifests_destination_facility_id_facilities_id_fk",
+          "tableFrom": "waste_manifests",
+          "tableTo": "facilities",
+          "columnsFrom": [
+            "destination_facility_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.weighbridge_records": {
       "name": "weighbridge_records",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "facility_id": {
           "name": "facility_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1994,7 +5694,7 @@
         },
         "source_record_id": {
           "name": "source_record_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

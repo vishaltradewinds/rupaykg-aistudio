@@ -8,7 +8,9 @@
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist",
+    "db:migrate": "tsx scripts/migrate.ts",
     "lint": "tsc --noEmit",
+    "test": "tsx tests/pilot_persistence_test.ts && tsx tests/two_process_survival_test.ts && tsx tests/two_process_reader.ts && tsx tests/urban_rural_test.ts && tsx tests/fail_closed_test.ts",
     "start": "node dist/server.cjs"
   },
   "dependencies": {

@@ -504,7 +504,15 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     }
   }
 
-  const adminHashedPassword = bcrypt.hashSync(process.env.ADMIN_PASSWORD || "admin_password", 10);
+  const rawAdminPassword = process.env.ADMIN_PASSWORD || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error("SECURITY FAULT: ADMIN_PASSWORD must be configured in production environment.");
+    }
+    const ephemeralPass = crypto.randomBytes(16).toString('hex');
+    console.warn(`[SECURITY WARNING] ADMIN_PASSWORD not set. Generated ephemeral session admin password.`);
+    return ephemeralPass;
+  })();
+  const adminHashedPassword = bcrypt.hashSync(rawAdminPassword, 10);
   const users: any[] = [
     {
       id: "admin_1",
@@ -653,7 +661,13 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   };
 
   // --- MULTI-GENERATOR PLATFORM STORES ---
-  const JWT_SECRET = process.env.JWT_SECRET || 'rupaykg_enterprise_platform_jwt_secret_2026_default_key';
+  const JWT_SECRET = process.env.JWT_SECRET || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error("SECURITY FAULT: JWT_SECRET must be configured in production environment.");
+    }
+    console.warn("[SECURITY WARNING] JWT_SECRET not set. Generating ephemeral 256-bit cryptographic key.");
+    return crypto.randomBytes(32).toString('hex');
+  })();
 
   const clientRedis: any = null;
   const generators: any[] = [];

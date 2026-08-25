@@ -104,7 +104,7 @@ async function process1Writer() {
     pilotId: pilot.id,
     auditLogId: auditLog.id,
     blockHash: block.hash,
-    blockIndex: block.block_index
+    blockIndex: block.index
   };
 
   fs.writeFileSync('./tests/.survival_manifest.json', JSON.stringify(manifest, null, 2));

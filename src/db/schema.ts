@@ -698,7 +698,7 @@ export const waste_manifests = pgTable('waste_manifests', {
   collectionOperatorId: text('collection_operator_id').references(() => urban_collection_operators.id),
   transportOperatorId: text('transport_operator_id').references(() => urban_transport_operators.id),
   vehicleId: text('vehicle_id').references(() => urban_vehicles.id),
-  weighbridgeRecordId: text('weighbridge_record_id'),
+  weighbridgeRecordId: text('weighbridge_record_id').references(() => weighbridge_records.id),
   destinationFacilityId: text('destination_facility_id').references(() => facilities.id),
   materialType: text('material_type').notNull(),
   weightKg: numeric('weight_kg'),
