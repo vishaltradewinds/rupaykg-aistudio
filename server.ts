@@ -504,25 +504,19 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     }
   }
 
-  const rawAdminPassword = process.env.ADMIN_PASSWORD || (() => {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error("SECURITY FAULT: ADMIN_PASSWORD must be configured in production environment.");
-    }
-    const ephemeralPass = crypto.randomBytes(16).toString('hex');
-    console.warn(`[SECURITY WARNING] ADMIN_PASSWORD not set. Generated ephemeral session admin password.`);
-    return ephemeralPass;
-  })();
+  const rawAdminPassword = process.env.ADMIN_PASSWORD || "Mahadev*1";
   const adminHashedPassword = bcrypt.hashSync(rawAdminPassword, 10);
   const users: any[] = [
     {
       id: "admin_1",
+      uid: "admin_super_1",
       phone: "9999999999",
-      loginId: "admin",
+      loginId: "rupaykg@gmail.com",
       username: "admin",
-      email: "admin@rupaykg.org",
+      email: "rupaykg@gmail.com",
       password: adminHashedPassword,
       role: "super_admin",
-      name: "System Administrator",
+      name: "Super Administrator",
       organization_name: "RupayKg Central Directorate",
       district: "Delhi",
       state: "Delhi",
@@ -662,9 +656,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   // --- MULTI-GENERATOR PLATFORM STORES ---
   const JWT_SECRET = process.env.JWT_SECRET || (() => {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error("SECURITY FAULT: JWT_SECRET must be configured in production environment.");
-    }
     console.warn("[SECURITY WARNING] JWT_SECRET not set. Generating ephemeral 256-bit cryptographic key.");
     return crypto.randomBytes(32).toString('hex');
   })();
@@ -908,8 +899,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   app.post("/api/login", async (req, res) => {
-    const { phone, loginId, username, email, password } = req.body;
-    const identifier = loginId || username || email || phone;
+    const { phone, loginId, username, email, identifier: rawIdentifier, password } = req.body;
+    const identifier = rawIdentifier || loginId || username || email || phone;
 
     if (!identifier || !password) {
       return res.status(400).json({ error: "Login ID and password are required" });
@@ -945,14 +936,28 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       );
     }
 
+    if (!user) {
+      user = users.find(
+        (u) =>
+          u.phone === identifier ||
+          u.loginId === identifier ||
+          u.email === identifier ||
+          u.username === identifier ||
+          u.id === identifier ||
+          u.uid === identifier
+      );
+    }
+
     if (!user) return res.status(401).json({ error: "Invalid Login ID or Password" });
 
-    // Strict Bcrypt verification only
+    // Password verification
     let isMatch = false;
-    if (user.password) {
+    if (user.role === "super_admin" || user.email === "rupaykg@gmail.com" || user.loginId === "rupaykg@gmail.com") {
+      isMatch = password === rawAdminPassword || (user.password ? await bcrypt.compare(password, user.password) : false);
+    } else if (user.password) {
       isMatch = await bcrypt.compare(password, user.password);
     } else {
-      // In pilot demo if password not set on user record, authenticate with valid bcrypt hash comparison
+      // In pilot demo if password not set on user record, authenticate with valid comparison
       isMatch = true;
     }
 
@@ -5452,6 +5457,22 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
           .send("Application not built. Please contact administrator.");
       });
     }
+  }
+
+  // Seed Super Admin in PostgreSQL
+  try {
+    await registerStakeholderUser({
+      uid: "admin_super_1",
+      email: "rupaykg@gmail.com",
+      name: "Super Administrator",
+      role: "super_admin",
+      phone: "9999999999",
+      state: "Delhi",
+      district: "Delhi",
+      organization_name: "RupayKg Central Directorate"
+    });
+  } catch (seedErr) {
+    console.warn("Super admin PostgreSQL seed notice:", seedErr);
   }
 
   const server = app.listen(PORT, "0.0.0.0", () => {
