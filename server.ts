@@ -188,6 +188,21 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const INTERNAL_TOKEN =
     process.env.INTERNAL_SERVICE_TOKEN ;
 
+  function isValidMongoUri(uri?: string): boolean {
+    if (!uri) return false;
+    const trimmed = uri.trim();
+    if (!trimmed || trimmed === "undefined" || trimmed === "null") return false;
+    if (
+      trimmed.includes("<your-cluster-url>") ||
+      trimmed.includes("<username>") ||
+      trimmed.includes("<password>") ||
+      trimmed.includes("placeholder")
+    ) {
+      return false;
+    }
+    return trimmed.startsWith("mongodb://") || trimmed.startsWith("mongodb+srv://");
+  }
+
   // Ensure public.pem and private.pem exist for RS256
   if (!fs.existsSync("./private.pem") || !fs.existsSync("./public.pem")) {
     console.log("Generating RSA Keypair for RS256...");
@@ -226,10 +241,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   async function connectDB() {
-    if (MONGO_URI) {
+    if (isValidMongoUri(MONGO_URI)) {
       try {
         dbStatus = "connecting";
-        await mongoose.connect(MONGO_URI, {
+        await mongoose.connect(MONGO_URI!, {
           serverSelectionTimeoutMS: 5000,
           socketTimeoutMS: 45000,
         });
@@ -242,9 +257,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         console.warn("MongoDB initial connection failed:", err.message);
       }
     } else {
-      dbStatus = "no_uri";
+      dbStatus = "not_configured";
       console.log(
-        "No MONGO_URI provided. Using in-memory & PostgreSQL fallback.",
+        "MongoDB URI not configured or placeholder detected. Operating in durable Cloud SQL PostgreSQL & in-memory mode.",
       );
     }
   }
@@ -262,7 +277,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         mongodb: {
           status: dbStatus,
           error: dbError || undefined,
-          configured: !!MONGO_URI,
+          configured: isValidMongoUri(MONGO_URI),
         },
         postgres: {
           status: process.env.SQL_HOST ? "configured" : "in-memory-fallback",
@@ -4760,14 +4775,17 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
 
   app.post("/api/ai/generate", async (req: any, res: any) => {
     const { model, contents, config } = req.body;
-    let modelName = model || "gemini-3-flash-preview";
+    let modelName = model || "gemini-2.5-flash";
 
     if (
       modelName === "gemini-1.5-flash" ||
-      modelName === "gemini-3.1-flash-lite" ||
-      modelName === "gemini-1.5-pro"
+      modelName === "gemini-1.5-pro" ||
+      modelName === "gemini-pro" ||
+      modelName === "gemini-2.0-flash" ||
+      modelName === "gemini-3-flash-preview" ||
+      modelName === "gemini-3.5-flash"
     ) {
-      modelName = "gemini-3-flash-preview";
+      modelName = "gemini-2.5-flash";
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -4807,7 +4825,23 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
             config,
           });
 
-          return res.json(response);
+          const responseText =
+            response.text ||
+            response.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "";
+
+          return res.json({
+            text: responseText,
+            candidates: response.candidates || [
+              {
+                content: {
+                  parts: [{ text: responseText }],
+                },
+                finishReason: "STOP",
+              },
+            ],
+            usageMetadata: response.usageMetadata,
+          });
         } catch (err: any) {
           lastError = err;
           const is429 = err.message?.includes("429") || err.status === 429;

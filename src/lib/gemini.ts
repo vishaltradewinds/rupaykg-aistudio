@@ -31,14 +31,22 @@ export const ai = {
           throw new Error(errorMsg);
         }
 
-        if (!data) {
-          throw new Error("Received invalid response from AI service");
-        }
+        const textVal =
+          data?.text ||
+          data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+          (typeof data === "string" ? data : "");
 
-        const textVal = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
         return {
-          ...data,
+          ...(typeof data === "object" ? data : {}),
           text: textVal,
+          candidates: data?.candidates || [
+            {
+              content: {
+                parts: [{ text: textVal }]
+              },
+              finishReason: "STOP"
+            }
+          ],
           response: {
             text: () => textVal
           }
