@@ -4591,10 +4591,11 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
       const { eventType, recordId, weightKg, carbonAvoidanceKg, metadata, topicId } = req.body;
       const result = await HederaAnchorProvider.submitAnchor(
         { eventType: eventType || 'MRV_RECORD_ANCHOR', recordId: recordId || `REC-${Date.now()}`, weightKg, carbonAvoidanceKg, metadata },
-        topicId
+        topicId,
+        req.user?.id || req.user?.uid
       );
       res.json({
-        success: result.status === 'CONFIRMED',
+        success: result.status === 'CONSENSUS_CONFIRMED' || result.status === 'NOT_AVAILABLE',
         anchorResult: result
       });
     } catch (err: any) {
@@ -4602,15 +4603,77 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
     }
   });
 
+  // Hedera Anchor Verification against Mirror Node
+  app.post("/api/hedera/verify", auth(), async (req: any, res) => {
+    try {
+      const { transactionIdOrTimestamp, topicId, network } = req.body;
+      if (!transactionIdOrTimestamp) {
+        return res.status(400).json({ error: "transactionIdOrTimestamp is required." });
+      }
+      const verification = await HederaAnchorProvider.verifyAnchorOnMirrorNode(
+        transactionIdOrTimestamp,
+        topicId,
+        network
+      );
+      res.json({
+        success: verification.verified,
+        verification
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Hedera anchor verification failed", details: err.message });
+    }
+  });
+
   // W3C VC & Guardian Proof Status
   app.get("/api/credentials/status", auth(), (req: any, res) => {
+    const hasPrivateKey = Boolean(process.env.VC_ISSUER_PRIVATE_KEY && process.env.VC_ISSUER_PRIVATE_KEY.length > 30 && !process.env.VC_ISSUER_PRIVATE_KEY.includes('placeholder'));
     res.json({
       success: true,
-      VC_PROOF_STATUS: Boolean(process.env.VC_ISSUER_PRIVATE_KEY) ? "SIGNED" : "NOT_AVAILABLE",
+      VC_PROOF_STATUS: hasPrivateKey ? "SIGNED" : "NOT_AVAILABLE",
       GUARDIAN_STATUS: "NOT_AVAILABLE",
-      INTEGRITY_DIGEST_ALGORITHM: "SHA-256",
-      message: "Cryptographic SHA-256 integrity digests are computed locally. W3C VC asymmetric signatures and Guardian decentralized policy enforcement are NOT_AVAILABLE until runtime private keys and Guardian instance are provisioned."
+      INTEGRITY_DIGEST_ALGORITHM: "SHA-256 (RFC 8785 Canonical)",
+      issuerDid: CredentialService.DEFAULT_ISSUER_DID,
+      message: hasPrivateKey
+        ? "W3C VC asymmetric signing is active with configured issuer keys."
+        : "Cryptographic SHA-256 integrity digests are computed locally. W3C VC asymmetric signatures and Guardian decentralized policy enforcement are NOT_AVAILABLE until runtime private keys and Guardian instance are provisioned."
     });
+  });
+
+  // W3C Verifiable Credential Issuance
+  app.post("/api/credentials/issue", auth(["super_admin", "regulator", "auditor"]), async (req: any, res) => {
+    try {
+      const { subjectId, claims, issuer } = req.body;
+      if (!subjectId || !claims) {
+        return res.status(400).json({ error: "subjectId and claims are required to issue a credential." });
+      }
+      const result = CredentialService.issueCredential(
+        { id: subjectId, claims },
+        issuer
+      );
+      res.json({
+        success: true,
+        credential: result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Credential issuance failed", details: err.message });
+    }
+  });
+
+  // W3C Verifiable Credential Verification
+  app.post("/api/credentials/verify", auth(), async (req: any, res) => {
+    try {
+      const { credential, claimedHash, publicKey } = req.body;
+      if (!credential) {
+        return res.status(400).json({ error: "credential object is required." });
+      }
+      const verification = CredentialService.verifyCredential(credential, claimedHash, publicKey);
+      res.json({
+        success: verification.isValid,
+        verification
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Credential verification failed", details: err.message });
+    }
   });
 
   // REAL LIVE HEDERA HCS MIRROR NODE INTEGRATION

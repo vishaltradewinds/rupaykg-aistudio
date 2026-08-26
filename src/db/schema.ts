@@ -869,3 +869,26 @@ export const cqe_methodologies = pgTable('cqe_methodologies', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+export const hedera_anchors = pgTable('hedera_anchors', {
+  id: text('id').primaryKey(),
+  recordId: text('record_id'),
+  credentialId: text('credential_id'),
+  payloadHash: text('payload_hash').notNull(),
+  network: text('network').notNull().default('testnet'),
+  topicId: text('topic_id').notNull(),
+  transactionId: text('transaction_id'),
+  consensusTimestamp: text('consensus_timestamp'),
+  status: text('status').notNull().default('NOT_CONFIGURED'), // NOT_CONFIGURED, READY, SUBMITTING, SUBMITTED, CONSENSUS_CONFIRMED, FAILED, RETRYABLE_FAILURE, PERMANENT_FAILURE, NOT_AVAILABLE
+  provider: text('provider').notNull().default('HEDERA_HCS'),
+  attemptCount: integer('attempt_count').notNull().default(0),
+  lastAttemptAt: timestamp('last_attempt_at'),
+  confirmedAt: timestamp('confirmed_at'),
+  errorCode: text('error_code'),
+  errorMessage: text('error_message'),
+  metadata: jsonb('metadata'),
+  createdBy: text('created_by'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+
