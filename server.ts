@@ -1,7 +1,7 @@
 import { carbonRouter } from "./src/routes/carbon.ts";
 import { auth as requireAuth } from "./src/middleware/auth.ts";
 import { sanitizeMiddleware } from "./src/middleware/sanitize.ts";
-import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserByPhone, getOrCreateUser } from "./src/db/users.ts";
+import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserByPhone, getOrCreateUser, getUserByIdentifier, updateUserPassword, createPasswordResetToken, findValidPasswordResetToken, markPasswordResetTokenUsed } from "./src/db/users.ts";
 import { db } from "./src/db/index.ts";
 import { users as dbUsers, records as dbRecords, farmers as dbFarmers, carbon_events as dbCarbonEvents, compliance_records as dbComplianceRecords, system_notifications as dbNotifications, operational_logs as dbOperationalLogs, blockchain_blocks as dbBlockchainBlocks, pilot_onboardings as dbPilotOnboardings, pilot_records as dbPilotRecords } from "./src/db/schema.ts";
 import { eq, desc, sql } from "drizzle-orm";
@@ -187,20 +187,49 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const INTERNAL_TOKEN =
     process.env.INTERNAL_SERVICE_TOKEN ;
 
-  // Ensure public.pem and private.pem exist for RS256
-  if (!fs.existsSync("./private.pem") || !fs.existsSync("./public.pem")) {
-    console.log("Generating RSA Keypair for RS256...");
-    const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-      modulusLength: 2048,
-      publicKeyEncoding: { type: "spki", format: "pem" },
-      privateKeyEncoding: { type: "pkcs8", format: "pem" },
-    });
-    fs.writeFileSync("./public.pem", publicKey);
-    fs.writeFileSync("./private.pem", privateKey);
+  // Enterprise Key Management
+  function initRSAKeys(): { publicKey: string; privateKey: string } {
+    let pub = process.env.RUPAYKG_JWT_PUBLIC_KEY;
+    let priv = process.env.RUPAYKG_JWT_PRIVATE_KEY;
+
+    if ((!pub || !priv) && fs.existsSync("./private.pem") && fs.existsSync("./public.pem")) {
+      pub = fs.readFileSync("./public.pem", "utf8");
+      priv = fs.readFileSync("./private.pem", "utf8");
+    }
+
+    const isProd = process.env.NODE_ENV === "production" || process.env.APP_MODE === "production";
+
+    if (!pub || !priv || !pub.includes("KEY-----") || !priv.includes("KEY-----")) {
+      if (isProd) {
+        console.error("[FATAL SECURITY ERROR] RSA Keys missing or invalid in production environment. RUPAYKG_JWT_PUBLIC_KEY and RUPAYKG_JWT_PRIVATE_KEY must be configured.");
+        throw new Error("Missing required cryptographic RSA keys in production mode.");
+      }
+      console.warn("[SECURITY NOTICE] Ephemeral RSA Keypair generated for local DEVELOPMENT sandbox only.");
+      const keypair = crypto.generateKeyPairSync("rsa", {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: "spki", format: "pem" },
+        privateKeyEncoding: { type: "pkcs8", format: "pem" },
+      });
+      fs.writeFileSync("./public.pem", keypair.publicKey);
+      fs.writeFileSync("./private.pem", keypair.privateKey);
+      pub = keypair.publicKey;
+      priv = keypair.privateKey;
+    }
+
+    // Cryptographic validation test
+    try {
+      const testPayload = { test: true, ts: Date.now() };
+      const testToken = jwt.sign(testPayload, priv, { algorithm: "RS256" });
+      jwt.verify(testToken, pub, { algorithms: ["RS256"] });
+    } catch (valErr: any) {
+      console.error("[FATAL SECURITY ERROR] RSA key pair cryptographic validation failed:", valErr.message);
+      throw new Error(`Invalid RSA key pair: ${valErr.message}`);
+    }
+
+    return { publicKey: pub, privateKey: priv };
   }
 
-  const publicKey = fs.readFileSync("./public.pem", "utf8");
-  const privateKey = fs.readFileSync("./private.pem", "utf8");
+  const { publicKey, privateKey } = initRSAKeys();
 
   let dbStatus = "disconnected";
   let dbError = "";
@@ -254,8 +283,19 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   );
 
   app.get("/api/health", async (req, res) => {
-    res.json({
-      status: "ok",
+    let pgStatus = "healthy";
+    let pgError = undefined;
+    try {
+      await db.select().from(dbUsers).limit(1);
+    } catch (err: any) {
+      pgStatus = "degraded";
+      pgError = err.message;
+    }
+
+    const overallStatus = pgStatus === "healthy" ? "ok" : "degraded";
+
+    res.status(overallStatus === "ok" ? 200 : 503).json({
+      status: overallStatus,
       version: "3.0.0-Enterprise",
       services: {
         mongodb: {
@@ -264,15 +304,16 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           configured: !!MONGO_URI,
         },
         postgres: {
-          status: process.env.SQL_HOST ? "configured" : "in-memory-fallback",
-          host: process.env.SQL_HOST || "none",
+          status: pgStatus,
+          error: pgError,
+          host: process.env.SQL_HOST || "cloudsql-postgres",
         },
         security_keys: {
           status: "active_rs256",
           algorithm: "RS256",
         },
         gemini_ai: {
-          status: process.env.GEMINI_API_KEY ? "enabled" : "mock_ready",
+          status: process.env.GEMINI_API_KEY ? "enabled" : "rule_engine_fallback",
         },
         carbon_engine: {
           status: "active",
@@ -319,22 +360,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         monthlyData[month] = (monthlyData[month] || 0) + (r.weight_kg || 0);
       });
 
-      let chartData = Object.keys(monthlyData).map((month) => ({
+      const chartData = Object.keys(monthlyData).map((month) => ({
         month,
         weight: monthlyData[month],
       }));
-
-      if (chartData.length === 0 && allDbUsers.length === 0) {
-        chartData = [
-          { month: "Jan", weight: 400 },
-          { month: "Feb", weight: 700 },
-          { month: "Mar", weight: 600 },
-          { month: "Apr", weight: 1200 },
-          { month: "May", weight: 1500 },
-          { month: "Jun", weight: 2100 },
-          { month: "Jul", weight: 2800 },
-        ];
-      }
 
       // Network Topology (Users grouped by state)
       const stateCounts: Record<string, number> = {};
@@ -345,7 +374,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       });
 
       const colors = ["emerald", "blue", "purple", "cyan", "amber", "rose"];
-      let networkTopology = Object.keys(stateCounts)
+      const networkTopology = Object.keys(stateCounts)
         .map((state, index) => ({
           name: state + " Cluster",
           nodes: stateCounts[state],
@@ -354,35 +383,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         }))
         .sort((a, b) => b.nodes - a.nodes)
         .slice(0, 4);
-
-      if (networkTopology.length === 0 && allDbUsers.length === 0) {
-        networkTopology = [
-          {
-            name: "Maharashtra Cluster",
-            nodes: 412,
-            load: "84%",
-            color: "emerald",
-          },
-          {
-            name: "Punjab Agricultural Rail",
-            nodes: 284,
-            load: "92%",
-            color: "blue",
-          },
-          {
-            name: "Karnataka Bio-Hub",
-            nodes: 156,
-            load: "67%",
-            color: "purple",
-          },
-          {
-            name: "Gujarat Municipal Rail",
-            nodes: 390,
-            load: "78%",
-            color: "cyan",
-          },
-        ];
-      }
 
       // Rail Distribution (Records grouped by context or user role)
       const roleCounts: Record<string, number> = {};
@@ -400,20 +400,12 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         }
       });
 
-      let railDistribution = Object.keys(roleCounts).map((role) => ({
+      const railDistribution = Object.keys(roleCounts).map((role) => ({
         name: role.replace("_", " ").toUpperCase(),
         value: roleCounts[role],
       }));
 
-      if (railDistribution.length === 0) {
-        railDistribution = [
-          { name: "RECYCLER", value: 35 },
-          { name: "CSR", value: 20 },
-          { name: "MUNICIPAL", value: 15 },
-          { name: "CCC", value: 20 },
-          { name: "EPR", value: 10 },
-        ];
-      }
+      const hasData = verifiedRecords.length > 0 || allDbUsers.length > 0;
 
       res.json({
         total_weight_kg,
@@ -423,10 +415,93 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         chartData,
         networkTopology,
         railDistribution,
+        data_status: hasData ? "LIVE" : "NO_LIVE_DATA"
       });
     } catch (err) {
       console.error("Public impact API error:", err);
       res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
+  // ---------------- LGD DIRECTORY ENDPOINTS ----------------
+  app.get("/api/lgd/states", async (req, res) => {
+    try {
+      const states = getLgdStates();
+      res.json({ success: true, count: states.length, states });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch LGD states", details: err.message });
+    }
+  });
+
+  app.get("/api/lgd/districts/:state", async (req, res) => {
+    try {
+      const stateParam = req.params.state;
+      // Check if state is a numeric code or name
+      const states = getLgdStates();
+      let stateName = stateParam;
+      const numericCode = parseInt(stateParam, 10);
+      if (!isNaN(numericCode)) {
+        const found = states.find(s => s.state_lgd_code === numericCode);
+        if (found) stateName = found.state_name;
+      }
+      const districts = await getLgdDistricts(stateName);
+      res.json({ success: true, count: districts.length, districts });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch LGD districts", details: err.message });
+    }
+  });
+
+  app.get("/api/lgd/subdistricts", async (req, res) => {
+    try {
+      const state = (req.query.state as string) || "";
+      const district = (req.query.district as string) || "";
+      if (!state || !district) {
+        return res.status(400).json({ error: "Missing required query parameters: state, district" });
+      }
+      const subdistricts = await getLgdSubdistricts(state, district);
+      res.json({ success: true, count: subdistricts.length, subdistricts });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch LGD subdistricts", details: err.message });
+    }
+  });
+
+  app.get("/api/lgd/local-bodies", async (req, res) => {
+    try {
+      const state = (req.query.state as string) || "";
+      const district = (req.query.district as string) || "";
+      const subdistrict = (req.query.subdistrict as string) || "";
+      if (!state || !district || !subdistrict) {
+        return res.status(400).json({ error: "Missing required query parameters: state, district, subdistrict" });
+      }
+      const localBodies = getLgdLocalBodies(state, district, subdistrict);
+      res.json({ success: true, count: localBodies.length, localBodies });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch LGD local bodies", details: err.message });
+    }
+  });
+
+  app.get("/api/lgd/status", async (req, res) => {
+    try {
+      const status = getLgdSyncStatus();
+      res.json({ success: true, status });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch LGD status", details: err.message });
+    }
+  });
+
+  app.post("/api/lgd/sync", auth(["super_admin", "state_admin"]), async (req: any, res) => {
+    try {
+      const result = await syncLgdDatabase();
+      await AuditLogService.log(
+        "LGD_DATABASE_SYNCED",
+        `LGD directory database synchronized by ${req.user.name || req.user.id}`,
+        "INFO",
+        req.user.id,
+        { result }
+      );
+      res.json({ success: true, message: "LGD directory database synchronized successfully", result });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to synchronize LGD database", details: err.message });
     }
   });
 
@@ -814,8 +889,13 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       return res.status(400).json({ error: "Login ID (or Phone) and password are required" });
     }
 
-    if (!ALL_STAKEHOLDER_ROLES.includes(role) && !PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role)) {
-      return res.status(400).json({ error: "Invalid stakeholder role specified. Please select a valid category." });
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters long" });
+    }
+
+    const targetRole = role || "citizen";
+    if (!PUBLIC_ROLES.includes(targetRole) || ADMIN_ROLES.includes(targetRole)) {
+      return res.status(400).json({ error: "Invalid stakeholder role specified. Privileged administrative roles cannot be self-assigned." });
     }
 
     if (dbStatus === "connected") {
@@ -851,7 +931,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       loginId: loginId || identifier,
       email: email || `${identifier}@rupaykg.org`,
       password: hashedPassword,
-      role: role || "citizen",
+      role: targetRole,
       name: name || "User",
       district: district || "",
       state: state || "",
@@ -875,6 +955,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       email: newUser.email,
       name: newUser.name,
       role: newUser.role,
+      passwordHash: hashedPassword,
       phone: newUser.phone,
       state: newUser.state,
       district: newUser.district,
@@ -947,15 +1028,15 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     if (!user) return res.status(401).json({ error: "Invalid Login ID or Password" });
 
     // Strict Bcrypt verification only
-    let isMatch = false;
-    if (user.password) {
-      isMatch = await bcrypt.compare(password, user.password);
-    } else {
-      // In pilot demo if password not set on user record, authenticate with valid bcrypt hash comparison
-      isMatch = true;
+    const storedHash = user.passwordHash || user.password;
+    if (!storedHash) {
+      return res.status(401).json({ error: "Invalid Login ID or Password" });
     }
 
-    if (!isMatch) return res.status(401).json({ error: "Invalid Login ID or Password" });
+    const isMatch = await bcrypt.compare(password, storedHash);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid Login ID or Password" });
+    }
 
     const tokenPayload = {
       id: user.uid || user.id,
@@ -990,18 +1071,69 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
      res.json({ message: "Logged out successfully" });
   });
 
+  app.post("/api/auth/request-reset", async (req, res) => {
+    const { phone, email, identifier } = req.body;
+    const target = identifier || phone || email;
+    if (!target) {
+      return res.status(400).json({ error: "Phone number, email, or Login ID is required" });
+    }
+
+    const user = await getUserByIdentifier(target);
+    // Secure OTP: 6 numeric digits
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const tokenHash = crypto.createHash("sha256").update(otp).digest("hex");
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    if (user) {
+      await createPasswordResetToken(target, tokenHash, expiresAt);
+    }
+
+    const isDev = process.env.NODE_ENV !== "production";
+    res.json({
+      message: "If an account is associated with this identifier, a password reset OTP has been issued.",
+      ...(isDev ? { dev_otp: otp } : {})
+    });
+  });
+
   app.post("/api/auth/reset-password", async (req, res) => {
-    const { phone, new_password } = req.body;
-    const user = await getUserByPhone(phone);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const { phone, identifier, otp, new_password } = req.body;
+    const target = identifier || phone;
+    if (!target || !otp || !new_password) {
+      return res.status(400).json({ error: "Identifier, OTP code, and new password are required" });
+    }
+
+    if (typeof new_password !== "string" || new_password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters long" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(otp.toString()).digest("hex");
+    const resetToken = await findValidPasswordResetToken(target, tokenHash);
+
+    if (!resetToken) {
+      return res.status(401).json({ error: "Invalid, expired, or previously used password reset OTP" });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(new_password, salt);
+
+    // Update in Postgres
+    await updateUserPassword(target, hashedPassword);
+
+    // Update in Mongo if connected
     if (dbStatus === "connected") {
       try {
-        await User.updateOne({ phone }, { password: hashedPassword });
-      } catch (err) {}
+        await User.updateOne(
+          { $or: [{ phone: target }, { email: target }, { loginId: target }, { id: target }] },
+          { password: hashedPassword }
+        );
+      } catch (err) {
+        console.warn("Mongo reset password warning:", err);
+      }
     }
+
+    // Mark token as used
+    await markPasswordResetTokenUsed(resetToken.id);
+
     res.json({ message: "Password reset successfully" });
   });
 
@@ -1016,8 +1148,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.post("/api/auth/register-stakeholder", auth(), async (req: any, res) => {
     const { role, name, phone, state, district, subdistrict, local_area, village, organization_name } = req.body;
 
-    if (!role || (!PUBLIC_ROLES.includes(role) && !ADMIN_ROLES.includes(role))) {
-      return res.status(400).json({ error: "Invalid stakeholder role specified. Please select a valid role." });
+    if (!role || !PUBLIC_ROLES.includes(role) || ADMIN_ROLES.includes(role)) {
+      return res.status(400).json({ error: "Invalid stakeholder role specified. Privileged administrative roles cannot be self-assigned." });
     }
 
     const uid = req.user.uid || req.user.id;
@@ -4752,7 +4884,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
     };
   }
 
-  app.post("/api/ai/generate", async (req: any, res: any) => {
+  app.post("/api/ai/generate", auth(), async (req: any, res: any) => {
     const { model, contents, config } = req.body;
     let modelName = model || "gemini-3-flash-preview";
 
@@ -5197,7 +5329,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // 1c. Register New Methodology / Definition
-  app.post("/api/carbon/cqe/methodologies", auth(), (req: any, res) => {
+  app.post("/api/carbon/cqe/methodologies", auth(["super_admin", "regulator"]), (req: any, res) => {
     try {
       const author = req.user?.name || req.user?.email || "BEE Administrator";
       const registered = CQEMethodologyRegistry.register(req.body, author);
@@ -5213,7 +5345,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // 1d. Update Existing Methodology
-  app.put("/api/carbon/cqe/methodologies/:id", auth(), (req: any, res) => {
+  app.put("/api/carbon/cqe/methodologies/:id", auth(["super_admin", "regulator"]), (req: any, res) => {
     try {
       const updated = CQEMethodologyRegistry.update(req.params.id, req.body);
       res.json({
@@ -5227,7 +5359,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // 1e. Version Bump / Clone Methodology
-  app.post("/api/carbon/cqe/methodologies/:id/version", auth(), (req: any, res) => {
+  app.post("/api/carbon/cqe/methodologies/:id/version", auth(["super_admin", "regulator"]), (req: any, res) => {
     try {
       const { newVersion, changelog, overrides } = req.body;
       if (!newVersion) {
@@ -5253,7 +5385,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // 1f. Import JSON Definition(s)
-  app.post("/api/carbon/cqe/methodologies/import-json", auth(), (req: any, res) => {
+  app.post("/api/carbon/cqe/methodologies/import-json", auth(["super_admin", "regulator"]), (req: any, res) => {
     try {
       const author = req.user?.name || req.user?.email || "BEE Administrator";
       const result = CQEMethodologyRegistry.importJSON(req.body, author);
@@ -5270,7 +5402,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // 1g. Reset Catalogue to Official 2026 Standards
-  app.post("/api/carbon/cqe/methodologies/reset", auth(), (req: any, res) => {
+  app.post("/api/carbon/cqe/methodologies/reset", auth(["super_admin", "regulator"]), (req: any, res) => {
     try {
       const list = CQEMethodologyRegistry.resetToStandard();
       res.json({
@@ -5285,7 +5417,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   // 1h. Delete / Archive Methodology
-  app.delete("/api/carbon/cqe/methodologies/:id", auth(), (req: any, res) => {
+  app.delete("/api/carbon/cqe/methodologies/:id", auth(["super_admin", "regulator"]), (req: any, res) => {
     try {
       const success = CQEMethodologyRegistry.delete(req.params.id);
       if (!success) {

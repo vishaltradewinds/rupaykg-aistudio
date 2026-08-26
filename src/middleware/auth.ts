@@ -9,11 +9,17 @@ export interface AuthRequest extends Request {
   user?: any;
 }
 
-function getPublicKey(): string | null {
+export function getPublicKey(): string | null {
   try {
+    if (process.env.RUPAYKG_JWT_PUBLIC_KEY && process.env.RUPAYKG_JWT_PUBLIC_KEY.includes('KEY-----')) {
+      return process.env.RUPAYKG_JWT_PUBLIC_KEY;
+    }
     const pubPath = path.resolve(process.cwd(), 'public.pem');
     if (fs.existsSync(pubPath)) {
-      return fs.readFileSync(pubPath, 'utf8');
+      const content = fs.readFileSync(pubPath, 'utf8');
+      if (content && content.includes('KEY-----')) {
+        return content;
+      }
     }
   } catch (err) {
     // ignore
@@ -41,7 +47,7 @@ export const auth = (roles: string[] = []) => {
       try {
         decodedPayload = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
       } catch (err) {
-        // Not signed by local RS256 key, will check Firebase / generic decoding
+        // Not signed by local RS256 key, check Firebase
       }
     }
 
@@ -74,8 +80,6 @@ export const auth = (roles: string[] = []) => {
       }
     }
 
-    
-
     if (!decodedPayload) {
       return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
     }
@@ -107,4 +111,3 @@ export const auth = (roles: string[] = []) => {
     next();
   };
 };
-

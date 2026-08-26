@@ -1,6 +1,6 @@
 import { db } from './index.ts';
-import { users } from './schema.ts';
-import { eq } from 'drizzle-orm';
+import { users, password_reset_tokens } from './schema.ts';
+import { eq, and, gt } from 'drizzle-orm';
 
 export async function getUser(uid: string) {
   const found = await db.select().from(users).where(eq(users.uid, uid));
@@ -28,6 +28,18 @@ export async function getUserByPhone(phone: string) {
     return found[0];
   }
   return null;
+}
+
+export async function getUserByIdentifier(identifier: string) {
+  const all = await getAllUsers();
+  return all.find(
+    (u) =>
+      u.phone === identifier ||
+      u.email === identifier ||
+      u.uid === identifier ||
+      (u as any).loginId === identifier ||
+      u.id?.toString() === identifier
+  ) || null;
 }
 
 export async function getOrCreateUser(uid: string, email: string, name: string) {
@@ -60,6 +72,7 @@ export async function registerStakeholderUser(data: {
   email: string;
   name: string;
   role: string;
+  passwordHash?: string;
   phone?: string;
   state?: string;
   district?: string;
@@ -74,6 +87,7 @@ export async function registerStakeholderUser(data: {
       email: data.email,
       name: data.name,
       role: data.role,
+      passwordHash: data.passwordHash,
       phone: data.phone,
       state: data.state,
       district: data.district,
@@ -87,6 +101,7 @@ export async function registerStakeholderUser(data: {
       set: {
         name: data.name,
         role: data.role,
+        passwordHash: data.passwordHash,
         phone: data.phone,
         state: data.state,
         district: data.district,
@@ -101,4 +116,63 @@ export async function registerStakeholderUser(data: {
   return result[0];
 }
 
+export async function updateUserPassword(identifier: string, passwordHash: string) {
+  const user = await getUserByIdentifier(identifier);
+  if (!user) return null;
+  const updated = await db.update(users)
+    .set({ passwordHash })
+    .where(eq(users.uid, user.uid))
+    .returning();
+  return updated[0] || null;
+}
 
+export async function createPasswordResetToken(identifier: string, tokenHash: string, expiresAt: Date) {
+  const res = await db.insert(password_reset_tokens)
+    .values({
+      identifier,
+      tokenHash,
+      expiresAt,
+      used: false,
+      attempts: 0
+    })
+    .returning();
+  return res[0];
+}
+
+export async function findValidPasswordResetToken(identifier: string, tokenHash: string) {
+  const now = new Date();
+  const rows = await db.select()
+    .from(password_reset_tokens)
+    .where(
+      and(
+        eq(password_reset_tokens.identifier, identifier),
+        eq(password_reset_tokens.tokenHash, tokenHash),
+        eq(password_reset_tokens.used, false),
+        gt(password_reset_tokens.expiresAt, now)
+      )
+    );
+  return rows[0] || null;
+}
+
+export async function markPasswordResetTokenUsed(id: number) {
+  await db.update(password_reset_tokens)
+    .set({ used: true })
+    .where(eq(password_reset_tokens.id, id));
+}
+
+export async function updateUserRole(uid: string, role: string) {
+  const updated = await db.update(users)
+    .set({ role })
+    .where(eq(users.uid, uid))
+    .returning();
+  return updated[0] || null;
+}
+
+export async function incrementPasswordResetTokenAttempts(id: number) {
+  const rows = await db.select().from(password_reset_tokens).where(eq(password_reset_tokens.id, id));
+  if (rows[0]) {
+    await db.update(password_reset_tokens)
+      .set({ attempts: (rows[0].attempts || 0) + 1 })
+      .where(eq(password_reset_tokens.id, id));
+  }
+}

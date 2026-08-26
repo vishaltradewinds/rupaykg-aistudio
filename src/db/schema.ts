@@ -6,6 +6,7 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   uid: text('uid').notNull().unique(), // Firebase Auth UID representing SSO
   email: text('email').notNull(),
+  passwordHash: text('password_hash'),
   role: text('role'), // Stakeholder role assigned upon explicit registration
   name: text('name').notNull(),
   phone: text('phone'),
@@ -16,6 +17,16 @@ export const users = pgTable('users', {
   village: text('village'),
   organization_name: text('organization_name'),
   wallet_balance: doublePrecision('wallet_balance').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const password_reset_tokens = pgTable('password_reset_tokens', {
+  id: serial('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  tokenHash: text('token_hash').notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  used: boolean('used').default(false),
+  attempts: integer('attempts').default(0),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

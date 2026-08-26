@@ -594,6 +594,14 @@ Generate and maintain:
 
 ---
 
+# Communication & Output Rules (Mandatory)
+
+* **Always provide responses in a complete, self-contained, copyable Markdown code block format.**
+* **Always include the official shared application link at the top/bottom of every response:**
+  `https://ais-pre-ufb2w37wtcw26kbtvi6fqr-134790079851.asia-southeast1.run.app`
+
+---
+
 # Upgrade Strategy
 
 Follow an iterative approach:
