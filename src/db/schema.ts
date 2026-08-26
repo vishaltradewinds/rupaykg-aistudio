@@ -829,3 +829,43 @@ export const blockchain_blocks = pgTable('blockchain_blocks', {
   timestamp: timestamp('timestamp').defaultNow(),
 });
 
+export const cqe_methodologies = pgTable('cqe_methodologies', {
+  id: text('id').primaryKey(),
+  methodologyCode: text('methodology_code').notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
+  sector: text('sector').notNull().default('Waste Handling & Disposal'),
+  version: text('version').notNull().default('1.0'),
+  status: text('status').notNull().default('ACTIVE'), // ACTIVE, DRAFT, SUPERSEDED, RETIRED
+  sourceType: text('source_type').notNull().default('CUSTOM'), // SYSTEM_REFERENCE, CUSTOM, BEE_OFFICIAL, IMPORTED
+  baselineRules: text('baseline_rules'),
+  projectRules: text('project_rules'),
+  leakageRules: text('leakage_rules'),
+  applicability: jsonb('applicability'),
+  monitoringRequirements: jsonb('monitoring_requirements'),
+  parameters: jsonb('parameters'),
+  emissionFactors: jsonb('emission_factors'),
+  toolsRequired: jsonb('tools_required'),
+  creditingPeriodRules: text('crediting_period_rules'),
+  effectiveDate: text('effective_date'),
+  effectiveFrom: timestamp('effective_from'),
+  effectiveTo: timestamp('effective_to'),
+  sourceDocument: text('source_document'),
+  sourceReference: text('source_reference'),
+  evidenceReference: text('evidence_reference'),
+  issuer: text('issuer'),
+  changelog: text('changelog'),
+  baselineEquationLatex: text('baseline_equation_latex'),
+  projectEquationLatex: text('project_equation_latex'),
+  leakageEquationLatex: text('leakage_equation_latex'),
+  acvaAccreditationStandard: text('acva_accreditation_standard'),
+  tenantId: text('tenant_id'),
+  createdBy: text('created_by'),
+  approvedBy: text('approved_by'),
+  approvedAt: timestamp('approved_at'),
+  supersededBy: text('superseded_by'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+

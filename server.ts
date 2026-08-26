@@ -34,6 +34,9 @@ import { WASTE_TYPES as INITIAL_WASTE_TYPES, INDIAN_STATES } from "./src/constan
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
 import { generateCarbonEvent, cqe, BEE_APPROVED_METHODOLOGIES, CarbonQuantificationEngine, CQEMethodologyRegistry } from "./src/services/carbonEngine";
+import { CqeMethodologyDbService } from "./src/db/cqeMethodologies.ts";
+import { HederaAnchorProvider } from "./src/services/hederaAnchor.ts";
+import { CredentialService } from "./src/services/credentialService.ts";
 import { VCService } from "./src/services/vcService";
 import { GuardianService } from "./src/services/guardianService";
 import { ICMComplianceService, ICM_METHODOLOGIES, ICM_CCTS_SECTORS } from "./src/services/icmComplianceService";
@@ -4563,6 +4566,53 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
     res.json(mockSensors);
   });
 
+  // =========================================================================
+  // HEDERA CONSENSUS SERVICE (HCS) & CREDENTIAL PROVENANCE ENDPOINTS
+  // =========================================================================
+
+  // Live Hedera Read/Write Status Separation
+  app.get("/api/hedera/status", auth(), (req: any, res) => {
+    const topicId = req.query.topicId as string;
+    const status = HederaAnchorProvider.getAnchorStatus(topicId);
+    res.json({
+      success: true,
+      HEDERA_READ_STATUS: status.readStatus,
+      HEDERA_WRITE_STATUS: status.writeStatus,
+      HEDERA_CONSENSUS_STATUS: status.consensusStatus,
+      mirrorNodeEndpoint: status.mirrorNodeEndpoint,
+      topicId: status.topicId,
+      message: status.message
+    });
+  });
+
+  // Hedera HCS Anchor Submission (Returns NOT_AVAILABLE when signing keys are absent)
+  app.post("/api/hedera/anchor", auth(["super_admin", "regulator", "auditor"]), async (req: any, res) => {
+    try {
+      const { eventType, recordId, weightKg, carbonAvoidanceKg, metadata, topicId } = req.body;
+      const result = await HederaAnchorProvider.submitAnchor(
+        { eventType: eventType || 'MRV_RECORD_ANCHOR', recordId: recordId || `REC-${Date.now()}`, weightKg, carbonAvoidanceKg, metadata },
+        topicId
+      );
+      res.json({
+        success: result.status === 'CONFIRMED',
+        anchorResult: result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Hedera anchor execution failed", details: err.message });
+    }
+  });
+
+  // W3C VC & Guardian Proof Status
+  app.get("/api/credentials/status", auth(), (req: any, res) => {
+    res.json({
+      success: true,
+      VC_PROOF_STATUS: Boolean(process.env.VC_ISSUER_PRIVATE_KEY) ? "SIGNED" : "NOT_AVAILABLE",
+      GUARDIAN_STATUS: "NOT_AVAILABLE",
+      INTEGRITY_DIGEST_ALGORITHM: "SHA-256",
+      message: "Cryptographic SHA-256 integrity digests are computed locally. W3C VC asymmetric signatures and Guardian decentralized policy enforcement are NOT_AVAILABLE until runtime private keys and Guardian instance are provisioned."
+    });
+  });
+
   // REAL LIVE HEDERA HCS MIRROR NODE INTEGRATION
   app.get("/api/dmrv/hedera-stream/:topicId", auth(), async (req: any, res) => {
     const topicId = req.params.topicId || "0.0.4592011";
@@ -4653,26 +4703,17 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
           nitrogen_dioxide: { value: current.nitrogen_dioxide || 14.5, unit: "µg/m³", label: "Nitrogen Dioxide (NO₂)" }
         },
         source: "Open-Meteo Global Air Quality Service & Copernicus Sentinel-5P",
-        status: "verified"
+        status: "LIVE_STREAM"
       };
 
       res.json(telemetry);
     } catch (err: any) {
       console.error(`[dMRV Climate] Error fetching Open-Meteo telemetry:`, err.message);
-      // Fallback response with slightly randomized but plausible real metrics if API fails
-      res.json({
+      res.status(503).json({
+        status: "SOURCE_UNAVAILABLE",
+        error: "Real-time atmospheric telemetry source temporarily unreachable.",
         coordinates: { latitude: parseFloat(lat as string), longitude: parseFloat(lng as string) },
-        timestamp: new Date().toISOString(),
-        metrics: {
-          pm2_5: { value: 18.5 + Math.random() * 5, unit: "µg/m³", label: "PM2.5 Fine Particles" },
-          pm10: { value: 32.2 + Math.random() * 10, unit: "µg/m³", label: "PM10 Coarse Particles" },
-          carbon_monoxide: { value: 290 + Math.floor(Math.random() * 50), unit: "µg/m³", label: "Carbon Monoxide" },
-          carbon_dioxide: { value: 416.8 + Math.random() * 2, unit: "ppm", label: "Atmospheric CO₂ Concentration" },
-          sulphur_dioxide: { value: 2.4 + Math.random() * 1, unit: "µg/m³", label: "Sulphur Dioxide (SO₂)" },
-          nitrogen_dioxide: { value: 11.8 + Math.random() * 3, unit: "µg/m³", label: "Nitrogen Dioxide (NO₂)" }
-        },
-        source: "Copernicus Sentinel-5P (Simulated Fallback)",
-        status: "verified"
+        timestamp: new Date().toISOString()
       });
     }
   });
@@ -5304,38 +5345,47 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   }, 10000);
 
   // =========================================================================
-  // RUPAYKG CARBON QUANTIFICATION ENGINE — CQE 1.0 API ENDPOINTS
+  // RUPAYKG CARBON QUANTIFICATION ENGINE — CQE 1.0 API ENDPOINTS (PostgreSQL Authoritative)
   // =========================================================================
 
-  // 1. Live Approved BEE Methodology Catalogue & Registry (2026 standards)
+  // 1. Live Approved BEE Methodology Catalogue & Registry (PostgreSQL + Immutable 2026 Reference Standards)
   app.get("/api/carbon/cqe/methodologies", async (req, res) => {
-    const { sector, status, search } = req.query as { sector?: string; status?: string; search?: string };
-    const list = CQEMethodologyRegistry.getAll({ sector, status, search });
-    res.json({
-      total: list.length,
-      registryAuthority: "Bureau of Energy Efficiency (BEE), Ministry of Power, Govt. of India",
-      complianceStandard: "CCTS Offset Mechanism (OM) 2026",
-      methodologies: list
-    });
+    try {
+      const { sector, status, sourceType, search } = req.query as { sector?: string; status?: string; sourceType?: string; search?: string };
+      const list = await CqeMethodologyDbService.getAllMethodologies({ sector, status, sourceType, search });
+      res.json({
+        total: list.length,
+        registryAuthority: "Bureau of Energy Efficiency (BEE), Ministry of Power, Govt. of India",
+        complianceStandard: "CCTS Offset Mechanism (OM) 2026",
+        methodologies: list
+      });
+    } catch (err: any) {
+      console.error("[GET /api/carbon/cqe/methodologies Error]", err);
+      res.status(500).json({ error: "Failed to fetch methodologies from database", details: err.message });
+    }
   });
 
   // 1b. Single Methodology by ID
   app.get("/api/carbon/cqe/methodologies/:id", async (req, res) => {
-    const item = CQEMethodologyRegistry.getById(req.params.id);
-    if (!item) {
-      return res.status(404).json({ error: `Methodology ${req.params.id} not found.` });
+    try {
+      const item = await CqeMethodologyDbService.getMethodologyById(req.params.id);
+      if (!item) {
+        return res.status(404).json({ error: `Methodology ${req.params.id} not found.` });
+      }
+      res.json({ success: true, methodology: item });
+    } catch (err: any) {
+      res.status(500).json({ error: "Database error retrieving methodology", details: err.message });
     }
-    res.json({ success: true, methodology: item });
   });
 
-  // 1c. Register New Methodology / Definition
-  app.post("/api/carbon/cqe/methodologies", auth(["super_admin", "regulator"]), (req: any, res) => {
+  // 1c. Register New Methodology / Definition (PostgreSQL Authoritative)
+  app.post("/api/carbon/cqe/methodologies", auth(["super_admin", "regulator"]), async (req: any, res) => {
     try {
-      const author = req.user?.name || req.user?.email || "BEE Administrator";
-      const registered = CQEMethodologyRegistry.register(req.body, author);
+      const author = req.user?.name || req.user?.email || req.user?.uid || "BEE Administrator";
+      const registered = await CqeMethodologyDbService.registerMethodology(req.body, { id: req.user?.uid, name: author, role: req.user?.role }, 'CUSTOM');
       res.status(201).json({
         success: true,
-        message: `Methodology ${registered.methodologyCode} (${registered.version}) successfully registered under BEE CCTS 2026.`,
+        message: `Methodology ${registered.methodologyCode} (${registered.version}) successfully registered and persisted in PostgreSQL.`,
         methodology: registered
       });
     } catch (err: any) {
@@ -5344,13 +5394,14 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
     }
   });
 
-  // 1d. Update Existing Methodology
-  app.put("/api/carbon/cqe/methodologies/:id", auth(["super_admin", "regulator"]), (req: any, res) => {
+  // 1d. Update Existing Methodology (PostgreSQL Authoritative)
+  app.put("/api/carbon/cqe/methodologies/:id", auth(["super_admin", "regulator"]), async (req: any, res) => {
     try {
-      const updated = CQEMethodologyRegistry.update(req.params.id, req.body);
+      const author = req.user?.name || req.user?.email || req.user?.uid || "BEE Administrator";
+      const updated = await CqeMethodologyDbService.updateMethodology(req.params.id, req.body, { id: req.user?.uid, name: author, role: req.user?.role });
       res.json({
         success: true,
-        message: `Methodology ${updated.methodologyCode} (${updated.version}) updated successfully.`,
+        message: `Methodology ${updated.methodologyCode} (${updated.version}) updated and persisted successfully.`,
         methodology: updated
       });
     } catch (err: any) {
@@ -5358,20 +5409,20 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
     }
   });
 
-  // 1e. Version Bump / Clone Methodology
-  app.post("/api/carbon/cqe/methodologies/:id/version", auth(["super_admin", "regulator"]), (req: any, res) => {
+  // 1e. Version Bump / Clone Methodology (PostgreSQL Authoritative)
+  app.post("/api/carbon/cqe/methodologies/:id/version", auth(["super_admin", "regulator"]), async (req: any, res) => {
     try {
       const { newVersion, changelog, overrides } = req.body;
       if (!newVersion) {
         return res.status(400).json({ error: "newVersion is required (e.g., '1.1' or '2.0')." });
       }
-      const author = req.user?.name || req.user?.email || "BEE Administrator";
-      const result = CQEMethodologyRegistry.createNewVersion(
+      const author = req.user?.name || req.user?.email || req.user?.uid || "BEE Administrator";
+      const result = await CqeMethodologyDbService.createNewVersion(
         req.params.id,
         newVersion,
         changelog || `Version ${newVersion} published under BEE CCTS OM.`,
         overrides,
-        author
+        { id: req.user?.uid, name: author, role: req.user?.role }
       );
       res.json({
         success: true,
@@ -5384,46 +5435,62 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
     }
   });
 
-  // 1f. Import JSON Definition(s)
-  app.post("/api/carbon/cqe/methodologies/import-json", auth(["super_admin", "regulator"]), (req: any, res) => {
+  // 1f. Import JSON Definition(s) (PostgreSQL Authoritative)
+  app.post("/api/carbon/cqe/methodologies/import-json", auth(["super_admin", "regulator"]), async (req: any, res) => {
     try {
-      const author = req.user?.name || req.user?.email || "BEE Administrator";
-      const result = CQEMethodologyRegistry.importJSON(req.body, author);
+      const author = req.user?.name || req.user?.email || req.user?.uid || "BEE Administrator";
+      const payload = req.body;
+      const items: any[] = Array.isArray(payload) ? payload : (payload.methodologies || [payload]);
+      const imported: any[] = [];
+      const errors: string[] = [];
+
+      for (const item of items) {
+        try {
+          const reg = await CqeMethodologyDbService.registerMethodology(item, { id: req.user?.uid, name: author, role: req.user?.role }, 'IMPORTED');
+          imported.push(reg);
+        } catch (itemErr: any) {
+          errors.push(`Failed to import ${item.methodologyCode || item.title || 'item'}: ${itemErr.message}`);
+        }
+      }
+
       res.json({
-        success: true,
-        importedCount: result.imported.length,
-        imported: result.imported,
-        errors: result.errors,
-        message: `Successfully imported ${result.imported.length} BEE methodology definition(s).`
+        success: errors.length === 0 || imported.length > 0,
+        importedCount: imported.length,
+        imported,
+        errors,
+        message: `Successfully imported ${imported.length} methodology definition(s) into PostgreSQL.`
       });
     } catch (err: any) {
       res.status(400).json({ error: err.message || "Failed to import JSON methodology." });
     }
   });
 
-  // 1g. Reset Catalogue to Official 2026 Standards
-  app.post("/api/carbon/cqe/methodologies/reset", auth(["super_admin", "regulator"]), (req: any, res) => {
+  // 1g. Reset Catalogue / Reload Reference Standards
+  app.post("/api/carbon/cqe/methodologies/reset", auth(["super_admin", "regulator"]), async (req: any, res) => {
     try {
-      const list = CQEMethodologyRegistry.resetToStandard();
+      const author = req.user?.name || req.user?.email || req.user?.uid || "BEE Administrator";
+      await CqeMethodologyDbService.logAudit('RESET', 'ALL', { id: req.user?.uid, name: author, role: req.user?.role }, { reason: 'Reset catalogue view' });
+      const list = await CqeMethodologyDbService.getAllMethodologies();
       res.json({
         success: true,
         total: list.length,
-        message: "CQE 1.0 Methodology Catalogue reset to official 2026 BEE CCTS baseline.",
+        message: "CQE 1.0 Methodology Catalogue active with official 2026 BEE CCTS baseline and PostgreSQL records.",
         methodologies: list
       });
     } catch (err: any) {
-      res.status(500).json({ error: "Failed to reset methodology registry." });
+      res.status(500).json({ error: "Failed to reset methodology registry.", details: err.message });
     }
   });
 
-  // 1h. Delete / Archive Methodology
-  app.delete("/api/carbon/cqe/methodologies/:id", auth(["super_admin", "regulator"]), (req: any, res) => {
+  // 1h. Delete / Archive Methodology (PostgreSQL Authoritative)
+  app.delete("/api/carbon/cqe/methodologies/:id", auth(["super_admin", "regulator"]), async (req: any, res) => {
     try {
-      const success = CQEMethodologyRegistry.delete(req.params.id);
+      const author = req.user?.name || req.user?.email || req.user?.uid || "BEE Administrator";
+      const success = await CqeMethodologyDbService.deleteMethodology(req.params.id, { id: req.user?.uid, name: author, role: req.user?.role });
       if (!success) {
         return res.status(404).json({ error: `Methodology ${req.params.id} not found.` });
       }
-      res.json({ success: true, message: `Methodology ${req.params.id} deleted.` });
+      res.json({ success: true, message: `Methodology ${req.params.id} deleted from PostgreSQL.` });
     } catch (err: any) {
       res.status(400).json({ error: err.message || "Failed to delete methodology." });
     }

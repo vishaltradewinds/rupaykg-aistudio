@@ -21,6 +21,7 @@ export async function ensureDatabaseSchema(pool: Pool): Promise<void> {
       'pilot_issues',
       'waste_manifests',
       'weighbridge_records',
+      'cqe_methodologies',
     ];
 
     const result = await pool.query(

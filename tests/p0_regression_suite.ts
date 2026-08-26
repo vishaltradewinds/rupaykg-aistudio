@@ -11,7 +11,6 @@ import {
 } from '../src/db/users.ts';
 import { RecordService } from '../src/services/recordService.ts';
 import { CQEMethodologyRegistry } from '../src/services/carbonEngine.ts';
-import { generateSecureToken, verifySecureToken } from '../core/security.ts';
 import { eq } from 'drizzle-orm';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
@@ -273,6 +272,7 @@ async function runP0RegressionSuite() {
   console.log("\n===================================================================");
   console.log(`🎉 ALL ${passedTests}/${totalTests} P0 SECURITY & DATA INTEGRITY TESTS PASSED!`);
   console.log("===================================================================");
+  process.exit(0);
 }
 
 runP0RegressionSuite().catch((err) => {
