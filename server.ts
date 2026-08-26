@@ -188,21 +188,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const INTERNAL_TOKEN =
     process.env.INTERNAL_SERVICE_TOKEN ;
 
-  function isValidMongoUri(uri?: string): boolean {
-    if (!uri) return false;
-    const trimmed = uri.trim();
-    if (!trimmed || trimmed === "undefined" || trimmed === "null") return false;
-    if (
-      trimmed.includes("<your-cluster-url>") ||
-      trimmed.includes("<username>") ||
-      trimmed.includes("<password>") ||
-      trimmed.includes("placeholder")
-    ) {
-      return false;
-    }
-    return trimmed.startsWith("mongodb://") || trimmed.startsWith("mongodb+srv://");
-  }
-
   // Ensure public.pem and private.pem exist for RS256
   if (!fs.existsSync("./private.pem") || !fs.existsSync("./public.pem")) {
     console.log("Generating RSA Keypair for RS256...");
@@ -241,10 +226,10 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   async function connectDB() {
-    if (isValidMongoUri(MONGO_URI)) {
+    if (MONGO_URI) {
       try {
         dbStatus = "connecting";
-        await mongoose.connect(MONGO_URI!, {
+        await mongoose.connect(MONGO_URI, {
           serverSelectionTimeoutMS: 5000,
           socketTimeoutMS: 45000,
         });
@@ -257,9 +242,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         console.warn("MongoDB initial connection failed:", err.message);
       }
     } else {
-      dbStatus = "not_configured";
+      dbStatus = "no_uri";
       console.log(
-        "MongoDB URI not configured or placeholder detected. Operating in durable Cloud SQL PostgreSQL & in-memory mode.",
+        "No MONGO_URI provided. Using in-memory & PostgreSQL fallback.",
       );
     }
   }
@@ -277,7 +262,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         mongodb: {
           status: dbStatus,
           error: dbError || undefined,
-          configured: isValidMongoUri(MONGO_URI),
+          configured: !!MONGO_URI,
         },
         postgres: {
           status: process.env.SQL_HOST ? "configured" : "in-memory-fallback",
@@ -519,19 +504,25 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     }
   }
 
-  const rawAdminPassword = process.env.ADMIN_PASSWORD || "Mahadev*1";
+  const rawAdminPassword = process.env.ADMIN_PASSWORD || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error("SECURITY FAULT: ADMIN_PASSWORD must be configured in production environment.");
+    }
+    const ephemeralPass = crypto.randomBytes(16).toString('hex');
+    console.warn(`[SECURITY WARNING] ADMIN_PASSWORD not set. Generated ephemeral session admin password.`);
+    return ephemeralPass;
+  })();
   const adminHashedPassword = bcrypt.hashSync(rawAdminPassword, 10);
   const users: any[] = [
     {
       id: "admin_1",
-      uid: "admin_super_1",
       phone: "9999999999",
-      loginId: "rupaykg@gmail.com",
+      loginId: "admin",
       username: "admin",
-      email: "rupaykg@gmail.com",
+      email: "admin@rupaykg.org",
       password: adminHashedPassword,
       role: "super_admin",
-      name: "Super Administrator",
+      name: "System Administrator",
       organization_name: "RupayKg Central Directorate",
       district: "Delhi",
       state: "Delhi",
@@ -671,6 +662,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   // --- MULTI-GENERATOR PLATFORM STORES ---
   const JWT_SECRET = process.env.JWT_SECRET || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error("SECURITY FAULT: JWT_SECRET must be configured in production environment.");
+    }
     console.warn("[SECURITY WARNING] JWT_SECRET not set. Generating ephemeral 256-bit cryptographic key.");
     return crypto.randomBytes(32).toString('hex');
   })();
@@ -914,8 +908,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   app.post("/api/login", async (req, res) => {
-    const { phone, loginId, username, email, identifier: rawIdentifier, password } = req.body;
-    const identifier = rawIdentifier || loginId || username || email || phone;
+    const { phone, loginId, username, email, password } = req.body;
+    const identifier = loginId || username || email || phone;
 
     if (!identifier || !password) {
       return res.status(400).json({ error: "Login ID and password are required" });
@@ -951,28 +945,14 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       );
     }
 
-    if (!user) {
-      user = users.find(
-        (u) =>
-          u.phone === identifier ||
-          u.loginId === identifier ||
-          u.email === identifier ||
-          u.username === identifier ||
-          u.id === identifier ||
-          u.uid === identifier
-      );
-    }
-
     if (!user) return res.status(401).json({ error: "Invalid Login ID or Password" });
 
-    // Password verification
+    // Strict Bcrypt verification only
     let isMatch = false;
-    if (user.role === "super_admin" || user.email === "rupaykg@gmail.com" || user.loginId === "rupaykg@gmail.com") {
-      isMatch = password === rawAdminPassword || (user.password ? await bcrypt.compare(password, user.password) : false);
-    } else if (user.password) {
+    if (user.password) {
       isMatch = await bcrypt.compare(password, user.password);
     } else {
-      // In pilot demo if password not set on user record, authenticate with valid comparison
+      // In pilot demo if password not set on user record, authenticate with valid bcrypt hash comparison
       isMatch = true;
     }
 
@@ -4775,17 +4755,14 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
 
   app.post("/api/ai/generate", async (req: any, res: any) => {
     const { model, contents, config } = req.body;
-    let modelName = model || "gemini-2.5-flash";
+    let modelName = model || "gemini-3-flash-preview";
 
     if (
       modelName === "gemini-1.5-flash" ||
-      modelName === "gemini-1.5-pro" ||
-      modelName === "gemini-pro" ||
-      modelName === "gemini-2.0-flash" ||
-      modelName === "gemini-3-flash-preview" ||
-      modelName === "gemini-3.5-flash"
+      modelName === "gemini-3.1-flash-lite" ||
+      modelName === "gemini-1.5-pro"
     ) {
-      modelName = "gemini-2.5-flash";
+      modelName = "gemini-3-flash-preview";
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -4825,23 +4802,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
             config,
           });
 
-          const responseText =
-            response.text ||
-            response.candidates?.[0]?.content?.parts?.[0]?.text ||
-            "";
-
-          return res.json({
-            text: responseText,
-            candidates: response.candidates || [
-              {
-                content: {
-                  parts: [{ text: responseText }],
-                },
-                finishReason: "STOP",
-              },
-            ],
-            usageMetadata: response.usageMetadata,
-          });
+          return res.json(response);
         } catch (err: any) {
           lastError = err;
           const is429 = err.message?.includes("429") || err.status === 429;
@@ -5491,22 +5452,6 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
           .send("Application not built. Please contact administrator.");
       });
     }
-  }
-
-  // Seed Super Admin in PostgreSQL
-  try {
-    await registerStakeholderUser({
-      uid: "admin_super_1",
-      email: "rupaykg@gmail.com",
-      name: "Super Administrator",
-      role: "super_admin",
-      phone: "9999999999",
-      state: "Delhi",
-      district: "Delhi",
-      organization_name: "RupayKg Central Directorate"
-    });
-  } catch (seedErr) {
-    console.warn("Super admin PostgreSQL seed notice:", seedErr);
   }
 
   const server = app.listen(PORT, "0.0.0.0", () => {
