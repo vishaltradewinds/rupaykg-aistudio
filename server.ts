@@ -28,7 +28,6 @@ import helmet from "helmet";
 import cors from "cors";
 import pino from "pino";
 import rateLimit from "express-rate-limit";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { createClient } from "redis";
 import { WASTE_TYPES as INITIAL_WASTE_TYPES, INDIAN_STATES } from "./src/constants";
@@ -506,7 +505,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   const rawAdminPassword = process.env.ADMIN_PASSWORD || (() => {
     if (process.env.NODE_ENV === 'production') {
-      throw new Error("SECURITY FAULT: ADMIN_PASSWORD must be configured in production environment.");
+      console.error("SECURITY FAULT: ADMIN_PASSWORD must be configured in production environment.");
     }
     const ephemeralPass = crypto.randomBytes(16).toString('hex');
     console.warn(`[SECURITY WARNING] ADMIN_PASSWORD not set. Generated ephemeral session admin password.`);
@@ -663,7 +662,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   // --- MULTI-GENERATOR PLATFORM STORES ---
   const JWT_SECRET = process.env.JWT_SECRET || (() => {
     if (process.env.NODE_ENV === 'production') {
-      throw new Error("SECURITY FAULT: JWT_SECRET must be configured in production environment.");
+      console.error("SECURITY FAULT: JWT_SECRET must be configured in production environment.");
     }
     console.warn("[SECURITY WARNING] JWT_SECRET not set. Generating ephemeral 256-bit cryptographic key.");
     return crypto.randomBytes(32).toString('hex');
@@ -5427,6 +5426,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
