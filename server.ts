@@ -29,7 +29,7 @@ import cors from "cors";
 import pino from "pino";
 import rateLimit from "express-rate-limit";
 import { GoogleGenAI } from "@google/genai";
-import { createClient } from "redis";
+
 import { WASTE_TYPES as INITIAL_WASTE_TYPES, INDIAN_STATES } from "./src/constants";
 import { SatelliteVerificationService } from "./src/services/satelliteService";
 import { CCCRegistryService } from "./src/services/cccRegistryService";
@@ -168,11 +168,23 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
 
   // Security Hardenings
+  
   app.use(
     helmet({
-      contentSecurityPolicy: false, // Disabled for Vite HMR in Dev
-    }),
+      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "https://*"]
+        }
+      } : false,
+      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+      noSniff: true
+    })
   );
+
   app.use(
     cors({
       origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : ["http://localhost:3000"],
@@ -797,7 +809,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     return crypto.randomBytes(32).toString('hex');
   })();
 
-  const clientRedis: any = null;
+  
   const generators: any[] = [];
   const activeContracts: any[] = [];
   const complianceRecords: any[] = [];
@@ -1115,14 +1127,22 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   app.post("/api/logout", auth(), async (req: any, res) => {
-     if (req.user?.jti && clientRedis?.isReady) {
+    try {
+      const { getRedisClient, isRedisConnected } = require("./src/lib/redis.ts");
+      const clientRedis = await getRedisClient();
+      if (req.user?.jti && isRedisConnected()) {
          const { exp } = req.user;
          const ttl = exp ? exp - Math.floor(Date.now() / 1000) : 86400; // 24h fallback
          if (ttl > 0) {
             await clientRedis.setEx(`bl_${req.user.jti}`, ttl, "true");
          }
-     }
-     res.json({ message: "Logged out successfully" });
+      } else if (!isRedisConnected()) {
+         return res.status(503).json({ error: "Cannot revoke token because Redis is offline. Fail closed." });
+      }
+      res.json({ message: "Logged out successfully" });
+    } catch(err) {
+      res.status(500).json({ error: "Logout failed" });
+    }
   });
 
   app.post("/api/auth/request-reset", async (req, res) => {
@@ -3308,24 +3328,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   });
 
   app.post("/api/swm/weighbridge/slip", async (req, res) => {
-    const { grossWeightKg, tareWeightKg, vehicleNo, facilityName } = req.body;
-    const gross = Number(grossWeightKg) || 12400;
-    const tare = Number(tareWeightKg) || 4800;
-    const net = gross - tare;
-    const slipNo = `WB-SLIP-${Math.floor(100000 + Math.random() * 900000)}`;
-    const hash = crypto.createHash('sha256').update(`${slipNo}:${vehicleNo}:${net}`).digest('hex');
-
-    res.json({
-      slipNo,
-      vehicleNo: vehicleNo || "KA-01-EQ-9921",
-      facilityName: facilityName || "Municipal Composting & MRF Center 04",
-      grossWeightKg: gross,
-      tareWeightKg: tare,
-      netWeightKg: net,
-      timestamp: new Date().toISOString(),
-      integrityHash: hash,
-      verifiedBy: "Electronic Weighbridge SCADA Interface"
-    });
+    return res.status(503).json({ error: "Simulated weighbridge evidence generation is disabled in production." });
   });
 
   app.post("/api/swm/ai-forecast", async (req, res) => {
@@ -3403,51 +3406,16 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   const guardianSubmissions: any[] = [];
 
   app.post("/api/v1/guardian/authority", async (req, res) => {
-    const { username, hederaAccountId, hederaPrivateKey } = req.body;
-    if (!username || !hederaAccountId || !hederaPrivateKey) {
-      return res.status(400).json({ error: "Missing required fields: username, hederaAccountId, hederaPrivateKey" });
-    }
-
-    const fingerprint = crypto.createHash('sha256').update(username + hederaAccountId).digest('hex').substring(0, 16);
-    const did = `did:hedera:testnet:${fingerprint};rupaykg-authority`;
-
-    guardianAuthority = {
-      username,
-      hederaAccountId,
-      hederaPrivateKey: hederaPrivateKey.substring(0, 10) + "..." + hederaPrivateKey.substring(hederaPrivateKey.length - 6),
-      did,
-      initializedAt: new Date().toISOString(),
-      verifiablePresentation: {
-        id: `urn:uuid:${crypto.randomBytes(16).toString('hex')}`,
-        type: ["VerifiablePresentation"],
-        verifiableCredential: {
-          id: `vc-authority-${crypto.randomBytes(4).toString('hex')}`,
-          type: ["VerifiableCredential", "StandardRegistryCredential"],
-          issuer: "did:hedera:testnet:rupaykg-root-registry",
-          issuanceDate: new Date().toISOString(),
-          credentialSubject: {
-            id: did,
-            username,
-            hederaAccountId,
-            role: "StandardRegistry",
-            status: "Authorized"
-          }
-        }
-      }
-    };
-
-    res.json({
-      success: true,
-      message: "Standard Registry authority successfully initialized on Hedera Testnet.",
-      ...guardianAuthority
-    });
+    return res.status(403).json({ error: "Guardian authority initialization is restricted to deployment-time secrets or secure administrative bootstrap. Remote provisioning is disabled in production." });
   });
 
   app.get("/api/v1/guardian/authority", async (req, res) => {
-    if (!guardianAuthority) {
-      return res.json({ success: false, message: "Authority not initialized yet" });
+    if (!process.env.HEDERA_OPERATOR_ID || !process.env.HEDERA_OPERATOR_KEY) {
+      return res.status(503).json({ success: false, error: "Guardian authority not configured. Missing HEDERA_OPERATOR_ID or HEDERA_OPERATOR_KEY." });
     }
-    res.json({ success: true, ...guardianAuthority });
+    const fingerprint = crypto.createHash('sha256').update(process.env.HEDERA_OPERATOR_ID).digest('hex').substring(0, 16);
+    const did = `did:hedera:testnet:${fingerprint};rupaykg-authority`;
+    res.json({ success: true, hederaAccountId: process.env.HEDERA_OPERATOR_ID, did, status: "Configured from deployment secrets" });
   });
 
   app.get("/api/v1/policies", async (req, res) => {
@@ -3497,92 +3465,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   });
 
   app.post("/api/v1/policies/:policy_id/blocks/:block_id", async (req, res) => {
-    const { policy_id, block_id } = req.params;
-    const { document } = req.body;
-
-    if (!document) {
-      return res.status(400).json({ error: "Missing required 'document' payload under MRV automated rules." });
-    }
-
-    const policy = guardianPolicies.find(p => p.id === policy_id);
-    if (!policy) {
-      return res.status(404).json({ error: `Policy ${policy_id} not found on this Guardian node.` });
-    }
-
-    let carbonVerifiedKg = 0;
-    let assetType = "Carbon Offset";
-
-    if (policy_id.includes("drec") || policy.policyName.toLowerCase().includes("renewable") || policy.policyName.toLowerCase().includes("drec")) {
-      const mwh = Number(document.megawattHoursGenerated || document.mwh || 0);
-      carbonVerifiedKg = mwh * 700;
-      assetType = "dREC Certificate";
-    } else if (policy_id.includes("methane") || policy.policyName.toLowerCase().includes("methane") || policy.policyName.toLowerCase().includes("acm0022")) {
-      const weight = Number(document.divertedWeightKg || document.weight_kg || 0);
-      carbonVerifiedKg = weight * 0.5;
-      assetType = "Methane Avoidance Credit";
-    } else {
-      const val = Number(document.metricValue || document.value || 100);
-      carbonVerifiedKg = val * 1.2;
-    }
-
-    const sequenceNumber = Math.floor(Math.random() * 100000) + 1000;
-    const topicId = "0.0.4592011";
-    const runningHash = crypto.createHash('sha384').update(JSON.stringify(document) + sequenceNumber).digest('hex');
-
-    const hcsMsg = {
-      id: `hcs-${crypto.randomBytes(8).toString('hex')}`,
-      topicId,
-      sequenceNumber,
-      runningHash,
-      message: {
-        policyId: policy_id,
-        blockId: block_id,
-        assetType,
-        document,
-        carbonVerifiedKg
-      },
-      timestamp: new Date().toISOString()
-    };
-
-    const blockchainTx = {
-      record_id: hcsMsg.id,
-      user_id: guardianAuthority?.username || "EcoRegistryAdmin",
-      waste_type: assetType,
-      weight_kg: document.divertedWeightKg || document.solarPanelsInstalled || 0,
-      ccc_amount_kg: carbonVerifiedKg.toFixed(2),
-      verified_by: "Hedera Guardian Policy Engine",
-      registry_serial_number: `HEDERA-GUARDIAN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
-      event_type: "GUARDIAN_MRV_VERIFICATION",
-      hcs_sequence: sequenceNumber,
-      hcs_running_hash: runningHash
-    };
-
-    const appendedBlock = appendBlock(blockchainTx);
-
-    const submission = {
-      id: `sub-${crypto.randomBytes(6).toString('hex')}`,
-      policyId: policy_id,
-      blockId: block_id,
-      document,
-      carbonVerifiedKg,
-      assetType,
-      hcsMessage: hcsMsg,
-      blockchainIndex: appendedBlock.index,
-      timestamp: new Date().toISOString(),
-      status: "Verified & Registered"
-    };
-
-    guardianSubmissions.push(submission);
-
-    res.json({
-      success: true,
-      message: `MRV document successfully processed. Registered ${carbonVerifiedKg.toFixed(2)} kg CO2e verified mitigation on Hedera network.`,
-      submission_id: submission.id,
-      hcsMessage: hcsMsg,
-      blockchainIndex: appendedBlock.index,
-      assetType,
-      tokensVerified: carbonVerifiedKg.toFixed(2)
-    });
+    return res.status(503).json({ error: "SIMULATED evidence generation disabled in production. A real Guardian/Hedera provider is required." });
   });
 
   app.get("/api/v1/guardian/submissions", async (req, res) => {
@@ -4061,152 +3944,15 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
   });
 
   app.post("/api/carbon/guardian/verify-chain", async (req, res) => {
-    const messages = guardianMessages;
-    let validCount = 0;
-    let corruptedCount = 0;
-    const items: any[] = [];
-
-    messages.forEach((m, idx) => {
-      const calcHash = crypto.createHash('sha384').update(JSON.stringify(m.message) + (m.sequenceNumber || (idx + 1))).digest('hex');
-      const isValid = m.runningHash ? m.runningHash.length > 0 : true;
-      if (isValid) validCount++; else corruptedCount++;
-
-      items.push({
-        id: m.id || `hcs-${idx + 1}`,
-        topicId: m.topicId || "0.0.4592011",
-        sequenceNumber: m.sequenceNumber || (idx + 1),
-        runningHash: m.runningHash || calcHash,
-        timestamp: m.timestamp || new Date().toISOString(),
-        status: isValid ? "VERIFIED_INTACT" : "INTEGRITY_COMPROMISED",
-        vcId: m.message?.vc_id || "N/A",
-        issuer: m.message?.issuer || "did:rupaykg:authority:national-compost-01"
-      });
-    });
-
-    res.json({
-      audit_id: `AUDIT_HCS_${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
-      status: corruptedCount === 0 ? "PASS" : "WARN",
-      chain_integrity_score: 100,
-      total_messages_scanned: messages.length,
-      verified_messages: validCount,
-      anomalies_detected: corruptedCount,
-      sequence_continuity: "UNBROKEN",
-      hash_algorithm: "SHA-384 / Ed25519",
-      verified_at: new Date().toISOString(),
-      verified_items: items
-    });
+    return res.status(503).json({ error: "Simulated Hedera chain verification is disabled in production." });
   });
 
   app.post("/api/carbon/guardian/broadcast-test", async (req, res) => {
-    try {
-      const { topicId, payloadText, eventType } = req.body;
-      const testVc = {
-        "@context": ["https://www.w3.org/2018/credentials/v1"],
-        id: `urn:uuid:${crypto.randomBytes(16).toString('hex')}`,
-        type: ["VerifiableCredential", "RupayKgTelemetryCredential"],
-        issuer: "did:rupaykg:node:testnet-01",
-        issuanceDate: new Date().toISOString(),
-        credentialSubject: {
-          id: `did:hedera:mainnet:${crypto.randomBytes(8).toString('hex')}`,
-          eventType: eventType || "HCS_TEST_TELEMETRY",
-          payload: payloadText || "Diagnostic HCS consensus handshake signal",
-          nodeLatencyMs: 34
-        },
-        proof: {
-          type: "Ed25519Signature2020",
-          created: new Date().toISOString(),
-          proofValue: `sig_${crypto.randomBytes(32).toString('hex')}`
-        }
-      };
-
-      const hcsMessage = await GuardianService.anchorToHCS(testVc);
-      if (!guardianMessages.some(m => m.id === hcsMessage.id)) {
-        guardianMessages.push(hcsMessage);
-      }
-
-      res.json({
-        message: "Test message successfully anchored to Hedera Consensus Service topic!",
-        hcsMessage
-      });
-    } catch (err: any) {
-      res.status(500).json({ error: "Failed to broadcast HCS test message", details: err.message });
-    }
+    return res.status(503).json({ error: "Simulated Hedera broadcast is disabled in production." });
   });
 
   app.post("/api/carbon/guardian/sync-ledger", async (req, res) => {
-    try {
-      const existingCount = guardianMessages.length;
-      const baseSeq = existingCount > 0 
-        ? Math.max(...guardianMessages.map(m => m.sequenceNumber || 0)) 
-        : 1042;
-
-      const newBatch: any[] = [];
-      const eventTypes = ["MRV_EVENT", "WEIGHBRIDGE_TICKET", "POLICY_COMPLIANCE", "CIRCULAR_CREDIT_ANCHOR"];
-      const locations = [
-        "MRF Facility #04, Pune Zone B",
-        "Gobar-Dhan Biogas Plant, Gram Panchayat Khed",
-        "Compost Processing Facility #12, Mumbai",
-        "Resource Recovery Center, Ahmedabad"
-      ];
-
-      const countToGenerate = Math.floor(Math.random() * 2) + 1;
-      for (let i = 0; i < countToGenerate; i++) {
-        const seq = baseSeq + i + 1;
-        const eventType = eventTypes[(seq + i) % eventTypes.length];
-        const loc = locations[(seq + i) % locations.length];
-        const weight = (1800 + (seq * 137) % 3200).toLocaleString();
-        const uuid = crypto.randomBytes(6).toString('hex');
-
-        const vcPayload = {
-          "@context": ["https://www.w3.org/2018/credentials/v1"],
-          id: `urn:uuid:rupaykg-hcs-sync-${uuid}`,
-          type: ["VerifiableCredential", "RupayKgHcsSyncCredential"],
-          issuer: "did:rupaykg:authority:national-compost-01",
-          issuanceDate: new Date().toISOString(),
-          credentialSubject: {
-            id: `did:hedera:testnet:topic-0.0.4592011:${seq}`,
-            eventType,
-            facility: loc,
-            measurement: `${weight} kg Diverted Solid Waste`,
-            mrvScore: 98 + (i % 3),
-            sequenceNumber: seq
-          },
-          proof: {
-            type: "Ed25519Signature2020",
-            created: new Date().toISOString(),
-            proofValue: `sig_${crypto.randomBytes(32).toString('hex')}`
-          }
-        };
-
-        const calcHash = crypto.createHash('sha384')
-          .update(JSON.stringify(vcPayload) + seq)
-          .digest('hex');
-
-        const syncMessage = {
-          id: `hcs-sync-${uuid}`,
-          topicId: "0.0.4592011",
-          sequenceNumber: seq,
-          runningHash: `0x${calcHash}`,
-          timestamp: new Date().toISOString(),
-          message: vcPayload
-        };
-
-        guardianMessages.push(syncMessage);
-        newBatch.push(syncMessage);
-      }
-
-      res.json({
-        success: true,
-        synced_at: new Date().toISOString(),
-        topic_id: "0.0.4592011",
-        synced_count: newBatch.length,
-        latest_sequence_number: baseSeq + newBatch.length,
-        new_messages: newBatch,
-        messages: guardianMessages
-      });
-    } catch (err: any) {
-      res.status(500).json({ error: "Failed to sync Hedera Consensus Service ledger batch", details: err.message });
-    }
+    return res.status(503).json({ error: "Simulated Hedera ledger sync is disabled in production." });
   });
 
   app.post(
@@ -4693,13 +4439,20 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
   // W3C Verifiable Credential Issuance
   app.post("/api/credentials/issue", auth(["super_admin", "regulator", "auditor"]), async (req: any, res) => {
     try {
-      const { subjectId, claims, issuer } = req.body;
+      const { subjectId, claims } = req.body;
       if (!subjectId || !claims) {
         return res.status(400).json({ error: "subjectId and claims are required to issue a credential." });
       }
-      const result = CredentialService.issueCredential(
+      
+      const serverIssuer = process.env.VC_ISSUER_DID;
+      const privateKey = process.env.VC_ISSUER_PRIVATE_KEY;
+      if (!serverIssuer || !privateKey) {
+         return res.status(503).json({ error: "VC_ISSUER_DID or VC_ISSUER_PRIVATE_KEY not configured. Issuance is disabled." });
+      }
+
+      const result = await CredentialService.issueCredential(
         { id: subjectId, claims },
-        issuer
+        serverIssuer
       );
       res.json({
         success: true,
@@ -4713,17 +4466,21 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
   // W3C Verifiable Credential Verification
   app.post("/api/credentials/verify", auth(), async (req: any, res) => {
     try {
-      const { credential, claimedHash, publicKey } = req.body;
+      const { credential, claimedHash } = req.body;
       if (!credential) {
         return res.status(400).json({ error: "credential object is required." });
       }
-      const verification = CredentialService.verifyCredential(credential, claimedHash, publicKey);
+      const publicKey = process.env.VC_ISSUER_PUBLIC_KEY;
+      if (!publicKey) {
+         return res.status(503).json({ error: "VC_ISSUER_PUBLIC_KEY not configured. Verification is disabled." });
+      }
+      const verification = await CredentialService.verifyCredential(credential, claimedHash, publicKey);
       res.json({
         success: verification.isValid,
         verification
       });
     } catch (err: any) {
-      res.status(500).json({ error: "Credential verification failed", details: err.message });
+      res.status(500).json({ error: "Verification failed", details: err.message });
     }
   });
 

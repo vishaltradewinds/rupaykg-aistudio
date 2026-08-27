@@ -1,4 +1,6 @@
+const fs = require('fs');
 
+let authCode = `
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
@@ -69,7 +71,7 @@ export const auth = (roles: string[] = []) => {
          return res.status(503).json({ error: 'Service Unavailable: Token revocation service is offline. Failing closed.' });
       }
       if (decodedPayload.jti) {
-         const isRevoked = await redis.get(`bl_${decodedPayload.jti}`);
+         const isRevoked = await redis.get(\`bl_\${decodedPayload.jti}\`);
          if (isRevoked) {
            return res.status(401).json({ error: 'Unauthorized: Token has been revoked' });
          }
@@ -118,3 +120,7 @@ export const auth = (roles: string[] = []) => {
     next();
   };
 };
+`;
+
+fs.writeFileSync('src/middleware/auth.ts', authCode);
+console.log("Auth middleware updated.");

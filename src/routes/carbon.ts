@@ -65,7 +65,14 @@ carbonRouter.get('/methodologies', async (req, res) => {
 
 carbonRouter.get('/projects', async (req, res) => {
   try {
-    const data = await db.select().from(carbon_projects);
+    const userRole = (req as any).user?.role;
+    const uid = (req as any).user?.uid;
+    let data;
+    if (["super_admin", "regulator", "auditor"].includes(userRole)) {
+       data = await db.select().from(carbon_projects);
+    } else {
+       data = await db.select().from(carbon_projects).where(eq(carbon_projects.ownerId, uid));
+    }
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -74,7 +81,9 @@ carbonRouter.get('/projects', async (req, res) => {
 
 carbonRouter.post('/projects', async (req, res) => {
   try {
-    const { name, description, ownerId, wasteSourceRecordId, methodologyId } = req.body;
+    const { name, description, wasteSourceRecordId, methodologyId } = req.body;
+    const ownerId = (req as any).user?.uid || (req as any).user?.id;
+    if (!ownerId) return res.status(401).json({ error: "Missing authenticated user" });
     const newProject = {
       id: crypto.randomUUID(),
       name,
@@ -94,6 +103,9 @@ carbonRouter.post('/projects', async (req, res) => {
 carbonRouter.get('/projects/:id', async (req, res) => {
   try {
     const data = await db.select().from(carbon_projects).where(eq(carbon_projects.id, req.params.id));
+    if (data.length && data[0].ownerId && data[0].ownerId !== (req as any).user?.uid && !["super_admin", "regulator", "auditor"].includes((req as any).user?.role)) {
+      return res.status(403).json({ error: "Cross-tenant access denied" });
+    }
     if (!data.length) return res.status(404).json({ error: "Not found" });
     res.json(data[0]);
   } catch (err: any) {
@@ -105,6 +117,11 @@ carbonRouter.get('/projects/:id', async (req, res) => {
 
 carbonRouter.post('/projects/:id/intake', async (req, res) => {
   try {
+    const project = await db.select().from(carbon_projects).where(eq(carbon_projects.id, req.params.id));
+    if (!project.length) return res.status(404).json({ error: "Not found" });
+    if (project[0].ownerId && project[0].ownerId !== (req as any).user?.uid && !["super_admin"].includes((req as any).user?.role)) {
+      return res.status(403).json({ error: "Cross-tenant mutation denied" });
+    }
     const result = await realProjectIntakeEngine.processIntake(req.params.id, req.body);
     res.json(result);
   } catch (err: any) {
@@ -225,6 +242,9 @@ carbonRouter.post('/projects/:id/audit-package', async (req, res) => {
 carbonRouter.get('/public/projects/:id', async (req, res) => {
   try {
     const data = await db.select().from(carbon_projects).where(eq(carbon_projects.id, req.params.id));
+    if (data.length && data[0].ownerId && data[0].ownerId !== (req as any).user?.uid && !["super_admin", "regulator", "auditor"].includes((req as any).user?.role)) {
+      return res.status(403).json({ error: "Cross-tenant access denied" });
+    }
     if (!data.length) return res.status(404).json({ error: "Public project record not found." });
 
     const proj = data[0];

@@ -243,12 +243,11 @@ export class HederaAnchorProvider {
         .setMessage(messageJson);
 
       const response = await tx.execute(client);
-      const receipt = await response.getReceipt(client);
-
+      const record = await response.getRecord(client);
+      const receipt = record.receipt;
       const txId = response.transactionId ? response.transactionId.toString() : null;
-      const consensusTimestamp = receipt.topicSequenceNumber
-        ? `${receipt.topicSequenceNumber}`
-        : new Date().toISOString();
+      const consensusTimestamp = record.consensusTimestamp ? record.consensusTimestamp.toString() : null;
+      if (!consensusTimestamp) throw new Error("Did not receive a consensus timestamp from network");
 
       const successResult: HederaSubmitResult = {
         id: anchorId,
