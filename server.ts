@@ -41,15 +41,8 @@ import { VCService } from "./src/services/vcService";
 import { GuardianService } from "./src/services/guardianService";
 import { ICMComplianceService, ICM_METHODOLOGIES, ICM_CCTS_SECTORS } from "./src/services/icmComplianceService";
 
-import { hedera } from "./services/hedera-service/index";
-import { WalletEngine } from "./services/wallet-engine/logic";
-import { initAuth } from "./services/auth-service/index";
-import { initCCC } from "./services/ccc-engine/index";
-import { initMRV } from "./services/mrv-engine/index";
-import { initRegistry } from "./services/registry-service/index";
-import { initFraud } from "./services/fraud-engine/index";
+import { checkFraud } from "./src/services/fraudEngine";
 import { AIBiomassVerificationService } from "./src/services/aiBiomassService";
-import { initPayoutWorker } from "./workers/payout-worker/index";
 import {
   initLgdDatabase,
   getLgdStates,
@@ -69,13 +62,7 @@ let paymentConfig = {
 
 async function startServer() {
   // --- Domain Service Orchestration ---
-  initAuth();
   initLgdDatabase();
-  initCCC();
-  initMRV();
-  initRegistry();
-  initFraud();
-  initPayoutWorker();
 
   const logger = pino({
     transport: {
@@ -1739,9 +1726,18 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       await RecordService.addRecord(record);
 
       // Hedera HCS Anchor - Trust Rail Audit
-      const eventHash = crypto.createHash('sha256').update(JSON.stringify(record)).digest('hex');
-      const hcsResult = await hedera.anchorEvent("0.0.1234", eventHash, { type: "WASTE_LOG", actor: req.user.id });
-      record.hcs_transaction_id = hcsResult.transactionId;
+      try {
+        const hcsResult = await HederaAnchorProvider.submitAnchor({
+          eventType: "WASTE_LOG",
+          recordId: record.id,
+          weightKg: record.weight_kg,
+          carbonAvoidanceKg: record.ccc_amount_kg,
+          metadata: { actor: req.user.id }
+        }, undefined, req.user.id);
+        record.hcs_transaction_id = hcsResult.transactionId || undefined;
+      } catch (hcsErr) {
+        console.warn("Hedera anchoring skipped or unavailable:", hcsErr);
+      }
 
       const user = users.find((u) => u.id === req.user.id);
       
@@ -2176,56 +2172,49 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     const recycler = users.find(u => u.id === req.user.id);
     const material_value = record.base_value || (record.weight_kg * (dynamicWasteTypes.find(w => w.type === record.waste_type)?.value || 10));
     
-    if (dbStatus === "connected") {
-        await WalletEngine.transact(req.user.id, material_value, 'DEBIT', {
-            eventId: record.id,
-            category: 'material_purchase_cost'
-        });
-    } else {
-        if (recycler) recycler.wallet_balance = (recycler.wallet_balance || 0) - material_value;
+    if (recycler) {
+      recycler.wallet_balance = (recycler.wallet_balance || 0) - material_value;
+      try {
+        await db.update(dbUsers).set({ wallet_balance: recycler.wallet_balance }).where(eq(dbUsers.uid, String(recycler.uid || recycler.id)));
+      } catch (e) {
+        // in-memory fallback active
+      }
     }
 
     // Generator receives their payout (Physical Material Payment to generator)
     const generator = users.find(u => u.id === record.citizen_id);
     const generator_payout = record.generator_payout || (material_value * ((100 - paymentConfig.logistics_margin_percent - paymentConfig.system_profit_percent) / 100));
     if (generator && generator_payout > 0) {
-        if (dbStatus === "connected") {
-            await WalletEngine.transact(generator.id, generator_payout, 'CREDIT', {
-                eventId: record.id,
-                category: 'base_waste_payout',
-                hcsTx: record.hcs_transaction_id 
-            });
-        } else {
-            generator.wallet_balance = (generator.wallet_balance || 0) + generator_payout;
-        }
+      generator.wallet_balance = (generator.wallet_balance || 0) + generator_payout;
+      try {
+        await db.update(dbUsers).set({ wallet_balance: generator.wallet_balance }).where(eq(dbUsers.uid, String(generator.uid || generator.id)));
+      } catch (e) {
+        // in-memory fallback active
+      }
     }
 
     // Aggregator receives their transit & collection payout (Physical Material Logistics Payment to aggregator)
     const aggregator = users.find(u => u.id === record.aggregator_id);
     const logistics_payout = (record.base_value || material_value) * (paymentConfig.logistics_margin_percent / 100);
     if (aggregator && logistics_payout > 0) {
-        if (dbStatus === "connected") {
-            await WalletEngine.transact(aggregator.id, logistics_payout, 'CREDIT', {
-                eventId: record.id,
-                category: 'logistics_payout'
-            });
-        } else {
-            aggregator.wallet_balance = (aggregator.wallet_balance || 0) + logistics_payout;
-        }
+      aggregator.wallet_balance = (aggregator.wallet_balance || 0) + logistics_payout;
+      try {
+        await db.update(dbUsers).set({ wallet_balance: aggregator.wallet_balance }).where(eq(dbUsers.uid, String(aggregator.uid || aggregator.id)));
+      } catch (e) {
+        // in-memory fallback active
+      }
     }
 
     // Platform system fee on material handling (10%)
     const system_fee = material_value * (paymentConfig.system_profit_percent / 100);
     const platformAdmin = users.find(u => u.role === "super_admin" || u.id === "admin_1");
     if (platformAdmin && system_fee > 0) {
-        if (dbStatus === "connected") {
-            await WalletEngine.transact(platformAdmin.id, system_fee, 'CREDIT', {
-                eventId: record.id,
-                category: 'platform_material_handling_fee'
-            });
-        } else {
-            platformAdmin.wallet_balance = (platformAdmin.wallet_balance || 0) + system_fee;
-        }
+      platformAdmin.wallet_balance = (platformAdmin.wallet_balance || 0) + system_fee;
+      try {
+        await db.update(dbUsers).set({ wallet_balance: platformAdmin.wallet_balance }).where(eq(dbUsers.uid, String(platformAdmin.uid || platformAdmin.id)));
+      } catch (e) {
+        // in-memory fallback active
+      }
     }
 
     await AuditLogService.log(
@@ -2442,23 +2431,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         await db.update(dbUsers).set({ wallet_balance: adminNewBalance }).where(eq(dbUsers.uid, String(platformAdmin.uid || platformAdmin.id)));
       }
 
-      if (dbStatus === "connected" && platformAdmin) {
-        try {
-          await WalletEngine.transact(String(user.id || user.uid), totalCost, 'DEBIT', {
-            category: 'carbon_credit_purchase',
-            recordCount: recordsToPurchase.length,
-            recordIds: record_ids
-          });
-          await WalletEngine.transact(String(platformAdmin.id || platformAdmin.uid), totalCost, 'CREDIT', {
-            category: 'platform_carbon_credit_sale_income',
-            buyerId: user.id || user.uid,
-            buyerRole: user.role,
-            recordCount: recordsToPurchase.length
-          });
-        } catch (dbErr) {
-          console.error("WalletEngine error during carbon credit certificate purchase:", dbErr);
-        }
-      }
+      // Balances debit/credit completed in PostgreSQL and memory state
 
       // Mark records as purchased and attribute carbon revenue exclusively to platform treasury
       for (const r of recordsToPurchase) {
@@ -4452,7 +4425,7 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
 
       const result = await CredentialService.issueCredential(
         { id: subjectId, claims },
-        serverIssuer
+        { id: serverIssuer, name: "RupayKg Circular Economy Authority" }
       );
       res.json({
         success: true,

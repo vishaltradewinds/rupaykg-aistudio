@@ -18,8 +18,8 @@ export const checkFraud = (eventData: any) => {
     return { isFraud: true, reason: 'Invalid data schema' };
   }
   
-  if (result.data.anomalyScore > 85) {
-     return { isFraud: true, reason: 'High anomaly score detected' };
+  if (result.data.anomalyScore > 85) { 
+    return { isFraud: true, reason: 'High anomaly score detected' };
   }
   return { isFraud: false };
-}
+};
