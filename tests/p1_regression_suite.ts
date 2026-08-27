@@ -155,17 +155,7 @@ async function runP1Suite() {
     });
 
     if (cred.proofStatus === 'INTEGRITY_HASH_ONLY' && cred.signature === null && cred.isSimulated === false && cred.proofType === 'LOCAL_SHA256_DIGEST') {
-      const verify = CredentialService.verifyCredential({
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        id: cred.credentialId,
-        type: ['VerifiableCredential', 'CircularEconomyActivityCredential'],
-        issuer: cred.issuerId,
-        issuanceDate: cred.issuanceDate,
-        credentialSubject: {
-          id: 'did:rupaykg:entity:test-entity',
-          claims: { certifiedAvoidanceKg: 4200, standard: 'CCTS OM 2026' }
-        }
-      }, cred.integrityHash);
+      const verify = CredentialService.verifyCredential(cred.verifiableCredential, cred.integrityHash);
 
       if (verify.isValid && verify.proofStatus === 'INTEGRITY_HASH_ONLY' && verify.signatureVerified === false && verify.guardianPolicyStatus === 'NOT_AVAILABLE') {
         recordTest('P1-07', 'Cryptographic Terminology & Real Credential Digest Proof Boundary', true, 'Digest verified locally; W3C signature and Guardian accurately reported as NOT_AVAILABLE.');
