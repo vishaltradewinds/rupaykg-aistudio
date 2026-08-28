@@ -32,6 +32,10 @@ export async function getUserByPhone(phone: string) {
 
 export async function getUserByIdentifier(identifier: string) {
   const all = await getAllUsers();
+  if (identifier === 'admin') {
+    const adminUser = all.find((u) => u.uid === 'admin_1' || u.email === 'admin@rupaykg.org' || (u as any).loginId === 'admin');
+    if (adminUser) return adminUser;
+  }
   return all.find(
     (u) =>
       u.phone === identifier ||
