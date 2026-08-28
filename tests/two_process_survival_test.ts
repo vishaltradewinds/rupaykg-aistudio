@@ -4,7 +4,7 @@ import { CarbonEventService } from '../src/services/carbonEventService.ts';
 import { ComplianceService } from '../src/services/complianceService.ts';
 import { PilotService } from '../src/services/pilotService.ts';
 import { AuditLogService } from '../src/services/auditLogService.ts';
-import { BlockchainService } from '../src/services/blockchainService.ts';
+import { HederaAnchorProvider } from '../src/services/hederaAnchor.ts';
 import { registerStakeholderUser } from '../src/db/users.ts';
 import fs from 'fs';
 
@@ -88,7 +88,7 @@ async function process1Writer() {
     { timestamp: ts }
   );
 
-  const block = await BlockchainService.appendBlock({
+  const anchor = await HederaAnchorProvider.submitAnchor({
     record_id: recordId,
     action: "SURVIVAL_BLOCK",
     data: { weight_kg: 720, ccc_amount_kg: 1080 },
@@ -103,8 +103,8 @@ async function process1Writer() {
     complianceId: compliance.id,
     pilotId: pilot.id,
     auditLogId: auditLog.id,
-    blockHash: block.hash,
-    blockIndex: block.index
+    anchorId: anchor.anchorId,
+    anchorHash: anchor.payloadDigest
   };
 
   fs.writeFileSync('./tests/.survival_manifest.json', JSON.stringify(manifest, null, 2));

@@ -19,7 +19,7 @@ export interface GuardianMessage {
 }
 
 export class GuardianService {
-  private static HCS_TOPIC_ID = "0.0.4592011"; // Default RupayKg National Carbon Topic
+  private static HCS_TOPIC_ID = process.env.HEDERA_TOPIC_ID || "";
 
   static get guardianApiUrl() {
     return process.env.GUARDIAN_API_URL;

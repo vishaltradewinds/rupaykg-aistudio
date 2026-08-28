@@ -80,9 +80,10 @@ export class GuardianAIToolkit {
    * Natural Language Query for Hedera HCS Topic
    */
   static async queryHederaTopic(messages: any[], query: string): Promise<string> {
+    const topicId = process.env.HEDERA_TOPIC_ID || 'Active Hedera HCS Topic';
     const prompt = `
       You are the Guardian AI Assistant for the RupayKg Carbon Registry. 
-      The following is a list of HCS (Hedera Consensus Service) messages retrieved from Topic 0.0.4592011:
+      The following is a list of HCS (Hedera Consensus Service) messages retrieved from Topic ${topicId}:
       
       ${JSON.stringify(messages.slice(-10), null, 2)}
       

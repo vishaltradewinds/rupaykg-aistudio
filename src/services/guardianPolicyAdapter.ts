@@ -1,6 +1,8 @@
 import { MethodologyIR, MRVEvent, EvidenceRecord, Policy } from '../types';
 import { GuardianService } from './guardianService';
-import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils';
+import { CredentialService } from './credentialService';
+import { HederaAnchorProvider } from './hederaAnchor';
+import { hashStringHex } from '../utils/cryptoUtils';
 
 /**
  * ========================================================
@@ -8,8 +10,6 @@ import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils';
  * ========================================================
  * Isolates Hedera Guardian-specific serialization, schema matching, and 
  * policy schema mapping from RupayKg's core physical MRV domain logic.
- * 
- * Provides sandbox and simulated communication capabilities with clear indicators.
  */
 export class GuardianPolicyAdapter {
   private static SIMULATION_SANDBOX_ACTIVE = false;
@@ -28,11 +28,9 @@ export class GuardianPolicyAdapter {
   }> {
     console.log(`[GuardianPolicyAdapter] Translating Methodology IR [${ir.metadata.methodologyId}] to Hedera Guardian schema representations.`);
     
-    // Simulate compilation steps
-    const policyId = `POL_GUARD_${randomBytesHex(4).toUpperCase()}`;
-    const hederaTopicId = `0.0.${Math.floor(1000000 + Math.random() * 9000000)}`;
+    const policyId = `POL_GUARD_${hashStringHex(ir.metadata.methodologyId).substring(0, 8).toUpperCase()}`;
+    const hederaTopicId = process.env.HEDERA_TOPIC_ID || '';
     
-    // Guardian specific compilation outputs
     const schemaMappingsCount = ir.entities.length;
     const roleMappingsCount = ir.roles.length;
 
@@ -41,7 +39,7 @@ export class GuardianPolicyAdapter {
       hederaTopicId,
       schemaMappingsCount,
       roleMappingsCount,
-      status: 'Compiled & Active on HCS',
+      status: hederaTopicId ? 'Compiled & Active on HCS' : 'Compiled (HEDERA_TOPIC_ID not configured)',
       isSandbox: this.SIMULATION_SANDBOX_ACTIVE
     };
   }
@@ -63,60 +61,51 @@ export class GuardianPolicyAdapter {
   }> {
     console.log(`[GuardianPolicyAdapter] Structuring W3C Verifiable Credential for Event ID: ${event.eventId}`);
 
-    // Standardize credential subject payload adhering to Guardian schema mappings
-    const vcPayload = {
-      "@context": [
-        "https://www.w3.org/2018/credentials/v1",
-        "https://rupaykg.org/schemas/mrv-event-v1.json"
-      ],
-      "id": `urn:uuid:${randomBytesHex(16)}`,
-      "type": ["VerifiableCredential", "RupayKgMrvEventCredential"],
-      "issuer": `did:rupaykg:authority:national-compost-01`,
-      "issuanceDate": new Date().toISOString(),
-      "credentialSubject": {
-        "id": `did:rupaykg:activity:${event.sourceId || 'generic_source'}`,
-        "eventId": event.eventId,
-        "operatingMode": event.operatingMode,
-        "activityType": event.eventType,
-        "physicalQuantity": {
-          "value": event.measurement,
-          "unit": event.unit
+    // Structure credential subject
+    const subject = {
+      id: `did:rupaykg:activity:${event.sourceId || 'generic_source'}`,
+      claims: {
+        eventId: event.eventId,
+        operatingMode: event.operatingMode,
+        activityType: event.eventType,
+        physicalQuantity: {
+          value: event.measurement,
+          unit: event.unit
         },
-        "location": {
-          "latitude": event.latitude,
-          "longitude": event.longitude
+        location: {
+          latitude: event.latitude,
+          longitude: event.longitude
         },
-        "evidenceTrace": evidenceRecords.map(e => ({
-          "evidenceId": e.evidenceId,
-          "type": e.evidenceType,
-          "ref": e.fileReference,
-          "integrityHash": e.integrityHash || 'sha256-pending'
+        evidenceTrace: evidenceRecords.map(e => ({
+          evidenceId: e.evidenceId,
+          type: e.evidenceType,
+          ref: e.fileReference,
+          integrityHash: e.integrityHash || 'sha256-pending'
         }))
-      },
-      "proof": {
-        "type": "Ed25519Signature2020",
-        "created": new Date().toISOString(),
-        "verificationMethod": "did:rupaykg:authority:national-compost-01#key-1",
-        "proofPurpose": "assertionMethod",
-        "proofValue": `sig_${randomBytesHex(32)}`
       }
     };
 
+    // Issue asymmetric signed VC (fails closed if private key unconfigured)
+    const vcResult = CredentialService.issueCredential(subject, {
+      id: 'did:rupaykg:authority:national-compost-01',
+      name: 'RupayKg National Compost Authority'
+    });
+
     // Call underlying GuardianService
-    const hcsMessage = await GuardianService.anchorToHCS(vcPayload);
+    const hcsMessage = await GuardianService.anchorToHCS(vcResult.verifiableCredential);
 
     return {
       messageId: hcsMessage.id,
       topicId: hcsMessage.topicId,
       sequenceNumber: hcsMessage.sequenceNumber,
       runningHash: hcsMessage.runningHash,
-      vcPayload,
+      vcPayload: vcResult.verifiableCredential,
       isSandbox: this.SIMULATION_SANDBOX_ACTIVE
     };
   }
 
   /**
-   * Creates an immutable Decentrailized Identifier (DID) for a stakeholder or processing node.
+   * Creates an immutable Decentralized Identifier (DID) for a stakeholder or processing node.
    */
   static generateStakeholderDID(entityId: string): { did: string; status: string; isSandbox: boolean } {
     const fingerprint = hashStringHex(entityId).substring(0, 16);
@@ -134,18 +123,20 @@ export class GuardianPolicyAdapter {
   static async traceTrustPath(messageId: string): Promise<{
     messageId: string;
     timestamp: string;
-    blockNumber: number;
     hederaExplorerUrl: string;
     verifiedByVVBAudit: boolean;
     verificationStatus: string;
+    mirrorData?: any;
   }> {
+    const mirrorVerify = await HederaAnchorProvider.verifyAnchorOnMirrorNode(messageId);
+
     return {
       messageId,
-      timestamp: new Date().toISOString(),
-      blockNumber: Math.floor(45100000 + Math.random() * 50000),
+      timestamp: mirrorVerify.consensusTimestamp || new Date().toISOString(),
       hederaExplorerUrl: `https://hashscan.io/mainnet/message/${messageId}`,
-      verifiedByVVBAudit: true,
-      verificationStatus: 'VERIFIED_ON_LEDGER'
+      verifiedByVVBAudit: mirrorVerify.verified,
+      verificationStatus: mirrorVerify.verified ? 'VERIFIED_ON_LEDGER' : 'PENDING_MIRROR_INDEX',
+      mirrorData: mirrorVerify
     };
   }
 }

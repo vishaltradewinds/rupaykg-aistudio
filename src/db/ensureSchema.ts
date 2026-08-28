@@ -15,7 +15,6 @@ export async function ensureDatabaseSchema(pool: Pool): Promise<void> {
       'compliance_records',
       'system_notifications',
       'operational_logs',
-      'blockchain_blocks',
       'pilot_onboardings',
       'pilot_records',
       'pilot_issues',

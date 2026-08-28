@@ -32,6 +32,7 @@ import {
 } from '../types';
 
 import { GoogleGenAI } from '@google/genai';
+import { hashStringHex } from '../utils/cryptoUtils';
 
 // Simple helper to generate IDs
 const generateId = (prefix: string) => `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
@@ -488,11 +489,14 @@ export const enterpriseMrvService = {
   },
 
   addMrvEvent: (event: Omit<MRVEvent, 'eventId' | 'recordedAt' | 'integrityHash'>): MRVEvent => {
+    const recordedAt = new Date().toISOString();
+    const eventId = generateId('MRV_EVT');
+    const integrityHash = hashStringHex(`${eventId}:${recordedAt}:${JSON.stringify(event)}`);
     const newEvent: MRVEvent = {
       ...event,
-      eventId: generateId('MRV_EVT'),
-      recordedAt: new Date().toISOString(),
-      integrityHash: `sha256_${Math.random().toString(36).substring(7)}`,
+      eventId,
+      recordedAt,
+      integrityHash,
       dataQuality: event.evidenceRefs.length * 40 + 15 > 100 ? 100 : event.evidenceRefs.length * 40 + 15
     };
     enterpriseStore.mrvEvents.unshift(newEvent);
@@ -594,12 +598,15 @@ export const enterpriseMrvService = {
   },
 
   addEvidenceRecord: (record: Omit<EvidenceRecord, 'evidenceId' | 'uploadedAt' | 'integrityHash' | 'checksum'>): EvidenceRecord => {
+    const evidenceId = generateId('EVID');
+    const uploadedAt = new Date().toISOString();
+    const payloadStr = `${evidenceId}:${uploadedAt}:${record.projectId}:${record.fileReference}:${record.evidenceType}`;
     const newRecord: EvidenceRecord = {
       ...record,
-      evidenceId: generateId('EVID'),
-      uploadedAt: new Date().toISOString(),
-      checksum: `md5_${Math.random().toString(36).substring(7)}`,
-      integrityHash: `sha256_hash_${Math.random().toString(36).substring(7)}`
+      evidenceId,
+      uploadedAt,
+      checksum: `md5_${hashStringHex(payloadStr).substring(0, 32)}`,
+      integrityHash: `sha256_${hashStringHex(payloadStr)}`
     };
     enterpriseStore.evidenceRecords.push(newRecord);
 
@@ -720,7 +727,7 @@ export const enterpriseMrvService = {
       uncertaintyResult: 5.0, // 5%
       executedAt: new Date().toISOString(),
       engineVersion: 'RupayEngine_v3.0.0',
-      calculationHash: `sha256_calc_${Math.random().toString(36).substring(7)}`
+      calculationHash: `sha256_calc_${hashStringHex(`${runId}:${meth.methodologyId}:${netReductions}`)}`
     };
 
     enterpriseStore.calculationRuns.push(calculationRun);
@@ -749,7 +756,7 @@ export const enterpriseMrvService = {
     const jobId = enterpriseMrvService.launchJob('Methodology Ingestion', 'METHODOLOGY_PARSING');
     
     // Create new methodology placeholder in draft state
-    const code = 'METH_' + Math.random().toString(36).substring(7).toUpperCase();
+    const code = 'METH_' + hashStringHex(pdfName).substring(0, 6).toUpperCase();
     const newMeth: Methodology = {
       methodologyId: generateId('METH'),
       methodologyCode: code,
@@ -763,7 +770,7 @@ export const enterpriseMrvService = {
       status: MethodologyStatus.PARSED,
       sourceDocument: pdfName,
       sourceAuthority: 'Ministry of Power / BEE India',
-      methodologyHash: `sha256_${Math.random().toString(36).substring(7)}`,
+      methodologyHash: `sha256_${hashStringHex(textSnippet || pdfName)}`,
       digitizationStatus: 'Extracted via AI Parser',
       policyCompilationStatus: 'Awaiting Compilation',
       calculationCoverage: 80,
@@ -840,7 +847,7 @@ export const enterpriseMrvService = {
       status: 'Active',
       compiledAt: new Date().toISOString(),
       deployedAt: new Date().toISOString(),
-      hederaTopicId: `0.0.${Math.floor(1000000 + Math.random() * 9000000)}`,
+      hederaTopicId: process.env.HEDERA_TOPIC_ID || '',
       schemaMappingsCount: meth.ir?.entities.length || 2,
       roleMappingsCount: meth.ir?.roles.length || 2
     };
@@ -1175,13 +1182,16 @@ export const enterpriseMrvService = {
   },
 
   logAudit: (event: Omit<AuditEvent, 'auditEventId' | 'timestamp' | 'requestId' | 'correlationId' | 'integrityHash'>): AuditEvent => {
+    const auditEventId = generateId('AUD');
+    const timestamp = new Date().toISOString();
+    const payloadStr = `${auditEventId}:${timestamp}:${event.eventType}:${event.resourceId}:${event.action}`;
     const newEvent: AuditEvent = {
       ...event,
-      auditEventId: generateId('AUD'),
-      timestamp: new Date().toISOString(),
-      requestId: `req_${Math.random().toString(36).substring(7)}`,
-      correlationId: `corr_${Math.random().toString(36).substring(7)}`,
-      integrityHash: `sha256_audit_${Math.random().toString(36).substring(7)}`
+      auditEventId,
+      timestamp,
+      requestId: `req_${hashStringHex(payloadStr).substring(0, 10)}`,
+      correlationId: `corr_${hashStringHex(payloadStr).substring(10, 20)}`,
+      integrityHash: `sha256_${hashStringHex(payloadStr)}`
     };
     enterpriseStore.auditEvents.unshift(newEvent);
     enterpriseStore.saveToStorage();

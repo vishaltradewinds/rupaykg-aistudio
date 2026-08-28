@@ -820,15 +820,6 @@ export const operational_logs = pgTable('operational_logs', {
   timestamp: timestamp('timestamp').defaultNow(),
 });
 
-export const blockchain_blocks = pgTable('blockchain_blocks', {
-  id: text('id').primaryKey(),
-  blockIndex: integer('block_index').notNull().unique(),
-  previousHash: text('previous_hash').notNull(),
-  hash: text('hash').notNull(),
-  data: jsonb('data').notNull(),
-  timestamp: timestamp('timestamp').defaultNow(),
-});
-
 export const cqe_methodologies = pgTable('cqe_methodologies', {
   id: text('id').primaryKey(),
   methodologyCode: text('methodology_code').notNull(),

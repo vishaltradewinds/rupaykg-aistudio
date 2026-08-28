@@ -126,6 +126,26 @@ export class CredentialService {
   }
 
   /**
+   * Returns standard W3C context for waste carbon credentials
+   */
+  public static getWasteCarbonContext(): any {
+    return {
+      "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "id": "@id",
+        "type": "@type",
+        "RupayKgWasteCarbon": "https://rupaykg.org/contexts/waste-carbon#",
+        "WasteDiversionActivity": "https://rupaykg.org/contexts/waste-carbon#WasteDiversionActivity",
+        "wasteDetails": "https://rupaykg.org/contexts/waste-carbon#wasteDetails",
+        "carbonMetrics": "https://rupaykg.org/contexts/waste-carbon#carbonMetrics",
+        "mrvEvidence": "https://rupaykg.org/contexts/waste-carbon#mrvEvidence",
+        "compliance": "https://rupaykg.org/contexts/waste-carbon#compliance"
+      }
+    };
+  }
+
+  /**
    * Issue a W3C Verifiable Credential with real asymmetric cryptographic signature.
    * STRICT FAIL-CLOSED: Rejects with NOT_CONFIGURED error if VC_ISSUER_PRIVATE_KEY is missing.
    */
@@ -283,46 +303,39 @@ export class CredentialService {
     };
 
     const privateKeyEnv = process.env.VC_ISSUER_PRIVATE_KEY;
-    if (privateKeyEnv && privateKeyEnv.trim().length > 30 && !privateKeyEnv.includes('placeholder')) {
-      try {
-        const canonicalData = this.canonicalize(vcPayloadWithoutProof);
-        const privateKey = crypto.createPrivateKey(privateKeyEnv);
-        let signatureValue: string;
-        if (privateKey.asymmetricKeyType === 'ed25519') {
-          const sig = crypto.sign(null, Buffer.from(canonicalData, 'utf8'), privateKey);
-          signatureValue = sig.toString('base64');
-        } else {
-          const sign = crypto.createSign('SHA256');
-          sign.update(canonicalData);
-          sign.end();
-          signatureValue = sign.sign(privateKey, 'base64');
-        }
-        return {
-          ...vcPayloadWithoutProof,
-          proof: {
-            type: "Ed25519Signature2020",
-            created: timestamp,
-            verificationMethod: "https://rupaykg.org/issuers/national-compliance-ai/keys/v1",
-            proofPurpose: "assertionMethod",
-            signatureValue
-          }
-        };
-      } catch {
-        // Fallback below
-      }
+    const hasSigningKey = Boolean(privateKeyEnv && privateKeyEnv.trim().length > 30 && !privateKeyEnv.includes('placeholder'));
+
+    if (!hasSigningKey) {
+      throw new Error(
+        'VC_ISSUER_PRIVATE_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.'
+      );
     }
 
-    const canonicalString = this.canonicalize(vcPayloadWithoutProof);
-    const digest = crypto.createHash('sha256').update(canonicalString).digest('hex');
+    const canonicalData = this.canonicalize(vcPayloadWithoutProof);
+    const privateKey = crypto.createPrivateKey(privateKeyEnv!);
+    let signatureValue: string;
+    let proofType = 'Ed25519Signature2020';
+
+    if (privateKey.asymmetricKeyType === 'ed25519') {
+      const sig = crypto.sign(null, Buffer.from(canonicalData, 'utf8'), privateKey);
+      signatureValue = sig.toString('base64');
+      proofType = 'Ed25519Signature2020';
+    } else {
+      const sign = crypto.createSign('SHA256');
+      sign.update(canonicalData);
+      sign.end();
+      signatureValue = sign.sign(privateKey, 'base64');
+      proofType = 'JsonWebSignature2020';
+    }
 
     return {
       ...vcPayloadWithoutProof,
       proof: {
-        type: "DataIntegrityProof",
+        type: proofType,
         created: timestamp,
         verificationMethod: "https://rupaykg.org/issuers/national-compliance-ai/keys/v1",
         proofPurpose: "assertionMethod",
-        signatureValue: digest
+        signatureValue
       }
     };
   }

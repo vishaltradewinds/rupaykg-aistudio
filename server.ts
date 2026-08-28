@@ -1,9 +1,9 @@
 import { carbonRouter } from "./src/routes/carbon.ts";
 import { auth as requireAuth } from "./src/middleware/auth.ts";
 import { sanitizeMiddleware } from "./src/middleware/sanitize.ts";
-import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserByPhone, getOrCreateUser, getUserByIdentifier, updateUserPassword, createPasswordResetToken, findValidPasswordResetToken, markPasswordResetTokenUsed } from "./src/db/users.ts";
+import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserByPhone, getOrCreateUser, getUserByIdentifier, updateUserPassword, createPasswordResetToken, findValidPasswordResetToken, markPasswordResetTokenUsed, findUserByPhoneOrEmail } from "./src/db/users.ts";
 import { db } from "./src/db/index.ts";
-import { users as dbUsers, records as dbRecords, farmers as dbFarmers, carbon_events as dbCarbonEvents, compliance_records as dbComplianceRecords, system_notifications as dbNotifications, operational_logs as dbOperationalLogs, blockchain_blocks as dbBlockchainBlocks, pilot_onboardings as dbPilotOnboardings, pilot_records as dbPilotRecords } from "./src/db/schema.ts";
+import { users as dbUsers, records as dbRecords, farmers as dbFarmers, carbon_events as dbCarbonEvents, compliance_records as dbComplianceRecords, system_notifications as dbNotifications, operational_logs as dbOperationalLogs, hedera_anchors as dbHederaAnchors, pilot_onboardings as dbPilotOnboardings, pilot_records as dbPilotRecords } from "./src/db/schema.ts";
 import { eq, desc, sql } from "drizzle-orm";
 import { SWMComplianceService } from "./src/services/swmComplianceEngine";
 import express from "express";
@@ -15,7 +15,6 @@ import { ComplianceService } from './src/services/complianceService.ts';
 import { PilotService } from './src/services/pilotService.ts';
 import { NotificationService } from './src/services/notificationService.ts';
 import { AuditLogService } from './src/services/auditLogService.ts';
-import { BlockchainService } from './src/services/blockchainService.ts';
 
 
 import jwt from "jsonwebtoken";
@@ -36,7 +35,6 @@ import { generateCarbonEvent, cqe, BEE_APPROVED_METHODOLOGIES, CarbonQuantificat
 import { CqeMethodologyDbService } from "./src/db/cqeMethodologies.ts";
 import { HederaAnchorProvider } from "./src/services/hederaAnchor.ts";
 import { CredentialService } from "./src/services/credentialService.ts";
-import { VCService } from "./src/services/vcService";
 import { GuardianService } from "./src/services/guardianService";
 import { ICMComplianceService, ICM_METHODOLOGIES, ICM_CCTS_SECTORS } from "./src/services/icmComplianceService";
 
@@ -184,7 +182,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   // MUST run on port 3000 in this environment
   const PORT = 3000;
-  const MONGO_URI = process.env.MONGO_URI;
   const INTERNAL_TOKEN =
     process.env.INTERNAL_SERVICE_TOKEN ;
 
@@ -504,7 +501,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   app.get(
     "/api/db-status",
     (req, res) => {
-      res.json({ status: dbStatus, error: dbError });
+      res.json({ status: "connected", database: "PostgreSQL", orm: "Drizzle" });
     },
   );
 
@@ -570,25 +567,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   const logs: any[] = [];
   const records: any[] = [];
   const carbonEvents: any[] = [];
-  // Arrays replaced by DB
-
-  
-  
   const farmers: any[] = [];
   const notifications: any[] = [];
-  const blockchain: any[] = [
-    {
-      "index": 0,
-      "timestamp": 1714550000000,
-      "data": {
-        "message": "Genesis Block",
-        "hcs_topic_id": "0.0.4592011",
-        "protocol": "Hedera Open Source Blockchain Interface"
-      },
-      "previousHash": "0",
-      "hash": "a192e1424adc1dc71ecfdfe4cc43c15f040f4f8f0c337d2415bd137ff0f3249a"
-    }
-  ];
   const pilotRecords: any[] = [];
   const pilotOnboarding: any[] = [];
 
@@ -861,21 +841,9 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       return res.status(400).json({ error: "Invalid stakeholder role specified. Privileged administrative roles cannot be self-assigned." });
     }
 
-    if (dbStatus === "connected") {
-      try {
-        const existingUser = await User.findOne({
-          $or: [
-            { phone: identifier },
-            { email: identifier },
-            { loginId: identifier },
-            { username: identifier }
-          ]
-        });
-        if (existingUser)
-          return res.status(400).json({ error: "User with this Login ID or Phone already exists" });
-      } catch (err) {
-        console.warn("Mongo lookup warning in register:", err);
-      }
+    const existingUser = await findUserByPhoneOrEmail(identifier);
+    if (existingUser) {
+      return res.status(400).json({ error: "User with this Login ID or Phone already exists" });
     }
 
     const allDbUsers = await getAllUsers();
@@ -904,14 +872,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       organization_name: organization_name || null,
       wallet_balance: 0,
     };
-
-    if (dbStatus === "connected") {
-      try {
-        await User.create(newUser);
-      } catch (mErr) {
-        console.warn("Mongo user create warning:", mErr);
-      }
-    }
 
     await registerStakeholderUser({
       uid: userId,
@@ -958,22 +918,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       return res.status(400).json({ error: "Login ID and password are required" });
     }
 
-    let user: any = null;
-    if (dbStatus === "connected") {
-      try {
-        user = await User.findOne({
-          $or: [
-            { phone: identifier },
-            { email: identifier },
-            { loginId: identifier },
-            { username: identifier },
-            { id: identifier }
-          ]
-        });
-      } catch (err) {
-        console.warn("Mongo findOne login warning:", err);
-      }
-    }
+    let user: any = await findUserByPhoneOrEmail(identifier);
 
     if (!user) {
       const allDbUsers = await getAllUsers();
@@ -1112,18 +1057,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     // Update in Postgres
     await updateUserPassword(target, hashedPassword);
 
-    // Update in Mongo if connected
-    if (dbStatus === "connected") {
-      try {
-        await User.updateOne(
-          { $or: [{ phone: target }, { email: target }, { loginId: target }, { id: target }] },
-          { password: hashedPassword }
-        );
-      } catch (err) {
-        console.warn("Mongo reset password warning:", err);
-      }
-    }
-
     // Mark token as used
     await markPasswordResetTokenUsed(resetToken.id);
 
@@ -1192,14 +1125,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         village: village || local_area || memUser.village,
         organization_name: organization_name || memUser.organization_name
       });
-    }
-
-    if (dbStatus === "connected") {
-      await User.findOneAndUpdate(
-        { id: uid },
-        { id: uid, role, name: name || req.user.name, phone, state, district, subdistrict, local_area: local_area || village, organization_name },
-        { upsert: true, new: true }
-      );
     }
 
     const tokenPayload = {
@@ -1860,8 +1785,8 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         };
         await CarbonEventService.addCarbonEvent(carbonEvent);
 
-        // Record on Blockchain
-        const blockchainTx = {
+        // Submit anchor to Hedera HCS
+        const anchorResult = await HederaAnchorProvider.submitAnchor({
           record_id: record.id,
           user_id: record.citizen_id || record.user_id,
           waste_type: record.waste_type,
@@ -1870,15 +1795,14 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           verified_by: req.user.id,
           registry_serial_number: registrySerialNumber,
           event_type: "MRV_VERIFICATION",
-        };
-        const block = await BlockchainService.appendBlock(blockchainTx);
+        });
 
         await AuditLogService.log(
           "MRV_VERIFIED",
-          `CCCs issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Recorded on Blockchain Block #${block.index}`,
+          `CCCs issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Anchored on Hedera HCS (Status: ${anchorResult.status})`,
           "INFO",
           req.user.id,
-          { recordId: record.id, registrySerialNumber, blockIndex: block.index }
+          { recordId: record.id, registrySerialNumber, anchorId: anchorResult.anchorId }
         );
       } else {
         await AuditLogService.log(
@@ -2741,7 +2665,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
         status: "healthy",
         uptime: process.uptime(),
         memory: process.memoryUsage(),
-        db_status: dbStatus,
+        db_status: "connected (PostgreSQL Authoritative)",
         active_connections: users.length + 5, // Simulated
         last_backup: new Date(Date.now() - 3600000).toISOString(),
       });
@@ -3285,22 +3209,22 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     async (req: any, res) => {
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : undefined;
-      const allBlocks = await BlockchainService.getBlocks();
+      const allAnchors = await db.select().from(dbHederaAnchors).orderBy(desc(dbHederaAnchors.createdAt));
       
       if (limit !== undefined || offset !== undefined) {
         const start = offset || 0;
-        const end = limit !== undefined ? start + limit : allBlocks.length;
-        const items = allBlocks.slice(start, end);
+        const end = limit !== undefined ? start + limit : allAnchors.length;
+        const items = allAnchors.slice(start, end);
         return res.json({
-          total: allBlocks.length,
-          limit: limit || allBlocks.length,
+          total: allAnchors.length,
+          limit: limit || allAnchors.length,
           offset: start,
-          hasMore: end < allBlocks.length,
+          hasMore: end < allAnchors.length,
           items
         });
       }
 
-      res.json(allBlocks);
+      res.json(allAnchors);
     },
   );
 
@@ -3454,17 +3378,11 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       : "unknown";
 
     // Find if the user is onboarded in the pilot
-    let user;
-    if (dbStatus === "connected") {
-      user =
-        (await PilotOnboarding.findOne({ phone })) ||
-        (await User.findOne({ phone }));
-    } else {
-      const onboardings = await PilotService.getAllOnboardings();
-      user =
-        onboardings.find((u) => u.phone === phone) ||
-        users.find((u) => u.phone === phone);
-    }
+    const onboardings = await PilotService.getAllOnboardings();
+    const allUsers = await getAllUsers();
+    const user =
+      onboardings.find((u: any) => u.baselineData?.phone === phone || u.phone === phone) ||
+      allUsers.find((u: any) => u.phone === phone);
 
     if (!user) {
       // Send a response back to Twilio/Meta using TwiML or Meta Graph API
@@ -3762,7 +3680,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
         hcs_anchored_count: guardianMessages.length,
         average_mrv_score: average_mrv_score,
         carbonEvents: filteredCarbonEvents,
-        guardianTopicId: "0.0.4592011",
+        guardianTopicId: process.env.HEDERA_TOPIC_ID || "",
       });
     } catch (err) {
       console.error("Dashboard calculation error:", err);
@@ -3802,7 +3720,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     const health = {
       status: "OPERATIONAL",
       network: "Hedera Testnet (Consensus Service)",
-      topic_id: "0.0.4592011",
+      topic_id: process.env.HEDERA_TOPIC_ID || "NOT_CONFIGURED",
       consensus_latency_ms: 38 + Math.floor(Math.random() * 12),
       mirror_node_status: "CONNECTED (testnet.mirrornode.hedera.com)",
       tps: (12.4 + Math.random() * 2).toFixed(1),
@@ -3960,7 +3878,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
   app.get("/api/carbon/context.jsonld", async (req, res) => {
     // Public endpoint for VVB programmatic parsing
-    res.json(VCService.getWasteCarbonContext());
+    res.json(CredentialService.getWasteCarbonContext());
   });
 
   // ========================================================

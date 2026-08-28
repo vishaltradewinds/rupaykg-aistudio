@@ -1,5 +1,5 @@
 import { MRVEvent, EvidenceRecord, CCTSReadinessAssessment, CCTSReadinessStatus } from '../types';
-import { randomBytesHex } from '../utils/cryptoUtils';
+import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils';
 
 export interface RegistryProjectSubmission {
   submissionId: string;
@@ -92,7 +92,7 @@ export class RegistryGatewayAdapter {
     if (sub.status === 'UNDER_REVIEW') {
       sub.status = 'ISSUED';
       sub.creditsIssued = sub.totalCreditsRequested;
-      sub.transactionHash = `0xbee_ccts_${randomBytesHex(12)}`;
+      sub.transactionHash = `0xbee_ccts_${hashStringHex(`${sub.submissionId}:${sub.projectId}:${sub.totalCreditsRequested}`).substring(0, 24)}`;
       sub.notes = 'Official CCTS Compliance Credits minted successfully inside National carbon depository.';
     }
 

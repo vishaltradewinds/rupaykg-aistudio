@@ -877,12 +877,7 @@ export class CQEEvidenceVault {
       methodologyVersion: `${methodology.methodologyCode}-${methodology.version}`,
       evidenceHashes: [weighbridgeHash, rootHash],
       rootProvenanceHash: rootHash,
-      hederaAnchor: {
-        topicId: "0.0.4592011",
-        consensusTimestamp: new Date().toISOString(),
-        sequenceNumber: 104200 + Math.floor(Math.random() * 5000),
-        transactionId: `0.0.1234@${Date.now()}.000000001`
-      }
+      hederaAnchor: undefined
     };
   }
 }

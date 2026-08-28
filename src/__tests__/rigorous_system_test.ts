@@ -9,8 +9,9 @@ import {
   WaterfallDoctrineRegistry
 } from "../services/carbonEngine.ts";
 import { SWMComplianceService } from "../services/swmComplianceEngine.ts";
-import { VCService } from "../services/vcService.ts";
+import { CredentialService } from "../services/credentialService.ts";
 import { INDIAN_STATES } from "../constants.ts";
+import crypto from "crypto";
 import { getLgdStates, getLgdDistricts } from "../services/lgdDb.ts";
 
 export async function runRigorousSystemTests() {
@@ -375,12 +376,18 @@ export async function runRigorousSystemTests() {
     stakeholder_chain: ["ULB_OPERATOR", "AGGREGATOR_FPO", "PROCESSOR_COMPOST", "ACVA_AUDITOR"]
   };
 
-  const generatedVc = VCService.generateWasteCarbonVC(mockRecord, mockCarbonEvent);
+  if (!process.env.VC_ISSUER_PRIVATE_KEY) {
+    const keyPair = crypto.generateKeyPairSync("ed25519");
+    process.env.VC_ISSUER_PRIVATE_KEY = keyPair.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    process.env.VC_ISSUER_PUBLIC_KEY = keyPair.publicKey.export({ type: "spki", format: "pem" }).toString();
+  }
+
+  const generatedVc = CredentialService.generateWasteCarbonVC(mockRecord, mockCarbonEvent);
 
   assert(!!generatedVc.id, "Verifiable Credential generated with unique URI", generatedVc.id);
   assert(generatedVc.type.includes("VerifiableCredential"), "VC contains VerifiableCredential type");
   assert(generatedVc.type.includes("CarbonReductionCredential"), "VC contains CarbonReductionCredential schema");
-  assert(!!generatedVc.proof?.proofValue, "Cryptographic Data Integrity Proof attached to VC");
+  assert(!!generatedVc.proof?.signatureValue, "Cryptographic Asymmetric Signature attached to VC");
   assert(generatedVc.credentialSubject.carbonMetrics.netReduction.value === 28450.5, "Credential Subject carries verified net reduction metrics");
   assert(generatedVc.credentialSubject.compliance.lgd_local_body_name === "Jabalpur Municipal Corporation", "Credential Subject carries LGD spatial governance metadata");
   console.log("     -> W3C Verifiable Credential cryptographic tests passed.\n");

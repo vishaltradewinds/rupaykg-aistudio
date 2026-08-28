@@ -4,7 +4,7 @@ import { CarbonEventService } from '../src/services/carbonEventService.ts';
 import { ComplianceService } from '../src/services/complianceService.ts';
 import { PilotService } from '../src/services/pilotService.ts';
 import { AuditLogService } from '../src/services/auditLogService.ts';
-import { BlockchainService } from '../src/services/blockchainService.ts';
+import { HederaAnchorProvider } from '../src/services/hederaAnchor.ts';
 import { getUser } from '../src/db/users.ts';
 import fs from 'fs';
 
@@ -58,11 +58,11 @@ async function process2Reader() {
   if (!log) throw new Error("AuditLogService failed survival");
   results.push({ service: "AuditLogService", id: manifest.auditLogId, before: "PERSISTED (P1)", after: "FETCHED (P2)", result: "PASS" });
 
-  // 8. BlockchainService
-  const blocks = await BlockchainService.getBlocks();
-  const block = blocks.find((b: any) => b.hash === manifest.blockHash);
-  if (!block) throw new Error("BlockchainService failed survival");
-  results.push({ service: "BlockchainService", id: manifest.blockHash, before: "PERSISTED (P1)", after: "FETCHED (P2)", result: "PASS" });
+  // 8. HederaAnchorProvider
+  const anchors = await HederaAnchorProvider.getRecentAnchors(50);
+  const anchor = anchors.find((a: any) => a.id === manifest.anchorId || a.payloadDigest === manifest.anchorHash);
+  if (!anchor) throw new Error("HederaAnchorProvider failed survival");
+  results.push({ service: "HederaAnchorProvider", id: manifest.anchorId, before: "PERSISTED (P1)", after: "FETCHED (P2)", result: "PASS" });
 
   console.log("\n=======================================================");
   console.log("SERVICE | ID | BEFORE RESTART | AFTER RESTART | RESULT");

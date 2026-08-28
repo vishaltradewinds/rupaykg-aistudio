@@ -5,7 +5,7 @@ import { CarbonEventService } from '../src/services/carbonEventService.ts';
 import { ComplianceService } from '../src/services/complianceService.ts';
 import { PilotService } from '../src/services/pilotService.ts';
 import { AuditLogService } from '../src/services/auditLogService.ts';
-import { BlockchainService } from '../src/services/blockchainService.ts';
+import { HederaAnchorProvider } from '../src/services/hederaAnchor.ts';
 import { getUser, registerStakeholderUser, getAllUsers } from '../src/db/users.ts';
 
 async function runPersistenceVerification() {
@@ -161,22 +161,22 @@ async function runPersistenceVerification() {
   }
   console.log("✓ AuditLogService verified in PostgreSQL (table: operational_logs)");
 
-  // 8. BlockchainService Persistence
-  console.log("\n[8/8] Verifying BlockchainService Persistence in PostgreSQL...");
-  const block = await BlockchainService.appendBlock({
+  // 8. HederaAnchorProvider Persistence
+  console.log("\n[8/8] Verifying HederaAnchorProvider Persistence in PostgreSQL...");
+  const anchor = await HederaAnchorProvider.submitAnchor({
     record_id: `rec_${testId}`,
     action: "MRV_VERIFIED",
     data: { weight_kg: 500, ccc_amount_kg: 750 },
     actor: `user_${testId}`,
   });
-  if (!block || !block.hash) {
-    throw new Error("FAILED: Blockchain block not persisted in PostgreSQL");
+  if (!anchor || !anchor.payloadDigest) {
+    throw new Error("FAILED: Hedera anchor not persisted in PostgreSQL");
   }
-  const chain = await BlockchainService.getBlocks();
-  if (!chain || chain.length === 0) {
-    throw new Error("FAILED: Blockchain chain query from PostgreSQL failed");
+  const anchors = await HederaAnchorProvider.getRecentAnchors(5);
+  if (!anchors || anchors.length === 0) {
+    throw new Error("FAILED: Hedera anchors query from PostgreSQL failed");
   }
-  console.log("✓ BlockchainService verified in PostgreSQL (table: blockchain_blocks)");
+  console.log("✓ HederaAnchorProvider verified in PostgreSQL (table: hedera_anchors)");
 
   console.log("\n=======================================================");
   console.log("🎉 ALL 8 PERSISTENCE SERVICES STRICTLY VERIFIED IN POSTGRESQL!");
