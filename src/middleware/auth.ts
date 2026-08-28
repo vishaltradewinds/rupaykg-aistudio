@@ -82,12 +82,11 @@ export const auth = (roles: string[] = []) => {
     const uid = decodedPayload.id || decodedPayload.uid;
     const dbUser = await getUser(uid);
 
-    if (!dbUser && !decodedPayload.email) {
-       return res.status(401).json({ error: 'Unauthorized: User not found' });
+    if (!dbUser) {
+       return res.status(401).json({ error: 'Unauthorized: User not found in authoritative database' });
     }
     
-    // Create if missing, just for migration compatibility from Firebase
-    const activeUser = dbUser || await getOrCreateUser(uid, decodedPayload.email, decodedPayload.name || 'User');
+    const activeUser = dbUser;
 
     // JWT Claims DO NOT override PostgreSQL authoritative role, org, or jurisdiction!
     req.user = {

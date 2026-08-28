@@ -30,60 +30,49 @@ export class GuardianService {
   }
 
   /**
-   * Anchors a Verifiable Credential to Hedera Consensus Service (HCS).
-   * This provides immutability and a public audit trail for independent VVBs.
+   * Anchors a Verifiable Credential to Hedera Consensus Service (HCS) via Guardian API.
+   * Fails closed if Guardian API is not configured or returns an error.
    */
   static async anchorToHCS(vc: any): Promise<GuardianMessage> {
-    const timestamp = new Date().toISOString();
-    let messageId = `hcs-${randomBytesHex(8)}`;
-    let sequenceNumber = Math.floor(Math.random() * 10000);
-    let runningHash = hashStringHex(JSON.stringify(vc) + sequenceNumber);
-    let topicId = this.HCS_TOPIC_ID;
+    if (!this.guardianApiUrl) {
+      throw new Error("GUARDIAN_API_URL environment variable is not configured. Guardian HCS anchoring is unavailable.");
+    }
 
-    // Actual Hedera Guardian API Integration
-    if (this.guardianApiUrl) {
-      try {
-        console.log(`[Guardian] Connecting to Guardian API at ${this.guardianApiUrl}`);
-        const response = await fetch(`${this.guardianApiUrl}/api/v1/messages`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(this.guardianApiKey ? { 'Authorization': `Bearer ${this.guardianApiKey}` } : {})
-          },
-          body: JSON.stringify({ document: vc })
-        });
-        
-        if (response.ok) {
-          const data = await safeParseJson(response);
-          if (data) {
-            messageId = data.id || messageId;
-            topicId = data.topicId || topicId;
-            sequenceNumber = data.sequenceNumber || sequenceNumber;
-            runningHash = data.runningHash || runningHash;
-          }
-        } else {
-          console.warn(`[Guardian] API returned status ${response.status}. Falling back to simulation.`);
-        }
-      } catch (err) {
-        console.error(`[Guardian] API connection failed. Falling back to simulation:`, err);
-      }
+    const timestamp = new Date().toISOString();
+
+    const response = await fetch(`${this.guardianApiUrl}/api/v1/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.guardianApiKey ? { 'Authorization': `Bearer ${this.guardianApiKey}` } : {})
+      },
+      body: JSON.stringify({ document: vc })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      throw new Error(`Guardian API error (${response.status}): ${errorText || 'Failed to anchor message'}`);
+    }
+
+    const data = await safeParseJson(response);
+    if (!data || !data.id) {
+      throw new Error("Guardian API returned an invalid response structure without message ID.");
     }
 
     const hcsMessage: GuardianMessage = {
-      id: messageId,
-      topicId,
-      sequenceNumber,
-      runningHash,
-      message: {
+      id: data.id,
+      topicId: data.topicId || this.HCS_TOPIC_ID,
+      sequenceNumber: data.sequenceNumber || 0,
+      runningHash: data.runningHash || '',
+      message: data.message || {
         vc_id: vc.id,
         issuer: vc.issuer,
         subject: vc.credentialSubject?.id || vc.id,
-        proof_value: vc.proof?.proofValue || 'simulated-proof'
       },
-      timestamp
+      timestamp: data.timestamp || timestamp
     };
 
-    console.log(`[Guardian] Credential ${vc.id} anchored to HCS Topic ${topicId}`);
+    console.log(`[Guardian] Credential ${vc.id} anchored to HCS Topic ${hcsMessage.topicId}`);
     return hcsMessage;
   }
 

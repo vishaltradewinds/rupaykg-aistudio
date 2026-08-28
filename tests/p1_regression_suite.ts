@@ -138,8 +138,8 @@ async function runP1Suite() {
       weightKg: 1000
     });
 
-    if (anchorAttempt.status === 'NOT_AVAILABLE' && anchorAttempt.transactionId === null && anchorAttempt.isSimulated === false && anchorAttempt.integrityHash.length === 64) {
-      recordTest('P1-06b', 'Hedera Fail-Closed Write Attempt Handling', true, `Anchor attempt safely returned NOT_AVAILABLE with local SHA-256 integrity hash (${anchorAttempt.integrityHash.slice(0, 12)}...).`);
+    if ((anchorAttempt.status === 'NOT_AVAILABLE' || anchorAttempt.status === 'NOT_CONFIGURED') && anchorAttempt.transactionId === null && anchorAttempt.isSimulated === false && anchorAttempt.integrityHash.length === 64) {
+      recordTest('P1-06b', 'Hedera Fail-Closed Write Attempt Handling', true, `Anchor attempt safely returned ${anchorAttempt.status} with local SHA-256 integrity hash (${anchorAttempt.integrityHash.slice(0, 12)}...).`);
     } else {
       recordTest('P1-06b', 'Hedera Fail-Closed Write Attempt Handling', false, `Anchor attempt returned invalid payload: ${JSON.stringify(anchorAttempt)}`);
     }
@@ -147,26 +147,25 @@ async function runP1Suite() {
     recordTest('P1-06', 'Hedera Read/Write Status Truthful Separation', false, `Error: ${err.message}`);
   }
 
-  // P1-07: Cryptographic Terminology & Credential Verification Accuracy
+  // P1-07: Cryptographic Terminology & Fail-Closed Credential Issuance
   try {
-    const cred = CredentialService.issueCredential({
-      id: 'did:rupaykg:entity:test-entity',
-      claims: { certifiedAvoidanceKg: 4200, standard: 'CCTS OM 2026' }
-    });
+    let failClosedCaught = false;
+    try {
+      CredentialService.issueCredential({
+        id: 'did:rupaykg:entity:test-entity',
+        claims: { certifiedAvoidanceKg: 4200, standard: 'CCTS OM 2026' }
+      });
+    } catch (e: any) {
+      failClosedCaught = e.message.includes('VC_ISSUER_PRIVATE_KEY');
+    }
 
-    if (cred.proofStatus === 'INTEGRITY_HASH_ONLY' && cred.signature === null && cred.isSimulated === false && cred.proofType === 'LOCAL_SHA256_DIGEST') {
-      const verify = CredentialService.verifyCredential(cred.verifiableCredential, cred.integrityHash);
-
-      if (verify.isValid && verify.proofStatus === 'INTEGRITY_HASH_ONLY' && verify.signatureVerified === false && verify.guardianPolicyStatus === 'NOT_AVAILABLE') {
-        recordTest('P1-07', 'Cryptographic Terminology & Real Credential Digest Proof Boundary', true, 'Digest verified locally; W3C signature and Guardian accurately reported as NOT_AVAILABLE.');
-      } else {
-        recordTest('P1-07', 'Cryptographic Terminology & Real Credential Digest Proof Boundary', false, `Verification mismatch: ${JSON.stringify(verify)}`);
-      }
+    if (failClosedCaught) {
+      recordTest('P1-07', 'Cryptographic Terminology & Fail-Closed Credential Boundary', true, 'VC issuance strictly failed closed when private signing key is unconfigured.');
     } else {
-      recordTest('P1-07', 'Cryptographic Terminology & Real Credential Digest Proof Boundary', false, `Issuance proof status invalid: ${JSON.stringify(cred)}`);
+      recordTest('P1-07', 'Cryptographic Terminology & Fail-Closed Credential Boundary', false, 'VC issuance did not fail closed as expected.');
     }
   } catch (err: any) {
-    recordTest('P1-07', 'Cryptographic Terminology & Real Credential Digest Proof Boundary', false, `Error: ${err.message}`);
+    recordTest('P1-07', 'Cryptographic Terminology & Fail-Closed Credential Boundary', false, `Error: ${err.message}`);
   }
 
   // P1-08: Protection of Official Immutable Reference Standards

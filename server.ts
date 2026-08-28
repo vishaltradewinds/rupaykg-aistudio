@@ -18,7 +18,6 @@ import { AuditLogService } from './src/services/auditLogService.ts';
 import { BlockchainService } from './src/services/blockchainService.ts';
 
 
-import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
@@ -233,57 +232,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
   const { publicKey, privateKey } = initRSAKeys();
 
-  let dbStatus = "disconnected";
-  let dbError = "";
-
-  mongoose.connection.on("connected", () => {
-    dbStatus = "connected";
-    dbError = "";
-    console.log("MongoDB connection event: CONNECTED");
-  });
-
-  mongoose.connection.on("error", (err: any) => {
-    dbStatus = "error";
-    dbError = err.message || "Connection error";
-    console.error("MongoDB connection event error:", err.message);
-  });
-
-  mongoose.connection.on("disconnected", () => {
-    if (dbStatus === "connected") {
-      dbStatus = "disconnected";
-      console.warn("MongoDB connection event: DISCONNECTED");
-    }
-  });
-
-  async function connectDB() {
-    if (MONGO_URI) {
-      try {
-        dbStatus = "connecting";
-        await mongoose.connect(MONGO_URI, {
-          serverSelectionTimeoutMS: 5000,
-          socketTimeoutMS: 45000,
-        });
-        dbStatus = "connected";
-        dbError = "";
-        console.log("Connected to MongoDB successfully");
-      } catch (err: any) {
-        dbStatus = "failed";
-        dbError = err.message;
-        console.warn("MongoDB initial connection failed:", err.message);
-      }
-    } else {
-      dbStatus = "no_uri";
-      console.log(
-        "No MONGO_URI provided. Using in-memory & PostgreSQL fallback.",
-      );
-    }
-  }
-
-  // Start DB connection in background
-  connectDB().catch((err) =>
-    console.error("Background DB connection failed:", err),
-  );
-
   app.get("/api/health", async (req, res) => {
     let pgStatus = "healthy";
     let pgError = undefined;
@@ -300,11 +248,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       status: overallStatus,
       version: "3.0.0-Enterprise",
       services: {
-        mongodb: {
-          status: dbStatus,
-          error: dbError || undefined,
-          configured: !!MONGO_URI,
-        },
         postgres: {
           status: pgStatus,
           error: pgError,
@@ -565,59 +508,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
     },
   );
 
-  app.post("/api/db-retry", auth(["super_admin"]), async (req, res) => {
-    await connectDB();
-    res.json({ status: dbStatus, error: dbError });
-  });
-
-  // ---------------- MONGOOSE SCHEMAS (PRODUCTION) ----------------
-  const userSchema = new mongoose.Schema({
-    id: String,
-    phone: { type: String, unique: true },
-    password: { type: String },
-    role: String,
-    name: String,
-    district: String,
-    state: String,
-    subdistrict: String,
-    local_area: String,
-    organization_name: String,
-    wallet_balance: { type: Number, default: 0 },
-  });
-  const User = mongoose.model("User", userSchema);
-
-  const pilotRecordSchema = new mongoose.Schema({
-    id: String,
-    weight: Number,
-    wasteType: String,
-    location: String,
-    photoUrl: String,
-    collectorId: String,
-    timestamp: String,
-    estimatedCCC: Number,
-    isValidated: Boolean,
-    validationScore: Number,
-    validationExplanation: String,
-    status: String,
-    source: String,
-  });
-  const PilotRecord = mongoose.model("PilotRecord", pilotRecordSchema);
-
-  const pilotOnboardingSchema = new mongoose.Schema({
-    id: String,
-    name: String,
-    role: String,
-    phone: String,
-    location: String,
-    timestamp: String,
-    status: String,
-  });
-  const PilotOnboarding = mongoose.model(
-    "PilotOnboarding",
-    pilotOnboardingSchema,
-  );
-
-  // --- IN-MEMORY FALLBACK DB ---
+  // --- SSE CLIENTS ---
   const liveSseClients = new Set<express.Response>();
 
   function broadcastRealtimeEvent(type: string, data: any) {
@@ -3624,19 +3515,11 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
           source: "whatsapp",
         };
 
-        if (dbStatus === "connected") {
-          await PilotRecord.create(logEntry);
-        }
         await PilotService.addRecord(logEntry);
         responseMessage = `✅ Successfully logged ${logEntry.weight}kg of ${wasteType} waste! Estimated CCC Impact: ${estimatedCCC.toFixed(3)} tCO2e.`;
       }
     } else if (messageText === "stats") {
-      let userLogs;
-      if (dbStatus === "connected") {
-        userLogs = await PilotRecord.find({ collectorId: user.id });
-      } else {
-        userLogs = await PilotService.getRecordsByCollector(user.id);
-      }
+      const userLogs = await PilotService.getRecordsByCollector(user.id);
       const totalWeight = userLogs.reduce(
         (sum: any, r: any) => sum + Number(r.weight),
         0,
@@ -3671,9 +3554,6 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
         status: "active",
       };
 
-      if (dbStatus === "connected") {
-        await PilotOnboarding.create(onboardEntry);
-      }
       await PilotService.addOnboarding(onboardEntry);
 
       res.json({ message: "Onboarded successfully", entry: onboardEntry });
@@ -3706,9 +3586,6 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
         status: "logged",
       };
 
-      if (dbStatus === "connected") {
-        await PilotRecord.create(logEntry);
-      }
       await PilotService.addRecord(logEntry);
 
       try {
@@ -3751,16 +3628,8 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     "/api/pilot/stats",
     auth(["super_admin", "state_admin", "municipal_admin", "regulator"]),
     async (req, res) => {
-      let currentPilotRecords;
-      let currentPilotOnboarding;
-
-      if (dbStatus === "connected") {
-        currentPilotRecords = await PilotRecord.find();
-        currentPilotOnboarding = await PilotOnboarding.find();
-      } else {
-        currentPilotRecords = await PilotService.getAllRecords();
-        currentPilotOnboarding = await PilotService.getAllOnboardings();
-      }
+      const currentPilotRecords = await PilotService.getAllRecords();
+      const currentPilotOnboarding = await PilotService.getAllOnboardings();
 
       const totalWeight = currentPilotRecords.reduce(
         (sum: any, r: any) => sum + (r.weight || 0),
@@ -3812,16 +3681,6 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       const score = validationScore || 100;
       const explanation = validationExplanation || "Manual validation";
 
-      if (dbStatus === "connected") {
-        await PilotRecord.updateOne(
-          { id: record_id },
-          {
-            validationScore: score,
-            validationExplanation: explanation,
-            status: score > 70 ? "validated" : "flagged",
-          },
-        );
-      }
       await PilotService.validateRecord(record_id, score, explanation);
 
       res.json({

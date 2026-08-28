@@ -32,18 +32,6 @@ export default defineConfig(({mode}) => {
                 },
               },
             },
-            {
-              urlPattern: /\/api\/.*/i,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'rupaykg-api-cache',
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
-                },
-                networkTimeoutSeconds: 5,
-              },
-            },
           ],
         },
         manifest: {

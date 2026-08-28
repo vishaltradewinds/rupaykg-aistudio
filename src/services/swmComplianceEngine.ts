@@ -1,97 +1,104 @@
-import mongoose from 'mongoose';
+import { db } from '../db/index.ts';
+import { compliance_records } from '../db/schema.ts';
+import { eq, desc, and } from 'drizzle-orm';
+import crypto from 'crypto';
 
 // ========================================================
-// SWM COMPLIANCE ENGINE & CPCB OPERATIONAL INTEGRATION DATA MODELS
+// SWM COMPLIANCE ENGINE & CPCB OPERATIONAL INTEGRATION (PostgreSQL Native)
 // ========================================================
 
-// 1. SwmCompliance Model
-const swmComplianceSchema = new mongoose.Schema({
-  entityId: { type: String, required: true },
-  entityType: { type: String, required: true }, // BWG, ULB, Facility, Recycler, Transporter, Collector, Producer, Vendor
-  ruleId: { type: String, required: true },
-  ruleDescription: { type: String },
-  status: { type: String, enum: ['Compliant', 'Non-Compliant', 'Review Required', 'Validating'], default: 'Validating' },
-  score: { type: Number, default: 100 },
-  lastInspectionDate: { type: Date },
-  nextInspectionDate: { type: Date },
-  violationsCount: { type: Number, default: 0 },
-  evidence: { type: Array, default: [] },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+export interface SWMRegistrationData {
+  registryId?: string;
+  type: 'BWG' | 'ULB' | 'Facility' | 'Recycler' | 'Transporter' | 'Collection Agency' | 'Producer' | 'Vendor';
+  name: string;
+  gstPanCin?: {
+    gstin?: string;
+    pan?: string;
+    cin?: string;
+  };
+  location?: {
+    state?: string;
+    district?: string;
+    ulb?: string;
+    ward?: string;
+    address?: string;
+    coordinates?: { lat: number; lng: number };
+  };
+  contactPersons?: Array<{
+    name: string;
+    designation: string;
+    phone: string;
+    email: string;
+  }>;
+  operationalMetrics?: {
+    builtUpAreaSqm?: number;
+    waterConsumptionKlDay?: number;
+    dailyWasteGenerationKg?: number;
+    wasteCategories?: string[];
+  };
+  licences?: Array<{
+    permitType: string;
+    permitNumber: string;
+    issuedBy: string;
+    validUntil?: Date | string;
+    status: string;
+  }>;
+  status?: 'Active' | 'Pending CPCB Sync' | 'Suspended' | 'Closed';
+  cpcbSyncStatus?: 'Synced' | 'Pending' | 'Failed';
+  cpcbToken?: string;
+  complianceScore?: number;
+  issuedAt?: Date;
+  validUntil?: Date;
+}
 
-export const SwmCompliance = mongoose.models.SwmCompliance || mongoose.model('SwmCompliance', swmComplianceSchema);
-
-// 2. SwmRegistration Model (Layer 1)
-const swmRegistrationSchema = new mongoose.Schema({
-  registryId: { type: String, required: true, unique: true },
-  type: { 
-    type: String, 
-    required: true, 
-    enum: ['BWG', 'ULB', 'Facility', 'Recycler', 'Transporter', 'Collection Agency', 'Producer', 'Vendor'] 
-  },
-  name: { type: String, required: true },
-  gstPanCin: {
-    gstin: String,
-    pan: String,
-    cin: String
-  },
-  location: {
-    state: String,
-    district: String,
-    ulb: String,
-    ward: String,
-    address: String,
-    coordinates: { lat: Number, lng: Number }
-  },
-  contactPersons: [{
-    name: String,
-    designation: String,
-    phone: String,
-    email: String
-  }],
-  operationalMetrics: {
-    builtUpAreaSqm: Number,
-    waterConsumptionKlDay: Number,
-    dailyWasteGenerationKg: Number,
-    wasteCategories: [String] // Wet/Organic, Dry Recyclable, Domestic Hazardous, Sanitary, E-waste, C&D
-  },
-  licences: [{
-    permitType: String, // CTO, CTE, CPCB Authorisation
-    permitNumber: String,
-    issuedBy: String,
-    validUntil: Date,
-    status: String
-  }],
-  status: { type: String, enum: ['Active', 'Pending CPCB Sync', 'Suspended', 'Closed'], default: 'Active' },
-  cpcbSyncStatus: { type: String, enum: ['Synced', 'Pending', 'Failed'], default: 'Synced' },
-  cpcbToken: { type: String },
-  complianceScore: { type: Number, default: 94 },
-  issuedAt: { type: Date, default: Date.now },
-  validUntil: { type: Date }
-});
-
-export const SwmRegistration = mongoose.models.SwmRegistration || mongoose.model('SwmRegistration', swmRegistrationSchema);
-
-// 3. SWM Compliance Service Class
 export class SWMComplianceService {
-  async registerEntity(data: any) {
-    const registryId = `REG-SWM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  async registerEntity(data: SWMRegistrationData) {
+    const registryId = data.registryId || `REG-SWM-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
     const validUntil = new Date();
     validUntil.setFullYear(validUntil.getFullYear() + 1); // 1 year validity
     
-    const registration = new SwmRegistration({
+    const recordId = `swm_reg_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+    const cpcbToken = data.cpcbToken || `CPCB-AUTH-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    
+    const registrationRecord = {
+      id: recordId,
+      entityId: registryId,
+      complianceType: `SWM_REGISTRATION_${data.type || 'BWG'}`,
+      reportingPeriod: `${new Date().getFullYear()}-ANNUAL`,
+      status: 'COMPLIANT',
+      targetQuantity: Number(data.operationalMetrics?.dailyWasteGenerationKg || 0),
+      achievedQuantity: Number(data.operationalMetrics?.dailyWasteGenerationKg || 0),
+      evidenceUrls: [],
+      verifiedBy: 'CPCB_SWM_PORTAL',
+      metadata: {
+        registryId,
+        cpcbToken,
+        cpcbSyncStatus: data.cpcbSyncStatus || 'Synced',
+        name: data.name,
+        type: data.type,
+        gstPanCin: data.gstPanCin || {},
+        location: data.location || {},
+        contactPersons: data.contactPersons || [],
+        operationalMetrics: data.operationalMetrics || {},
+        licences: data.licences || [],
+        complianceScore: data.complianceScore ?? 94,
+        status: data.status || 'Active',
+        issuedAt: (data.issuedAt || new Date()).toISOString(),
+        validUntil: validUntil.toISOString(),
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await db.insert(compliance_records).values(registrationRecord).onConflictDoNothing();
+
+    return {
       registryId,
-      cpcbToken: `CPCB-AUTH-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+      cpcbToken,
       cpcbSyncStatus: 'Synced',
       ...data,
       validUntil
-    });
-    
-    if (mongoose.connection.readyState === 1) {
-      await registration.save();
-    }
-    return registration;
+    };
   }
 
   async validateCompliance(entityId: string, ruleId: string, evidenceData: any) {
@@ -105,51 +112,53 @@ export class SWMComplianceService {
        }
     }
 
-    if (mongoose.connection.readyState === 1) {
-      await SwmCompliance.updateOne(
-        { entityId, ruleId } as any,
-        { 
-          status, 
-          ruleDescription: 'Segregation into 4 streams (Wet, Dry, Sanitary, Special Care)',
-          $inc: { score: scoreDelta },
-          $push: { evidence: evidenceData },
-          updatedAt: new Date()
-        },
-        { upsert: true }
-      );
-      
-      if (scoreDelta !== 0) {
-        await SwmRegistration.updateOne(
-          { registryId: entityId } as any,
-          { $inc: { complianceScore: scoreDelta } }
-        );
-      }
-    }
+    const checkId = `swm_chk_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+    await db.insert(compliance_records).values({
+      id: checkId,
+      entityId,
+      complianceType: `SWM_RULE_${ruleId}`,
+      reportingPeriod: `${new Date().getFullYear()}-Q${Math.floor(new Date().getMonth() / 3) + 1}`,
+      status: status === 'Compliant' ? 'COMPLIANT' : 'NON_COMPLIANT',
+      targetQuantity: 100,
+      achievedQuantity: status === 'Compliant' ? 100 : (100 + scoreDelta),
+      evidenceUrls: Array.isArray(evidenceData?.segregationImages) ? evidenceData.segregationImages : [],
+      verifiedBy: 'SWM_RULE_VALIDATOR',
+      metadata: {
+        ruleId,
+        ruleDescription: 'Segregation into 4 streams (Wet, Dry, Sanitary, Special Care)',
+        scoreDelta,
+        evidence: evidenceData,
+        validatedAt: new Date().toISOString()
+      },
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).onConflictDoNothing();
     
     return { entityId, ruleId, status, scoreDelta };
   }
   
-  async getDashboardMetrics(type: string, locationFilter?: any) {
-    if (mongoose.connection.readyState === 1) {
-      const query = locationFilter || {};
-      const totalEntities = await SwmRegistration.countDocuments(query);
-      const nonCompliant = await SwmCompliance.countDocuments({ ...query, status: 'Non-Compliant' });
-      const avgScoreData = await SwmRegistration.aggregate([
-        { $match: query },
-        { $group: { _id: null, avgScore: { $avg: '$complianceScore' } } }
-      ]);
-      
-      return {
-        totalRegisteredEntities: totalEntities || 0,
-        activeViolations: nonCompliant || 0,
-        complianceScore: avgScoreData.length > 0 ? Number(avgScoreData[0].avgScore.toFixed(1)) : 100.0
-      };
+  async getDashboardMetrics(_type?: string, locationFilter?: any) {
+    const allRecords = await db.select().from(compliance_records);
+    const regRecords = allRecords.filter(r => r.complianceType.startsWith('SWM_REGISTRATION_'));
+    const violationRecords = allRecords.filter(r => r.status === 'NON_COMPLIANT');
+
+    let totalRegisteredEntities = regRecords.length;
+    let activeViolations = violationRecords.length;
+
+    if (locationFilter && locationFilter.state) {
+      totalRegisteredEntities = regRecords.filter(r => (r.metadata as any)?.location?.state === locationFilter.state).length;
+    }
+
+    let avgScore = 100;
+    if (regRecords.length > 0) {
+      const scores = regRecords.map(r => Number((r.metadata as any)?.complianceScore || 94));
+      avgScore = Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1));
     }
 
     return {
-      totalRegisteredEntities: 0,
-      activeViolations: 0,
-      complianceScore: 100.0
+      totalRegisteredEntities: totalRegisteredEntities || 0,
+      activeViolations: activeViolations || 0,
+      complianceScore: avgScore
     };
   }
 }

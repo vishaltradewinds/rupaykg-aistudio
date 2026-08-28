@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { ai } from "./lib/gemini";
-import { Helmet } from 'react-helmet-async';
 import { 
   Leaf, 
   LayoutDashboard,
@@ -790,6 +789,13 @@ export default function App() {
 
   const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
   const [realtimeToast, setRealtimeToast] = useState<{ message: string; time: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const viewTitle = view ? view.charAt(0).toUpperCase() + view.slice(1) : 'Dashboard';
+      document.title = `${t(viewTitle)} | RupayKg - Sovereign Digital MRV Infrastructure`;
+    } catch {}
+  }, [view, t]);
 
   useEffect(() => {
     let es: EventSource | null = null;
@@ -3434,20 +3440,6 @@ export default function App() {
           <button onClick={() => setRealtimeToast(null)} className="ml-2 text-white/40 hover:text-white">✕</button>
         </div>
       )}
-      <Helmet>
-        <title>{t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg - Sovereign Digital MRV Infrastructure</title>
-        <meta name="description" content={t(`Access the RupayKg ${view} dashboard. Sovereign-grade digital MRV infrastructure for waste-to-carbon accounting, AI-verification, and climate intelligence.`)} />
-        <meta name="keywords" content={`RupayKg ${view}, digital MRV infrastructure, waste to carbon, MRV verification, climate reporting, sovereign environmental data`} />
-        
-        {/* Open Graph / Facebook */}
-        <meta property="og:title" content={`${t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg MRV Infrastructure`} />
-        <meta property="og:description" content={t(`RupayKg OS ${view} view: Transforming waste into digital climate value through integrated sovereign-grade infrastructure.`)} />
-        <meta property="og:image" content="/icon.svg" />
-        
-        {/* Twitter */}
-        <meta name="twitter:title" content={`${t(view.charAt(0).toUpperCase() + view.slice(1))} | RupayKg Circular OS`} />
-        <meta name="twitter:description" content={t(`RupayKg OS ${view} view: Transforming waste into digital climate value through integrated sovereign-grade infrastructure.`)} />
-      </Helmet>
       {/* Sidebar Navigation */}
       <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
         <BrandIdentity isLiveConnected={isLiveConnected} variant="sidebar" />

@@ -64,7 +64,7 @@ export interface AnchorSubmissionPayload {
  * 5. Idempotent: Duplicate submissions for identical payload hashes return existing confirmed records.
  */
 export class HederaAnchorProvider {
-  public static readonly DEFAULT_TOPIC_ID = process.env.HEDERA_TOPIC_ID || '0.0.4592011';
+  public static readonly DEFAULT_TOPIC_ID = process.env.HEDERA_TOPIC_ID || '';
   public static readonly DEFAULT_NETWORK = (process.env.HEDERA_NETWORK as 'testnet' | 'mainnet' | 'previewnet') || 'testnet';
 
   public static getMirrorNodeEndpoint(network: string = this.DEFAULT_NETWORK): string {
@@ -79,7 +79,8 @@ export class HederaAnchorProvider {
   public static isOperatorConfigured(): boolean {
     const id = process.env.HEDERA_OPERATOR_ID;
     const key = process.env.HEDERA_OPERATOR_KEY;
-    if (!id || !key) return false;
+    const topic = process.env.HEDERA_TOPIC_ID;
+    if (!id || !key || !topic) return false;
     if (key.includes('placeholder') || key.includes('your_') || key.length < 20) return false;
     return true;
   }
@@ -91,6 +92,7 @@ export class HederaAnchorProvider {
     const configured = this.isOperatorConfigured();
     const network = this.DEFAULT_NETWORK;
     const mirrorNodeEndpoint = this.getMirrorNodeEndpoint(network);
+    const effectiveTopicId = topicId || this.DEFAULT_TOPIC_ID;
 
     return {
       readStatus: 'AVAILABLE',
@@ -98,11 +100,13 @@ export class HederaAnchorProvider {
       consensusStatus: configured ? 'CONFIGURED' : 'NOT_AVAILABLE',
       network,
       mirrorNodeEndpoint,
-      topicId: topicId || this.DEFAULT_TOPIC_ID,
+      topicId: effectiveTopicId || 'NOT_CONFIGURED',
       isConfigured: configured,
       message: configured
-        ? `Hedera HCS Operator Credentials Configured for ${network.toUpperCase()}. Live anchoring active.`
-        : `Hedera HCS Read Stream is Active via Public Mirror Node (${mirrorNodeEndpoint}). HCS Write Anchoring is NOT_AVAILABLE until HEDERA_OPERATOR_ID and HEDERA_OPERATOR_KEY are configured in the runtime environment.`
+        ? `Hedera HCS Operator Credentials Configured for ${network.toUpperCase()} on Topic ${effectiveTopicId}. Live anchoring active.`
+        : effectiveTopicId
+        ? `Hedera HCS Read Stream is Active via Public Mirror Node (${mirrorNodeEndpoint}). HCS Write Anchoring is NOT_AVAILABLE until HEDERA_OPERATOR_ID and HEDERA_OPERATOR_KEY are configured in the runtime environment.`
+        : `Hedera HCS Topic ID is not configured (HEDERA_TOPIC_ID). Write Anchoring is NOT_AVAILABLE.`
     };
   }
 
@@ -126,6 +130,22 @@ export class HederaAnchorProvider {
     const effectiveTopicId = topicId || this.DEFAULT_TOPIC_ID;
     const payloadHash = this.computePayloadHash(payload);
     const anchorId = `ANC-${crypto.randomBytes(8).toString('hex')}`;
+
+    if (!effectiveTopicId) {
+      return {
+        id: anchorId,
+        status: 'NOT_CONFIGURED',
+        transactionId: null,
+        consensusTimestamp: null,
+        topicId: '',
+        network,
+        integrityHash: payloadHash,
+        attemptCount: 0,
+        isSimulated: false,
+        message: 'HCS Write Consensus Anchoring is NOT_CONFIGURED: HEDERA_TOPIC_ID is missing from server environment.',
+        persistedToDb: false
+      };
+    }
 
     // 1. Idempotency Check: check if already anchored in DB
     if (db) {
