@@ -1,0 +1,67 @@
+name: One-time LGD hardening
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    if: github.event.head_commit.message != 'security: harden LGD verification boundary'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove synthetic LGD authority
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p = Path('server.ts')
+          s = p.read_text()
+          pattern = r'function getLGDInfo\(state: string, district: string, localArea: string, context = [\'\"]Urban[\'\"], subdistrict\?: string\) \{.*?\n\}\n\n  app\.set\("trust proxy", 1\);'
+          replacement = '''function getLGDInfo(state: string, district: string, localArea: string, context = "Urban", subdistrict?: string) {
+            const stateData = state ? INDIAN_STATES[state] : undefined;
+            const districtData = stateData && district ? stateData[district] : undefined;
+            const areas = districtData
+              ? ((context === "Rural" || context === "rural") ? (districtData.Rural || []) : (districtData.Urban || []))
+              : [];
+            const localAreaExists = !!localArea && areas.includes(localArea);
+            const districtExists = !!districtData;
+            const stateExists = !!stateData;
+
+            // This application dataset is a local index only. It is NEVER authoritative Government LGD verification.
+            // No hash, arithmetic, AI, or fallback value may manufacture an official-looking LGD code.
+            return {
+              state_name: state || null,
+              state_lgd_code: null,
+              district_name: district || null,
+              district_lgd_code: null,
+              subdistrict_name: subdistrict || null,
+              subdistrict_lgd_code: null,
+              local_body_name: localArea || null,
+              local_body_lgd_code: null,
+              local_body_type: (context === "Rural" || context === "rural") ? "Gram Panchayat" : "Local Body",
+              ward_or_village_name: localArea || null,
+              ward_or_village_lgd_code: null,
+              census_2011_code: null,
+              is_lgd_verified: false,
+              verification_source: "Local application index — not authoritative LGD",
+              local_index_match: stateExists && districtExists && localAreaExists,
+              last_synced_at: null,
+            };
+          }
+
+          if not re.search(pattern, s, flags=re.S):
+              raise SystemExit('Target getLGDInfo function not found; refusing to modify server.ts')
+          s = re.sub(pattern, replacement + '\n\n  app.set("trust proxy", 1);', s, count=1, flags=re.S)
+          p.write_text(s)
+      - name: Commit and remove one-time workflow
+        run: |
+          rm -f .github/workflows/one-time-lgd-hardening.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add server.ts .github/workflows/one-time-lgd-hardening.yml
+          git commit -m 'security: harden LGD verification boundary'
+          git push
