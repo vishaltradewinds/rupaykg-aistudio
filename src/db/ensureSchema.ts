@@ -2,26 +2,16 @@ import { Pool } from 'pg';
 
 /**
  * Read-only schema verification at startup.
- * The runtime application user (ai_studio_app_user) does NOT have DDL privileges.
+ * The runtime application user does NOT have DDL privileges.
  * Schema management and migrations are executed exclusively during deployment/migration phase.
  */
 export async function ensureDatabaseSchema(pool: Pool): Promise<void> {
   try {
     const requiredTables = [
-      'users',
-      'records',
-      'farmers',
-      'carbon_events',
-      'compliance_records',
-      'system_notifications',
-      'operational_logs',
-      'pilot_onboardings',
-      'pilot_records',
-      'pilot_issues',
-      'waste_manifests',
-      'weighbridge_records',
-      'cqe_methodologies',
-      'hedera_anchors',
+      'users', 'records', 'farmers', 'carbon_events', 'compliance_records',
+      'system_notifications', 'operational_logs', 'pilot_onboardings', 'pilot_records',
+      'pilot_issues', 'waste_manifests', 'weighbridge_records', 'cqe_methodologies',
+      'hedera_anchors', 'environmental_credit_positions', 'environmental_credit_transactions'
     ];
 
     const result = await pool.query(
@@ -33,9 +23,9 @@ export async function ensureDatabaseSchema(pool: Pool): Promise<void> {
     const missingTables = requiredTables.filter(t => !existingTables.has(t));
 
     if (missingTables.length > 0) {
-      console.warn(`[DB Schema Warning] The following tables were not found in public schema: ${missingTables.join(', ')}. Please run migrations.`);
+      console.warn(`[DB Schema Warning] Missing tables: ${missingTables.join(', ')}. Run deployment migrations.`);
     } else {
-      console.log(`[DB Schema Ready] All ${requiredTables.length} core database tables verified in public schema.`);
+      console.log(`[DB Schema Ready] All ${requiredTables.length} required tables verified.`);
     }
   } catch (err: any) {
     console.warn('[DB Schema Verification Note]', err.message);
