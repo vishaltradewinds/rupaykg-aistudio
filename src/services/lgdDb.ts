@@ -132,7 +132,7 @@ export function getLgdStates(): LgdStateRecord[] {
 }
 
 /** Returns only locally indexed districts. No AI expansion or fabricated LGD codes. */
-export function getLgdDistricts(state: string): LgdDistrictRecord[] {
+export async function getLgdDistricts(state: string): Promise<LgdDistrictRecord[]> {
   if (!db) return [];
   return (db.prepare(`SELECT district_name, district_lgd_code, state_name FROM lgd_districts WHERE state_name = ? ORDER BY district_name`).all(state) as LgdDistrictRecord[])
     .map(row => ({ ...row, is_lgd_verified: false }));
