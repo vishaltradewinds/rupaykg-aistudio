@@ -1,6 +1,5 @@
 // RupayKg Enterprise 3.0 Service Worker - Critical UI Asset Caching & Offline Sync
-const CACHE_NAME_STATIC = 'rupaykg-static-v1';
-const CACHE_NAME_API = 'rupaykg-api-v1';
+const CACHE_NAME_STATIC = 'rupaykg-static-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -26,63 +25,39 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME_STATIC && cacheName !== CACHE_NAME_API) {
-            console.log('[ServiceWorker] Removing stale cache store:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME_STATIC)
+          .map((cacheName) => caches.delete(cacheName))
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch Interceptor - Implement Network-First for API and Cache-First for Assets
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Skip non-GET requests for standard HTTP caching (handled via offline sync queue)
-  if (req.method !== 'GET') {
-    return;
-  }
-
-  // 1. API Requests (/api/*) - Network-first with cache fallback
+  // Never cache API responses. Authenticated API data is tenant/session scoped
+  // and must not be persisted in a shared browser cache.
   if (url.pathname.startsWith('/api/')) {
+    if (req.method !== 'GET') return;
+
     event.respondWith(
-      fetch(req)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME_API).then((cache) => {
-              cache.put(req, responseClone);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(async () => {
-          console.warn(`[ServiceWorker] Network unavailable for ${url.pathname}. Serving cached API response.`);
-          const cachedResponse = await caches.match(req);
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          return new Response(
-            JSON.stringify({
-              offline: true,
-              message: 'Device is offline. Displaying cached system state.',
-              timestamp: new Date().toISOString()
-            }),
-            {
-              status: 503,
-              headers: { 'Content-Type': 'application/json' }
-            }
-          );
-        })
+      fetch(req).catch(() => new Response(
+        JSON.stringify({
+          offline: true,
+          message: 'Device is offline. Live API data is unavailable.'
+        }),
+        {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      ))
     );
     return;
   }
 
-  // 2. Navigation / HTML Document requests - Network-first with cached index.html fallback
+  // Navigation / HTML document requests - network-first with cached fallback
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
@@ -100,7 +75,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Static Assets (.js, .css, fonts, images) - Cache-first with background revalidation
+  // Static assets - cache-first with background revalidation
   event.respondWith(
     caches.match(req).then((cachedResponse) => {
       if (cachedResponse) {
@@ -108,7 +83,7 @@ self.addEventListener('fetch', (event) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME_STATIC).then((cache) => cache.put(req, networkResponse));
           }
-        }).catch(() => {/* Silent catch for offline static revalidation */});
+        }).catch(() => {});
         return cachedResponse;
       }
       return fetch(req).then((networkResponse) => {
@@ -120,9 +95,10 @@ self.addEventListener('fetch', (event) => {
       });
     })
   );
+
+  // Offline mutation replay is coordinated by the application offline-sync manager.
 });
 
-// Sync Event Listener for Background Sync
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-offline-mutations') {
     event.waitUntil(
