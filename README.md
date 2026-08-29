@@ -1,88 +1,144 @@
-# RupayKg - Sovereign Environmental DPI (The Google Maps of Waste and CCC)
+# RupayKg Enterprise 3.0
 
-RupayKg is a **Waste-to-CCC Digital MRV Infrastructure Platform**. It acts as a national protocol layer (DPI) that records real-world environmental activity and converts it into verified climate value (CCCs, recycling credits). It provides a real-time geospatial visualization system similar to Google Maps, but for waste, biomass, recycling, and CCC emissions reduction.
+**RupayKg** is a circular-economy and environmental MRV (Measurement, Reporting and Verification) operating platform for recording real-world waste and biomass activity, compliance evidence, carbon/CCC workflows, and stakeholder operations.
 
-## Architecture & Tech Stack
+The current production architecture is a **single full-stack TypeScript application** with a React/Vite frontend, Express backend, PostgreSQL persistence, Redis-backed session revocation, and fail-closed integrations for Hedera HCS and W3C Verifiable Credentials.
 
-*   **Backend:** Python FastAPI microservices (Production) & Node.js/Express (Live Preview)
-*   **Frontend:** React + Tailwind CSS + Mapbox/Leaflet (Vite)
-*   **Database:** MongoDB Atlas
-*   **Caching:** Redis
-*   **Event Streaming:** Kafka
-*   **Authentication:** JWT Role-based access
-*   **Cloud & Deployment:** Docker containers, Kubernetes (K8s), Vercel (Frontend), Railway (Backend)
+## Current architecture
 
-## 12 Strategic API Integrations
+- **Frontend:** React + TypeScript + Vite + Tailwind CSS
+- **Maps:** Leaflet / React Leaflet with OpenStreetMap tiles
+- **Charts:** Recharts
+- **Backend:** Node.js + Express + TypeScript
+- **Database:** PostgreSQL via Drizzle ORM
+- **Authentication:** RS256 JWT verification with PostgreSQL-authoritative user/RBAC resolution
+- **Session revocation:** Redis JWT `jti` blocklist; authentication fails closed when the revocation service is unavailable
+- **Trust rail:** Hedera Consensus Service through the canonical `src/services/hederaAnchor.ts` provider
+- **Verifiable Credentials:** W3C-compatible asymmetric signing through the canonical credential service
+- **PWA/offline:** VitePWA plus application-level IndexedDB offline mutation queue
+- **Localization:** i18next with Indian-language translations
+- **Deployment:** Google Cloud Run / single Node.js production bundle
 
-The platform integrates the following 12 strategic APIs to power its geospatial and MRV engines:
-1.  **Google Earth Engine API:** Satellite imagery analysis for crop residues and land cover.
-2.  **Sentinel Satellite APIs (ESA):** Vegetation monitoring, fire detection, and environmental verification.
-3.  **AgriStack APIs:** Farmer registry, crop registry, and land parcel data for biomass estimation.
-4.  **Agricultural Data Exchange (ADeX):** Soil data, crop production, and weather patterns.
-5.  **OpenWeather API:** Weather data to model composting conditions and biomass drying.
-6.  **Climatiq API:** Emission factors to calculate CCC reductions.
-7.  **OpenStreetMap API:** Geospatial data for roads, land use, and facility mapping.
-8.  **Mapbox API:** Interactive maps, routing, and geolocation visualization.
-9.  **ONDC API:** Marketplace creation for trading recyclables and biomass.
-10. **OpenGHG API:** Greenhouse gas datasets for emissions analysis.
-11. **Energy and Biomass Datasets API:** Mapping biomass power plants and waste-to-energy plants.
-12. **Aadhaar Identity APIs:** Identity verification for aggregators and recyclers to prevent fraud.
+## Security posture
 
-## Database Structure (MongoDB)
+Production integrations are deliberately **fail closed**. The application does not fabricate Hedera transactions, VC signatures, weighbridge evidence, or Guardian mutations when required external credentials/providers are unavailable.
 
-*   `users`: `{ _id, name, phone, role, organization, state, wallet_balance, created_at }`
-*   `activities`: `{ _id, user_id, waste_type, weight_kg, lat, lng, photo_url, status, timestamp }`
-*   `biomass_records`: `{ _id, farmer_id, crop_type, hectares, estimated_tons, status }`
-*   `ccc_records`: `{ _id, activity_id, ccc_amount_kg, verified_by, status }`
-*   `wallets`: `{ _id, user_id, balance_inr, cccs, transactions: [] }`
-*   `projects`: `{ _id, name, type, location, capacity, status }`
-*   `marketplace_listings`: `{ _id, material, quantity, price, location, listed_by, status }`
-*   `audit_logs`: `{ _id, action, user_id, timestamp, details, ip_address }`
+Private keys and environment secrets must never be committed to Git. PEM files are excluded through `.gitignore`. Production secrets belong in the deployment secret-management system.
 
-## API Design & Documentation
+## Canonical production commands
 
-### Authentication
-*   `POST /auth/register` - Register a new user (Generator, Aggregator, Recycler, Municipality, CCC Admin, Corporate Buyer, System Admin)
-*   `POST /auth/login` - Authenticate and receive JWT
+```bash
+npm install
+npm run dev
+npm run build
+npm start
+```
 
-### Waste Activity Engine
-*   `POST /waste/activity` - Record waste generation (requires GPS & photo)
-*   `GET /waste/history` - Get user's activity history
+The production build generates the Vite frontend and bundles the Express server to:
 
-### Biomass Supply Chain
-*   `POST /biomass/estimate` - Estimate biomass based on crop type and hectares (Rice: 2.5, Wheat: 1.8, Maize: 2.0)
+```text
+dist/server.cjs
+```
 
-### MRV Engine & CCC Registry
-*   `POST /mrv/verify` - Verify an activity and calculate emission reduction (Biomass: 1.5, Plastic: 2.7, Organic: 0.9)
-*   `POST /ccc/register` - Submit verified environmental activity to CCC registries
+## Verification
 
-### Marketplace & Geospatial
-*   `POST /marketplace/list` - Push a listing to the ONDC network
-*   `GET /map/environmental-activity` - Fetch geospatial data for map visualization
-*   `GET /dashboard` - Fetch role-specific metrics
+The repository contains security, regression, adversarial, certification, and persistence-survival test suites. Before production acceptance, run the complete available suite and verify the production build succeeds.
 
-## Deployment Instructions
+Typical commands:
 
-### Single-File Prototype (Fastest Setup - Recommended)
-We have generated a complete production-grade platform in a single file (`rupaykg_core.py`) with an embedded React frontend and all 12 API connectors.
-1. Install dependencies: `pip install -r requirements_single.txt`
-2. Run the server: `uvicorn rupaykg_core:app --reload`
-3. View the dashboard at `http://localhost:8000`
+```bash
+npm test
+npm run test:p0
+npm run test:p1
+npm run test:p2
+npm run test:cert
+npm run build
+```
 
-### Local Development (Full Python Backend)
-1.  Navigate to the Python backend directory: `cd rupaykg-dpi-python`
-2.  Install dependencies: `pip install -r requirements.txt`
-3.  Run the server: `uvicorn main:app --reload`
-4.  Access the interactive API docs at: `http://localhost:8000/docs`
+## Production integrations
 
-### Docker Deployment
-1.  Run `docker-compose up --build -d` to start the API, MongoDB, Redis, and Kafka containers.
+### Hedera HCS
 
-### Kubernetes Deployment (National Scale)
-1.  Apply the deployment manifest: `kubectl apply -f rupaykg-dpi-python/k8s/deployment.yaml`
-2.  Ensure your cluster has ingress controllers configured for load balancing.
+Real HCS writes require production deployment secrets including:
 
-### Frontend Deployment (Vercel)
-1.  The React frontend in `/src` is ready to be deployed to Vercel.
-2.  Run `npm run build` to generate the static files.
-3.  Deploy the `/dist` folder. Ensure `VITE_API_URL` is set in your Vercel environment variables.
+- `HEDERA_NETWORK`
+- `HEDERA_TOPIC_ID`
+- `HEDERA_OPERATOR_ID`
+- `HEDERA_OPERATOR_KEY`
+
+Without these, write operations must remain unavailable rather than generating synthetic evidence.
+
+### W3C Verifiable Credentials
+
+Real asymmetric issuance requires:
+
+- `VC_ISSUER_DID`
+- `VC_ISSUER_PRIVATE_KEY`
+- `VC_ISSUER_PUBLIC_KEY`
+
+API callers cannot supply signing keys. The server-side credential boundary owns signing and verification configuration.
+
+### Redis
+
+JWT revocation requires:
+
+- `REDIS_URL`
+
+If Redis is unavailable, protected authentication paths fail closed by design.
+
+### Weighbridge
+
+Physical weighbridge integration requires the configured field hardware/interface and is an external acceptance gate; it is not simulated in production mode.
+
+## Main platform domains
+
+The application includes operational and governance workflows covering areas such as:
+
+- Urban ULB solid-waste-management operations
+- Rural / Gram Panchayat operations
+- MRV and CCTS carbon workflows
+- Hedera / Guardian trust and evidence workflows
+- LGD (Local Government Directory) data
+- ESG and stakeholder reporting
+- Field evidence, GPS and offline workflows
+- Stakeholder onboarding and verification
+
+## Repository structure
+
+```text
+server.ts                 Express production entry point
+src/                      React application, routes, services and utilities
+src/services/             Canonical domain/integration services
+src/middleware/           Authentication and request middleware
+tests/                    Automated verification suites
+scripts/                  Maintained development/verification utilities
+docs/                     Domain and audit documentation
+public/                   Static frontend assets
+translations/             Localization resources
+dist/                     Generated production output (not source)
+```
+
+## Deployment
+
+The canonical production process is:
+
+1. Build with `npm run build`.
+2. Run the generated server with `npm start`.
+3. Deploy the resulting application to Google Cloud Run.
+4. Bind production secrets through the deployment secret-management system.
+5. Verify `/api/health` and execute live external acceptance tests.
+
+Do not reintroduce the retired Python backend, MongoDB production path, Kubernetes prototype manifests, duplicate microservice stubs, or synthetic/mock production mutation paths.
+
+## Production acceptance status
+
+Automated repository hardening and regression verification can establish code readiness, but they do **not** replace live acceptance of external infrastructure.
+
+The remaining external gates are:
+
+- Real Hedera HCS transaction and consensus verification
+- Real asymmetric VC issuance and tamper-rejection verification
+- Physical weighbridge connectivity
+- Production Cloud Run + Secret Manager verification
+
+These should be completed only after the repository/build is frozen and the required production credentials and hardware are provisioned securely.
