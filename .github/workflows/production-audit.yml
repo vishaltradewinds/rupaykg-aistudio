@@ -133,17 +133,17 @@ jobs:
       - name: Remove ephemeral CI keys
         if: always()
         run: rm -f private.pem public.pem /tmp/vc_private.pem /tmp/vc_public.pem
-      - name: Commit tested UI consolidation and restore audit workflow
+      - name: Commit tested UI consolidation
         if: success()
         run: |
-          git fetch --no-tags --prune --depth=2 origin main
-          git show HEAD^:.github/workflows/production-audit.yml > .github/workflows/production-audit.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/App.tsx .github/workflows/production-audit.yml
-          if ! git diff --quiet -- package-lock.json; then
-            git add package-lock.json
+          git checkout -- package-lock.json
+          git add src/App.tsx
+          if git diff --cached --quiet; then
+            echo "No UI changes to commit; repository already contains the consolidated UI."
+            exit 0
           fi
           git diff --cached --check
-          git commit -m "refactor: consolidate UI navigation and LGD status"
+          git commit -m "refactor: consolidate UI navigation and LGD status [skip ci]"
           git push
