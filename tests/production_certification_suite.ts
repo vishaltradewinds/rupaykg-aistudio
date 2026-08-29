@@ -1,6 +1,5 @@
 import { db } from '../src/db/index';
-import { users, hedera_anchors, cqe_methodologies } from '../src/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { cqe_methodologies } from '../src/db/schema';
 import { HederaAnchorProvider } from '../src/services/hederaAnchor';
 import { CredentialService } from '../src/services/credentialService';
 
@@ -57,35 +56,23 @@ async function runProductionCertification() {
       metadata: { gateTest: true, uniqueNonce: Math.random().toString(36) }
     };
 
-    // First submission
     const res1 = await HederaAnchorProvider.submitAnchor(testPayload, process.env.HEDERA_TOPIC_ID || '', 'cert_tester');
-    
-    // Check if operator configured or properly fail-closed
     const isConfigured = HederaAnchorProvider.isOperatorConfigured();
     if (!isConfigured) {
-      if (res1.status === 'NOT_AVAILABLE' && res1.transactionId === null && !res1.isSimulated) {
-        recordTest(
-          'CERT-HEDERA-01',
-          'Hedera Fail-Closed Boundary',
-          'Verify Hedera HCS write fails closed when operator credentials are missing',
-          'Submit anchor without HEDERA_OPERATOR_KEY',
-          'status: NOT_AVAILABLE, transactionId: null, isSimulated: false',
-          `status: ${res1.status}, transactionId: ${res1.transactionId}, isSimulated: ${res1.isSimulated}`,
-          'PASS',
-          `Integrity hash computed locally: ${res1.integrityHash}. No fake transaction IDs generated.`
-        );
-      } else {
-        recordTest(
-          'CERT-HEDERA-01',
-          'Hedera Fail-Closed Boundary',
-          'Verify Hedera HCS write fails closed when operator credentials are missing',
-          'Submit anchor without HEDERA_OPERATOR_KEY',
-          'status: NOT_AVAILABLE, transactionId: null',
-          `status: ${res1.status}, transactionId: ${res1.transactionId}`,
-          'FAIL',
-          'Failed closed requirement not met.'
-        );
-      }
+      const failClosed = (res1.status === 'NOT_AVAILABLE' || res1.status === 'NOT_CONFIGURED') &&
+        res1.transactionId === null && !res1.isSimulated;
+      recordTest(
+        'CERT-HEDERA-01',
+        'Hedera Fail-Closed Boundary',
+        'Verify Hedera HCS write fails closed when operator credentials are missing',
+        'Submit anchor without HEDERA_OPERATOR_KEY',
+        'status: NOT_AVAILABLE or NOT_CONFIGURED, transactionId: null, isSimulated: false',
+        `status: ${res1.status}, transactionId: ${res1.transactionId}, isSimulated: ${res1.isSimulated}`,
+        failClosed ? 'PASS' : 'FAIL',
+        failClosed
+          ? `Integrity hash computed locally: ${res1.integrityHash}. No fake transaction IDs generated.`
+          : 'Fail-closed requirement not met.'
+      );
     } else {
       recordTest(
         'CERT-HEDERA-01',
@@ -99,33 +86,18 @@ async function runProductionCertification() {
       );
     }
 
-    // Second submission (Idempotency test)
     const res2 = await HederaAnchorProvider.submitAnchor(testPayload, process.env.HEDERA_TOPIC_ID || '', 'cert_tester');
-    if (res2.integrityHash === res1.integrityHash) {
-      recordTest(
-        'CERT-HEDERA-02',
-        'Hedera Idempotency Guard',
-        'Verify identical payload returns idempotent matching anchor',
-        'Duplicate anchor submission for same payload hash',
-        'Same integrityHash, no duplicate submission',
-        `Integrity hash match: ${res2.integrityHash === res1.integrityHash}`,
-        'PASS',
-        `Payload hash ${res1.integrityHash} deduplicated via database and hash matching.`
-      );
-    } else {
-      recordTest(
-        'CERT-HEDERA-02',
-        'Hedera Idempotency Guard',
-        'Verify identical payload returns idempotent matching anchor',
-        'Duplicate anchor submission',
-        'Identical hash',
-        'Mismatched hash',
-        'FAIL',
-        'Idempotency hash mismatch.'
-      );
-    }
+    recordTest(
+      'CERT-HEDERA-02',
+      'Hedera Idempotency Guard',
+      'Verify identical payload returns idempotent matching anchor',
+      'Duplicate anchor submission for same payload hash',
+      'Same integrityHash, no duplicate submission',
+      `Integrity hash match: ${res2.integrityHash === res1.integrityHash}`,
+      res2.integrityHash === res1.integrityHash ? 'PASS' : 'FAIL',
+      `Payload hash ${res1.integrityHash} checked for duplicate submission.`
+    );
 
-    // Tamper test
     const tamperedPayload = { ...testPayload, weightKg: 99999 };
     const tamperedHash = HederaAnchorProvider.computePayloadHash(tamperedPayload);
     const isTamperDetected = tamperedHash !== res1.integrityHash;
@@ -141,6 +113,16 @@ async function runProductionCertification() {
     );
   } catch (err: any) {
     console.error('Hedera test error:', err);
+    recordTest(
+      'CERT-HEDERA-01',
+      'Hedera Certification Harness',
+      'Hedera certification execution completed without unhandled errors',
+      'Hedera certification exception',
+      'No unhandled exception',
+      err?.message || String(err),
+      'FAIL',
+      'Hedera certification section threw before completing its assertions.'
+    );
   }
 
   // 2. W3C Verifiable Credentials Test & Tamper Resistance
@@ -170,7 +152,6 @@ async function runProductionCertification() {
       `Credential ID: ${issuance.credentialId}, Integrity Digest: ${issuance.integrityHash}`
     );
 
-    // Tamper test on VC claims
     const tamperedVc = JSON.parse(JSON.stringify(issuance.verifiableCredential));
     tamperedVc.credentialSubject.weightProcessedKg = 9999999;
     const tamperedVerification = CredentialService.verifyCredential(tamperedVc, issuance.integrityHash);
@@ -187,31 +168,69 @@ async function runProductionCertification() {
     );
   } catch (err: any) {
     console.error('VC test error:', err);
+    recordTest(
+      'CERT-VC-01',
+      'W3C VC Certification Harness',
+      'W3C VC certification execution completed without unhandled errors',
+      'VC certification exception',
+      'No unhandled exception',
+      err?.message || String(err),
+      'FAIL',
+      'VC certification section threw before completing its assertions.'
+    );
   }
 
   // 3. PostgreSQL Database Authority & Table Presence
   try {
     if (db) {
-      const cqeCount = await db.select().from(cqe_methodologies).limit(5);
+      await db.select().from(cqe_methodologies).limit(5);
       recordTest(
         'CERT-DB-01',
         'PostgreSQL Authority Verification',
         'Verify cqe_methodologies and domain tables exist and are queryable',
-        'Direct Drizzle ORM select queries against Cloud SQL PostgreSQL',
+        'Direct Drizzle ORM select queries against PostgreSQL',
         'Successful query execution with zero SQL errors',
-        `Query successful. Rows accessible.`,
+        'Query successful. Rows accessible.',
         'PASS',
-        `PostgreSQL stores live tables cqe_methodologies, users, records, and operational_logs.`
+        'PostgreSQL stores live tables cqe_methodologies and core domain records.'
       );
+    } else {
+      throw new Error('Database handle is unavailable.');
     }
   } catch (err: any) {
     console.error('DB test error:', err);
+    recordTest(
+      'CERT-DB-01',
+      'PostgreSQL Authority Verification',
+      'Verify cqe_methodologies and domain tables are queryable',
+      'Direct Drizzle ORM select query',
+      'Successful query execution',
+      err?.message || String(err),
+      'FAIL',
+      'Database certification assertion failed.'
+    );
   }
 
+  const expectedTestIds = [
+    'CERT-HEDERA-01',
+    'CERT-HEDERA-02',
+    'CERT-HEDERA-03',
+    'CERT-VC-01',
+    'CERT-VC-02',
+    'CERT-DB-01',
+  ];
+  const missing = expectedTestIds.filter(id => !testResults.some(t => t.testId === id));
+  const failed = testResults.filter(t => t.status === 'FAIL');
+  const passed = testResults.filter(t => t.status === 'PASS').length;
+
   console.log('\n============================================================');
-  console.log(`CERTIFICATION SUMMARY: ${testResults.filter(t => t.status === 'PASS').length} / ${testResults.length} PASSED`);
+  console.log(`CERTIFICATION SUMMARY: ${passed} / ${expectedTestIds.length} PASSED`);
+  if (missing.length > 0) console.log(`MISSING TEST RESULTS: ${missing.join(', ')}`);
+  if (failed.length > 0) console.log(`FAILED TESTS: ${failed.map(t => t.testId).join(', ')}`);
   console.log('============================================================\n');
-  process.exit(0);
+
+  // Certification must fail the process if any expected assertion failed or was skipped.
+  process.exitCode = missing.length > 0 || failed.length > 0 || testResults.length !== expectedTestIds.length ? 1 : 0;
 }
 
 runProductionCertification().catch((err) => {

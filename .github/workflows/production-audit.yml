@@ -21,6 +21,8 @@ jobs:
       SQL_ADMIN_PASSWORD: postgres
       SQL_DB_NAME: rupaykg
       SQL_PORT: 5432
+      HEDERA_NETWORK: testnet
+      HEDERA_TOPIC_ID: 0.0.12345
     services:
       postgres:
         image: postgres:16
@@ -62,11 +64,20 @@ jobs:
         run: npm run build
       - name: Apply database migrations
         run: npm run db:migrate
-      - name: Generate ephemeral CI RSA test keys
+      - name: Generate ephemeral CI cryptographic test keys
         run: |
-          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out private.pem
-          openssl rsa -pubout -in private.pem -out public.pem
-          chmod 600 private.pem public.pem
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/vc_private.pem
+          openssl rsa -pubout -in /tmp/vc_private.pem -out /tmp/vc_public.pem
+          {
+            echo 'VC_ISSUER_PRIVATE_KEY<<RUPAYKG_VC_EOF'
+            cat /tmp/vc_private.pem
+            echo 'RUPAYKG_VC_EOF'
+            echo 'VC_ISSUER_PUBLIC_KEY<<RUPAYKG_VC_EOF'
+            cat /tmp/vc_public.pem
+            echo 'RUPAYKG_VC_EOF'
+            echo 'VC_ISSUER_DID=did:rupaykg:ci'
+          } >> "$GITHUB_ENV"
+          chmod 600 /tmp/vc_private.pem /tmp/vc_public.pem
       - name: Domain and persistence tests
         run: npm test
       - name: P0 security tests
