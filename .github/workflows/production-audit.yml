@@ -68,6 +68,10 @@ jobs:
         run: |
           openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/vc_private.pem
           openssl rsa -pubout -in /tmp/vc_private.pem -out /tmp/vc_public.pem
+          cp /tmp/vc_private.pem private.pem
+          cp /tmp/vc_public.pem public.pem
+          while IFS= read -r line; do echo "::add-mask::$line"; done < /tmp/vc_private.pem
+          while IFS= read -r line; do echo "::add-mask::$line"; done < /tmp/vc_public.pem
           {
             echo 'VC_ISSUER_PRIVATE_KEY<<RUPAYKG_VC_EOF'
             cat /tmp/vc_private.pem
@@ -77,7 +81,7 @@ jobs:
             echo 'RUPAYKG_VC_EOF'
             echo 'VC_ISSUER_DID=did:rupaykg:ci'
           } >> "$GITHUB_ENV"
-          chmod 600 /tmp/vc_private.pem /tmp/vc_public.pem
+          chmod 600 private.pem public.pem /tmp/vc_private.pem /tmp/vc_public.pem
       - name: Domain and persistence tests
         run: npm test
       - name: P0 security tests
@@ -88,6 +92,9 @@ jobs:
         run: npm run test:p2
       - name: Production certification tests
         run: npm run test:cert
+      - name: Remove ephemeral CI keys
+        if: always()
+        run: rm -f private.pem public.pem /tmp/vc_private.pem /tmp/vc_public.pem
       - name: Commit synchronized lockfile
         run: |
           if git diff --quiet -- package-lock.json; then
