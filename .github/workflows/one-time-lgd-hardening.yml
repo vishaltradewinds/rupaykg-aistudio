@@ -13,51 +13,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Remove synthetic LGD authority
+        with:
+          fetch-depth: 1
+      - name: Make LGD verification fail closed
         shell: python
         run: |
           from pathlib import Path
           import re
           p = Path('server.ts')
           s = p.read_text()
-          pattern = r'function getLGDInfo\(state: string, district: string, localArea: string, context = [\'\"]Urban[\'\"], subdistrict\?: string\) \{.*?\n\}\n\n  app\.set\("trust proxy", 1\);'
-          replacement = '''function getLGDInfo(state: string, district: string, localArea: string, context = "Urban", subdistrict?: string) {
-            const stateData = state ? INDIAN_STATES[state] : undefined;
-            const districtData = stateData && district ? stateData[district] : undefined;
-            const areas = districtData
-              ? ((context === "Rural" || context === "rural") ? (districtData.Rural || []) : (districtData.Urban || []))
-              : [];
-            const localAreaExists = !!localArea && areas.includes(localArea);
-            const districtExists = !!districtData;
-            const stateExists = !!stateData;
+          pattern = r'function getLGDInfo\(state: string, district: string, localArea: string, context = [\'\"]Urban[\'\"], subdistrict\?: string\) \{.*?\n\}\n\napp\.set\("trust proxy", 1\);'
+          replacement = '''function getLGDInfo(state: string, district: string, localArea: string, context = 'Urban', subdistrict?: string) {
+            // LGD is a government-authority boundary. The application dataset is a local index only.
+            // Never manufacture or label locally derived identifiers as official LGD codes.
+            const states = getLgdStates();
+            const stateRecord = states.find((row) => row.state_name === state || String(row.state_lgd_code) === state);
+            if (!stateRecord) return null;
 
-            // This application dataset is a local index only. It is NEVER authoritative Government LGD verification.
-            // No hash, arithmetic, AI, or fallback value may manufacture an official-looking LGD code.
+            const districtRows = getLgdDistricts(stateRecord.state_name);
+            const districtRecord = districtRows.find((row) => row.district_name === district);
+            if (!districtRecord) return null;
+
             return {
-              state_name: state || null,
-              state_lgd_code: null,
-              district_name: district || null,
-              district_lgd_code: null,
+              state_name: stateRecord.state_name,
+              state_lgd_code: stateRecord.state_lgd_code,
+              district_name: districtRecord.district_name,
+              district_lgd_code: districtRecord.district_lgd_code,
               subdistrict_name: subdistrict || null,
               subdistrict_lgd_code: null,
               local_body_name: localArea || null,
               local_body_lgd_code: null,
-              local_body_type: (context === "Rural" || context === "rural") ? "Gram Panchayat" : "Local Body",
+              local_body_type: (context === 'Rural' || context === 'rural') ? 'Gram Panchayat' : 'Local Body',
               ward_or_village_name: localArea || null,
               ward_or_village_lgd_code: null,
               census_2011_code: null,
               is_lgd_verified: false,
-              verification_source: "Local application index — not authoritative LGD",
-              local_index_match: stateExists && districtExists && localAreaExists,
+              verification_source: 'Local application index — not authoritative LGD',
               last_synced_at: null,
             };
-          }
-
+          }'''
           if not re.search(pattern, s, flags=re.S):
               raise SystemExit('Target getLGDInfo function not found; refusing to modify server.ts')
-          s = re.sub(pattern, replacement + '\n\n  app.set("trust proxy", 1);', s, count=1, flags=re.S)
+          s = re.sub(pattern, replacement + '\n\napp.set("trust proxy", 1);', s, count=1, flags=re.S)
           p.write_text(s)
-      - name: Commit and remove one-time workflow
+      - name: Remove one-time workflow and commit
         run: |
           rm -f .github/workflows/one-time-lgd-hardening.yml
           git config user.name 'github-actions[bot]'
