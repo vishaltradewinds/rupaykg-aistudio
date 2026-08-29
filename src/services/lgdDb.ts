@@ -131,11 +131,20 @@ export function getLgdStates(): LgdStateRecord[] {
     .map(row => ({ ...row, is_lgd_verified: false }));
 }
 
-/** Returns only locally indexed districts. No AI expansion or fabricated LGD codes. */
-export async function getLgdDistricts(state: string): Promise<LgdDistrictRecord[]> {
-  if (!db) return [];
-  return (db.prepare(`SELECT district_name, district_lgd_code, state_name FROM lgd_districts WHERE state_name = ? ORDER BY district_name`).all(state) as LgdDistrictRecord[])
+/**
+ * Returns only locally indexed districts. No AI expansion or fabricated LGD codes.
+ * The returned array is also a synchronous thenable for compatibility with the
+ * legacy server call site; awaiting it still yields the same array.
+ */
+export function getLgdDistricts(state: string): LgdDistrictRecord[] & { then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T } {
+  if (!db) return [] as LgdDistrictRecord[] & { then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T };
+  const rows = (db.prepare(`SELECT district_name, district_lgd_code, state_name FROM lgd_districts WHERE state_name = ? ORDER BY district_name`).all(state) as LgdDistrictRecord[])
     .map(row => ({ ...row, is_lgd_verified: false }));
+  Object.defineProperty(rows, "then", {
+    enumerable: false,
+    value: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => onfulfilled(rows),
+  });
+  return rows as LgdDistrictRecord[] & { then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T };
 }
 
 /** Returns locally indexed subdistrict names. Codes are local index identifiers, not official LGD codes. */
