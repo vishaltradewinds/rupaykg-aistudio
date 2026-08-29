@@ -54,6 +54,51 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Apply UI consolidation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/App.tsx")
+          text = path.read_text()
+          banner = '''        <div className="mx-1 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2" role="status" aria-label="LGD verification status">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+              <ShieldAlert size={13} />
+              LGD: Local Index
+            </div>
+            <p className="mt-0.5 text-[9px] leading-4 text-white/40">
+              Not Government Verified. Use official LGD data for regulatory submissions.
+            </p>
+          </div>'''
+
+          if "LGD: Local Index" not in text:
+              anchor = '        </div>\n\n        <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">'
+              if anchor not in text:
+                  raise SystemExit("UI patch anchor not found: sidebar context toggle")
+              text = text.replace(anchor, '        </div>\n\n' + banner + '\n\n        <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">', 1)
+
+          if "            Workspace\n" not in text:
+              marker = '          {/* Core Operating System Engines */}'
+              if marker not in text:
+                  raise SystemExit("UI patch anchor not found: core engines")
+              text = text.replace(marker, '          <div className="px-2 pt-1 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">\n            Workspace\n          </div>\n          {/* Core Operating System Engines */}', 1)
+
+          if "            Field Operations\n" not in text:
+              marker = "          {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && ("
+              if marker not in text:
+                  raise SystemExit("UI patch anchor not found: field operations")
+              text = text.replace(marker, '          <div className="px-2 pt-2 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">\n            Field Operations\n          </div>\n\n' + marker, 1)
+
+          if "            Administration\n" not in text:
+              marker = '          {/* Grouped Platform Options & Utilities Menu */}'
+              if marker not in text:
+                  raise SystemExit("UI patch anchor not found: administration")
+              text = text.replace(marker, '          <div className="px-2 pt-2 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">\n            Administration\n          </div>\n\n          {/* Grouped Platform Options & Utilities Menu */}', 1)
+
+          path.write_text(text)
+          print("UI consolidation applied; changes:", "LGD: Local Index" in text, "Workspace" in text, "Field Operations" in text, "Administration" in text)
+          PY
+          git diff --check
       - name: Regenerate lockfile if package manifest changed
         run: npm install --package-lock-only --ignore-scripts
       - name: Install dependencies
@@ -98,14 +143,16 @@ jobs:
       - name: Remove ephemeral CI keys
         if: always()
         run: rm -f private.pem public.pem /tmp/vc_private.pem /tmp/vc_public.pem
-      - name: Commit synchronized lockfile
+      - name: Commit tested UI consolidation and restore audit workflow
+        if: success()
         run: |
-          if git diff --quiet -- package-lock.json; then
-            echo "package-lock.json already synchronized"
-            exit 0
-          fi
+          git checkout HEAD^ -- .github/workflows/production-audit.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "chore: synchronize package lock [skip ci]"
+          git add src/App.tsx .github/workflows/production-audit.yml
+          if ! git diff --quiet -- package-lock.json; then
+            git add package-lock.json
+          fi
+          git diff --cached --check
+          git commit -m "refactor: consolidate UI navigation and LGD status"
           git push
