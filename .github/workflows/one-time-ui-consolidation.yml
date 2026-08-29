@@ -1,0 +1,79 @@
+name: One-time UI consolidation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-ui-consolidation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply surgical UI consolidation
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          app = Path('src/App.tsx')
+          text = app.read_text(encoding='utf-8')
+
+          import_marker = "import { StakeholderOnboardingHub } from './components/StakeholderOnboardingHub';"
+          badge_import = "import { LgdVerificationBadge } from './components/LgdVerificationBadge';"
+          if badge_import not in text:
+              text = text.replace(import_marker, import_marker + "\n" + badge_import, 1)
+
+          start = text.index('          {/* Core Operating System */}')
+          end = text.index('          {/* Trust & Verification is surfaced inside Enterprise / Guardian / Verification workflows; no duplicate standalone implementation is introduced. */}')
+
+          nav = '''          {/* Canonical business navigation — capabilities remain in their existing production modules. */}\n          <div className="px-3 pt-1 pb-0 text-[9px] font-black uppercase tracking-[0.18em] text-white/30 hidden md:block">Operations</div>\n          <button onClick={() => setView('dashboard')} aria-label={t('Go to Dashboard')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <LayoutDashboard size={20} /><span className="hidden md:block font-medium">{t('Dashboard')}</span>\n          </button>\n          <button onClick={() => setView('ground_reality')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ground_reality' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <Users size={20} /><span className="hidden md:block font-bold">Ground Reality & Safai</span>\n          </button>\n          {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator','commercial_generator','institution_generator','municipal_generator','industry','commercial','institution','municipality'].includes(user?.role || '')) && (\n            <button onClick={() => setView('upload')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'upload' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n              <PlusCircle size={20} /><span className="hidden md:block font-medium">{t('Upload Waste')}</span>\n            </button>\n          )}\n          {(user?.role === 'aggregator' || user?.role === 'processor') && (\n            <button onClick={() => setView('tasks')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'tasks' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n              <ClipboardList size={20} /><span className="hidden md:block font-medium">{t('Task Board')}</span>\n            </button>\n          )}\n\n          <div className="px-3 pt-2 pb-0 text-[9px] font-black uppercase tracking-[0.18em] text-white/30 hidden md:block">Compliance</div>\n          <button onClick={() => setView('enterprise_suite')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <ShieldCheck size={20} /><span className="hidden md:block font-bold">Enterprise & CPCB Compliance</span>\n          </button>\n          <button onClick={() => setView('reports')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'reports' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <FileText size={20} /><span className="hidden md:block font-bold">Compliance Reports</span>\n          </button>\n\n          <div className="px-3 pt-2 pb-0 text-[9px] font-black uppercase tracking-[0.18em] text-white/30 hidden md:block">Carbon & MRV</div>\n          <button onClick={() => setView('ccts_carbon_os')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ccts_carbon_os' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <Globe size={20} /><span className="hidden md:block font-bold">CCTS Carbon OS</span>\n          </button>\n\n          <div className="px-3 pt-2 pb-0 text-[9px] font-black uppercase tracking-[0.18em] text-white/30 hidden md:block">Trust & Verification</div>\n          <button onClick={() => setView('enterprise_suite')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <ShieldCheck size={20} /><span className="hidden md:block font-bold">Hedera / Guardian</span>\n          </button>\n          <button onClick={() => setView('verification')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'verification' ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <CheckCircle2 size={20} /><span className="hidden md:block font-bold">Verification</span>\n          </button>\n\n          <div className="px-3 pt-2 pb-0 text-[9px] font-black uppercase tracking-[0.18em] text-white/30 hidden md:block">Administration</div>\n          <button onClick={() => setView('stakeholder_registration')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'stakeholder_registration' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <UserPlus size={20} /><span className="hidden md:block font-bold">Users & Organizations</span>\n          </button>\n          <button onClick={() => setView('platform_manual')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'platform_manual' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>\n            <BookOpen size={20} /><span className="hidden md:block font-bold">Working Manual</span>\n          </button>\n'''
+          text = text[:start] + nav + text[end:]
+
+          old = "<span className=\"text-xs text-white/40\">{t('Auto-burns Lat/Long, Timestamp & LGD location')}</span>"
+          new = "<span className=\"text-xs text-white/40\">{t('Captures Lat/Long and timestamp. LGD location remains a local reference until Government verification.')}</span>\n                            <LgdVerificationBadge />"
+          if old in text:
+              text = text.replace(old, new, 1)
+
+          app.write_text(text, encoding='utf-8')
+
+      - name: Add LGD truthfulness badge
+        shell: bash
+        run: |
+          cat > src/components/LgdVerificationBadge.tsx <<'EOF'
+          import React from 'react';
+          import { Info } from 'lucide-react';
+
+          /**
+           * Truth boundary for LGD data: the local application index is not
+           * Government-authoritative LGD verification.
+           */
+          export const LgdVerificationBadge: React.FC = () => (
+            <span
+              className="inline-flex items-center gap-1.5 mt-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-300"
+              title="This application currently uses a local LGD index. Government verification is required for regulatory use."
+              role="status"
+              aria-label="Local LGD index — not Government verified"
+            >
+              <Info size={11} />
+              Local LGD Index — Not Government Verified
+            </span>
+          );
+
+          export default LgdVerificationBadge;
+          EOF
+
+      - name: Remove one-time workflow and commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/one-time-ui-consolidation.yml
+          git add src/App.tsx src/components/LgdVerificationBadge.tsx .github/workflows/one-time-ui-consolidation.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: consolidate UI navigation and LGD truth status"
+          git push
