@@ -203,3 +203,8 @@ html.light .hover\:bg-white\/10:hover,
   text-transform: uppercase;
   opacity: 0.7;
 }
+
+/* UI consolidation checkpoint: keep the authenticated global context control in the main header. */
+nav > div.my-3 {
+  display: none;
+}
