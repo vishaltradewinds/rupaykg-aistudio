@@ -64,12 +64,21 @@ jobs:
         run: npm run build
       - name: Apply database migrations
         run: npm run db:migrate
-      - name: Generate ephemeral CI cryptographic test keys
+      - name: Generate ephemeral RSA files for CI security tests
+        run: |
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out private.pem
+          openssl rsa -pubout -in private.pem -out public.pem
+          chmod 600 private.pem public.pem
+      - name: Domain and persistence tests
+        run: npm test
+      - name: P0 security tests
+        run: npm run test:p0
+      - name: P1 regression tests
+        run: npm run test:p1
+      - name: Generate ephemeral VC signing keys for certification
         run: |
           openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/vc_private.pem
           openssl rsa -pubout -in /tmp/vc_private.pem -out /tmp/vc_public.pem
-          cp /tmp/vc_private.pem private.pem
-          cp /tmp/vc_public.pem public.pem
           while IFS= read -r line; do echo "::add-mask::$line"; done < /tmp/vc_private.pem
           while IFS= read -r line; do echo "::add-mask::$line"; done < /tmp/vc_public.pem
           {
@@ -81,13 +90,7 @@ jobs:
             echo 'RUPAYKG_VC_EOF'
             echo 'VC_ISSUER_DID=did:rupaykg:ci'
           } >> "$GITHUB_ENV"
-          chmod 600 private.pem public.pem /tmp/vc_private.pem /tmp/vc_public.pem
-      - name: Domain and persistence tests
-        run: npm test
-      - name: P0 security tests
-        run: npm run test:p0
-      - name: P1 regression tests
-        run: npm run test:p1
+          chmod 600 /tmp/vc_private.pem /tmp/vc_public.pem
       - name: P2 adversarial security tests
         run: npm run test:p2
       - name: Production certification tests
