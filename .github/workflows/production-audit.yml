@@ -1,0 +1,35 @@
+name: RupayKg Production Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint / Typecheck
+        run: npm run lint
+      - name: Production build
+        run: npm run build
+      - name: Domain and persistence tests
+        run: npm test
+      - name: P0 security tests
+        run: npm run test:p0
+      - name: P1 regression tests
+        run: npm run test:p1
+      - name: P2 adversarial security tests
+        run: npm run test:p2
+      - name: Production certification tests
+        run: npm run test:cert
