@@ -16,6 +16,11 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rupaykg
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
+      SQL_HOST: localhost
+      SQL_ADMIN_USER: postgres
+      SQL_ADMIN_PASSWORD: postgres
+      SQL_DB_NAME: rupaykg
+      SQL_PORT: 5432
     services:
       postgres:
         image: postgres:16
@@ -55,6 +60,8 @@ jobs:
         run: npm run lint
       - name: Production build
         run: npm run build
+      - name: Apply database migrations
+        run: npm run db:migrate
       - name: Domain and persistence tests
         run: npm test
       - name: P0 security tests
