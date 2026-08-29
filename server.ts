@@ -71,63 +71,41 @@ async function startServer() {
   const app = express();
 
 function getLGDInfo(state: string, district: string, localArea: string, context = 'Urban', subdistrict?: string) {
-  const hashCode = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return Math.abs(hash);
-  };
+  // LGD is an authoritative-government-data boundary. This endpoint may only
+  // return records from the local LGD index; it must never manufacture codes
+  // or claim Government verification for locally derived identifiers.
+  const states = getLgdStates();
+  const stateRecord = states.find((row) => row.state_name === state || String(row.state_lgd_code) === state);
+  if (!stateRecord) return null;
 
-  const stateHash = hashCode(state || 'State');
-  const districtHash = hashCode(district || 'District');
-  const areaHash = hashCode(localArea || 'Area');
-
-  const statesList = Object.keys(INDIAN_STATES).sort();
-  const stateIndex = statesList.indexOf(state);
-  const stateCode = stateIndex !== -1 ? (stateIndex + 1) : ((stateHash % 37) + 1);
-
-  const baseDistrictCode = stateCode * 1000;
-  const districtsOfState = state ? INDIAN_STATES[state] : null;
-  const districtList = districtsOfState ? Object.keys(districtsOfState).sort() : [];
-  const districtIndex = districtList.indexOf(district);
-  const districtCode = districtIndex !== -1 ? (baseDistrictCode + districtIndex + 1) : (100 + (districtHash % 800));
-
-  const isRural = context === 'Rural' || context === 'rural' || (subdistrict && subdistrict.toLowerCase().includes('rural'));
-  const subdistrictCode = districtCode * 10 + (isRural ? 2 : 1);
-
-  const districtData = districtsOfState && district ? districtsOfState[district] : null;
-  const areasList = districtData ? (isRural ? (districtData.Rural || []) : (districtData.Urban || [])).slice().sort() : [];
-  const areaIndex = areasList.indexOf(localArea);
-  const wardOrVillageCode = areaIndex !== -1 ? (subdistrictCode * 100 + areaIndex + 1) : ((isRural ? 500000 : 900000) + (areaHash % 99999));
-
-  const localBodyCode = wardOrVillageCode;
-
-  const localBodyType = isRural ? 'Gram Panchayat' : 'Municipal Corporation';
-  const localBodyName = isRural
-    ? `${localArea} Gram Panchayat`
-    : `${district || "Visakhapatnam"} Municipal Corporation`;
-
-  return {
-    state_name: state || "Andhra Pradesh",
-    state_lgd_code: stateCode,
-    district_name: district || "Visakhapatnam",
-    district_lgd_code: districtCode,
-    subdistrict_name: subdistrict || (isRural ? `${district || "Visakhapatnam"} Block (Rural)` : `${district || "Visakhapatnam"} Tehsil (Urban)`),
-    subdistrict_lgd_code: subdistrictCode,
-    local_body_name: localBodyName,
-    local_body_lgd_code: localBodyCode,
-    local_body_type: localBodyType,
-    ward_or_village_name: localArea || "Gajuwaka Ward 1",
-    ward_or_village_lgd_code: wardOrVillageCode,
-    census_2011_code: isRural ? (600000 + (areaHash % 99999)) : null,
-    is_lgd_verified: true,
-    verification_source: "Ministry of Panchayati Raj (lgdirectory.gov.in)",
-    last_synced_at: new Date().toISOString(),
-  };
+  const districts = getLgdDistricts(stateRecord.state_name);
+  return districts.then((districtRows) => {
+    const districtRecord = districtRows.find((row) => row.district_name === district);
+    if (!districtRecord) return null;
+    const requestedSubdistrict = subdistrict || (context.toLowerCase() === 'rural'
+      ? `${district} Block (Rural)`
+      : `${district} Tehsil (Urban)`);
+    return {
+      state_name: stateRecord.state_name,
+      state_lgd_code: stateRecord.state_lgd_code,
+      district_name: districtRecord.district_name,
+      district_lgd_code: districtRecord.district_lgd_code,
+      subdistrict_name: requestedSubdistrict,
+      subdistrict_lgd_code: null,
+      local_body_name: localArea || null,
+      local_body_lgd_code: null,
+      local_body_type: context.toLowerCase() === 'rural' ? 'Gram Panchayat' : 'Municipal Corporation',
+      ward_or_village_name: localArea || null,
+      ward_or_village_lgd_code: null,
+      census_2011_code: null,
+      is_lgd_verified: false,
+      verification_source: "Local application index — not authoritative LGD",
+      last_synced_at: new Date().toISOString(),
+    };
+  });
 }
 
-  app.set("trust proxy", 1);
+app.set("trust proxy", 1);
 
   // Rate Limiting - Hardening for Nation Scale
   const limiter = rateLimit({
