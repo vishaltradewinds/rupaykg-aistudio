@@ -58,7 +58,7 @@ async function runProductionCertification() {
     };
 
     // First submission
-    const res1 = await HederaAnchorProvider.submitAnchor(testPayload, '0.0.4592011', 'cert_tester');
+    const res1 = await HederaAnchorProvider.submitAnchor(testPayload, process.env.HEDERA_TOPIC_ID || '', 'cert_tester');
     
     // Check if operator configured or properly fail-closed
     const isConfigured = HederaAnchorProvider.isOperatorConfigured();
@@ -100,7 +100,7 @@ async function runProductionCertification() {
     }
 
     // Second submission (Idempotency test)
-    const res2 = await HederaAnchorProvider.submitAnchor(testPayload, '0.0.4592011', 'cert_tester');
+    const res2 = await HederaAnchorProvider.submitAnchor(testPayload, process.env.HEDERA_TOPIC_ID || '', 'cert_tester');
     if (res2.integrityHash === res1.integrityHash) {
       recordTest(
         'CERT-HEDERA-02',

@@ -862,7 +862,7 @@ const resources = {
   "Amount / CCC": "Amount / CCC",
   "Registry ID": "Registry ID",
   "Guardian HCS Ledger AI Interface": "Guardian HCS Ledger AI Interface",
-  "Query the Hedera Consensus Service topic 0.0.4592011 directly using natural language.": "Query the Hedera Consensus Service topic 0.0.4592011 directly using natural language.",
+  "Query the Hedera Consensus Service topic the configured directly using natural language.": "Query the Hedera Consensus Service topic the configured directly using natural language.",
   "Example: How many carbon units are anchored in total?": "Example: How many carbon units are anchored in total?",
   "Query Ledger": "Query Ledger",
   "Guardian AI Response": "Guardian AI Response",
@@ -1754,7 +1754,7 @@ const resources = {
   "Amount / CCC": "Amount / CCC",
   "Registry ID": "Registry ID",
   "Guardian HCS Ledger AI Interface": "Guardian HCS Ledger AI Interface",
-  "Query the Hedera Consensus Service topic 0.0.4592011 directly using natural language.": "Query the Hedera Consensus Service topic 0.0.4592011 directly using natural language.",
+  "Query the Hedera Consensus Service topic the configured directly using natural language.": "Query the Hedera Consensus Service topic the configured directly using natural language.",
   "Example: How many carbon units are anchored in total?": "Example: How many carbon units are anchored in total?",
   "Query Ledger": "Query Ledger",
   "Guardian AI Response": "Guardian AI Response",
@@ -5316,4719 +5316,442 @@ const resources = {
   "Read Whitepaper": "ਵ੍ਹਾਈਟ ਪੇਪਰ ਪੜ੍ਹੋ",
   "AI-Verified Intake": "AI-ਪ੍ਰਮਾਣਿਤ ਦਾਖਲੇ",
   "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "ਨਾਗਰਿਕ ਬਟੂਏ ਨੂੰ ਸਿੱਧੇ ਤੌਰ 'ਤੇ ਫੰਡ ਵੰਡੋ, ਵਾਤਾਵਰਣ ਦੀਆਂ ਦੇਣਦਾਰੀਆਂ ਨੂੰ ਸਥਾਨਕ ਆਰਥਿਕ ਵਿਕਾਸ ਵਿੱਚ ਬਦਲੋ।",
-  "Rural Wealth Creation": "ਪੇਂਡੂ ਦੌਲਤ ਸਿਰਜਣਾ",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "ਇਸ ਦੇ ਨਾਲ ਹੀ ਪ੍ਰੋਸੈਸ ਕੀਤੇ ਗਏ ਹਰ ਕਿਲੋਗ੍ਰਾਮ ਬਾਇਓਮਾਸ ਲਈ ਰੀਸਾਈਕਲਰ, ਸੀਐਸਆਰ, ਮਿਉਂਸਪਲ, ਕਾਰਬਨ, ਅਤੇ ਈਪੀਆਰ ਰੇਲਜ਼ ਤੋਂ ਮੁੱਲ ਕੱਢੋ।",
-  "Multi-Rail Value Engine": "ਮਲਟੀ-ਰੇਲ ਮੁੱਲ ਇੰਜਣ",
-  "Real-time waste throughput across the RupayKg OS": "RupayKg OS ਵਿੱਚ ਰੀਅਲ-ਟਾਈਮ ਵੇਸਟ ਥ੍ਰੋਪੁੱਟ",
-  "Live Network Impact": "ਲਾਈਵ ਨੈੱਟਵਰਕ ਪ੍ਰਭਾਵ",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "ਰਹਿੰਦ-ਖੂੰਹਦ ਦੀ ਕਿਸਮ, ਭਾਰ, ਅਤੇ ਭੂ-ਸਥਾਨ ਦੀ ਸਵੈਚਲਿਤ ਤਸਦੀਕ ਅਟੱਲ, ਸੰਪ੍ਰਭੂ-ਗ੍ਰੇਡ ਡੇਟਾ ਅਖੰਡਤਾ ਨੂੰ ਯਕੀਨੀ ਬਣਾਉਂਦੀ ਹੈ।",
-  "Value Minted": "ਮੁੱਲ ਮਿੱਥਿਆ ਗਿਆ",
-  "Aggregate": "ਕੁੱਲ",
-  "Network Topology": "ਨੈੱਟਵਰਕ ਟੌਪੋਲੋਜੀ",
-  "Active Nodes": "ਕਿਰਿਆਸ਼ੀਲ ਨੋਡਸ",
-  "Distributed biomass collection nodes": "ਬਾਇਓਮਾਸ ਕਲੈਕਸ਼ਨ ਨੋਡ ਵੰਡੇ ਗਏ",
-  "Citizens collect agricultural, municipal, or industrial waste.": "ਨਾਗਰਿਕ ਖੇਤੀਬਾੜੀ, ਨਗਰਪਾਲਿਕਾ ਜਾਂ ਉਦਯੋਗਿਕ ਰਹਿੰਦ-ਖੂੰਹਦ ਨੂੰ ਇਕੱਠਾ ਕਰਦੇ ਹਨ।",
-  "A seamless pipeline from waste generation to value realization.": "ਰਹਿੰਦ-ਖੂੰਹਦ ਦੇ ਉਤਪਾਦਨ ਤੋਂ ਮੁੱਲ ਪ੍ਰਾਪਤੀ ਤੱਕ ਇੱਕ ਸਹਿਜ ਪਾਈਪਲਾਈਨ।",
-  "Aggregators verify, weigh, and transport waste to facilities.": "ਐਗਰੀਗੇਟਰ ਕੂੜੇ ਦੀ ਤਸਦੀਕ ਕਰਦੇ ਹਨ, ਤੋਲਦੇ ਹਨ ਅਤੇ ਸਹੂਲਤਾਂ ਤੱਕ ਪਹੁੰਚਾਉਂਦੇ ਹਨ।",
-  "Generate": "ਪੈਦਾ ਕਰੋ",
-  "nodes": "ਨੋਡਸ",
-  "Choose your part in the circular economy.": "ਸਰਕੂਲਰ ਆਰਥਿਕਤਾ ਵਿੱਚ ਆਪਣਾ ਹਿੱਸਾ ਚੁਣੋ।",
-  "Mint Value": "ਪੁਦੀਨੇ ਦਾ ਮੁੱਲ",
-  "Citizen": "ਨਾਗਰਿਕ",
-  "Instant wallet funding": "ਤੁਰੰਤ ਵਾਲਿਟ ਫੰਡਿੰਗ",
-  "Upload waste records": "ਰਹਿੰਦ-ਖੂੰਹਦ ਦੇ ਰਿਕਾਰਡ ਅੱਪਲੋਡ ਕਰੋ",
-  "Waste Generator": "ਵੇਸਟ ਜਨਰੇਟਰ",
-  "Process": "ਪ੍ਰਕਿਰਿਆ",
-  "Smart contracts distribute funds across all 5 value rails.": "ਸਮਾਰਟ ਕੰਟਰੈਕਟ ਸਾਰੇ 5 ਮੁੱਲ ਰੇਲਾਂ ਵਿੱਚ ਫੰਡ ਵੰਡਦੇ ਹਨ।",
-  "Recyclers convert waste into usable materials or energy.": "ਰੀਸਾਈਕਲਰ ਰਹਿੰਦ-ਖੂੰਹਦ ਨੂੰ ਵਰਤੋਂ ਯੋਗ ਸਮੱਗਰੀ ਜਾਂ ਊਰਜਾ ਵਿੱਚ ਬਦਲਦੇ ਹਨ।",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "ਖੇਤੀਬਾੜੀ, ਨਗਰਪਾਲਿਕਾ, ਜਾਂ ਉਦਯੋਗਿਕ ਰਹਿੰਦ-ਖੂੰਹਦ ਨੂੰ ਇਕੱਠਾ ਕਰੋ ਅਤੇ ਜਮ੍ਹਾਂ ਕਰੋ। ਪ੍ਰਦਾਨ ਕੀਤੇ ਗਏ ਵਜ਼ਨ ਅਤੇ ਕੂੜੇ ਦੀ ਕਿਸਮ ਦੇ ਆਧਾਰ 'ਤੇ ਸਿੱਧੀ ਵਾਲਿਟ ਡਿਪਾਜ਼ਿਟ ਕਮਾਓ।",
-  "Processor": "ਪ੍ਰੋਸੈਸਰ",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "ਨਾਗਰਿਕ ਜਮ੍ਹਾਂ ਰਕਮਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ, ਰਹਿੰਦ-ਖੂੰਹਦ ਨੂੰ ਇਕੱਠਾ ਕਰੋ, ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਪ੍ਰੋਸੈਸਿੰਗ ਸਹੂਲਤਾਂ ਤੱਕ ਲਿਜਾਣ ਲਈ ਲੌਜਿਸਟਿਕਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ।",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "ਇਕੱਠੀ ਕੀਤੀ ਰਹਿੰਦ-ਖੂੰਹਦ ਨੂੰ ਪ੍ਰਾਪਤ ਕਰੋ ਅਤੇ ਇਸ ਨੂੰ ਅੰਤਮ ਉਤਪਾਦਾਂ ਵਿੱਚ ਪ੍ਰੋਸੈਸ ਕਰੋ। ਸਾਰੀਆਂ ਰੇਲਾਂ ਵਿੱਚ ਅੰਤਮ ਮੁੱਲ ਪ੍ਰਾਪਤੀ ਨੂੰ ਟਰਿੱਗਰ ਕਰੋ।",
-  "Track environmental impact": "ਵਾਤਾਵਰਣ ਦੇ ਪ੍ਰਭਾਵ ਨੂੰ ਟਰੈਕ ਕਰੋ",
-  "Recycler": "ਰੀਸਾਈਕਲਰ",
-  "Collection & Transport": "ਸੰਗ੍ਰਹਿ ਅਤੇ ਆਵਾਜਾਈ",
-  "Route optimization data": "ਰੂਟ ਅਨੁਕੂਲਨ ਡੇਟਾ",
-  "Aggregator": "ਐਗਰੀਗੇਟਰ",
-  "Earn logistics margins": "ਲੌਜਿਸਟਿਕਸ ਮਾਰਜਿਨ ਕਮਾਓ",
-  "Log collection batches": "ਲੌਗ ਕਲੈਕਸ਼ਨ ਬੈਚ",
-  "Login": "ਲਾਗਿਨ",
-  "Circular Economy Operating System": "ਸਰਕੂਲਰ ਆਰਥਿਕਤਾ ਓਪਰੇਟਿੰਗ ਸਿਸਟਮ",
-  "Log processing yields": "ਲੌਗ ਪ੍ਰੋਸੈਸਿੰਗ ਉਪਜ",
-  "Generate CCCs": "ਕਾਰਬਨ ਕ੍ਰੈਡਿਟ ਤਿਆਰ ਕਰੋ",
-  "Account Type": "ਖਾਤੇ ਦੀ ਕਿਸਮ",
-  "District": "ਜ਼ਿਲ੍ਹਾ",
-  "Register": "ਰਜਿਸਟਰ ਕਰੋ",
-  "Access CSR/EPR funds": "ਸੀਐਸਆਰ/ਈਪੀਆਰ ਫੰਡਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰੋ",
-  "Context:": "ਸੰਦਰਭ:",
-  "Organization Name": "ਸੰਸਥਾ ਦਾ ਨਾਮ",
-  "Access OS": "OS ਤੱਕ ਪਹੁੰਚ ਕਰੋ",
-  "Back to Home": "ਘਰ 'ਤੇ ਵਾਪਸ ਜਾਓ",
-  "Password": "ਪਾਸਵਰਡ",
-  "Phone Number": "ਫੋਨ ਨੰਬਰ",
-  "Quick Demo Access": "ਤੇਜ਼ ਡੈਮੋ ਪਹੁੰਚ",
-  "State": "ਰਾਜ",
-  "Create Account": "ਖਾਤਾ ਬਣਾਉ",
-  "Global Impact Map": "ਗਲੋਬਲ ਪ੍ਰਭਾਵ ਦਾ ਨਕਸ਼ਾ",
-  "System Audit Logs": "ਸਿਸਟਮ ਆਡਿਟ ਲਾਗ",
-  "Submission Heatmap": "ਸਪੁਰਦਗੀ ਹੀਟਮੈਪ",
-  "Total Offset": "ਕੁੱਲ ਔਫਸੈੱਟ",
-  "MRV Verification Dashboard": "MRV ਪੁਸ਼ਟੀਕਰਨ ਡੈਸ਼ਬੋਰਡ",
-  "No pending MRV records": "ਕੋਈ ਬਕਾਇਆ MRV ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ",
-  "Verify processed waste records to issue CCCs.": "ਕਾਰਬਨ ਕ੍ਰੈਡਿਟ ਜਾਰੀ ਕਰਨ ਲਈ ਪ੍ਰੋਸੈਸ ਕੀਤੇ ਕੂੜੇ ਦੇ ਰਿਕਾਰਡਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।",
-  "Waste Diverted": "ਕੂੜਾ ਮੋੜਿਆ ਗਿਆ",
-  "Impact Distribution": "ਪ੍ਰਭਾਵ ਵੰਡ",
-  "Pending": "ਬਕਾਇਆ",
-  "Farmers Supported": "ਕਿਸਾਨਾਂ ਨੇ ਸਮਰਥਨ ਦਿੱਤਾ",
-  "All processed waste has been verified.": "ਸਾਰੇ ਪ੍ਰੋਸੈਸ ਕੀਤੇ ਕੂੜੇ ਦੀ ਪੁਸ਼ਟੀ ਕੀਤੀ ਗਈ ਹੈ।",
-  "Portfolio Composition": "ਪੋਰਟਫੋਲੀਓ ਰਚਨਾ",
-  "Credit Value": "ਕ੍ਰੈਡਿਟ ਮੁੱਲ",
-  "Purchase verified CCCs to offset your footprint.": "ਆਪਣੇ ਪੈਰਾਂ ਦੇ ਨਿਸ਼ਾਨ ਨੂੰ ਆਫਸੈੱਟ ਕਰਨ ਲਈ ਪ੍ਰਮਾਣਿਤ ਕਾਰਬਨ ਕ੍ਰੈਡਿਟ ਖਰੀਦੋ।",
-  "CCC Reduction": "ਕਾਰਬਨ ਦੀ ਕਮੀ",
-  "Acreage": "ਰਕਬਾ",
-  "Reject": "ਅਸਵੀਕਾਰ ਕਰੋ",
-  "AI Risk Score": "AI ਜੋਖਮ ਸਕੋਰ",
-  "Location Verification": "ਟਿਕਾਣਾ ਪੁਸ਼ਟੀਕਰਨ",
-  "Available Credits": "ਉਪਲਬਧ ਕ੍ਰੈਡਿਟ",
-  "Verify & Issue Credits": "ਕ੍ਰੈਡਿਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਜਾਰੀ ਕਰੋ",
-  "Amount to Purchase (Tonnes)": "ਖਰੀਦ ਲਈ ਰਕਮ (ਟਨ)",
-  "Project": "ਪ੍ਰੋਜੈਕਟ",
-  "Cancel": "ਰੱਦ ਕਰੋ",
-  "Price per Tonne": "ਪ੍ਰਤੀ ਟਨ ਕੀਮਤ",
-  "Your Offset Balance": "ਤੁਹਾਡਾ ਔਫਸੈੱਟ ਬਕਾਇਆ",
-  "Purchase Credits": "ਕ੍ਰੈਡਿਟ ਖਰੀਦੋ",
-  "Recent Transactions": "ਹਾਲੀਆ ਲੈਣ-ਦੇਣ",
-  "Amount": "ਰਕਮ",
-  "Confirm Purchase": "ਖਰੀਦ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ",
-  "Total Cost": "ਕੁੱਲ ਲਾਗਤ",
-  "Network Active": "ਨੈੱਟਵਰਕ ਕਿਰਿਆਸ਼ੀਲ",
-  "Ward-Level Analytics": "ਵਾਰਡ-ਪੱਧਰੀ ਵਿਸ਼ਲੇਸ਼ਣ",
-  "MSW": "MSW",
-  "Status": "ਸਥਿਤੀ",
-  "National Dashboard": "ਨੈਸ਼ਨਲ ਡੈਸ਼ਬੋਰਡ",
-  "Price": "ਕੀਮਤ",
-  "Municipal Corporation": "ਨਗਰ ਨਿਗਮ",
-  "Ward Analytics": "ਵਾਰਡ ਵਿਸ਼ਲੇਸ਼ਣ",
-  "Ward": "ਵਾਰਡ",
-  "Date": "ਮਿਤੀ",
-  "Farmers / FPOs": "ਕਿਸਾਨਾਂ/ਐਫ.ਪੀ.ਓ",
-  "Village": "ਪਿੰਡ",
-  "All Roles": "ਸਾਰੀਆਂ ਭੂਮਿਕਾਵਾਂ",
-  "Farmer / FPO (Biomass Generator)": "ਕਿਸਾਨ / FPO (ਬਾਇਓਮਾਸ ਜਨਰੇਟਰ)",
-  "Gram Panchayat": "ਗ੍ਰਾਮ ਪੰਚਾਇਤ",
-  "Village Analytics": "ਪਿੰਡ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ",
-  "Citizen (MSW Generator)": "ਨਾਗਰਿਕ (MSW ਜਨਰੇਟਰ)",
-  "Biomass": "ਬਾਇਓਮਾਸ",
-  "Village-Level Analytics": "ਪਿੰਡ-ਪੱਧਰੀ ਵਿਸ਼ਲੇਸ਼ਣ",
-  "Citizens": "ਨਾਗਰਿਕ",
-  "User Management": "ਉਪਭੋਗਤਾ ਪ੍ਰਬੰਧਨ",
-  "CCC Pool Status": "ਕਾਰਬਨ ਪੂਲ ਸਥਿਤੀ",
-  "EPR Partners": "EPR ਭਾਈਵਾਲ",
-  "Processors": "ਪ੍ਰੋਸੈਸਰ",
-  "Diverted": "ਮੋੜਿਆ",
-  "Aggregators": "ਐਗਰੀਗੇਟਰ",
-  "CSR Partners": "CSR ਭਾਈਵਾਲ",
-  "Fraud Alerts & Flagged Events": "ਧੋਖਾਧੜੀ ਦੀਆਂ ਚਿਤਾਵਨੀਆਂ ਅਤੇ ਫਲੈਗ ਕੀਤੇ ਇਵੈਂਟ",
-  "CCC Buyers": "ਕਾਰਬਨ ਖਰੀਦਦਾਰ",
-  "Audit Logs": "ਆਡਿਟ ਲੌਗਸ",
-  "Processed Events": "ਸੰਸਾਧਿਤ ਇਵੈਂਟਸ",
-  "Trees Equivalent": "ਰੁੱਖਾਂ ਦੇ ਬਰਾਬਰ",
-  "Environmental Impact": "ਵਾਤਾਵਰਣ ਪ੍ਰਭਾਵ",
-  "Trees": "ਰੁੱਖ",
-  "Wallet Disbursed": "ਵਾਲਿਟ ਵੰਡਿਆ ਗਿਆ",
-  "Economic Efficiency": "ਆਰਥਿਕ ਕੁਸ਼ਲਤਾ",
-  "Total Waste Events": "ਕੁੱਲ ਰਹਿੰਦ-ਖੂੰਹਦ ਦੀਆਂ ਘਟਨਾਵਾਂ",
-  "Methane Avoided": "ਮੀਥੇਨ ਤੋਂ ਬਚਿਆ",
-  "Water Saved": "ਪਾਣੀ ਬਚਾਇਆ",
-  "Growth & Impact Trends": "ਵਿਕਾਸ ਅਤੇ ਪ੍ਰਭਾਵ ਰੁਝਾਨ",
-  "MRV Rejection Rate": "MRV ਅਸਵੀਕਾਰ ਦਰ",
-  "Waste Composition": "ਰਹਿੰਦ-ਖੂੰਹਦ ਦੀ ਰਚਨਾ",
-  "Avg Price / kg": "ਔਸਤ ਕੀਮਤ / ਕਿਲੋਗ੍ਰਾਮ",
-  "Operational Health": "ਸੰਚਾਲਨ ਸਿਹਤ",
-  "Geospatial Fraud Distribution": "ਭੂ-ਸਥਾਨਕ ਧੋਖਾਧੜੀ ਦੀ ਵੰਡ",
-  "Processing Efficiency": "ਪ੍ਰੋਸੈਸਿੰਗ ਕੁਸ਼ਲਤਾ",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* ਬਚੇ ਹੋਏ ਲੈਂਡਫਿਲ ਪ੍ਰਬੰਧਨ ਅਤੇ ਵਾਤਾਵਰਣ ਸੁਧਾਰ ਖਰਚਿਆਂ ਦੇ ਅਧਾਰ 'ਤੇ ਸਰਕਾਰੀ ਬੱਚਤਾਂ ਦੀ ਗਣਨਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।",
-  "Total Minted CCC Units": "ਕੁੱਲ ਮਿਟੇਡ ਕਾਰਬਨ ਯੂਨਿਟ",
-  "No flagged events detected.": "ਕੋਈ ਫਲੈਗ ਕੀਤੇ ਇਵੈਂਟ ਨਹੀਂ ਮਿਲੇ।",
-  "Govt Cost Savings": "ਸਰਕਾਰੀ ਲਾਗਤ ਬਚਤ",
-  "Actions": "ਕਾਰਵਾਈਆਂ",
-  "Role": "ਭੂਮਿਕਾ",
-  "Regulator": "ਰੈਗੂਲੇਟਰ",
-  "User": "ਉਪਭੋਗਤਾ",
-  "CSR Partner": "CSR ਸਾਥੀ",
-  "State Admin": "ਰਾਜ ਪ੍ਰਸ਼ਾਸਕ",
-  "Wallet": "ਵਾਲਿਟ",
-  "Municipal Admin": "ਮਿਉਂਸਪਲ ਐਡਮਿਨ",
-  "Super Admin": "ਸੁਪਰ ਐਡਮਿਨ",
-  "Location": "ਟਿਕਾਣਾ",
-  "Delete User": "ਉਪਭੋਗਤਾ ਨੂੰ ਮਿਟਾਓ",
-  "CCC Buyer": "ਕਾਰਬਨ ਖਰੀਦਦਾਰ",
-  "Action": "ਕਾਰਵਾਈ",
-  "User ID": "ਯੂਜਰ ਆਈਡੀ",
-  "Total Events": "ਕੁੱਲ ਇਵੈਂਟਸ",
-  "Total Waste": "ਕੁੱਲ ਕੂੜਾ",
-  "EPR Partner": "EPR ਸਾਥੀ",
-  "No audit logs available.": "ਕੋਈ ਆਡਿਟ ਲੌਗ ਉਪਲਬਧ ਨਹੀਂ ਹਨ।",
-  "No users found.": "ਕੋਈ ਉਪਭੋਗਤਾ ਨਹੀਂ ਮਿਲਿਆ।",
-  "No ward data available.": "ਵਾਰਡ ਦਾ ਕੋਈ ਡਾਟਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।",
-  "Save Changes": "ਤਬਦੀਲੀਆਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ",
-  "Add ₹10,000": "₹10,000 ਸ਼ਾਮਲ ਕਰੋ",
-  "Receive updates about your transactions via email.": "ਈਮੇਲ ਰਾਹੀਂ ਆਪਣੇ ਲੈਣ-ਦੇਣ ਬਾਰੇ ਅੱਪਡੇਟ ਪ੍ਰਾਪਤ ਕਰੋ।",
-  "Enable browser push notifications.": "ਬ੍ਰਾਊਜ਼ਰ ਪੁਸ਼ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ।",
-  "Get instant SMS alerts for critical updates.": "ਨਾਜ਼ੁਕ ਅੱਪਡੇਟਾਂ ਲਈ ਤਤਕਾਲ SMS ਚੇਤਾਵਨੀਆਂ ਪ੍ਰਾਪਤ ਕਰੋ।",
-  "Notification Preferences": "ਸੂਚਨਾ ਤਰਜੀਹਾਂ",
-  "Email Notifications": "ਈਮੇਲ ਸੂਚਨਾਵਾਂ",
-  "Saving...": "ਰੱਖਿਅਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
-  "Push Notifications": "ਪੁਸ਼ ਸੂਚਨਾਵਾਂ",
-  "SMS Alerts": "SMS ਚੇਤਾਵਨੀਆਂ",
-  "Currently Active: ": "ਵਰਤਮਾਨ ਵਿੱਚ ਕਿਰਿਆਸ਼ੀਲ:",
-  "Value: ": "ਮੁੱਲ:",
-  "Type: ": "ਕਿਸਮ:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 RupayKg ਸਰਕੂਲਰ ਆਰਥਿਕ OS। ਸਾਰੇ ਹੱਕ ਰਾਖਵੇਂ ਹਨ.",
-  "How the Engine Works": "ਇੰਜਣ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ",
-  "Village: ": "ਪਿੰਡ:",
-  "FRAUD ALERT": "ਧੋਖਾਧੜੀ ਚੇਤਾਵਨੀ",
-  "GENESIS": "ਉਤਪਤ",
-  "Weight: ": "ਭਾਰ:",
-  " Context (": "ਸੰਦਰਭ (",
-  "Privacy": "ਗੋਪਨੀਯਤਾ",
-  "RUPAYKG": "RUPAYKG",
-  "National Regulator": "ਰਾਸ਼ਟਰੀ ਰੈਗੂਲੇਟਰ",
-  "Farmer": "ਕਿਸਾਨ",
-  "rural": "ਪੇਂਡੂ",
-  "Terms": "ਸ਼ਰਤਾਂ",
-  "urban": "ਸ਼ਹਿਰੀ",
-  "Processor (Recycler)": "ਪ੍ਰੋਸੈਸਰ (ਰੀਸਾਈਕਲਰ)",
-  "Aggregator (Collection & Transport)": "ਐਗਰੀਗੇਟਰ (ਉਗਰਾਹੀ ਅਤੇ ਆਵਾਜਾਈ)",
-  "Admin": "ਐਡਮਿਨ",
-  "GPS Capture Failed": "GPS ਕੈਪਚਰ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ",
-  "Name": "ਨਾਮ",
-  "Capturing GPS Coordinates...": "GPS ਕੋਆਰਡੀਨੇਟਸ ਨੂੰ ਕੈਪਚਰ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
-  "Database Connection Failed": "ਡਾਟਾਬੇਸ ਕਨੈਕਸ਼ਨ ਅਸਫਲ ਰਿਹਾ",
-  "No audit logs found": "ਕੋਈ ਆਡਿਟ ਲੌਗ ਨਹੀਂ ਮਿਲੇ",
-  "Wallet Balance": "ਵਾਲਿਟ ਬਕਾਇਆ",
-  "Acreage (acres)": "ਰਕਬਾ (ਏਕੜ)",
-  "Circular Economy Intake Form": "ਸਰਕੂਲਰ ਇਕਨਾਮੀ ਇਨਟੇਕ ਫਾਰਮ",
-  "No records found": "ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਮਿਲਿਆ",
-  "GPS Captured: ": "GPS ਕੈਪਚਰ ਕੀਤਾ ਗਿਆ:",
-  "Active Queue": "ਕਿਰਿਆਸ਼ੀਲ ਕਤਾਰ",
-  "Retry GPS": "GPS ਦੀ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
-  "Failed to get location. Please enter manually.": "ਟਿਕਾਣਾ ਪ੍ਰਾਪਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ। ਕਿਰਪਾ ਕਰਕੇ ਹੱਥੀਂ ਦਾਖਲ ਕਰੋ।",
-  "GPS Required": "GPS ਦੀ ਲੋੜ ਹੈ",
-  "Geolocation is not supported by this browser.": "ਭੂ-ਸਥਾਨ ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਦੁਆਰਾ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।",
-  "Failed to register farmer": "ਕਿਸਾਨ ਰਜਿਸਟਰ ਕਰਨ ਵਿੱਚ ਅਸਫਲ",
-  "Drivers Online": "ਡਰਾਈਵਰ ਆਨਲਾਈਨ",
-  "Farmer registered successfully! ID: ": "ਕਿਸਾਨ ਸਫ਼ਲਤਾਪੂਰਵਕ ਰਜਿਸਟਰ ਹੋਇਆ! ID:",
-  "Active Fleet": "ਸਰਗਰਮ ਫਲੀਟ",
-  "e.g., Paddy, Wheat": "ਉਦਾਹਰਨ ਲਈ, ਝੋਨਾ, ਕਣਕ",
-  "Utilization": "ਉਪਯੋਗਤਾ",
-  "Total Capacity": "ਕੁੱਲ ਸਮਰੱਥਾ",
-  "Output Material": "ਆਉਟਪੁੱਟ ਸਮੱਗਰੀ",
-  "Accept Pickup": "ਪਿਕਅੱਪ ਸਵੀਕਾਰ ਕਰੋ",
-  "Incoming for Processing": "ਪ੍ਰੋਸੈਸਿੰਗ ਲਈ ਆਉਣਾ",
-  "Storage Utilization": "ਸਟੋਰੇਜ਼ ਉਪਯੋਗਤਾ",
-  "Available for Pickup": "ਪਿਕਅੱਪ ਲਈ ਉਪਲਬਧ",
-  "No new tasks available.": "ਕੋਈ ਨਵਾਂ ਕੰਮ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।",
-  "Current Load": "ਮੌਜੂਦਾ ਲੋਡ",
-  "Biomass in Stock": "ਸਟਾਕ ਵਿੱਚ ਬਾਇਓਮਾਸ",
-  "Value": "ਮੁੱਲ",
-  "Weight": "ਭਾਰ",
-  "Type": "ਟਾਈਪ ਕਰੋ",
-  "Recently Processed": "ਹਾਲ ਹੀ ਵਿੱਚ ਪ੍ਰਕਿਰਿਆ ਕੀਤੀ ਗਈ",
-  "Accept Receipt": "ਰਸੀਦ ਸਵੀਕਾਰ ਕਰੋ",
-  "Pending MRV": "ਲੰਬਿਤ MRV",
-  "Timestamp": "ਟਾਈਮਸਟੈਂਪ",
-  "No records found for the selected filter.": "ਚੁਣੇ ਗਏ ਫਿਲਟਰ ਲਈ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਮਿਲਿਆ।",
-  "No active tasks in your possession.": "ਤੁਹਾਡੇ ਕਬਜ਼ੇ ਵਿੱਚ ਕੋਈ ਸਰਗਰਮ ਕਾਰਜ ਨਹੀਂ ਹਨ।",
-  "MRV Status": "MRV ਸਥਿਤੀ",
-  "Verified By": "ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ",
-  "No credits available": "ਕੋਈ ਕ੍ਰੈਡਿਟ ਉਪਲਬਧ ਨਹੀਂ ਹੈ",
-  "High": "ਉੱਚ",
-  "Record ID": "ਰਿਕਾਰਡ ਆਈ.ਡੀ",
-  "Med": "ਮੇਡ",
-  "AI Risk": "AI ਜੋਖਮ",
-  "Low": "ਘੱਟ",
-  "No MRV history found": "ਕੋਈ MRV ਇਤਿਹਾਸ ਨਹੀਂ ਮਿਲਿਆ",
-  "Check back later for newly verified CCCs.": "ਨਵੇਂ ਪ੍ਰਮਾਣਿਤ ਕਾਰਬਨ ਕ੍ਰੈਡਿਟ ਲਈ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਜਾਂਚ ਕਰੋ।",
-  "Details": "ਵੇਰਵੇ",
-  "Insufficient Funds": "ਨਾਕਾਫ਼ੀ ਫੰਡ",
-  "Failed to update profile": "ਪ੍ਰੋਫਾਈਲ ਅੱਪਡੇਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲ",
-  "Profile updated successfully": "ਪ੍ਰੋਫਾਈਲ ਸਫਲਤਾਪੂਰਵਕ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ",
-  "Offset": "ਆਫਸੈੱਟ",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "RupayKg ਦਾ ਬੁਨਿਆਦੀ ਢਾਂਚਾ ਅਤੇ ਸੰਚਾਲਨ ਸਿਧਾਂਤ",
-  "Verified": "ਪ੍ਰਮਾਣਿਤ",
-  "Profile Settings": "ਪ੍ਰੋਫਾਈਲ ਸੈਟਿੰਗਾਂ",
-  "Purchase Credit": "ਕ੍ਰੈਡਿਟ ਖਰੀਦੋ",
-  "I. Introduction": "I. ਜਾਣ-ਪਛਾਣ",
-  "An error occurred": "ਇੱਕ ਤਰੁੱਟੀ ਉਤਪੰਨ ਹੋਈ",
-  "Urban": "ਸ਼ਹਿਰੀ",
-  "Municipal Corp + Ward": "ਨਗਰ ਨਿਗਮ + ਵਾਰਡ",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "RupayKg ਦੀ ਸਥਾਪਨਾ ਇੱਕ ਯੂਨੀਫਾਈਡ ਵੇਸਟ-ਟੂ-ਕਾਰਬਨ ਡਿਜੀਟਲ ਆਪਰੇਟਿੰਗ ਸਿਸਟਮ ਦੇ ਤੌਰ 'ਤੇ ਕੀਤੀ ਗਈ ਹੈ ਜੋ ਭਾਰਤ ਦੇ ਇੱਕ ਅਨੁਪਾਲਨ-ਆਧਾਰਿਤ ਕਾਰਬਨ ਬਾਜ਼ਾਰ ਵੱਲ ਤਬਦੀਲੀ ਦਾ ਸਮਰਥਨ ਕਰਨ ਲਈ ਤਿਆਰ ਕੀਤੀ ਗਈ ਹੈ।",
-  "II. Unified Operating System Model": "II. ਯੂਨੀਫਾਈਡ ਓਪਰੇਟਿੰਗ ਸਿਸਟਮ ਮਾਡਲ",
-  "Rural": "ਪੇਂਡੂ",
-  "Category": "ਸ਼੍ਰੇਣੀ",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "RupayKg ਨੂੰ ਇੱਕ ਪ੍ਰੋਜੈਕਟ ਡਿਵੈਲਪਰ, ਕਾਰਬਨ ਵਪਾਰੀ, ਜਾਂ ਰੀਸਾਈਕਲਿੰਗ ਇਕਾਈ ਦੇ ਰੂਪ ਵਿੱਚ ਢਾਂਚਾ ਨਹੀਂ ਬਣਾਇਆ ਗਿਆ ਹੈ। ਇਹ ਇੱਕ ਬੁਨਿਆਦੀ ਢਾਂਚਾ ਪਰਤ ਹੈ ਜੋ ਸ਼ਹਿਰੀ ਅਤੇ ਪੇਂਡੂ ਪ੍ਰਬੰਧਕੀ ਢਾਂਚੇ ਵਿੱਚ ਆਰਕੀਟੈਕਚਰਲ ਡੁਪਲੀਕੇਸ਼ਨ ਤੋਂ ਬਿਨਾਂ ਕੰਮ ਕਰਨ ਲਈ ਤਿਆਰ ਕੀਤੀ ਗਈ ਹੈ।",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "ਪਲੇਟਫਾਰਮ ਭਾਰਤ ਦੇ ਕਾਰਬਨ ਈਕੋਸਿਸਟਮ ਵਿੱਚ ਇੱਕ ਢਾਂਚਾਗਤ ਪਾੜੇ ਨੂੰ ਸੰਬੋਧਿਤ ਕਰਦਾ ਹੈ: ਇੱਕ ਏਕੀਕ੍ਰਿਤ, ਰੈਗੂਲੇਟਰ-ਅਲਾਈਨਡ ਡਿਜੀਟਲ ਬੁਨਿਆਦੀ ਢਾਂਚੇ ਦੀ ਅਣਹੋਂਦ ਜੋ ਪ੍ਰਮਾਣਿਤ ਕੂੜੇ ਦੇ ਡਾਇਵਰਸ਼ਨ ਨੂੰ ਪਾਲਣਾ-ਗਰੇਡ ਕਾਰਬਨ ਸਪਲਾਈ ਵਿੱਚ ਬਦਲਣ ਦੇ ਸਮਰੱਥ ਹੈ।",
-  "Anchor": "ਐਂਕਰ",
-  "Context": "ਸੰਦਰਭ",
-  "IV. CCC Origination": "IV. ਕਾਰਬਨ ਉਤਪਤੀ",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "ਐਗਰੀਗੇਟਰ ਨੂੰ ਸੰਰਚਨਾਤਮਕ ਤੌਰ 'ਤੇ ਪਰਿਭਾਸ਼ਿਤ ਕੀਤਾ ਗਿਆ ਹੈ ਜੋ ਇਕੱਠੀ ਕਰਨ ਅਤੇ ਪ੍ਰਮਾਣਿਕਤਾ ਦੀ ਛਾਂਟੀ ਕਰਨ, ਚੇਨ-ਆਫ-ਕਸਟਡੀ ਤਸਦੀਕ ਨੂੰ ਸਰਲ ਬਣਾਉਣ ਲਈ ਜ਼ਿੰਮੇਵਾਰ ਇਕਾਈ ਦੇ ਰੂਪ ਵਿੱਚ ਪਰਿਭਾਸ਼ਿਤ ਕੀਤਾ ਗਿਆ ਹੈ।",
-  "Biomass-based fossil substitution": "ਬਾਇਓਮਾਸ-ਆਧਾਰਿਤ ਫਾਸਿਲ ਬਦਲ",
-  "CSR Contributors": "CSR ਯੋਗਦਾਨੀ",
-  "Gram Panchayat + Village": "ਗ੍ਰਾਮ ਪੰਚਾਇਤ + ਪਿੰਡ",
-  "III. Unified Stakeholder Architecture": "III. ਯੂਨੀਫਾਈਡ ਸਟੇਕਹੋਲਡਰ ਆਰਕੀਟੈਕਚਰ",
-  "Administrative Authority": "ਪ੍ਰਬੰਧਕੀ ਅਥਾਰਟੀ",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* ਸਾਰੇ ਪੇਂਡੂ ਖੇਤੀਬਾੜੀ ਰਹਿੰਦ-ਖੂੰਹਦ ਅਤੇ ਬਾਇਓਮਾਸ ਗਤੀਵਿਧੀ ਨੂੰ ਬਾਇਓਮਾਸ ਦੇ ਅਧੀਨ ਸ਼੍ਰੇਣੀਬੱਧ ਕੀਤਾ ਗਿਆ ਹੈ। ਕੋਈ ਵੱਖਰਾ ਖੇਤੀ ਵਰਟੀਕਲ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।",
-  "Methane avoidance through diversion": "ਡਾਇਵਰਸ਼ਨ ਦੁਆਰਾ ਮੀਥੇਨ ਤੋਂ ਬਚਣਾ",
-  "Producers (EPR)": "ਉਤਪਾਦਕ (EPR)",
-  "VI. Regulator Sovereignty": "VI. ਰੈਗੂਲੇਟਰ ਪ੍ਰਭੂਸੱਤਾ",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "ਕਾਰਬਨ ਜਾਰੀ ਕਰਨ ਵਾਲੀ ਅਥਾਰਟੀ ਰੈਗੂਲੇਟਰ-ਨਿਯੰਤਰਿਤ ਰਹਿੰਦੀ ਹੈ। RupayKg ਸੁਤੰਤਰ ਤੌਰ 'ਤੇ ਕ੍ਰੈਡਿਟ ਨਹੀਂ ਕਰਦਾ। ਸਾਰੇ ਕ੍ਰੈਡਿਟ ਇਵੈਂਟ-ਟਰੇਸ ਕਰਨ ਯੋਗ, ਰਜਿਸਟਰੀ-ਅਨੁਕੂਲ, ਅਤੇ ਰਾਸ਼ਟਰੀ ਕਾਰਬਨ ਗਵਰਨੈਂਸ ਫਰੇਮਵਰਕ ਦੇ ਨਾਲ ਇਕਸਾਰ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।",
-  "EPR Rail": "EPR ਰੇਲ",
-  "CSR Rail": "ਸੀਐਸਆਰ ਰੇਲ",
-  "VII. Strategic Position": "VII. ਰਣਨੀਤਕ ਸਥਿਤੀ",
-  "Recycler Rail": "ਰੀਸਾਈਕਲਰ ਰੇਲ",
-  "Recycling substitution": "ਰੀਸਾਈਕਲਿੰਗ ਬਦਲ",
-  "V. Multi-Rail Architecture": "V. ਮਲਟੀ-ਰੇਲ ਆਰਕੀਟੈਕਚਰ",
-  "Governance Layer": "ਗਵਰਨੈਂਸ ਪਰਤ",
-  "CCC Rail": "ਕਾਰਬਨ ਰੇਲ",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "RupayKg ਇੱਕ ਸਿੰਗਲ ਡਿਜ਼ੀਟਲ ਸਿਸਟਮ ਦਾ ਸੰਚਾਲਨ ਕਰੇਗਾ ਜੋ ਹੇਠ ਲਾਗੂ ਹੋਵੇਗਾ: (a) ਨਗਰ ਨਿਗਮ + ਵਾਰਡ (ਸ਼ਹਿਰੀ ਸੰਦਰਭ) (ਬੀ) ਗ੍ਰਾਮ ਪੰਚਾਇਤ + ਪਿੰਡ (ਪੇਂਡੂ ਸੰਦਰਭ)। ਸੰਦਰਭਾਂ ਵਿਚਕਾਰ ਕੋਈ ਢਾਂਚਾਗਤ ਨਕਲ ਮੌਜੂਦ ਨਹੀਂ ਹੋਵੇਗਾ।",
-  "Article II — Unified Stakeholder Doctrine": "ਆਰਟੀਕਲ II - ਯੂਨੀਫਾਈਡ ਸਟੇਕਹੋਲਡਰ ਸਿਧਾਂਤ",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "RupayKg ਉਹਨਾਂ ਨੂੰ ਇਕਜੁੱਟ ਕਰਨ ਲਈ ਬਣਾਇਆ ਗਿਆ ਸੀ। ਕਾਰਬਨ ਵਪਾਰੀ ਵਜੋਂ ਨਹੀਂ। ਰੀਸਾਈਕਲਿੰਗ ਸਟਾਰਟਅੱਪ ਵਜੋਂ ਨਹੀਂ। ਪਰ ਇੱਕ ਸਿੰਗਲ ਓਪਰੇਟਿੰਗ ਸਿਸਟਮ ਦੇ ਰੂਪ ਵਿੱਚ ਮਿਉਂਸਪਲ ਵਾਰਡ ਪੱਧਰ ਅਤੇ ਗ੍ਰਾਮ ਪੰਚਾਇਤ ਪਿੰਡ ਪੱਧਰ 'ਤੇ ਢਾਂਚਾਗਤ ਦੁਹਰਾਈ ਤੋਂ ਬਿਨਾਂ ਕੰਮ ਕਰਨ ਦੇ ਸਮਰੱਥ ਹੈ।",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "ਰਹਿੰਦ-ਖੂੰਹਦ ਦਾ ਹੁਣ ਨਿਪਟਾਰਾ ਨਹੀਂ ਰਿਹਾ। ਇਹ ਸ਼ਾਸਨ ਨਾਲ ਜੁੜਿਆ ਜਲਵਾਯੂ ਬੁਨਿਆਦੀ ਢਾਂਚਾ ਹੈ।",
-  "Article I — Unified Operating System": "ਆਰਟੀਕਲ I - ਯੂਨੀਫਾਈਡ ਓਪਰੇਟਿੰਗ ਸਿਸਟਮ",
-  "— Founder, RupayKg": "- ਸੰਸਥਾਪਕ, RupayKg",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "ਬੁਨਿਆਦ ਢਾਂਚੇ ਦੀ ਘੋਸ਼ਣਾ",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "ਜਦੋਂ ਅਸੀਂ RupayKg ਬਣਾਉਣਾ ਸ਼ੁਰੂ ਕੀਤਾ, ਅਸੀਂ ਰੀਸਾਈਕਲਿੰਗ ਨਾਲ ਸ਼ੁਰੂ ਨਹੀਂ ਕੀਤਾ। ਅਸੀਂ ਇੱਕ ਢਾਂਚਾਗਤ ਸਵਾਲ ਦੇ ਨਾਲ ਸ਼ੁਰੂਆਤ ਕੀਤੀ: ਇੱਥੇ ਕੋਈ ਏਕੀਕ੍ਰਿਤ ਬੁਨਿਆਦੀ ਢਾਂਚਾ ਕਿਉਂ ਨਹੀਂ ਹੈ ਜੋ ਕੂੜੇ ਨੂੰ ਨਿਯੰਤ੍ਰਿਤ ਕਾਰਬਨ ਮੁੱਲ ਵਿੱਚ ਬਦਲਦਾ ਹੈ?",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "ਭਾਰਤ ਇੱਕ ਅਨੁਪਾਲਨ ਕਾਰਬਨ ਯੁੱਗ ਵਿੱਚ ਦਾਖਲ ਹੋ ਰਿਹਾ ਹੈ। ਮਿਊਂਸਪਲ ਸਿਸਟਮ ਮਾਪਣਯੋਗ ਮੀਥੇਨ ਪੈਦਾ ਕਰਦੇ ਹਨ। ਪੇਂਡੂ ਬਾਇਓਮਾਸ ਨੂੰ ਸਾੜ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਜਾਂ ਘੱਟ ਵਰਤੋਂ ਵਿੱਚ ਲਿਆ ਜਾਂਦਾ ਹੈ। ਫਿਰ ਵੀ ਸਿਸਟਮ ਖੰਡਿਤ ਰਹਿੰਦੇ ਹਨ।",
-  "Legally Styled": "ਕਾਨੂੰਨੀ ਤੌਰ 'ਤੇ ਸਟਾਈਲ ਕੀਤਾ ਗਿਆ",
-  "Article IV — CCC Engine": "ਆਰਟੀਕਲ IV - ਕਾਰਬਨ ਇੰਜਣ",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "ਸਾਰੀਆਂ ਨਿਕਾਸੀ ਕਟੌਤੀਆਂ ਨੂੰ ਇਵੈਂਟ-ਪੱਧਰ MRV ਪ੍ਰਮਾਣਿਕਤਾ ਦੇ ਨਾਲ ਇੱਕ ਸਿੰਗਲ ਕਾਰਬਨ ਕੈਲਕੂਲੇਸ਼ਨ ਇੰਜਣ ਦੁਆਰਾ ਸੰਸਾਧਿਤ ਕੀਤਾ ਜਾਵੇਗਾ।",
-  "Institutional Identity": "ਸੰਸਥਾਗਤ ਪਛਾਣ",
-  "Article III — Waste Classification": "ਆਰਟੀਕਲ III - ਰਹਿੰਦ-ਖੂੰਹਦ ਦਾ ਵਰਗੀਕਰਨ",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "RupayKg ਇਹਨਾਂ ਵਿਚਕਾਰ ਸਖ਼ਤ ਵਿਭਾਜਨ ਬਣਾਏਗਾ: ਰੀਸਾਈਕਲਰ ਲੇਖਾਕਾਰੀ, CSR ਲੇਖਾਕਾਰੀ, EPR ਪਾਲਣਾ, ਗਵਰਨੈਂਸ ਮੁੱਲ, ਕਾਰਬਨ ਜਾਰੀ ਕਰਨਾ। ਦੋਹਰੀ ਗਿਣਤੀ ਦੀ ਮਨਾਹੀ ਹੈ।",
-  "Article VI — Regulator Sovereignty": "ਆਰਟੀਕਲ VI - ਰੈਗੂਲੇਟਰ ਪ੍ਰਭੂਸੱਤਾ",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "ਸਟੇਕਹੋਲਡਰ ਢਾਂਚਾ ਦੇਸ਼ ਭਰ ਵਿੱਚ ਇਕਸਾਰ ਰਹੇਗਾ ਅਤੇ ਇਸ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਣਗੇ: ਵੇਸਟ ਜਨਰੇਟਰ, ਐਗਰੀਗੇਟਰ, ਪ੍ਰੋਸੈਸਰ, ਪ੍ਰਬੰਧਕੀ ਅਥਾਰਟੀ, ਉਤਪਾਦਕ (ਈਪੀਆਰ), ਸੀਐਸਆਰ ਯੋਗਦਾਨੀ, ਕਾਰਬਨ ਖਰੀਦਦਾਰ, ਰੈਗੂਲੇਟਰ।",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "ਕਾਰਬਨ ਟਕਸਾਲ ਅਥਾਰਟੀ ਰੈਗੂਲੇਟਰ ਕੰਟਰੋਲ ਅਧੀਨ ਰਹੇਗੀ। RupayKg ਸੁਤੰਤਰ ਤੌਰ 'ਤੇ ਕਾਰਬਨ ਕ੍ਰੈਡਿਟ ਜਾਰੀ ਨਹੀਂ ਕਰੇਗਾ।",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "ਰਹਿੰਦ-ਖੂੰਹਦ ਨੂੰ ਵਿਸ਼ੇਸ਼ ਤੌਰ 'ਤੇ ਇਸ ਤਰ੍ਹਾਂ ਸ਼੍ਰੇਣੀਬੱਧ ਕੀਤਾ ਜਾਵੇਗਾ: (a) ਸ਼ਹਿਰੀ ਸੰਦਰਭ ਵਿੱਚ MSW (b) ਪੇਂਡੂ ਸੰਦਰਭ ਵਿੱਚ ਬਾਇਓਮਾਸ। ਸਾਰੇ ਖੇਤੀ ਰਹਿੰਦ-ਖੂੰਹਦ ਨੂੰ ਬਾਇਓਮਾਸ ਦੇ ਅਧੀਨ ਸ਼੍ਰੇਣੀਬੱਧ ਕੀਤਾ ਜਾਵੇਗਾ।",
-  "Article V — Rail Separation": "ਆਰਟੀਕਲ V — ਰੇਲ ਵਿਭਾਜਨ",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "RupayKg ਨੂੰ ਇਸ ਤਰ੍ਹਾਂ ਪਰਿਭਾਸ਼ਿਤ ਕੀਤਾ ਗਿਆ ਹੈ: ਇੱਕ ਯੂਨੀਫਾਈਡ ਵੇਸਟ-ਟੂ-ਕਾਰਬਨ ਬੁਨਿਆਦੀ ਢਾਂਚਾ ਪਲੇਟਫਾਰਮ ਜੋ ਕਿ ਰੈਗੂਲੇਟਰ-ਅਲਾਈਨਡ ਕਾਰਬਨ ਉਤਪੱਤੀ ਸਮਰੱਥਾ ਦੇ ਨਾਲ ਇੱਕ ਸਿੰਗਲ ਰਾਸ਼ਟਰੀ ਸਟੇਕਹੋਲਡਰ ਆਰਕੀਟੈਕਚਰ ਦੇ ਅਧੀਨ ਕੰਮ ਕਰਦਾ ਹੈ।"
-  } },
-  as: { translation: {
-  "Task Board": "টাস্ক ব'ৰ্ড",
-  "Settings": "ছেটিংছ",
-  "Logout": "লগআউট কৰক",
-  "Genesis": "আদিপুস্তক",
-  "CCC Market": "কাৰ্বন বজাৰ",
-  "Dashboard": "ডেচব'ৰ্ড",
-  "History": "ইতিহাস",
-  "MRV Dashboard": "এম আৰ ভি ডেচব'ৰ্ড",
-  "National KPI": "ৰাষ্ট্ৰীয় কেপিআই",
-  "Upload Waste": "আৱৰ্জনা আপলোড কৰক",
-  "Language": "ভাষা",
-  "English": "ইংৰাজী",
-  "Hindi": "হিন্দী",
-  "Community Rank": "কমিউনিটি ৰেংক",
-  "System Overview": "চিস্টেম অভাৰভিউ",
-  "Farmers Registered": "কৃষক পঞ্জীয়ন",
-  "CCC Offset": "কাৰ্বন অফছেট",
-  "Total Collected": "মুঠ সংগ্ৰহ কৰা হৈছে",
-  "Welcome back": "পুনৰ স্বাগতম",
-  "Total Earnings": "মুঠ উপাৰ্জন",
-  "Value Generated": "মূল্য সৃষ্টি কৰা হৈছে",
-  "Platform Statistics": "প্লেটফৰ্ম পৰিসংখ্যা",
-  "CCCs": "কাৰ্বন ক্ৰেডিট",
-  "Total Processed": "মুঠ প্ৰক্ৰিয়াকৃত",
-  "Processing Yield": "প্ৰক্ৰিয়াকৰণ উৎপাদন",
-  "Fleet Efficiency": "বহৰৰ দক্ষতা",
-  "Logistics Margin": "লজিষ্টিক মাৰ্জিন",
-  "Seed Demo Data": "বীজ ডেমো ডাটা",
-  "ESG Score": "ই এছ জি স্ক'ৰ",
-  "Total Investment": "মুঠ বিনিয়োগ",
-  "Total Weight": "মুঠ ওজন",
-  "Recent Activity": "শেহতীয়া কাৰ্য্যকলাপ",
-  "Reset Demo Data": "ডেমো ডাটা পুনৰায় সেট কৰক",
-  "Performance Analytics": "পৰিৱেশন বিশ্লেষণ",
-  "Register New Farmer": "নতুন কৃষক পঞ্জীয়ন কৰক",
-  "Total Users": "মুঠ ব্যৱহাৰকাৰী",
-  "CCCs Generated": "কাৰ্বন হ্ৰাস কৰা হৈছে",
-  "Waste Distribution": "আৱৰ্জনা বিতৰণ",
-  "Total Value": "মুঠ মূল্য",
-  "New Collection Record": "নতুন সংগ্ৰহৰ ৰেকৰ্ড",
-  "New Processing Record": "নতুন প্ৰচেছিং ৰেকৰ্ড",
-  "Latitude": "অক্ষাংশ",
-  "Full Name": "সম্পূৰ্ণ নাম",
-  "New Intake Record": "নতুন ইনটেক ৰেকৰ্ড",
-  "Longitude": "দ্ৰাঘিমাংশ",
-  "Land Area (Acres)": "ভূমি আয়তন (একৰ)",
-  "Get Current Location": "বৰ্তমানৰ স্থান লাভ কৰক",
-  "Mobile Number": "মোবাইল নম্বৰ",
-  "Crop Type": "শস্যৰ প্ৰকাৰ",
-  "Farm Location": "ফাৰ্মৰ স্থান",
-  "In Transit": "ট্ৰেনজিটত",
-  "Registering...": "পঞ্জীয়ন...",
-  "Foundational Doctrine": "মৌলিক মতবাদ",
-  "All": "আটাইবোৰ",
-  "Transaction Ledger": "লেনদেন লেজাৰ",
-  "Pending Pickup": "পেণ্ডিং পিকআপ",
-  "Operations Management": "অপাৰেচন মেনেজমেণ্ট",
-  "Account Settings": "একাউণ্ট ছেটিংছ",
-  "Register Farmer": "পঞ্জীয়ন কৃষক",
-  "Processed": "প্ৰক্ৰিয়াকৃত",
-  "Base Value (Recycler)": "ভিত্তি মূল্য (পুনঃব্যৱহাৰকাৰী)",
-  "Waste Type": "আৱৰ্জনা প্ৰকাৰ",
-  "Processing...": "প্ৰচেছিং...",
-  "Confirm Intake & Mint Value": "গ্ৰহণ আৰু মিন্ট মান নিশ্চিত কৰক",
-  "Total Sovereign Value": "মুঠ সাৰ্বভৌম মূল্য",
-  "Weight (kg)": "ওজন (কিলোগ্ৰাম)",
-  "Location Confirmation (Google Maps)": "স্থান নিশ্চিতকৰণ (Google Maps)",
-  "CCC Value": "কাৰ্বন ক্ৰেডিট মূল্য",
-  "Estimated Value Breakdown": "আনুমানিক মূল্যৰ বিভাজন",
-  "Verification Image": "সত্যাপন ছবি",
-  "Access the OS": "অপাৰেটিং ছিষ্টেমত প্ৰৱেশ কৰক",
-  "Sovereign-Grade Circular Economy Engine": "ছ’ভাৰেইন-গ্ৰেডৰ চক্ৰীয় অৰ্থনীতি ইঞ্জিন",
-  "How it Works": "কেনেকৈ কাম কৰে",
-  "Features": "বৈশিষ্ট্যসমূহ",
-  "Global Circular Value": "গ্লোবেল চাৰ্কুলাৰ ভেলু",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "RupayKg হৈছে বহু-ৰেল মূল্য ইঞ্জিনৰ জৰিয়তে কৃষি, পৌৰসভা, আৰু ঔদ্যোগিক আৱৰ্জনাসমূহক মুদ্ৰাকৰণ কৰিবলৈ সম্প্ৰদায়সমূহক শক্তিশালী কৰা বৃত্তাকাৰ অৰ্থনীতিৰ পৰিচালনা ব্যৱস্থা।",
-  "Convert Every Kilogram of Waste into": "প্ৰতি কিলোগ্ৰাম আৱৰ্জনাক ৰূপান্তৰ কৰক",
-  "Launch OS": "অপাৰেটিং ছিষ্টেম আৰম্ভ কৰক",
-  "Ecosystem Roles": "পৰিৱেশ তন্ত্ৰৰ ভূমিকা",
-  "Intake": "গ্ৰহণ কৰা",
-  "Read Whitepaper": "শ্বেতপত্ৰ পঢ়ক",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "নাগৰিক মানিবেগলৈ পোনপটীয়াকৈ ধন প্ৰদান কৰা, পৰিৱেশৰ দায়বদ্ধতাক স্থানীয় অৰ্থনৈতিক বৃদ্ধিলৈ ৰূপান্তৰ কৰা।",
-  "Multi-Rail Value Engine": "মাল্টি-ৰেল ভেলু ইঞ্জিন",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "আৱৰ্জনা প্ৰকাৰ, ওজন, আৰু ভূ-অৱস্থানৰ স্বয়ংক্ৰিয় পৰীক্ষণে অপৰিৱৰ্তনীয়, সাৰ্বভৌম-গ্ৰেডৰ তথ্যৰ অখণ্ডতা নিশ্চিত কৰে।",
-  "Rural Wealth Creation": "গ্ৰাম্য সম্পদ সৃষ্টি",
-  "AI-Verified Intake": "এআই-পৰীক্ষিত গ্ৰহণ",
-  "Real-time waste throughput across the RupayKg OS": "RupayKg OS ৰ ভিতৰত বাস্তৱ সময়ৰ আৱৰ্জনা থ্ৰুপুট",
-  "Live Stream": "লাইভ ষ্ট্ৰীম",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "একেসময়তে প্ৰক্ৰিয়াকৃত প্ৰতি কিলোগ্ৰাম জৈৱবস্তুৰ বাবে পুনঃব্যৱহাৰকাৰী, চিএছআৰ, পৌৰসভা, কাৰ্বন, আৰু ইপিআৰ ৰেলৰ পৰা মূল্য আহৰণ কৰা।",
-  "Live Network Impact": "লাইভ নেটৱৰ্ক ইমপেক্ট",
-  "Distributed biomass collection nodes": "বিতৰণ কৰা জৈৱবস্তু সংগ্ৰহ ন'ড",
-  "Active Nodes": "সক্ৰিয় ন'ডসমূহ",
-  "Aggregators verify, weigh, and transport waste to facilities.": "এগ্ৰিগেটৰসকলে আৱৰ্জনাসমূহ পৰীক্ষা কৰে, ওজন কৰে আৰু সুবিধাসমূহলৈ পৰিবহণ কৰে।",
-  "Network Topology": "নেটৱাৰ্ক টপোলজি",
-  "Generate": "সৃষ্টি কৰা",
-  "A seamless pipeline from waste generation to value realization.": "আৱৰ্জনা উৎপাদনৰ পৰা মূল্য উপলব্ধিলৈকে এক নিৰৱচ্ছিন্ন পাইপলাইন।",
-  "Aggregate": "গোট খোৱা",
-  "Citizens collect agricultural, municipal, or industrial waste.": "নাগৰিকে কৃষি, পৌৰসভা বা উদ্যোগিক আৱৰ্জনা সংগ্ৰহ কৰে।",
-  "nodes": "ন'ডসমূহ",
-  "Value Minted": "মূল্য মিন্ট কৰা",
-  "Citizen": "নাগৰিক",
-  "Choose your part in the circular economy.": "বৃত্তাকাৰ অৰ্থনীতিত আপোনাৰ অংশ বাছি লওক।",
-  "Mint Value": "মিন্ট মূল্য",
-  "Recyclers convert waste into usable materials or energy.": "পুনঃব্যৱহাৰকাৰীয়ে আৱৰ্জনাক ব্যৱহাৰযোগ্য সামগ্ৰী বা শক্তিলৈ ৰূপান্তৰিত কৰে।",
-  "Waste Generator": "আৱৰ্জনা উৎপাদক",
-  "Smart contracts distribute funds across all 5 value rails.": "স্মাৰ্ট চুক্তিসমূহে ৫টা মূল্যৰ ৰেলৰ সকলোবোৰতে ধন বিতৰণ কৰে।",
-  "Process": "প্ৰক্ৰিয়া",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "কৃষি, পৌৰসভা বা উদ্যোগিক আৱৰ্জনা সংগ্ৰহ আৰু জমা কৰা। প্ৰদান কৰা আৱৰ্জনাসমূহৰ ওজন আৰু প্ৰকাৰৰ ওপৰত ভিত্তি কৰি প্ৰত্যক্ষ মানিবেগ জমা ধন উপাৰ্জন কৰক।",
-  "Upload waste records": "আৱৰ্জনা ৰেকৰ্ড আপলোড কৰক",
-  "Instant wallet funding": "তৎক্ষণাত ৱালেট ফাণ্ডিং",
-  "Aggregator": "এগ্ৰিগেটৰ",
-  "Track environmental impact": "পৰিৱেশৰ প্ৰভাৱ অনুসৰণ কৰা",
-  "Log collection batches": "লগ সংগ্ৰহৰ বেচসমূহ",
-  "Earn logistics margins": "লজিষ্টিক মাৰ্জিন উপাৰ্জন কৰক",
-  "Collection & Transport": "সংগ্ৰহ আৰু পৰিবহণ",
-  "Recycler": "পুনঃব্যৱহাৰকাৰী",
-  "Route optimization data": "ৰুট অনুকূলন তথ্য",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "একত্ৰিত আৱৰ্জনা গ্ৰহণ কৰি শেষৰ সামগ্ৰীলৈ প্ৰক্ৰিয়াকৰণ কৰা। সকলো ৰেলৰ মাজেৰে চূড়ান্ত মূল্য উপলব্ধি ট্ৰিগাৰ কৰক।",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "নাগৰিক জমা ধন পৰীক্ষা কৰা, আৱৰ্জনা একত্ৰিত কৰা, আৰু প্ৰক্ৰিয়াকৰণৰ সুবিধালৈ সামগ্ৰী পৰিবহণ কৰিবলৈ লজিষ্টিক পৰিচালনা কৰা।",
-  "Processor": "প্ৰচেছৰ",
-  "Register": "পঞ্জীয়ন কৰা",
-  "Generate CCCs": "কাৰ্বন ক্ৰেডিট সৃষ্টি কৰা",
-  "Circular Economy Operating System": "বৃত্তাকাৰ অৰ্থনীতি অপাৰেটিং চিষ্টেম",
-  "Log processing yields": "লগ প্ৰচেছিঙৰ উৎপাদন",
-  "Organization Name": "সংস্থাৰ নাম",
-  "Context:": "সন্দৰ্ভ:",
-  "Login": "লগইন কৰক",
-  "Access CSR/EPR funds": "চি এছ আৰ/ই পি আৰৰ ধন লাভ কৰক",
-  "Account Type": "একাউণ্টৰ ধৰণ",
-  "District": "জিলা",
-  "Access OS": "অ'এছ প্ৰৱেশ কৰক",
-  "Quick Demo Access": "দ্ৰুত ডেমো প্ৰৱেশ",
-  "State": "ৰাজ্য",
-  "Submission Heatmap": "জমা দিয়া হিটমেপ",
-  "Password": "পাছৱৰ্ড",
-  "Phone Number": "ফোন নম্বৰ",
-  "Global Impact Map": "গ্লোবেল ইমপেক্ট মেপ",
-  "System Audit Logs": "চিস্টেম অডিট লগসমূহ",
-  "Create Account": "একাউণ্ট সৃষ্টি কৰক",
-  "Back to Home": "ঘৰলৈ উভতি যাওক",
-  "Portfolio Composition": "পৰ্টফলিঅ' গঠন",
-  "Verify processed waste records to issue CCCs.": "কাৰ্বন ক্ৰেডিট জাৰি কৰিবলৈ প্ৰক্ৰিয়াকৃত আৱৰ্জনা ৰেকৰ্ড পৰীক্ষা কৰা।",
-  "Farmers Supported": "কৃষক সমৰ্থিত",
-  "Total Offset": "মুঠ অফছেট",
-  "Pending": "বাকী থকা",
-  "Waste Diverted": "আৱৰ্জনা ডাইভাৰ্ট কৰা হৈছে",
-  "No pending MRV records": "কোনো বাকী থকা এম আৰ ভি ৰেকৰ্ড নাই",
-  "Impact Distribution": "প্ৰভাৱ বিতৰণ",
-  "All processed waste has been verified.": "সকলো প্ৰক্ৰিয়াকৃত আৱৰ্জনা পৰীক্ষা কৰা হৈছে।",
-  "MRV Verification Dashboard": "এম আৰ ভি পৰীক্ষণ ডেচব'ৰ্ড",
-  "Location Verification": "স্থান পৰীক্ষণ",
-  "Credit Value": "ক্ৰেডিট মূল্য",
-  "Available Credits": "উপলব্ধ ক্ৰেডিট",
-  "Acreage": "একৰ মাটি",
-  "CCC Reduction": "CCC হ্ৰাস",
-  "Reject": "প্ৰত্যাখ্যান",
-  "Verify & Issue Credits": "ক্ৰেডিট পৰীক্ষা আৰু জাৰি কৰা",
-  "Purchase verified CCCs to offset your footprint.": "আপোনাৰ ফুটপ্ৰিণ্ট ক্ষতিপূৰণ কৰিবলৈ পৰীক্ষিত কাৰ্বন ক্ৰেডিট ক্ৰয় কৰক।",
-  "AI Risk Score": "এআই ৰিস্ক স্ক'ৰ",
-  "Project": "প্ৰকল্প",
-  "Your Offset Balance": "আপোনাৰ অফছেট বেলেন্স",
-  "Recent Transactions": "শেহতীয়া লেনদেন",
-  "Purchase Credits": "ক্ৰয় ক্ৰেডিট",
-  "Price per Tonne": "প্ৰতি টনত মূল্য",
-  "Amount": "পৰিমাণ",
-  "Cancel": "বাতিল কৰক",
-  "Amount to Purchase (Tonnes)": "ক্ৰয় কৰিবলগীয়া পৰিমাণ (টন)",
-  "Total Cost": "মুঠ খৰচ",
-  "Confirm Purchase": "ক্ৰয় নিশ্চিত কৰক",
-  "Price": "মূল্য",
-  "Ward": "ৱাৰ্ড",
-  "National Dashboard": "ৰাষ্ট্ৰীয় ডেচব'ৰ্ড",
-  "Ward-Level Analytics": "ৱাৰ্ড-স্তৰৰ বিশ্লেষণ",
-  "Ward Analytics": "ৱাৰ্ড বিশ্লেষণ",
-  "MSW": "এম এছ ডব্লিউ",
-  "Status": "স্থিতি",
-  "Date": "তাৰিখ",
-  "Network Active": "নেটৱৰ্ক সক্ৰিয়",
-  "Municipal Corporation": "পৌৰ নিগম",
-  "Citizen (MSW Generator)": "নাগৰিক (MSW জেনেৰেটৰ)",
-  "Gram Panchayat": "গ্ৰাম পঞ্চায়ত",
-  "Village-Level Analytics": "গাঁও-স্তৰৰ বিশ্লেষণ",
-  "Village Analytics": "ভিলেজ এনালাইটিক্স",
-  "Citizens": "নাগৰিক",
-  "Farmers / FPOs": "কৃষক / এফ পি অ'",
-  "Biomass": "জৈৱবস্তু",
-  "Village": "গাওঁ",
-  "Farmer / FPO (Biomass Generator)": "কৃষক / FPO (জৈৱবস্তু জেনেৰেটৰ)",
-  "All Roles": "সকলো ভূমিকা",
-  "EPR Partners": "ইপিআৰ অংশীদাৰ",
-  "Audit Logs": "অডিট লগসমূহ",
-  "CCC Buyers": "কাৰ্বন ক্ৰেতা",
-  "Aggregators": "এগ্ৰিগেটৰ",
-  "CSR Partners": "চি এছ আৰ অংশীদাৰ",
-  "CCC Pool Status": "কাৰ্বন পুলৰ অৱস্থা",
-  "Diverted": "ডাইভাৰ্ট কৰা হৈছে",
-  "Fraud Alerts & Flagged Events": "জালিয়াতি সতৰ্কবাণী আৰু ফ্লেগ কৰা পৰিঘটনা",
-  "User Management": "ব্যৱহাৰকাৰী ব্যৱস্থাপনা",
-  "Processors": "প্ৰচেছৰসমূহ",
-  "Total Waste Events": "মুঠ আৱৰ্জনা পৰিঘটনা",
-  "Processed Events": "প্ৰক্ৰিয়াকৃত ইভেন্টসমূহ",
-  "Water Saved": "পানী সঞ্চয়",
-  "Environmental Impact": "পৰিৱেশৰ প্ৰভাৱ",
-  "Economic Efficiency": "অৰ্থনৈতিক দক্ষতা",
-  "Wallet Disbursed": "ৱালেট বিতৰণ কৰা হৈছে",
-  "Trees": "গছ",
-  "Trees Equivalent": "গছ সমতুল্য",
-  "Methane Avoided": "মিথেন পৰিহাৰ কৰা হয়",
-  "Growth & Impact Trends": "বৃদ্ধি আৰু প্ৰভাৱৰ প্ৰৱণতা",
-  "Waste Composition": "আৱৰ্জনা গঠন",
-  "No flagged events detected.": "কোনো ফ্লেগ কৰা ইভেন্ট ধৰা পৰা হোৱা নাই।",
-  "MRV Rejection Rate": "এম আৰ ভি প্ৰত্যাখ্যানৰ হাৰ",
-  "Avg Price / kg": "গড় মূল্য / কিলোগ্ৰাম",
-  "Processing Efficiency": "প্ৰক্ৰিয়াকৰণৰ দক্ষতা",
-  "Govt Cost Savings": "চৰকাৰী খৰচ সঞ্চয়",
-  "Total Minted CCC Units": "মুঠ মিন্টেড কাৰ্বন ইউনিট",
-  "Operational Health": "কাৰ্য্যকৰী স্বাস্থ্য",
-  "Geospatial Fraud Distribution": "ভূ-স্থানীয় জালিয়াতি বিতৰণ",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* পৰিহাৰ কৰা লেণ্ডফিল ব্যৱস্থাপনা আৰু পৰিৱেশ সংশোধনৰ খৰচৰ ওপৰত ভিত্তি কৰি গণনা কৰা চৰকাৰী সঞ্চয়।",
-  "Location": "অৱস্থান",
-  "Municipal Admin": "পৌৰসভাৰ প্ৰশাসক",
-  "Regulator": "নিয়ন্ত্ৰক",
-  "User": "ব্যৱহাৰকাৰী",
-  "Actions": "কাৰ্য্য",
-  "CSR Partner": "চি এছ আৰ অংশীদাৰ",
-  "Super Admin": "চুপাৰ এডমিন",
-  "State Admin": "ৰাজ্যিক প্ৰশাসক",
-  "Wallet": "ধনৰ মোনা",
-  "Role": "ভূমিকা",
-  "EPR Partner": "ইপিআৰ অংশীদাৰ",
-  "Delete User": "ব্যৱহাৰকাৰী মচি পেলাওক",
-  "User ID": "ব্যৱহাৰকাৰী আইডি",
-  "CCC Buyer": "কাৰ্বন ক্ৰেতা",
-  "No users found.": "কোনো ব্যৱহাৰকাৰী পোৱা নগ'ল।",
-  "Action": "কাৰ্য কৰা",
-  "No audit logs available.": "কোনো অডিট লগ উপলব্ধ নহয়।",
-  "No ward data available.": "কোনো ৱাৰ্ডৰ তথ্য উপলব্ধ নহয়।",
-  "Total Events": "মুঠ পৰিঘটনা",
-  "Total Waste": "মুঠ আৱৰ্জনা",
-  "Notification Preferences": "জাননী পছন্দসমূহ",
-  "Save Changes": "পৰিবৰ্তনসমূহ সংৰক্ষণ কৰক",
-  "Add ₹10,000": "যোগ কৰক ₹10,000",
-  "Get instant SMS alerts for critical updates.": "জটিল আপডেটৰ বাবে তৎক্ষণাত এছএমএছ সতৰ্কবাণী লাভ কৰক।",
-  "Receive updates about your transactions via email.": "ইমেইলৰ জৰিয়তে আপোনাৰ লেনদেনৰ বিষয়ে আপডেট লাভ কৰক।",
-  "Push Notifications": "পুছ জাননীসমূহ",
-  "SMS Alerts": "এছএমএছ সতৰ্কবাণী",
-  "Enable browser push notifications.": "ব্ৰাউজাৰ পুছ জাননীসমূহ সামৰ্থবান কৰক।",
-  "Email Notifications": "ইমেইল জাননী",
-  "Saving...": "সঞ্চয়...",
-  "Weight: ": "ওজন:",
-  "Village: ": "গাওঁ:",
-  "Value: ": "মান:",
-  " Context (": "সন্দৰ্ভ (",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© ২০২৬ RupayKg বৃত্তাকাৰ অৰ্থনীতি অ.এছ. সকলো অধিকাৰ সংৰক্ষিত।",
-  "FRAUD ALERT": "FRAUD ALERT",
-  "GENESIS": "আদিপুস্তক",
-  "How the Engine Works": "ইঞ্জিনটোৱে কেনেকৈ কাম কৰে",
-  "Type: ": "প্ৰকাৰ:",
-  "Currently Active: ": "বৰ্তমান সক্ৰিয়:",
-  "rural": "গ্ৰাম্য",
-  "Farmer": "খেতিয়ক",
-  "Processor (Recycler)": "প্ৰচেছৰ (পুনঃব্যৱহাৰকাৰী)",
-  "Aggregator (Collection & Transport)": "এগ্ৰিগেটৰ (সংগ্ৰহ আৰু পৰিবহণ)",
-  "Terms": "চৰ্তাৱলী",
-  "RUPAYKG": "RUPAYKG",
-  "Admin": "প্ৰশাসক",
-  "Privacy": "গোপনীয়তা",
-  "National Regulator": "ৰাষ্ট্ৰীয় নিয়ন্ত্ৰক",
-  "urban": "নগৰ",
-  "Name": "নাম",
-  "GPS Captured: ": "জিপিএছ বন্দী:",
-  "GPS Capture Failed": "জিপিএছ কেপচাৰ বিফল",
-  "No audit logs found": "কোনো অডিট লগ পোৱা নগ'ল",
-  "Wallet Balance": "ৱালেট বেলেন্স",
-  "Acreage (acres)": "একৰ (একৰ)",
-  "Capturing GPS Coordinates...": "জিপিএছ স্থানাংক ক্যাপচাৰিং...",
-  "Circular Economy Intake Form": "বৃত্তাকাৰ অৰ্থনীতি গ্ৰহণ প্ৰ-পত্ৰ",
-  "Database Connection Failed": "ডাটাবেইচ সংযোগ ব্যৰ্থ",
-  "No records found": "কোনো ৰেকৰ্ড পোৱা নগ'ল",
-  "Retry GPS": "জিপিএছ পুনৰ চেষ্টা কৰক",
-  "Geolocation is not supported by this browser.": "এই ব্ৰাউজাৰৰ দ্বাৰা জিঅ'অৱস্থান সমৰ্থিত নহয়।",
-  "Drivers Online": "ড্ৰাইভাৰ অনলাইন",
-  "Active Queue": "সক্ৰিয় শাৰী",
-  "Failed to register farmer": "কৃষক পঞ্জীয়ন কৰাত ব্যৰ্থ",
-  "Active Fleet": "সক্ৰিয় বহৰ",
-  "e.g., Paddy, Wheat": "যেনে, ধান, ঘেঁহু",
-  "GPS Required": "জিপিএছৰ প্ৰয়োজন",
-  "Farmer registered successfully! ID: ": "কৃষকৰ সফল পঞ্জীয়ন! আইডি:",
-  "Failed to get location. Please enter manually.": "স্থান লাভ কৰাত ব্যৰ্থ হ'ল। অনুগ্ৰহ কৰি নিজেই প্ৰৱেশ কৰক।",
-  "Incoming for Processing": "প্ৰচেছিঙৰ বাবে অহা",
-  "Total Capacity": "মুঠ ক্ষমতা",
-  "Utilization": "ব্যৱহাৰ",
-  "Current Load": "বৰ্তমানৰ লোড",
-  "No new tasks available.": "কোনো নতুন কাম উপলব্ধ নহয়।",
-  "Output Material": "আউটপুট মেটেৰিয়েল",
-  "Available for Pickup": "পিকআপৰ বাবে উপলব্ধ",
-  "Storage Utilization": "সংৰক্ষণ ব্যৱহাৰ",
-  "Biomass in Stock": "ষ্টকত জৈৱবস্তু",
-  "Accept Pickup": "পিকআপ গ্ৰহণ কৰক",
-  "Accept Receipt": "ৰচিদ গ্ৰহণ কৰক",
-  "MRV Status": "এম আৰ ভি অৱস্থা",
-  "Recently Processed": "শেহতীয়াকৈ প্ৰক্ৰিয়াকৰণ কৰা হৈছে",
-  "Value": "মান",
-  "No records found for the selected filter.": "নিৰ্বাচিত ফিল্টাৰৰ বাবে কোনো ৰেকৰ্ড পোৱা নগ'ল।",
-  "No active tasks in your possession.": "আপোনাৰ হাতত কোনো সক্ৰিয় কাম নাই।",
-  "Pending MRV": "বাকী থকা এম আৰ ভি",
-  "Type": "প্ৰকাৰ",
-  "Weight": "ওজন",
-  "Timestamp": "টাইমষ্টেম্প",
-  "Low": "নিম্ন",
-  "Details": "সবিশেষ",
-  "No MRV history found": "কোনো এম আৰ ভি ইতিহাস পোৱা নগ’ল",
-  "High": "ওখ",
-  "Record ID": "ৰেকৰ্ড আইডি",
-  "Verified By": "দ্বাৰা পৰীক্ষা কৰা হৈছে",
-  "Check back later for newly verified CCCs.": "নতুনকৈ পৰীক্ষিত কাৰ্বন ক্ৰেডিটৰ বাবে পিছত পুনৰ পৰীক্ষা কৰক।",
-  "No credits available": "কোনো ক্ৰেডিট উপলব্ধ নহয়",
-  "AI Risk": "এ আই ৰিস্ক",
-  "Med": "মেড",
-  "Verified": "পৰীক্ষা কৰা হৈছে",
-  "An error occurred": "এটা ভুল হ’ল",
-  "Failed to update profile": "আলেখ্যন আপডেইট কৰাত ব্যৰ্থ",
-  "Insufficient Funds": "অপৰ্যাপ্ত ধন",
-  "I. Introduction": "I. পৰিচয়",
-  "Offset": "অফছেট",
-  "Profile Settings": "আলেখ্যন সংহতিসমূহ",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "ৰূপায়ৰ মৌলিক গাঁথনি আৰু পৰিচালনা মতবাদKg",
-  "RupayKg AI": "ৰূপায়কেজি এআই",
-  "Thinking...": "চিন্তা কৰি থকা হৈছে...",
-  "Read Aloud": "জোৰেৰে পঢ়ক",
-  "Playing...": "বজাই থকা হৈছে...",
-  "Use Maps": "মেপ ব্যৱহাৰ কৰক",
-  "Maps Grounding On": "মেপ গ্ৰাউণ্ডিং অন",
-  "Ask RupayKg AI...": "ৰূপায়কেজি এআইক সোধক...",
-  "Sources:": "উৎসসমূহ:",
-  "Map Location": "মেপৰ অৱস্থান",
-  "Hello! I am RupayKg AI. How can I help you with waste management, CCCs, or finding nearby facilities?": "নমস্কাৰ! মই ৰূপায়কেজি এআই। মই আপোনাক আৱৰ্জনা ব্যৱস্থাপনা, কাৰ্বন ক্ৰেডিট বা ওচৰৰ সুবিধাসমূহ বিচাৰি উলিওৱাত কেনেকৈ সহায় কৰিব পাৰো?",
-  "Sorry, I encountered an error.": "দুঃখিত, মই এটা ভুলৰ সন্মুখীন হৈছো।",
-  "Agricultural": "কৃষি",
-  "Municipal": "পৌৰসভা",
-  "Industrial": "ঔদ্যোগিক",
-  "Forestry": "বনপালন",
-  "Livestock": "পশুধন",
-  "Aquatic": "জলজ",
-  "Construction": "নিৰ্মাণ",
-  "Plastics": "প্লাষ্টিক",
-  "Metals": "ধাতু",
-  "E-Waste": "ই-আৱৰ্জনা",
-  "Textiles": "বস্ত্ৰ",
-  "Hazardous": "বিপজ্জনক",
-  "Crop Residue (Stubble/Straw)": "শস্যৰ অৱশিষ্ট (নৰা/খেৰ)",
-  "Rice Husk & Bran": "ধানৰ তুঁহ আৰু চাউলৰ মল",
-  "Wheat Bran": "ঘেঁহুৰ মল",
-  "Sugarcane Bagasse": "কুঁহিয়াৰৰ ছাল",
-  "Pressmud": "প্ৰেছমাড",
-  "Cotton Stalks": "কপাহৰ গছ",
-  "Maize Cobs & Stalks": "মাকৈৰ ঠুৰি আৰু গছ",
-  "Coconut Shells & Coir": "নাৰিকলৰ খোলা আৰু আঁহ",
-  "Groundnut Shells": "বাদামৰ খোলা",
-  "Fruit & Vegetable Pomace": "ফল আৰু পাচলিৰ অৱশিষ্ট",
-  "Spent Grain (Brewery)": "ব্যৱহৃত শস্য (মদৰ কাৰখানা)",
-  "Coffee Grounds/Husks": "কফিৰ গুড়ি/খোলা",
-  "Tea Waste": "চাহৰ আৱৰ্জনা",
-  "Municipal Organic Waste": "পৌৰসভাৰ জৈৱিক আৱৰ্জনা",
-  "Food & Kitchen Waste": "খাদ্য আৰু পাকঘৰৰ আৱৰ্জনা",
-  "Garden & Leaf Litter": "বাগিচা আৰু পাতৰ আৱৰ্জনা",
-  "Paper & Cardboard Waste": "কাগজ আৰু কাৰ্ডব'ৰ্ডৰ আৱৰ্জনা",
-  "Used Cooking Oil": "ব্যৱহৃত ৰন্ধন তেল",
-  "Textile Waste (Natural)": "বস্ত্ৰ আৱৰ্জনা (প্ৰাকৃতিক)",
-  "Glass Bottles & Jars": "কাঁচৰ বটল আৰু জাৰ",
-  "Industrial Sludge (Organic)": "ঔদ্যোগিক বোকা (জৈৱিক)",
-  "Leather Scraps": "চামৰাৰ টুকুৰা",
-  "Rubber Waste": "ৰাবাৰৰ আৱৰ্জনা",
-  "Distillery Spent Wash": "ডিষ্টিলাৰীৰ ব্যৱহৃত পানী",
-  "Fly Ash": "ফ্লাই এছ",
-  "Slag": "স্লাগ",
-  "Forestry Wood Chips": "বনপালনৰ কাঠৰ টুকুৰা",
-  "Sawdust & Bark": "কাঠৰ গুড়ি আৰু ছাল",
-  "Bamboo Waste": "বাঁহৰ আৱৰ্জনা",
-  "Pine Needles": "পাইন গছৰ বেজী",
-  "Invasive Species (Lantana)": "আক্ৰমণাত্মক প্ৰজাতি (লান্টানা)",
-  "Livestock Manure": "পশুধনৰ গোবৰ",
-  "Poultry Litter": "কুকুৰা ফাৰ্মৰ আৱৰ্জনা",
-  "Bone Meal": "হাড়ৰ গুড়ি",
-  "Feather Waste": "পাখিৰ আৱৰ্জনা",
-  "Aquatic Algae/Seaweed": "জলজ শেলাই/সাগৰীয় ঘাঁহ",
-  "Invasive Species (Water Hyacinth)": "আক্ৰমণাত্মক প্ৰজাতি (মেটেকা)",
-  "Fish Processing Waste": "মাছ প্ৰক্ৰিয়াকৰণৰ আৱৰ্জনা",
-  "Construction Wood Waste": "নিৰ্মাণ কাৰ্য্যৰ কাঠৰ আৱৰ্জনা",
-  "Concrete Rubble (Recycled)": "কংক্ৰিটৰ টুকুৰা (পুনঃব্যৱহৃত)",
-  "Brick & Tile Waste": "ইটা আৰু টাইলছৰ আৱৰ্জনা",
-  "Gypsum Board Scraps": "জিপচাম ব'ৰ্ডৰ টুকুৰা",
-  "PET Bottles (Clear)": "পি ই টি বটল (স্বচ্ছ)",
-  "HDPE Containers": "এইচ ডি পি ই পাত্ৰ",
-  "LDPE Film/Wrap": "এল ডি পি ই ফিল্ম/ৰেপ",
-  "PP Rigid Plastic": "পি পি কঠিন প্লাষ্টিক",
-  "PVC Scraps": "পি ভি চি টুকুৰা",
-  "Multi-Layered Plastic (MLP)": "বহুস্তৰীয় প্লাষ্টিক (এম এল পি)",
-  "Aluminum Cans": "এলুমিনিয়ামৰ কেন",
-  "Copper Wire Scraps": "তামৰ তাৰৰ টুকুৰা",
-  "Steel/Iron Scrap": "তীখা/লোৰ টুকুৰা",
-  "Brass/Bronze Fittings": "পিতল/ব্ৰঞ্জৰ ফিটিংছ",
-  "Printed Circuit Boards (PCBs)": "প্ৰিন্টেড চাৰ্কিট ব'ৰ্ড (পি চি বি)",
-  "Computer/Laptop Scraps": "কম্পিউটাৰ/লেপটপৰ টুকুৰা",
-  "Mobile Phone Waste": "মবাইল ফোনৰ আৱৰ্জনা",
-  "Lithium-Ion Batteries": "লিথিয়াম-আয়ন বেটাৰী",
-  "Cables & Connectors": "কেবল আৰু সংযোগকাৰী",
-  "Cotton Textile Scraps": "কপাহৰ বস্ত্ৰৰ টুকুৰা",
-  "Polyester/Synthetic Fabric": "পলিয়েষ্টাৰ/চিন্থেটিক কাপোৰ",
-  "Wool Waste": "ঊণৰ আৱৰ্জনা",
-  "Used Footwear": "ব্যৱহৃত জোতা-চেণ্ডেল",
-  "Lead-Acid Batteries": "লেড-এচিড বেটাৰী",
-  "Used Engine Oil": "ব্যৱহৃত ইঞ্জিন তেল",
-  "Paint & Solvent Waste": "ৰং আৰু দ্ৰাৱকৰ আৱৰ্জনা",
-  "E-Waste Batteries (Ni-Cd/Ni-MH)": "ই-আৱৰ্জনা বেটাৰী (Ni-Cd/Ni-MH)",
-  "Rice": "ধান",
-  "Wheat": "ঘেঁহু",
-  "Maize": "মাকৈ",
-  "Purchase Credit": "ক্ৰয় ক্ৰেডিট",
-  "Profile updated successfully": "প্ৰফাইল সফলতাৰে আপডেট কৰা হৈছে",
-  "Context": "সন্দৰ্ভ",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "RupayKg প্ৰকল্প বিকাশক, কাৰ্বন ব্যৱসায়ী, বা পুনঃব্যৱহাৰকাৰী সত্তা হিচাপে গঠন কৰা হোৱা নাই। ই স্থাপত্যৰ ডুপ্লিকেচন নোহোৱাকৈ চহৰ আৰু গ্ৰাম্য প্ৰশাসনিক কাঠামোৰ মাজেৰে কাম কৰিবলৈ ডিজাইন কৰা এটা আন্তঃগাঁথনি স্তৰ।",
-  "II. Unified Operating System Model": "II. ইউনিফাইড অপাৰেটিং চিষ্টেম মডেল",
-  "Anchor": "লংগৰ",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "এই প্লেটফৰ্মে ভাৰতৰ কাৰ্বন পৰিৱেশ তন্ত্ৰৰ এটা গাঁথনিগত ব্যৱধানৰ সমাধান কৰে: পৰীক্ষিত আৱৰ্জনা ডাইভাৰচনক কম্প্লাইয়েন্স গ্ৰেড কাৰ্বন যোগানলৈ ৰূপান্তৰিত কৰিব পৰা এক ঐক্যবদ্ধ, নিয়ন্ত্ৰক-প্ৰান্তিক ডিজিটেল আন্তঃগাঁথনিৰ অনুপস্থিতি।",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "ৰূপায়কেজিক ভাৰতৰ কম্প্লাইয়েন্স ভিত্তিক কাৰ্বন বজাৰৰ দিশত পৰিৱৰ্তনক সহায় কৰিবলৈ ডিজাইন কৰা ইউনিফাইড ৱেষ্ট-টু-কাৰ্বন ডিজিটেল অপাৰেটিং চিষ্টেম হিচাপে প্ৰতিষ্ঠা কৰা হৈছে।",
-  "Category": "শ্ৰেণী",
-  "Urban": "নগৰ",
-  "Municipal Corp + Ward": "পৌৰসভা কৰ্প + ৱাৰ্ড",
-  "Rural": "গ্ৰাম্য",
-  "III. Unified Stakeholder Architecture": "III. ইউনিফাইড ষ্টেকহোল্ডাৰ আৰ্কিটেকচাৰ",
-  "IV. CCC Origination": "IV. কাৰ্বনৰ উৎপত্তি",
-  "Administrative Authority": "প্ৰশাসনিক কৰ্তৃপক্ষ",
-  "Gram Panchayat + Village": "গ্ৰাম পঞ্চায়ত + গাঁও",
-  "Producers (EPR)": "উৎপাদক (ইপিআৰ)",
-  "CSR Contributors": "চি এছ আৰ অৱদানকাৰী",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* সকলো গ্ৰাম্য কৃষি অৱশিষ্ট আৰু জৈৱবস্তুৰ কাৰ্য্যকলাপক জৈৱবস্তুৰ অধীনত শ্ৰেণীভুক্ত কৰা হৈছে। কোনো পৃথক কৃষি উলম্ব নাই।",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "এগ্ৰিগেটৰক গাঁথনিগতভাৱে সংগ্ৰহ আৰু সজাই পৰাই বৈধকৰণৰ বাবে দায়বদ্ধ একত্ৰিত সত্তা হিচাপে সংজ্ঞায়িত কৰা হৈছে, যিয়ে চেইন-অফ-কাষ্টডি পৰীক্ষণ সৰল কৰে।",
-  "Methane avoidance through diversion": "ডাইভাৰচনৰ জৰিয়তে মিথেন পৰিহাৰ কৰা",
-  "Biomass-based fossil substitution": "জৈৱবস্তু ভিত্তিক জীৱাশ্ম প্ৰতিস্থাপন",
-  "CSR Rail": "চি এছ আৰ ৰেল",
-  "VII. Strategic Position": "VII. কৌশলগত অৱস্থান",
-  "V. Multi-Rail Architecture": "V. বহু ৰেল স্থাপত্য",
-  "VI. Regulator Sovereignty": "VI. নিয়ন্ত্ৰক সাৰ্বভৌমত্ব",
-  "Governance Layer": "শাসন ​​স্তৰ",
-  "Recycler Rail": "পুনঃব্যৱহাৰকাৰী ৰেল",
-  "CCC Rail": "কাৰ্বন ৰেল",
-  "Recycling substitution": "পুনঃব্যৱহাৰৰ বিকল্প",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "কাৰ্বন জাৰি কৰা কৰ্তৃপক্ষ নিয়ন্ত্ৰক নিয়ন্ত্ৰিত হৈয়ে আছে। RupayKg এ স্বতন্ত্ৰভাৱে ক্ৰেডিট মিন্ট নকৰে। সকলো ক্ৰেডিট ইভেণ্ট-ট্ৰেচযোগ্য, পঞ্জীয়ন-সামঞ্জস্যপূৰ্ণ, আৰু ৰাষ্ট্ৰীয় কাৰ্বন শাসন কাঠামোৰ সৈতে মিল থকা হ'ব লাগিব।",
-  "EPR Rail": "ইপিআৰ ৰেল",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "আমি যেতিয়া RupayKg নিৰ্মাণ কৰিবলৈ আৰম্ভ কৰিছিলো, তেতিয়া আমি পুনঃব্যৱহাৰৰ পৰা আৰম্ভ কৰা নাছিলো। আমি এটা গাঁথনিগত প্ৰশ্নৰে আৰম্ভ কৰিলোঁ: আৱৰ্জনাক নিয়ন্ত্ৰিত কাৰ্বন মূল্যলৈ ৰূপান্তৰিত কৰা কোনো ঐক্যবদ্ধ আন্তঃগাঁথনি কিয় নাই?",
-  "Article II — Unified Stakeholder Doctrine": "দ্বিতীয় অনুচ্ছেদ — ঐক্যবদ্ধ অংশীদাৰ মতবাদ",
-  "Legally Styled": "আইনীভাৱে ষ্টাইল কৰা",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "তেওঁলোকক একত্ৰিত কৰিবলৈ RupayKg নিৰ্মাণ কৰা হৈছিল। কাৰ্বন ব্যৱসায়ী হিচাপে নহয়। ৰিচাইক্লিং ষ্টাৰ্টআপ হিচাপে নহয়। কিন্তু গাঁথনিগত ডুপ্লিকেচন নোহোৱাকৈ পৌৰ ৱাৰ্ড পৰ্যায় আৰু গ্ৰাম পঞ্চায়ত গাঁও পৰ্যায়ত কাম কৰিব পৰা একক অপাৰেটিং চিষ্টেম হিচাপে।",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "RupayKg-এ নিম্নোক্ত অধীনত নিয়োগ কৰিব পৰা একক ডিজিটেল ব্যৱস্থা চলাব লাগিব: (ক) পৌৰ নিগম + ৱাৰ্ড (নগৰীয়া প্ৰেক্ষাপট) (খ) গ্ৰাম পঞ্চায়ত + গাঁও (গ্ৰাম্য প্ৰেক্ষাপট)। প্ৰসংগসমূহৰ মাজত কোনো গাঁথনিগত ডুপ্লিকেচন নাথাকিব।",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "মৌলিক গাঁথনিৰ ঘোষণা",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "ভাৰতে কম্প্লাইয়েন্স কাৰ্বন যুগত প্ৰৱেশ কৰিছে। পৌৰসভাৰ ব্যৱস্থাই জুখিব পৰা মিথেন উৎপন্ন কৰে। গ্ৰাম্য জৈৱবস্তু জ্বলাই দিয়া হয় বা কম ব্যৱহাৰ কৰা হয়। তথাপিও ব্যৱস্থাবোৰ খণ্ডিত হৈয়েই আছে।",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "আৱৰ্জনা এতিয়া নিষ্কাশন নহয়। ই শাসন-সংলগ্ন জলবায়ুৰ আন্তঃগাঁথনি।",
-  "Article I — Unified Operating System": "অনুচ্ছেদ I — সংহত অপাৰেটিং চিস্টেম",
-  "— Founder, RupayKg": "— প্ৰতিষ্ঠাপক, RupayKg",
-  "Institutional Identity": "প্ৰতিষ্ঠানিক পৰিচয়",
-  "Article IV — CCC Engine": "চতুৰ্থ অনুচ্ছেদ — কাৰ্বন ইঞ্জিন",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "সকলো নিৰ্গমন হ্ৰাস ইভেণ্ট-লেভেল এম আৰ ভি বৈধকৰণৰ সৈতে একক কাৰ্বন গণনা ইঞ্জিনৰ জৰিয়তে প্ৰক্ৰিয়াকৰণ কৰিব লাগিব।",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "কাৰ্বন মিন্ট কৰ্তৃপক্ষ নিয়ন্ত্ৰকৰ নিয়ন্ত্ৰণত থাকিব। RupayKg এ স্বতন্ত্ৰভাৱে কাৰ্বন ক্ৰেডিট জাৰি কৰিব নোৱাৰিব।",
-  "Article VI — Regulator Sovereignty": "ষষ্ঠ অনুচ্ছেদ — নিয়ন্ত্ৰক সাৰ্বভৌমত্ব",
-  "Article V — Rail Separation": "পঞ্চম অনুচ্ছেদ — ৰেল পৃথকীকৰণ",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "অংশীদাৰৰ গাঁথনি দেশজুৰি একে হৈ থাকিব আৰু ইয়াত থাকিব: আৱৰ্জনা উৎপাদক, সংগ্ৰহকাৰী, প্ৰচেছৰ, প্ৰশাসনিক কৰ্তৃপক্ষ, উৎপাদক (ইপিআৰ), চিএছআৰ অৱদানকাৰী, কাৰ্বন ক্ৰেতা, নিয়ন্ত্ৰক।",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "আৱৰ্জনাসমূহক একান্তভাৱে শ্ৰেণীভুক্ত কৰা হ’ব: (ক) নগৰীয়া প্ৰেক্ষাপটত এম এছ ডব্লিউ (খ) গ্ৰাম্য প্ৰেক্ষাপটত জৈৱবস্তু। সকলো কৃষি অৱশিষ্টক জৈৱবস্তুৰ অধীনত শ্ৰেণীভুক্ত কৰা হ’ব।",
-  "Article III — Waste Classification": "তৃতীয় অনুচ্ছেদ — আৱৰ্জনা শ্ৰেণীবিভাজন",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "RupayKg-এ এইবোৰৰ মাজত কঠোৰ পৃথকীকৰণ বজাই ৰাখিব লাগিব: পুনঃব্যৱহাৰকাৰী একাউণ্টিং, চিএছআৰ একাউণ্টিং, ইপিআৰ অনুসৰণ, শাসন মূল্য, কাৰ্বন জাৰি কৰা। দুগুণ গণনা নিষিদ্ধ।",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "RupayKg ক ইয়াৰ দ্বাৰা এনেদৰে সংজ্ঞায়িত কৰা হৈছে: নিয়ন্ত্ৰক-প্ৰান্তিককৃত কাৰ্বন উৎপত্তি ক্ষমতাৰ সৈতে একক ৰাষ্ট্ৰীয় অংশীদাৰ স্থাপত্যৰ অধীনত কাম কৰা এটা ঐক্যবদ্ধ আৱৰ্জনা-কাৰ্বন আন্তঃগাঁথনি মঞ্চ।"
-  } },
-  mai: { translation: {
-  "Genesis": "उत्पत्ति",
-  "Dashboard": "डैशबोर्ड",
-  "Settings": "सेटिंग्स",
-  "History": "इतिहास",
-  "Logout": "लॉग आउट",
-  "National KPI": "राष्ट्रीय के.पी.आई",
-  "Task Board": "कार्य मंडल",
-  "Upload Waste": "अपशिष्ट अपलोड करें",
-  "CCC Market": "कार्बन बाज़ार",
-  "MRV Dashboard": "एमआरवी डैशबोर्ड",
-  "Welcome back": "वापसी पर स्वागत है",
-  "System Overview": "तंत्र अवलोकन",
-  "English": "अंग्रेज़ी",
-  "Hindi": "हिंदी",
-  "Language": "भाषा",
-  "Total Earnings": "कुल कमाई",
-  "Total Collected": "कुल एकत्रित",
-  "Community Rank": "सामुदायिक रैंक",
-  "Farmers Registered": "किसानों का पंजीयन किया गया",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "Total Investment": "कुल निवेश",
-  "CCCs": "कार्बन क्रेडिट",
-  "Total Processed": "कुल संसाधित",
-  "Seed Demo Data": "बीज डेमो डेटा",
-  "Logistics Margin": "लॉजिस्टिक्स मार्जिन",
-  "Value Generated": "मूल्य उत्पन्न",
-  "Processing Yield": "प्रसंस्करण उपज",
-  "Platform Statistics": "प्लेटफार्म सांख्यिकी",
-  "Fleet Efficiency": "बेड़े की दक्षता",
-  "ESG Score": "ईएसजी स्कोर",
-  "Total Weight": "कुल वजन",
-  "Total Value": "कुल मूल्य",
-  "Performance Analytics": "प्रदर्शन विश्लेषण",
-  "Recent Activity": "हाल की गतिविधि",
-  "Total Users": "कुल उपयोगकर्ता",
-  "Reset Demo Data": "डेमो डेटा रीसेट करें",
-  "Waste Distribution": "अपशिष्ट वितरण",
-  "New Collection Record": "नया संग्रह रिकॉर्ड",
-  "Register New Farmer": "नए किसान का पंजीकरण करें",
-  "CCCs Generated": "कार्बन कम हुआ",
-  "Mobile Number": "मोबाइल नंबर",
-  "Latitude": "अक्षांश",
-  "Longitude": "देशान्तर",
-  "Full Name": "पूरा नाम",
-  "Get Current Location": "वर्तमान स्थान प्राप्त करें",
-  "Crop Type": "फसल का प्रकार",
-  "New Processing Record": "नया प्रसंस्करण रिकॉर्ड",
-  "New Intake Record": "नया सेवन रिकॉर्ड",
-  "Farm Location": "खेत का स्थान",
-  "Land Area (Acres)": "भूमि क्षेत्र (एकड़)",
-  "Registering...": "पंजीकरण हो रहा है...",
-  "Processed": "प्रसंस्कृत",
-  "All": "सभी",
-  "Account Settings": "अकाउंट सेटिंग",
-  "In Transit": "पारगमन में",
-  "Operations Management": "संचालन प्रबंधन",
-  "Pending Pickup": "लंबित पिकअप",
-  "Foundational Doctrine": "मूलभूत सिद्धांत",
-  "Transaction Ledger": "लेन-देन बही",
-  "Register Farmer": "किसान पंजीयन करें",
-  "Weight (kg)": "वजन (किलो)",
-  "Processing...": "प्रसंस्करण...",
-  "Verification Image": "सत्यापन छवि",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "Base Value (Recycler)": "आधार मूल्य (पुनर्चक्रणकर्ता)",
-  "Waste Type": "अपशिष्ट प्रकार",
-  "Total Sovereign Value": "कुल संप्रभु मूल्य",
-  "Location Confirmation (Google Maps)": "स्थान की पुष्टि (Google मानचित्र)",
-  "Confirm Intake & Mint Value": "सेवन और टकसाल मूल्य की पुष्टि करें",
-  "Estimated Value Breakdown": "अनुमानित मूल्य टूटना",
-  "Features": "विशेषताएँ",
-  "Intake": "प्रवेश",
-  "How it Works": "यह काम किस प्रकार करता है",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्राम अपशिष्ट को परिवर्तित करें",
-  "Sovereign-Grade Circular Economy Engine": "सॉवरेन-ग्रेड सर्कुलर इकोनॉमी इंजन",
-  "Access the OS": "ओएस तक पहुंचें",
-  "Ecosystem Roles": "पारिस्थितिकी तंत्र भूमिकाएँ",
-  "Global Circular Value": "वैश्विक परिपत्र मूल्य",
-  "Launch OS": "ओएस लॉन्च करें",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "रुपेकेजी एक सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम है जो समुदायों को मल्टी-रेल वैल्यू इंजन के माध्यम से कृषि, नगरपालिका और औद्योगिक कचरे का मुद्रीकरण करने के लिए सशक्त बनाता है।",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिकों के बटुए में सीधे धनराशि वितरित करना, पर्यावरणीय देनदारियों को स्थानीय आर्थिक विकास में बदलना।",
-  "Live Stream": "लाइव स्ट्रीम",
-  "Live Network Impact": "लाइव नेटवर्क प्रभाव",
-  "Multi-Rail Value Engine": "मल्टी-रेल वैल्यू इंजन",
-  "Rural Wealth Creation": "ग्रामीण धन सृजन",
-  "Read Whitepaper": "श्वेतपत्र पढ़ें",
-  "AI-Verified Intake": "एआई-सत्यापित सेवन",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "अपशिष्ट प्रकार, वजन और जियोलोकेशन का स्वचालित सत्यापन अपरिवर्तनीय, संप्रभु-ग्रेड डेटा अखंडता सुनिश्चित करता है।",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "साथ ही संसाधित प्रत्येक किलोग्राम बायोमास के लिए रिसाइक्लर, सीएसआर, म्यूनिसिपल, कार्बन और ईपीआर रेल से मूल्य निकालें।",
-  "Real-time waste throughput across the RupayKg OS": "रुपेकेजी ओएस पर वास्तविक समय अपशिष्ट थ्रूपुट",
-  "nodes": "नोड्स",
-  "Generate": "उत्पन्न",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटर्स कचरे का सत्यापन, वजन और सुविधाओं तक परिवहन करते हैं।",
-  "Aggregate": "सकल",
-  "Active Nodes": "सक्रिय नोड्स",
-  "Value Minted": "मूल्य अंकित",
-  "Network Topology": "नेटवर्क टोपोलॉजी",
-  "Distributed biomass collection nodes": "वितरित बायोमास संग्रह नोड्स",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिक कृषि, नगरपालिका या औद्योगिक कचरा एकत्र करते हैं।",
-  "A seamless pipeline from waste generation to value realization.": "अपशिष्ट उत्पादन से मूल्य प्राप्ति तक एक निर्बाध पाइपलाइन।",
-  "Process": "प्रक्रिया",
-  "Citizen": "नागरिक",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट अनुबंध सभी 5 मूल्य रेलों पर धन वितरित करते हैं।",
-  "Choose your part in the circular economy.": "सर्कुलर इकोनॉमी में अपना हिस्सा चुनें।",
-  "Upload waste records": "अपशिष्ट रिकॉर्ड अपलोड करें",
-  "Waste Generator": "अपशिष्ट जनरेटर",
-  "Instant wallet funding": "तत्काल वॉलेट फंडिंग",
-  "Mint Value": "टकसाल मूल्य",
-  "Recyclers convert waste into usable materials or energy.": "पुनर्चक्रणकर्ता अपशिष्ट को उपयोगी सामग्री या ऊर्जा में परिवर्तित करते हैं।",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि, नगरपालिका, या औद्योगिक अपशिष्ट एकत्र करें और जमा करें। प्रदान किए गए कचरे के वजन और प्रकार के आधार पर सीधे वॉलेट जमा अर्जित करें।",
-  "Processor": "प्रोसेसर",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "एकत्रित अपशिष्ट प्राप्त करें और इसे अंतिम उत्पादों में संसाधित करें। सभी रेलों पर अंतिम मूल्य प्राप्ति को ट्रिगर करें।",
-  "Recycler": "रेमंड",
-  "Aggregator": "एग्रीगेटर",
-  "Collection & Transport": "संग्रहण एवं परिवहन",
-  "Route optimization data": "मार्ग अनुकूलन डेटा",
-  "Track environmental impact": "पर्यावरणीय प्रभाव को ट्रैक करें",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिक जमाओं को सत्यापित करें, कचरे को समेकित करें, और प्रसंस्करण सुविधाओं तक सामग्री पहुंचाने के लिए रसद का प्रबंधन करें।",
-  "Log collection batches": "लॉग संग्रह बैच",
-  "Earn logistics margins": "लॉजिस्टिक्स मार्जिन अर्जित करें",
-  "Register": "पंजीकरण करवाना",
-  "District": "ज़िला",
-  "Login": "लॉग इन करें",
-  "Context:": "प्रसंग:",
-  "Account Type": "खाता प्रकार",
-  "Organization Name": "संगठन का नाम",
-  "Generate CCCs": "कार्बन क्रेडिट उत्पन्न करें",
-  "Log processing yields": "लॉग प्रोसेसिंग पैदावार",
-  "Access CSR/EPR funds": "सीएसआर/ईपीआर फंड तक पहुंचें",
-  "Circular Economy Operating System": "सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम",
-  "State": "राज्य",
-  "Password": "पासवर्ड",
-  "Back to Home": "घर वापिस जा रहा हूँ",
-  "Phone Number": "फ़ोन नंबर",
-  "Create Account": "खाता बनाएं",
-  "System Audit Logs": "सिस्टम ऑडिट लॉग",
-  "Access OS": "ओएस तक पहुंचें",
-  "Quick Demo Access": "त्वरित डेमो एक्सेस",
-  "Global Impact Map": "वैश्विक प्रभाव मानचित्र",
-  "Submission Heatmap": "सबमिशन हीटमैप",
-  "Pending": "लंबित",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी करने के लिए संसाधित अपशिष्ट रिकॉर्ड सत्यापित करें।",
-  "MRV Verification Dashboard": "एमआरवी सत्यापन डैशबोर्ड",
-  "All processed waste has been verified.": "सभी संसाधित कचरे का सत्यापन कर लिया गया है।",
-  "Farmers Supported": "किसानों का समर्थन किया",
-  "Impact Distribution": "प्रभाव वितरण",
-  "Waste Diverted": "अपशिष्ट डायवर्ट किया गया",
-  "No pending MRV records": "कोई लंबित एमआरवी रिकॉर्ड नहीं",
-  "Total Offset": "कुल ऑफसेट",
-  "Portfolio Composition": "पोर्टफोलियो संरचना",
-  "Credit Value": "क्रेडिट मूल्य",
-  "Reject": "अस्वीकार करना",
-  "AI Risk Score": "एआई जोखिम स्कोर",
-  "Carbon Reduction": "कार्बन कटौती",
-  "Acreage": "रकबा",
-  "Location Verification": "स्थान सत्यापन",
-  "Verify & Issue Credits": "सत्यापित करें और क्रेडिट जारी करें",
-  "Available Credits": "उपलब्ध क्रेडिट",
-  "Purchase verified CCCs to offset your footprint.": "अपने पदचिह्न को संतुलित करने के लिए सत्यापित कार्बन क्रेडिट खरीदें।",
-  "Confirm Purchase": "खरीद की पुष्टि करें",
-  "Cancel": "रद्द करना",
-  "Project": "परियोजना",
-  "Amount": "मात्रा",
-  "Total Cost": "कुल लागत",
-  "Amount to Purchase (Tonnes)": "खरीद की राशि (टन)",
-  "Purchase Credits": "क्रेडिट खरीदें",
-  "Price per Tonne": "कीमत प्रति टन",
-  "Your Offset Balance": "आपका ऑफसेट बैलेंस",
-  "Recent Transactions": "हाल के लेनदेन",
-  "Price": "कीमत",
-  "Date": "तारीख",
-  "Status": "स्थिति",
-  "Municipal Corporation": "नगर निगम",
-  "Ward": "वार्ड",
-  "MSW": "एमएसडब्ल्यू",
-  "Network Active": "नेटवर्क सक्रिय",
-  "Ward Analytics": "वार्ड विश्लेषण",
-  "Ward-Level Analytics": "वार्ड-स्तरीय विश्लेषण",
-  "National Dashboard": "राष्ट्रीय डैशबोर्ड",
-  "Village": "गाँव",
-  "Gram Panchayat": "ग्राम पंचायत",
-  "Biomass": "बायोमास",
-  "Citizens": "नागरिकों",
-  "Village-Level Analytics": "ग्राम-स्तरीय विश्लेषिकी",
-  "Citizen (MSW Generator)": "नागरिक (एमएसडब्ल्यू जेनरेटर)",
-  "Village Analytics": "ग्राम विश्लेषिकी",
-  "All Roles": "सभी भूमिकाएँ",
-  "Farmers / FPOs": "किसान/एफपीओ",
-  "Farmer / FPO (Biomass Generator)": "किसान/एफपीओ (बायोमास जेनरेटर)",
-  "Processors": "प्रोसेसर",
-  "User Management": "प्रयोक्ता प्रबंधन",
-  "Diverted": "मार्ग बदल दिया गया",
-  "Aggregators": "एग्रीगेटर",
-  "Audit Logs": "ऑडिट लॉग",
-  "CCC Buyers": "कार्बन खरीदार",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "EPR Partners": "ईपीआर पार्टनर्स",
-  "CSR Partners": "सीएसआर पार्टनर्स",
-  "Fraud Alerts & Flagged Events": "धोखाधड़ी की चेतावनियाँ और चिह्नित घटनाएँ",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Trees": "पेड़",
-  "Total Waste Events": "कुल अपशिष्ट घटनाएँ",
-  "Processed Events": "संसाधित घटनाएँ",
-  "Wallet Disbursed": "बटुआ वितरित",
-  "Trees Equivalent": "पेड़ समतुल्य",
-  "Water Saved": "पानी बचाया",
-  "Growth & Impact Trends": "विकास एवं प्रभाव रुझान",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Methane Avoided": "मीथेन से परहेज किया गया",
-  "Total Minted CCC Units": "कुल ढली हुई कार्बन इकाइयाँ",
-  "No flagged events detected.": "कोई चिह्नित ईवेंट नहीं पाया गया.",
-  "Geospatial Fraud Distribution": "भू-स्थानिक धोखाधड़ी वितरण",
-  "Avg Price / kg": "औसत मूल्य/किलो",
-  "MRV Rejection Rate": "एमआरवी अस्वीकृति दर",
-  "Processing Efficiency": "प्रसंस्करण दक्षता",
-  "Waste Composition": "अपशिष्ट संरचना",
-  "Govt Cost Savings": "सरकारी लागत बचत",
-  "Operational Health": "परिचालन स्वास्थ्य",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* सरकारी बचत की गणना टाले गए लैंडफिल प्रबंधन और पर्यावरणीय उपचार लागत के आधार पर की जाती है।",
-  "Location": "जगह",
-  "Role": "भूमिका",
-  "Wallet": "बटुआ",
-  "User": "उपयोगकर्ता",
-  "Actions": "कार्रवाई",
-  "Super Admin": "सुपर एडमिन",
-  "Regulator": "रेगुलेटर",
-  "Municipal Admin": "नगर प्रशासन",
-  "CSR Partner": "सीएसआर पार्टनर",
-  "State Admin": "राज्य प्रशासन",
-  "User ID": "उपयोगकर्ता पहचान",
-  "Delete User": "उपयोगकर्ता हटाएँ",
-  "Action": "कार्रवाई",
-  "EPR Partner": "ईपीआर पार्टनर",
-  "Total Waste": "कुल बर्बादी",
-  "No ward data available.": "कोई वार्ड डेटा उपलब्ध नहीं है.",
-  "No audit logs available.": "कोई ऑडिट लॉग उपलब्ध नहीं है.",
-  "CCC Buyer": "कार्बन क्रेता",
-  "Total Events": "कुल घटनाएँ",
-  "No users found.": "कोई उपयोगकर्ता नहीं मिला.",
-  "Push Notifications": "सूचनाएं धक्का",
-  "Saving...": "सहेजा जा रहा है...",
-  "Save Changes": "परिवर्तनों को सुरक्षित करें",
-  "Notification Preferences": "अधिसूचना प्राथमिकताएँ",
-  "Add ₹10,000": "₹10,000 जोड़ें",
-  "Email Notifications": "ईमेल सूचनाएं",
-  "SMS Alerts": "एसएमएस अलर्ट",
-  "Enable browser push notifications.": "ब्राउज़र पुश सूचनाएँ सक्षम करें.",
-  "Get instant SMS alerts for critical updates.": "महत्वपूर्ण अपडेट के लिए तत्काल एसएमएस अलर्ट प्राप्त करें।",
-  "Receive updates about your transactions via email.": "ईमेल के माध्यम से अपने लेनदेन के बारे में अपडेट प्राप्त करें।",
-  "Village: ": "गाँव:",
-  "Type: ": "प्रकार:",
-  "Weight: ": "वज़न:",
-  " Context (": "प्रसंग (",
-  "GENESIS": "उत्पत्ति",
-  "Value: ": "कीमत:",
-  "Currently Active: ": "वर्तमान में सक्रिय:",
-  "FRAUD ALERT": "धोखाधड़ी चेतावनी",
-  "How the Engine Works": "इंजन कैसे काम करता है",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 रुपेकेजी सर्कुलर इकोनॉमी ओएस। सर्वाधिकार सुरक्षित।",
-  "urban": "शहरी",
-  "Terms": "शर्तें",
-  "Admin": "व्यवस्थापक",
-  "Privacy": "गोपनीयता",
-  "rural": "ग्रामीण",
-  "Farmer": "किसान",
-  "RUPAYKG": "रुपायकेजी",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "Processor (Recycler)": "प्रोसेसर (रीसाइक्लर)",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संग्रह एवं परिवहन)",
-  "No records found": "कोई रिकॉर्ड नहीं मिला",
-  "Wallet Balance": "वॉलेट बैलेंस",
-  "Name": "नाम",
-  "GPS Captured: ": "जीपीएस से कैप्चर किया गया:",
-  "No audit logs found": "कोई ऑडिट लॉग नहीं मिला",
-  "Acreage (acres)": "एकड़ (एकड़)",
-  "GPS Capture Failed": "जीपीएस कैप्चर विफल",
-  "Database Connection Failed": "डेटाबेस कनेक्शन विफल",
-  "Circular Economy Intake Form": "सर्कुलर इकोनॉमी इंटेक फॉर्म",
-  "Capturing GPS Coordinates...": "जीपीएस निर्देशांक कैप्चर किया जा रहा है...",
-  "Active Fleet": "सक्रिय बेड़ा",
-  "Failed to register farmer": "किसान का पंजीयन नहीं हो सका",
-  "Farmer registered successfully! ID: ": "किसान सफलतापूर्वक पंजीकृत! पहचान:",
-  "Geolocation is not supported by this browser.": "जियोलोकेशन इस ब्राउज़र द्वारा समर्थित नहीं है.",
-  "Retry GPS": "जीपीएस पुनः प्रयास करें",
-  "e.g., Paddy, Wheat": "जैसे, धान, गेहूँ",
-  "GPS Required": "जीपीएस आवश्यक",
-  "Active Queue": "सक्रिय कतार",
-  "Failed to get location. Please enter manually.": "स्थान प्राप्त करने में विफल. कृपया मैन्युअल रूप से दर्ज करें.",
-  "Drivers Online": "ड्राइवर ऑनलाइन",
-  "Utilization": "उपयोग",
-  "Current Load": "वर्तमान भार",
-  "Available for Pickup": "बटोरने के लिए उपलब्ध",
-  "Accept Pickup": "पिकअप स्वीकार करें",
-  "Biomass in Stock": "स्टॉक में बायोमास",
-  "Storage Utilization": "भंडारण उपयोग",
-  "Incoming for Processing": "प्रसंस्करण हेतु आवक",
-  "Total Capacity": "कुल क्षमता",
-  "Output Material": "आउटपुट सामग्री",
-  "No new tasks available.": "कोई नया कार्य उपलब्ध नहीं है.",
-  "Weight": "वज़न",
-  "Timestamp": "समय-चिह्न",
-  "Value": "कीमत",
-  "Type": "प्रकार",
-  "No active tasks in your possession.": "आपके पास कोई सक्रिय कार्य नहीं है.",
-  "No records found for the selected filter.": "चयनित फ़िल्टर के लिए कोई रिकॉर्ड नहीं मिला.",
-  "Accept Receipt": "रसीद स्वीकार करें",
-  "MRV Status": "एमआरवी स्थिति",
-  "Recently Processed": "हाल ही में संसाधित",
-  "Pending MRV": "लंबित एमआरवी",
-  "High": "उच्च",
-  "Med": "मेड",
-  "Low": "कम",
-  "Verified By": "द्वारा सत्यापित",
-  "Details": "विवरण",
-  "Record ID": "रिकॉर्ड आईडी",
-  "No credits available": "कोई क्रेडिट उपलब्ध नहीं है",
-  "AI Risk": "एआई जोखिम",
-  "No MRV history found": "कोई एमआरवी इतिहास नहीं मिला",
-  "Check back later for newly verified CCCs.": "नए सत्यापित कार्बन क्रेडिट के लिए बाद में दोबारा जाँच करें।",
-  "I. Introduction": "I. प्रस्तावना",
-  "Offset": "ओफ़्सेट",
-  "Verified": "सत्यापित",
-  "Insufficient Funds": "अपर्याप्त कोष",
-  "Failed to update profile": "प्रोफ़ाइल अपडेट करने में विफल",
-  "An error occurred": "एक त्रुटि पाई गई",
-  "Purchase Credit": "क्रेडिट खरीदें",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "रुपेकेजी की मूलभूत संरचना और संचालन सिद्धांत",
-  "Profile Settings": "प्रोफ़ाइल सेटिंग्स",
-  "Profile updated successfully": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
-  "Urban": "शहरी",
-  "Context": "प्रसंग",
-  "Rural": "ग्रामीण",
-  "Anchor": "लंगर",
-  "Category": "वर्ग",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "II. Unified Operating System Model": "द्वितीय. एकीकृत ऑपरेटिंग सिस्टम मॉडल",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "रुपेकेजी को एक परियोजना डेवलपर, कार्बन व्यापारी या रीसाइक्लिंग इकाई के रूप में संरचित नहीं किया गया है। यह एक बुनियादी ढांचा परत है जिसे वास्तुशिल्प दोहराव के बिना शहरी और ग्रामीण प्रशासनिक ढांचे में संचालित करने के लिए डिज़ाइन किया गया है।",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "रुपेकेजी को एक एकीकृत अपशिष्ट-से-CCC डिजिटल ऑपरेटिंग सिस्टम के रूप में स्थापित किया गया है जो अनुपालन-आधारित CCC बाजार की ओर भारत के संक्रमण का समर्थन करने के लिए डिज़ाइन किया गया है।",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "यह प्लेटफ़ॉर्म भारत के कार्बन पारिस्थितिकी तंत्र में एक संरचनात्मक अंतर को संबोधित करता है: एक एकीकृत, नियामक-संरेखित डिजिटल बुनियादी ढांचे की अनुपस्थिति जो सत्यापित अपशिष्ट डायवर्जन को अनुपालन-ग्रेड कार्बन आपूर्ति में परिवर्तित करने में सक्षम है।",
-  "Gram Panchayat + Village": "ग्राम पंचायत + गाँव",
-  "CSR Contributors": "सीएसआर योगदानकर्ता",
-  "Administrative Authority": "प्रशासनिक प्राधिकारी",
-  "Producers (EPR)": "निर्माता (ईपीआर)",
-  "IV. CCC Origination": "चतुर्थ. CCC उत्पत्ति",
-  "Methane avoidance through diversion": "डायवर्जन के माध्यम से मीथेन से बचाव",
-  "Biomass-based fossil substitution": "बायोमास-आधारित जीवाश्म प्रतिस्थापन",
-  "III. Unified Stakeholder Architecture": "तृतीय. एकीकृत हितधारक वास्तुकला",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सभी ग्रामीण कृषि अवशेष और बायोमास गतिविधि को बायोमास के अंतर्गत वर्गीकृत किया गया है। कोई अलग कृषि कार्यक्षेत्र मौजूद नहीं है।",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटर को संरचनात्मक रूप से मर्ज की गई इकाई के रूप में परिभाषित किया गया है जो संग्रह और सॉर्टिंग सत्यापन के लिए जिम्मेदार है, श्रृंखला-ऑफ-कस्टडी सत्यापन को सरल बनाता है।",
-  "CSR Rail": "सीएसआर रेल",
-  "Recycler Rail": "रिसाइक्लर रेल",
-  "Recycling substitution": "पुनर्चक्रण प्रतिस्थापन",
-  "VII. Strategic Position": "सातवीं. सामरिक स्थिति",
-  "CCC Rail": "कार्बन रेल",
-  "Governance Layer": "शासन परत",
-  "EPR Rail": "ईपीआर रेल",
-  "VI. Regulator Sovereignty": "VI. नियामक संप्रभुता",
-  "V. Multi-Rail Architecture": "वी. मल्टी-रेल आर्किटेक्चर",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी करने वाला प्राधिकरण नियामक-नियंत्रित रहता है। रुपेकेजी स्वतंत्र रूप से क्रेडिट का खनन नहीं करता है। सभी क्रेडिट इवेंट-ट्रेस करने योग्य, रजिस्ट्री-संगत होने चाहिए और राष्ट्रीय कार्बन शासन ढांचे के साथ संरेखित होने चाहिए।",
-  "— Founder, RupayKg": "- संस्थापक, रुपेकेजी",
-  "Legally Styled": "कानूनी तौर पर स्टाइल किया गया",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जब हमने रुपेकेजी का निर्माण शुरू किया, तो हमने रीसाइक्लिंग से शुरुआत नहीं की। हमने एक संरचनात्मक प्रश्न से शुरुआत की: कोई एकीकृत बुनियादी ढांचा क्यों नहीं है जो कचरे को विनियमित कार्बन मूल्य में परिवर्तित करता है?",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "मूलभूत संरचना की घोषणा",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "कचरे का अब निपटान नहीं रह गया है। यह शासन से जुड़ा जलवायु बुनियादी ढांचा है।",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "उन्हें एकजुट करने के लिए रुपेकेजी का निर्माण किया गया था। कार्बन व्यापारी के रूप में नहीं. रीसाइक्लिंग स्टार्टअप के रूप में नहीं। लेकिन एक एकल ऑपरेटिंग सिस्टम के रूप में नगरपालिका वार्ड स्तर और ग्राम पंचायत ग्राम स्तर पर संरचनात्मक दोहराव के बिना काम करने में सक्षम है।",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत अनुपालन कार्बन युग में प्रवेश कर रहा है। नगरपालिका प्रणालियाँ मापने योग्य मीथेन उत्पन्न करती हैं। ग्रामीण बायोमास जला दिया जाता है या कम उपयोग किया जाता है। फिर भी प्रणालियाँ खंडित बनी हुई हैं।",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद II - एकीकृत हितधारक सिद्धांत",
-  "Article I — Unified Operating System": "अनुच्छेद I - एकीकृत ऑपरेटिंग सिस्टम",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "रुपेकेजी एक एकल डिजिटल प्रणाली संचालित करेगा जो निम्नलिखित के तहत लागू होगी: (ए) नगर निगम + वार्ड (शहरी संदर्भ) (बी) ग्राम पंचायत + गांव (ग्रामीण संदर्भ)। संदर्भों के बीच कोई संरचनात्मक दोहराव मौजूद नहीं होगा।",
-  "Article IV — CCC Engine": "अनुच्छेद IV - CCC इंजन",
-  "Institutional Identity": "संस्थागत पहचान",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "हितधारक संरचना देश भर में एक समान रहेगी और इसमें शामिल होंगे: अपशिष्ट जनरेटर, एग्रीगेटर, प्रोसेसर, प्रशासनिक प्राधिकरण, निर्माता (ईपीआर), सीएसआर योगदानकर्ता, कार्बन खरीदार, नियामक।",
-  "Article V — Rail Separation": "अनुच्छेद V - रेल पृथक्करण",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद VI - नियामक संप्रभुता",
-  "Article III — Waste Classification": "अनुच्छेद III - अपशिष्ट वर्गीकरण",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "अपशिष्ट को विशेष रूप से इस प्रकार वर्गीकृत किया जाएगा: (ए) शहरी संदर्भ में एमएसडब्ल्यू (बी) ग्रामीण संदर्भ में बायोमास। सभी कृषि अवशेषों को बायोमास के अंतर्गत वर्गीकृत किया जाएगा।",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "रुपेकेजी निम्नलिखित के बीच सख्त अलगाव बनाए रखेगा: रिसाइक्लर अकाउंटिंग, सीएसआर अकाउंटिंग, ईपीआर अनुपालन, गवर्नेंस वैल्यू, CCC जारी करना। दोहरी गिनती निषिद्ध है.",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन टकसाल प्राधिकरण नियामक नियंत्रण में रहेगा। रुपेकेजी स्वतंत्र रूप से कार्बन क्रेडिट जारी नहीं करेगा।",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सभी उत्सर्जन कटौती को इवेंट-स्तरीय एमआरवी सत्यापन के साथ एकल CCC गणना इंजन के माध्यम से संसाधित किया जाएगा।",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "रुपेकेजी को इस प्रकार परिभाषित किया गया है: एक एकीकृत अपशिष्ट-से-CCC अवसंरचना मंच जो नियामक-संरेखित CCC उत्पत्ति क्षमता के साथ एकल राष्ट्रीय हितधारक वास्तुकला के तहत काम कर रहा है।"
-  } },
-  sat: { translation: {
-  "MRV Dashboard": "एमआरवी डैशबोर्ड",
-  "CCC Market": "कार्बन बाज़ार",
-  "Settings": "सेटिंग्स",
-  "Genesis": "उत्पत्ति",
-  "Dashboard": "डैशबोर्ड",
-  "Upload Waste": "अपशिष्ट अपलोड करें",
-  "Task Board": "कार्य मंडल",
-  "National KPI": "राष्ट्रीय के.पी.आई",
-  "History": "इतिहास",
-  "Logout": "लॉग आउट",
-  "Welcome back": "वापसी पर स्वागत है",
-  "Total Earnings": "कुल कमाई",
-  "Community Rank": "सामुदायिक रैंक",
-  "System Overview": "तंत्र अवलोकन",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "Farmers Registered": "किसानों का पंजीयन किया गया",
-  "Language": "भाषा",
-  "English": "अंग्रेज़ी",
-  "Total Collected": "कुल एकत्रित",
-  "Hindi": "हिंदी",
-  "Logistics Margin": "लॉजिस्टिक्स मार्जिन",
-  "Total Processed": "कुल संसाधित",
-  "Total Investment": "कुल निवेश",
-  "ESG Score": "ईएसजी स्कोर",
-  "Platform Statistics": "प्लेटफार्म सांख्यिकी",
-  "Processing Yield": "प्रसंस्करण उपज",
-  "CCCs": "कार्बन क्रेडिट",
-  "Value Generated": "मूल्य उत्पन्न",
-  "Seed Demo Data": "बीज डेमो डेटा",
-  "Fleet Efficiency": "बेड़े की दक्षता",
-  "Total Users": "कुल उपयोगकर्ता",
-  "Total Value": "कुल मूल्य",
-  "New Collection Record": "नया संग्रह रिकॉर्ड",
-  "Register New Farmer": "नए किसान का पंजीकरण करें",
-  "Total Weight": "कुल वजन",
-  "Reset Demo Data": "डेमो डेटा रीसेट करें",
-  "CCCs Generated": "कार्बन कम हुआ",
-  "Recent Activity": "हाल की गतिविधि",
-  "Waste Distribution": "अपशिष्ट वितरण",
-  "Performance Analytics": "प्रदर्शन विश्लेषण",
-  "Land Area (Acres)": "भूमि क्षेत्र (एकड़)",
-  "Longitude": "देशान्तर",
-  "New Processing Record": "नया प्रसंस्करण रिकॉर्ड",
-  "Mobile Number": "मोबाइल नंबर",
-  "Farm Location": "खेत का स्थान",
-  "Latitude": "अक्षांश",
-  "Full Name": "पूरा नाम",
-  "New Intake Record": "नया सेवन रिकॉर्ड",
-  "Crop Type": "फसल का प्रकार",
-  "Get Current Location": "वर्तमान स्थान प्राप्त करें",
-  "Pending Pickup": "लंबित पिकअप",
-  "All": "सभी",
-  "Account Settings": "अकाउंट सेटिंग",
-  "Transaction Ledger": "लेन-देन बही",
-  "Processed": "प्रसंस्कृत",
-  "Operations Management": "संचालन प्रबंधन",
-  "Foundational Doctrine": "मूलभूत सिद्धांत",
-  "Register Farmer": "किसान पंजीयन करें",
-  "In Transit": "पारगमन में",
-  "Registering...": "पंजीकरण हो रहा है...",
-  "Waste Type": "अपशिष्ट प्रकार",
-  "Weight (kg)": "वजन (किलो)",
-  "Confirm Intake & Mint Value": "सेवन और टकसाल मूल्य की पुष्टि करें",
-  "Total Sovereign Value": "कुल संप्रभु मूल्य",
-  "Verification Image": "सत्यापन छवि",
-  "Processing...": "प्रसंस्करण...",
-  "Location Confirmation (Google Maps)": "स्थान की पुष्टि (Google मानचित्र)",
-  "Base Value (Recycler)": "आधार मूल्य (पुनर्चक्रणकर्ता)",
-  "Estimated Value Breakdown": "अनुमानित मूल्य टूटना",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "Launch OS": "ओएस लॉन्च करें",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्राम अपशिष्ट को परिवर्तित करें",
-  "Intake": "प्रवेश",
-  "Sovereign-Grade Circular Economy Engine": "सॉवरेन-ग्रेड सर्कुलर इकोनॉमी इंजन",
-  "Global Circular Value": "वैश्विक परिपत्र मूल्य",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "रुपेकेजी एक सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम है जो समुदायों को मल्टी-रेल वैल्यू इंजन के माध्यम से कृषि, नगरपालिका और औद्योगिक कचरे का मुद्रीकरण करने के लिए सशक्त बनाता है।",
-  "How it Works": "यह काम किस प्रकार करता है",
-  "Ecosystem Roles": "पारिस्थितिकी तंत्र भूमिकाएँ",
-  "Access the OS": "ओएस तक पहुंचें",
-  "Features": "विशेषताएँ",
-  "Real-time waste throughput across the RupayKg OS": "रुपेकेजी ओएस पर वास्तविक समय अपशिष्ट थ्रूपुट",
-  "Rural Wealth Creation": "ग्रामीण धन सृजन",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "साथ ही संसाधित प्रत्येक किलोग्राम बायोमास के लिए रिसाइक्लर, सीएसआर, म्यूनिसिपल, कार्बन और ईपीआर रेल से मूल्य निकालें।",
-  "Live Stream": "लाइव स्ट्रीम",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिकों के बटुए में सीधे धनराशि वितरित करना, पर्यावरणीय देनदारियों को स्थानीय आर्थिक विकास में बदलना।",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "अपशिष्ट प्रकार, वजन और जियोलोकेशन का स्वचालित सत्यापन अपरिवर्तनीय, संप्रभु-ग्रेड डेटा अखंडता सुनिश्चित करता है।",
-  "Live Network Impact": "लाइव नेटवर्क प्रभाव",
-  "Read Whitepaper": "श्वेतपत्र पढ़ें",
-  "Multi-Rail Value Engine": "मल्टी-रेल वैल्यू इंजन",
-  "AI-Verified Intake": "एआई-सत्यापित सेवन",
-  "Network Topology": "नेटवर्क टोपोलॉजी",
-  "nodes": "नोड्स",
-  "A seamless pipeline from waste generation to value realization.": "अपशिष्ट उत्पादन से मूल्य प्राप्ति तक एक निर्बाध पाइपलाइन।",
-  "Distributed biomass collection nodes": "वितरित बायोमास संग्रह नोड्स",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटर्स कचरे का सत्यापन, वजन और सुविधाओं तक परिवहन करते हैं।",
-  "Value Minted": "मूल्य अंकित",
-  "Active Nodes": "सक्रिय नोड्स",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिक कृषि, नगरपालिका या औद्योगिक कचरा एकत्र करते हैं।",
-  "Aggregate": "सकल",
-  "Generate": "उत्पन्न",
-  "Choose your part in the circular economy.": "सर्कुलर इकोनॉमी में अपना हिस्सा चुनें।",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट अनुबंध सभी 5 मूल्य रेलों पर धन वितरित करते हैं।",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि, नगरपालिका, या औद्योगिक अपशिष्ट एकत्र करें और जमा करें। प्रदान किए गए कचरे के वजन और प्रकार के आधार पर सीधे वॉलेट जमा अर्जित करें।",
-  "Upload waste records": "अपशिष्ट रिकॉर्ड अपलोड करें",
-  "Process": "प्रक्रिया",
-  "Waste Generator": "अपशिष्ट जनरेटर",
-  "Recyclers convert waste into usable materials or energy.": "पुनर्चक्रणकर्ता अपशिष्ट को उपयोगी सामग्री या ऊर्जा में परिवर्तित करते हैं।",
-  "Mint Value": "टकसाल मूल्य",
-  "Instant wallet funding": "तत्काल वॉलेट फंडिंग",
-  "Citizen": "नागरिक",
-  "Earn logistics margins": "लॉजिस्टिक्स मार्जिन अर्जित करें",
-  "Aggregator": "एग्रीगेटर",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "एकत्रित अपशिष्ट प्राप्त करें और इसे अंतिम उत्पादों में संसाधित करें। सभी रेलों पर अंतिम मूल्य प्राप्ति को ट्रिगर करें।",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिक जमाओं को सत्यापित करें, कचरे को समेकित करें, और प्रसंस्करण सुविधाओं तक सामग्री पहुंचाने के लिए रसद का प्रबंधन करें।",
-  "Route optimization data": "मार्ग अनुकूलन डेटा",
-  "Collection & Transport": "संग्रहण एवं परिवहन",
-  "Track environmental impact": "पर्यावरणीय प्रभाव को ट्रैक करें",
-  "Processor": "प्रोसेसर",
-  "Recycler": "रेमंड",
-  "Log collection batches": "लॉग संग्रह बैच",
-  "Login": "लॉग इन करें",
-  "Context:": "प्रसंग:",
-  "Generate CCCs": "कार्बन क्रेडिट उत्पन्न करें",
-  "District": "ज़िला",
-  "Log processing yields": "लॉग प्रोसेसिंग पैदावार",
-  "Account Type": "खाता प्रकार",
-  "Register": "पंजीकरण करवाना",
-  "Circular Economy Operating System": "सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम",
-  "Access CSR/EPR funds": "सीएसआर/ईपीआर फंड तक पहुंचें",
-  "Organization Name": "संगठन का नाम",
-  "Phone Number": "फ़ोन नंबर",
-  "System Audit Logs": "सिस्टम ऑडिट लॉग",
-  "Global Impact Map": "वैश्विक प्रभाव मानचित्र",
-  "Back to Home": "घर वापिस जा रहा हूँ",
-  "Create Account": "खाता बनाएं",
-  "Quick Demo Access": "त्वरित डेमो एक्सेस",
-  "Submission Heatmap": "सबमिशन हीटमैप",
-  "State": "राज्य",
-  "Password": "पासवर्ड",
-  "Access OS": "ओएस तक पहुंचें",
-  "Farmers Supported": "किसानों का समर्थन किया",
-  "No pending MRV records": "कोई लंबित एमआरवी रिकॉर्ड नहीं",
-  "Total Offset": "कुल ऑफसेट",
-  "All processed waste has been verified.": "सभी संसाधित कचरे का सत्यापन कर लिया गया है।",
-  "Impact Distribution": "प्रभाव वितरण",
-  "Portfolio Composition": "पोर्टफोलियो संरचना",
-  "Pending": "लंबित",
-  "Waste Diverted": "अपशिष्ट डायवर्ट किया गया",
-  "MRV Verification Dashboard": "एमआरवी सत्यापन डैशबोर्ड",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी करने के लिए संसाधित अपशिष्ट रिकॉर्ड सत्यापित करें।",
-  "Location Verification": "स्थान सत्यापन",
-  "Credit Value": "क्रेडिट मूल्य",
-  "Acreage": "रकबा",
-  "Available Credits": "उपलब्ध क्रेडिट",
-  "AI Risk Score": "एआई जोखिम स्कोर",
-  "Reject": "अस्वीकार करना",
-  "Carbon Reduction": "कार्बन कटौती",
-  "Purchase verified CCCs to offset your footprint.": "अपने पदचिह्न को संतुलित करने के लिए सत्यापित कार्बन क्रेडिट खरीदें।",
-  "Verify & Issue Credits": "सत्यापित करें और क्रेडिट जारी करें",
-  "Price per Tonne": "कीमत प्रति टन",
-  "Your Offset Balance": "आपका ऑफसेट बैलेंस",
-  "Total Cost": "कुल लागत",
-  "Cancel": "रद्द करना",
-  "Amount to Purchase (Tonnes)": "खरीद की राशि (टन)",
-  "Amount": "मात्रा",
-  "Project": "परियोजना",
-  "Confirm Purchase": "खरीद की पुष्टि करें",
-  "Recent Transactions": "हाल के लेनदेन",
-  "Purchase Credits": "क्रेडिट खरीदें",
-  "Status": "स्थिति",
-  "Ward": "वार्ड",
-  "Ward-Level Analytics": "वार्ड-स्तरीय विश्लेषण",
-  "MSW": "एमएसडब्ल्यू",
-  "Date": "तारीख",
-  "National Dashboard": "राष्ट्रीय डैशबोर्ड",
-  "Network Active": "नेटवर्क सक्रिय",
-  "Ward Analytics": "वार्ड विश्लेषण",
-  "Price": "कीमत",
-  "Municipal Corporation": "नगर निगम",
-  "Citizen (MSW Generator)": "नागरिक (एमएसडब्ल्यू जेनरेटर)",
-  "Farmers / FPOs": "किसान/एफपीओ",
-  "Gram Panchayat": "ग्राम पंचायत",
-  "Village-Level Analytics": "ग्राम-स्तरीय विश्लेषिकी",
-  "Village Analytics": "ग्राम विश्लेषिकी",
-  "Village": "गाँव",
-  "Citizens": "नागरिकों",
-  "All Roles": "सभी भूमिकाएँ",
-  "Biomass": "बायोमास",
-  "Farmer / FPO (Biomass Generator)": "किसान/एफपीओ (बायोमास जेनरेटर)",
-  "CCC Buyers": "कार्बन खरीदार",
-  "EPR Partners": "ईपीआर पार्टनर्स",
-  "CSR Partners": "सीएसआर पार्टनर्स",
-  "Diverted": "मार्ग बदल दिया गया",
-  "Processors": "प्रोसेसर",
-  "User Management": "प्रयोक्ता प्रबंधन",
-  "Fraud Alerts & Flagged Events": "धोखाधड़ी की चेतावनियाँ और चिह्नित घटनाएँ",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "Aggregators": "एग्रीगेटर",
-  "Audit Logs": "ऑडिट लॉग",
-  "Wallet Disbursed": "बटुआ वितरित",
-  "Trees Equivalent": "पेड़ समतुल्य",
-  "Total Waste Events": "कुल अपशिष्ट घटनाएँ",
-  "Trees": "पेड़",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Processed Events": "संसाधित घटनाएँ",
-  "Methane Avoided": "मीथेन से परहेज किया गया",
-  "Growth & Impact Trends": "विकास एवं प्रभाव रुझान",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Water Saved": "पानी बचाया",
-  "Waste Composition": "अपशिष्ट संरचना",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* सरकारी बचत की गणना टाले गए लैंडफिल प्रबंधन और पर्यावरणीय उपचार लागत के आधार पर की जाती है।",
-  "Govt Cost Savings": "सरकारी लागत बचत",
-  "Geospatial Fraud Distribution": "भू-स्थानिक धोखाधड़ी वितरण",
-  "Operational Health": "परिचालन स्वास्थ्य",
-  "Processing Efficiency": "प्रसंस्करण दक्षता",
-  "MRV Rejection Rate": "एमआरवी अस्वीकृति दर",
-  "Total Minted CCC Units": "कुल ढली हुई कार्बन इकाइयाँ",
-  "No flagged events detected.": "कोई चिह्नित ईवेंट नहीं पाया गया.",
-  "Avg Price / kg": "औसत मूल्य/किलो",
-  "Location": "जगह",
-  "State Admin": "राज्य प्रशासन",
-  "User": "उपयोगकर्ता",
-  "Wallet": "बटुआ",
-  "Super Admin": "सुपर एडमिन",
-  "Regulator": "रेगुलेटर",
-  "Actions": "कार्रवाई",
-  "Municipal Admin": "नगर प्रशासन",
-  "Role": "भूमिका",
-  "CSR Partner": "सीएसआर पार्टनर",
-  "Total Waste": "कुल बर्बादी",
-  "No audit logs available.": "कोई ऑडिट लॉग उपलब्ध नहीं है.",
-  "User ID": "उपयोगकर्ता पहचान",
-  "EPR Partner": "ईपीआर पार्टनर",
-  "Total Events": "कुल घटनाएँ",
-  "Action": "कार्रवाई",
-  "No ward data available.": "कोई वार्ड डेटा उपलब्ध नहीं है.",
-  "No users found.": "कोई उपयोगकर्ता नहीं मिला.",
-  "Delete User": "उपयोगकर्ता हटाएँ",
-  "CCC Buyer": "कार्बन क्रेता",
-  "Save Changes": "परिवर्तनों को सुरक्षित करें",
-  "Saving...": "सहेजा जा रहा है...",
-  "Get instant SMS alerts for critical updates.": "महत्वपूर्ण अपडेट के लिए तत्काल एसएमएस अलर्ट प्राप्त करें।",
-  "Enable browser push notifications.": "ब्राउज़र पुश सूचनाएँ सक्षम करें.",
-  "Push Notifications": "सूचनाएं धक्का",
-  "Add ₹10,000": "₹10,000 जोड़ें",
-  "Email Notifications": "ईमेल सूचनाएं",
-  "Receive updates about your transactions via email.": "ईमेल के माध्यम से अपने लेनदेन के बारे में अपडेट प्राप्त करें।",
-  "Notification Preferences": "अधिसूचना प्राथमिकताएँ",
-  "SMS Alerts": "एसएमएस अलर्ट",
-  "GENESIS": "उत्पत्ति",
-  "Weight: ": "वज़न:",
-  "Village: ": "गाँव:",
-  "Value: ": "कीमत:",
-  "Currently Active: ": "वर्तमान में सक्रिय:",
-  " Context (": "प्रसंग (",
-  "How the Engine Works": "इंजन कैसे काम करता है",
-  "Type: ": "प्रकार:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 रुपेकेजी सर्कुलर इकोनॉमी ओएस। सर्वाधिकार सुरक्षित।",
-  "FRAUD ALERT": "धोखाधड़ी चेतावनी",
-  "urban": "शहरी",
-  "Farmer": "किसान",
-  "rural": "ग्रामीण",
-  "RUPAYKG": "रुपायकेजी",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "Processor (Recycler)": "प्रोसेसर (रीसाइक्लर)",
-  "Admin": "व्यवस्थापक",
-  "Privacy": "गोपनीयता",
-  "Terms": "शर्तें",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संग्रह एवं परिवहन)",
-  "GPS Captured: ": "जीपीएस से कैप्चर किया गया:",
-  "Circular Economy Intake Form": "सर्कुलर इकोनॉमी इंटेक फॉर्म",
-  "Wallet Balance": "वॉलेट बैलेंस",
-  "Acreage (acres)": "एकड़ (एकड़)",
-  "No records found": "कोई रिकॉर्ड नहीं मिला",
-  "No audit logs found": "कोई ऑडिट लॉग नहीं मिला",
-  "Capturing GPS Coordinates...": "जीपीएस निर्देशांक कैप्चर किया जा रहा है...",
-  "Database Connection Failed": "डेटाबेस कनेक्शन विफल",
-  "GPS Capture Failed": "जीपीएस कैप्चर विफल",
-  "Name": "नाम",
-  "Retry GPS": "जीपीएस पुनः प्रयास करें",
-  "GPS Required": "जीपीएस आवश्यक",
-  "Drivers Online": "ड्राइवर ऑनलाइन",
-  "Active Queue": "सक्रिय कतार",
-  "Geolocation is not supported by this browser.": "जियोलोकेशन इस ब्राउज़र द्वारा समर्थित नहीं है.",
-  "e.g., Paddy, Wheat": "जैसे, धान, गेहूँ",
-  "Failed to get location. Please enter manually.": "स्थान प्राप्त करने में विफल. कृपया मैन्युअल रूप से दर्ज करें.",
-  "Failed to register farmer": "किसान का पंजीयन नहीं हो सका",
-  "Farmer registered successfully! ID: ": "किसान सफलतापूर्वक पंजीकृत! पहचान:",
-  "Active Fleet": "सक्रिय बेड़ा",
-  "No new tasks available.": "कोई नया कार्य उपलब्ध नहीं है.",
-  "Output Material": "आउटपुट सामग्री",
-  "Biomass in Stock": "स्टॉक में बायोमास",
-  "Utilization": "उपयोग",
-  "Accept Pickup": "पिकअप स्वीकार करें",
-  "Total Capacity": "कुल क्षमता",
-  "Storage Utilization": "भंडारण उपयोग",
-  "Incoming for Processing": "प्रसंस्करण हेतु आवक",
-  "Current Load": "वर्तमान भार",
-  "Available for Pickup": "बटोरने के लिए उपलब्ध",
-  "Value": "कीमत",
-  "Accept Receipt": "रसीद स्वीकार करें",
-  "No active tasks in your possession.": "आपके पास कोई सक्रिय कार्य नहीं है.",
-  "Timestamp": "समय-चिह्न",
-  "MRV Status": "एमआरवी स्थिति",
-  "No records found for the selected filter.": "चयनित फ़िल्टर के लिए कोई रिकॉर्ड नहीं मिला.",
-  "Weight": "वज़न",
-  "Type": "प्रकार",
-  "Recently Processed": "हाल ही में संसाधित",
-  "Pending MRV": "लंबित एमआरवी",
-  "Med": "मेड",
-  "No credits available": "कोई क्रेडिट उपलब्ध नहीं है",
-  "High": "उच्च",
-  "Verified By": "द्वारा सत्यापित",
-  "No MRV history found": "कोई एमआरवी इतिहास नहीं मिला",
-  "AI Risk": "एआई जोखिम",
-  "Details": "विवरण",
-  "Record ID": "रिकॉर्ड आईडी",
-  "Low": "कम",
-  "Check back later for newly verified CCCs.": "नए सत्यापित कार्बन क्रेडिट के लिए बाद में दोबारा जाँच करें।",
-  "Profile Settings": "प्रोफ़ाइल सेटिंग्स",
-  "Failed to update profile": "प्रोफ़ाइल अपडेट करने में विफल",
-  "Purchase Credit": "क्रेडिट खरीदें",
-  "An error occurred": "एक त्रुटि पाई गई",
-  "Offset": "ओफ़्सेट",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "रुपेकेजी की मूलभूत संरचना और संचालन सिद्धांत",
-  "I. Introduction": "I. प्रस्तावना",
-  "Verified": "सत्यापित",
-  "Profile updated successfully": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
-  "Insufficient Funds": "अपर्याप्त कोष",
-  "Context": "प्रसंग",
-  "Anchor": "लंगर",
-  "II. Unified Operating System Model": "द्वितीय. एकीकृत ऑपरेटिंग सिस्टम मॉडल",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "रुपेकेजी को एक एकीकृत अपशिष्ट-से-CCC डिजिटल ऑपरेटिंग सिस्टम के रूप में स्थापित किया गया है जो अनुपालन-आधारित CCC बाजार की ओर भारत के संक्रमण का समर्थन करने के लिए डिज़ाइन किया गया है।",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "रुपेकेजी को एक परियोजना डेवलपर, कार्बन व्यापारी या रीसाइक्लिंग इकाई के रूप में संरचित नहीं किया गया है। यह एक बुनियादी ढांचा परत है जिसे वास्तुशिल्प दोहराव के बिना शहरी और ग्रामीण प्रशासनिक ढांचे में संचालित करने के लिए डिज़ाइन किया गया है।",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "Urban": "शहरी",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "यह प्लेटफ़ॉर्म भारत के कार्बन पारिस्थितिकी तंत्र में एक संरचनात्मक अंतर को संबोधित करता है: एक एकीकृत, नियामक-संरेखित डिजिटल बुनियादी ढांचे की अनुपस्थिति जो सत्यापित अपशिष्ट डायवर्जन को अनुपालन-ग्रेड कार्बन आपूर्ति में परिवर्तित करने में सक्षम है।",
-  "Rural": "ग्रामीण",
-  "Category": "वर्ग",
-  "IV. CCC Origination": "चतुर्थ. CCC उत्पत्ति",
-  "III. Unified Stakeholder Architecture": "तृतीय. एकीकृत हितधारक वास्तुकला",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटर को संरचनात्मक रूप से मर्ज की गई इकाई के रूप में परिभाषित किया गया है जो संग्रह और सॉर्टिंग सत्यापन के लिए जिम्मेदार है, श्रृंखला-ऑफ-कस्टडी सत्यापन को सरल बनाता है।",
-  "Producers (EPR)": "निर्माता (ईपीआर)",
-  "CSR Contributors": "सीएसआर योगदानकर्ता",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सभी ग्रामीण कृषि अवशेष और बायोमास गतिविधि को बायोमास के अंतर्गत वर्गीकृत किया गया है। कोई अलग कृषि कार्यक्षेत्र मौजूद नहीं है।",
-  "Gram Panchayat + Village": "ग्राम पंचायत + गाँव",
-  "Methane avoidance through diversion": "डायवर्जन के माध्यम से मीथेन से बचाव",
-  "Biomass-based fossil substitution": "बायोमास-आधारित जीवाश्म प्रतिस्थापन",
-  "Administrative Authority": "प्रशासनिक प्राधिकारी",
-  "CCC Rail": "कार्बन रेल",
-  "Governance Layer": "शासन परत",
-  "EPR Rail": "ईपीआर रेल",
-  "Recycling substitution": "पुनर्चक्रण प्रतिस्थापन",
-  "Recycler Rail": "रिसाइक्लर रेल",
-  "V. Multi-Rail Architecture": "वी. मल्टी-रेल आर्किटेक्चर",
-  "VI. Regulator Sovereignty": "VI. नियामक संप्रभुता",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी करने वाला प्राधिकरण नियामक-नियंत्रित रहता है। रुपेकेजी स्वतंत्र रूप से क्रेडिट का खनन नहीं करता है। सभी क्रेडिट इवेंट-ट्रेस करने योग्य, रजिस्ट्री-संगत होने चाहिए और राष्ट्रीय कार्बन शासन ढांचे के साथ संरेखित होने चाहिए।",
-  "VII. Strategic Position": "सातवीं. सामरिक स्थिति",
-  "CSR Rail": "सीएसआर रेल",
-  "— Founder, RupayKg": "- संस्थापक, रुपेकेजी",
-  "Legally Styled": "कानूनी तौर पर स्टाइल किया गया",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "उन्हें एकजुट करने के लिए रुपेकेजी का निर्माण किया गया था। कार्बन व्यापारी के रूप में नहीं. रीसाइक्लिंग स्टार्टअप के रूप में नहीं। लेकिन एक एकल ऑपरेटिंग सिस्टम के रूप में नगरपालिका वार्ड स्तर और ग्राम पंचायत ग्राम स्तर पर संरचनात्मक दोहराव के बिना काम करने में सक्षम है।",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "कचरे का अब निपटान नहीं रह गया है। यह शासन से जुड़ा जलवायु बुनियादी ढांचा है।",
-  "Article I — Unified Operating System": "अनुच्छेद I - एकीकृत ऑपरेटिंग सिस्टम",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत अनुपालन कार्बन युग में प्रवेश कर रहा है। नगरपालिका प्रणालियाँ मापने योग्य मीथेन उत्पन्न करती हैं। ग्रामीण बायोमास जला दिया जाता है या कम उपयोग किया जाता है। फिर भी प्रणालियाँ खंडित बनी हुई हैं।",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "मूलभूत संरचना की घोषणा",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद II - एकीकृत हितधारक सिद्धांत",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "रुपेकेजी एक एकल डिजिटल प्रणाली संचालित करेगा जो निम्नलिखित के तहत लागू होगी: (ए) नगर निगम + वार्ड (शहरी संदर्भ) (बी) ग्राम पंचायत + गांव (ग्रामीण संदर्भ)। संदर्भों के बीच कोई संरचनात्मक दोहराव मौजूद नहीं होगा।",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जब हमने रुपेकेजी का निर्माण शुरू किया, तो हमने रीसाइक्लिंग से शुरुआत नहीं की। हमने एक संरचनात्मक प्रश्न से शुरुआत की: कोई एकीकृत बुनियादी ढांचा क्यों नहीं है जो कचरे को विनियमित कार्बन मूल्य में परिवर्तित करता है?",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "अपशिष्ट को विशेष रूप से इस प्रकार वर्गीकृत किया जाएगा: (ए) शहरी संदर्भ में एमएसडब्ल्यू (बी) ग्रामीण संदर्भ में बायोमास। सभी कृषि अवशेषों को बायोमास के अंतर्गत वर्गीकृत किया जाएगा।",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन टकसाल प्राधिकरण नियामक नियंत्रण में रहेगा। रुपेकेजी स्वतंत्र रूप से कार्बन क्रेडिट जारी नहीं करेगा।",
-  "Article III — Waste Classification": "अनुच्छेद III - अपशिष्ट वर्गीकरण",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "रुपेकेजी निम्नलिखित के बीच सख्त अलगाव बनाए रखेगा: रिसाइक्लर अकाउंटिंग, सीएसआर अकाउंटिंग, ईपीआर अनुपालन, गवर्नेंस वैल्यू, CCC जारी करना। दोहरी गिनती निषिद्ध है.",
-  "Institutional Identity": "संस्थागत पहचान",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद VI - नियामक संप्रभुता",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सभी उत्सर्जन कटौती को इवेंट-स्तरीय एमआरवी सत्यापन के साथ एकल CCC गणना इंजन के माध्यम से संसाधित किया जाएगा।",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "हितधारक संरचना देश भर में एक समान रहेगी और इसमें शामिल होंगे: अपशिष्ट जनरेटर, एग्रीगेटर, प्रोसेसर, प्रशासनिक प्राधिकरण, निर्माता (ईपीआर), सीएसआर योगदानकर्ता, कार्बन खरीदार, नियामक।",
-  "Article V — Rail Separation": "अनुच्छेद V - रेल पृथक्करण",
-  "Article IV — CCC Engine": "अनुच्छेद IV - CCC इंजन",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "रुपेकेजी को इस प्रकार परिभाषित किया गया है: एक एकीकृत अपशिष्ट-से-CCC अवसंरचना मंच जो नियामक-संरेखित CCC उत्पत्ति क्षमता के साथ एकल राष्ट्रीय हितधारक वास्तुकला के तहत काम कर रहा है।"
-  } },
-  ks: { translation: {
-  "Upload Waste": "अपशिष्ट अपलोड करें",
-  "Dashboard": "डैशबोर्ड",
-  "Task Board": "कार्य मंडल",
-  "Settings": "सेटिंग्स",
-  "CCC Market": "कार्बन बाज़ार",
-  "MRV Dashboard": "एमआरवी डैशबोर्ड",
-  "Genesis": "उत्पत्ति",
-  "National KPI": "राष्ट्रीय के.पी.आई",
-  "History": "इतिहास",
-  "Logout": "लॉग आउट",
-  "Language": "भाषा",
-  "English": "अंग्रेज़ी",
-  "Hindi": "हिंदी",
-  "Total Earnings": "कुल कमाई",
-  "Community Rank": "सामुदायिक रैंक",
-  "System Overview": "तंत्र अवलोकन",
-  "Welcome back": "वापसी पर स्वागत है",
-  "Farmers Registered": "किसानों का पंजीयन किया गया",
-  "Total Collected": "कुल एकत्रित",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "Total Investment": "कुल निवेश",
-  "Value Generated": "मूल्य उत्पन्न",
-  "Seed Demo Data": "बीज डेमो डेटा",
-  "ESG Score": "ईएसजी स्कोर",
-  "Total Processed": "कुल संसाधित",
-  "CCCs": "कार्बन क्रेडिट",
-  "Processing Yield": "प्रसंस्करण उपज",
-  "Logistics Margin": "लॉजिस्टिक्स मार्जिन",
-  "Fleet Efficiency": "बेड़े की दक्षता",
-  "Platform Statistics": "प्लेटफार्म सांख्यिकी",
-  "Recent Activity": "हाल की गतिविधि",
-  "Total Weight": "कुल वजन",
-  "CCCs Generated": "कार्बन कम हुआ",
-  "Total Users": "कुल उपयोगकर्ता",
-  "New Collection Record": "नया संग्रह रिकॉर्ड",
-  "Waste Distribution": "अपशिष्ट वितरण",
-  "Reset Demo Data": "डेमो डेटा रीसेट करें",
-  "Register New Farmer": "नए किसान का पंजीकरण करें",
-  "Performance Analytics": "प्रदर्शन विश्लेषण",
-  "Total Value": "कुल मूल्य",
-  "Mobile Number": "मोबाइल नंबर",
-  "Land Area (Acres)": "भूमि क्षेत्र (एकड़)",
-  "Crop Type": "फसल का प्रकार",
-  "New Intake Record": "नया सेवन रिकॉर्ड",
-  "Full Name": "पूरा नाम",
-  "Latitude": "अक्षांश",
-  "Farm Location": "खेत का स्थान",
-  "Get Current Location": "वर्तमान स्थान प्राप्त करें",
-  "Longitude": "देशान्तर",
-  "New Processing Record": "नया प्रसंस्करण रिकॉर्ड",
-  "Transaction Ledger": "लेन-देन बही",
-  "In Transit": "पारगमन में",
-  "Operations Management": "संचालन प्रबंधन",
-  "Register Farmer": "किसान पंजीयन करें",
-  "Account Settings": "अकाउंट सेटिंग",
-  "Foundational Doctrine": "मूलभूत सिद्धांत",
-  "Processed": "प्रसंस्कृत",
-  "Pending Pickup": "लंबित पिकअप",
-  "Registering...": "पंजीकरण हो रहा है...",
-  "All": "सभी",
-  "Weight (kg)": "वजन (किलो)",
-  "Location Confirmation (Google Maps)": "स्थान की पुष्टि (Google मानचित्र)",
-  "Total Sovereign Value": "कुल संप्रभु मूल्य",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "Waste Type": "अपशिष्ट प्रकार",
-  "Processing...": "प्रसंस्करण...",
-  "Base Value (Recycler)": "आधार मूल्य (पुनर्चक्रणकर्ता)",
-  "Estimated Value Breakdown": "अनुमानित मूल्य टूटना",
-  "Verification Image": "सत्यापन छवि",
-  "Confirm Intake & Mint Value": "सेवन और टकसाल मूल्य की पुष्टि करें",
-  "Features": "विशेषताएँ",
-  "Intake": "प्रवेश",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्राम अपशिष्ट को परिवर्तित करें",
-  "Access the OS": "ओएस तक पहुंचें",
-  "Sovereign-Grade Circular Economy Engine": "सॉवरेन-ग्रेड सर्कुलर इकोनॉमी इंजन",
-  "Global Circular Value": "वैश्विक परिपत्र मूल्य",
-  "Launch OS": "ओएस लॉन्च करें",
-  "How it Works": "यह काम किस प्रकार करता है",
-  "Ecosystem Roles": "पारिस्थितिकी तंत्र भूमिकाएँ",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "रुपेकेजी एक सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम है जो समुदायों को मल्टी-रेल वैल्यू इंजन के माध्यम से कृषि, नगरपालिका और औद्योगिक कचरे का मुद्रीकरण करने के लिए सशक्त बनाता है।",
-  "AI-Verified Intake": "एआई-सत्यापित सेवन",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "अपशिष्ट प्रकार, वजन और जियोलोकेशन का स्वचालित सत्यापन अपरिवर्तनीय, संप्रभु-ग्रेड डेटा अखंडता सुनिश्चित करता है।",
-  "Live Network Impact": "लाइव नेटवर्क प्रभाव",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "साथ ही संसाधित प्रत्येक किलोग्राम बायोमास के लिए रिसाइक्लर, सीएसआर, म्यूनिसिपल, कार्बन और ईपीआर रेल से मूल्य निकालें।",
-  "Live Stream": "लाइव स्ट्रीम",
-  "Read Whitepaper": "श्वेतपत्र पढ़ें",
-  "Real-time waste throughput across the RupayKg OS": "रुपेकेजी ओएस पर वास्तविक समय अपशिष्ट थ्रूपुट",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिकों के बटुए में सीधे धनराशि वितरित करना, पर्यावरणीय देनदारियों को स्थानीय आर्थिक विकास में बदलना।",
-  "Rural Wealth Creation": "ग्रामीण धन सृजन",
-  "Multi-Rail Value Engine": "मल्टी-रेल वैल्यू इंजन",
-  "Generate": "उत्पन्न",
-  "nodes": "नोड्स",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटर्स कचरे का सत्यापन, वजन और सुविधाओं तक परिवहन करते हैं।",
-  "Aggregate": "सकल",
-  "Distributed biomass collection nodes": "वितरित बायोमास संग्रह नोड्स",
-  "Network Topology": "नेटवर्क टोपोलॉजी",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिक कृषि, नगरपालिका या औद्योगिक कचरा एकत्र करते हैं।",
-  "A seamless pipeline from waste generation to value realization.": "अपशिष्ट उत्पादन से मूल्य प्राप्ति तक एक निर्बाध पाइपलाइन।",
-  "Value Minted": "मूल्य अंकित",
-  "Active Nodes": "सक्रिय नोड्स",
-  "Recyclers convert waste into usable materials or energy.": "पुनर्चक्रणकर्ता अपशिष्ट को उपयोगी सामग्री या ऊर्जा में परिवर्तित करते हैं।",
-  "Process": "प्रक्रिया",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि, नगरपालिका, या औद्योगिक अपशिष्ट एकत्र करें और जमा करें। प्रदान किए गए कचरे के वजन और प्रकार के आधार पर सीधे वॉलेट जमा अर्जित करें।",
-  "Choose your part in the circular economy.": "सर्कुलर इकोनॉमी में अपना हिस्सा चुनें।",
-  "Waste Generator": "अपशिष्ट जनरेटर",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट अनुबंध सभी 5 मूल्य रेलों पर धन वितरित करते हैं।",
-  "Instant wallet funding": "तत्काल वॉलेट फंडिंग",
-  "Upload waste records": "अपशिष्ट रिकॉर्ड अपलोड करें",
-  "Mint Value": "टकसाल मूल्य",
-  "Citizen": "नागरिक",
-  "Recycler": "रेमंड",
-  "Collection & Transport": "संग्रहण एवं परिवहन",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "एकत्रित अपशिष्ट प्राप्त करें और इसे अंतिम उत्पादों में संसाधित करें। सभी रेलों पर अंतिम मूल्य प्राप्ति को ट्रिगर करें।",
-  "Track environmental impact": "पर्यावरणीय प्रभाव को ट्रैक करें",
-  "Earn logistics margins": "लॉजिस्टिक्स मार्जिन अर्जित करें",
-  "Processor": "प्रोसेसर",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिक जमाओं को सत्यापित करें, कचरे को समेकित करें, और प्रसंस्करण सुविधाओं तक सामग्री पहुंचाने के लिए रसद का प्रबंधन करें।",
-  "Log collection batches": "लॉग संग्रह बैच",
-  "Aggregator": "एग्रीगेटर",
-  "Route optimization data": "मार्ग अनुकूलन डेटा",
-  "Log processing yields": "लॉग प्रोसेसिंग पैदावार",
-  "Access CSR/EPR funds": "सीएसआर/ईपीआर फंड तक पहुंचें",
-  "Generate CCCs": "कार्बन क्रेडिट उत्पन्न करें",
-  "Account Type": "खाता प्रकार",
-  "Context:": "प्रसंग:",
-  "Register": "पंजीकरण करवाना",
-  "Login": "लॉग इन करें",
-  "District": "ज़िला",
-  "Organization Name": "संगठन का नाम",
-  "Circular Economy Operating System": "सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम",
-  "Create Account": "खाता बनाएं",
-  "Quick Demo Access": "त्वरित डेमो एक्सेस",
-  "Access OS": "ओएस तक पहुंचें",
-  "State": "राज्य",
-  "Password": "पासवर्ड",
-  "Global Impact Map": "वैश्विक प्रभाव मानचित्र",
-  "Submission Heatmap": "सबमिशन हीटमैप",
-  "System Audit Logs": "सिस्टम ऑडिट लॉग",
-  "Back to Home": "घर वापिस जा रहा हूँ",
-  "Phone Number": "फ़ोन नंबर",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी करने के लिए संसाधित अपशिष्ट रिकॉर्ड सत्यापित करें।",
-  "Total Offset": "कुल ऑफसेट",
-  "MRV Verification Dashboard": "एमआरवी सत्यापन डैशबोर्ड",
-  "Farmers Supported": "किसानों का समर्थन किया",
-  "Pending": "लंबित",
-  "No pending MRV records": "कोई लंबित एमआरवी रिकॉर्ड नहीं",
-  "Portfolio Composition": "पोर्टफोलियो संरचना",
-  "Impact Distribution": "प्रभाव वितरण",
-  "All processed waste has been verified.": "सभी संसाधित कचरे का सत्यापन कर लिया गया है।",
-  "Waste Diverted": "अपशिष्ट डायवर्ट किया गया",
-  "Credit Value": "क्रेडिट मूल्य",
-  "AI Risk Score": "एआई जोखिम स्कोर",
-  "Carbon Reduction": "कार्बन कटौती",
-  "Acreage": "रकबा",
-  "Reject": "अस्वीकार करना",
-  "Purchase verified CCCs to offset your footprint.": "अपने पदचिह्न को संतुलित करने के लिए सत्यापित कार्बन क्रेडिट खरीदें।",
-  "Location Verification": "स्थान सत्यापन",
-  "Available Credits": "उपलब्ध क्रेडिट",
-  "Verify & Issue Credits": "सत्यापित करें और क्रेडिट जारी करें",
-  "Confirm Purchase": "खरीद की पुष्टि करें",
-  "Purchase Credits": "क्रेडिट खरीदें",
-  "Your Offset Balance": "आपका ऑफसेट बैलेंस",
-  "Cancel": "रद्द करना",
-  "Price per Tonne": "कीमत प्रति टन",
-  "Total Cost": "कुल लागत",
-  "Amount": "मात्रा",
-  "Recent Transactions": "हाल के लेनदेन",
-  "Amount to Purchase (Tonnes)": "खरीद की राशि (टन)",
-  "Project": "परियोजना",
-  "Ward Analytics": "वार्ड विश्लेषण",
-  "Municipal Corporation": "नगर निगम",
-  "Status": "स्थिति",
-  "MSW": "एमएसडब्ल्यू",
-  "Date": "तारीख",
-  "Ward": "वार्ड",
-  "National Dashboard": "राष्ट्रीय डैशबोर्ड",
-  "Network Active": "नेटवर्क सक्रिय",
-  "Ward-Level Analytics": "वार्ड-स्तरीय विश्लेषण",
-  "Price": "कीमत",
-  "Village": "गाँव",
-  "Farmers / FPOs": "किसान/एफपीओ",
-  "Biomass": "बायोमास",
-  "Village-Level Analytics": "ग्राम-स्तरीय विश्लेषिकी",
-  "All Roles": "सभी भूमिकाएँ",
-  "Farmer / FPO (Biomass Generator)": "किसान/एफपीओ (बायोमास जेनरेटर)",
-  "Citizens": "नागरिकों",
-  "Citizen (MSW Generator)": "नागरिक (एमएसडब्ल्यू जेनरेटर)",
-  "Village Analytics": "ग्राम विश्लेषिकी",
-  "Gram Panchayat": "ग्राम पंचायत",
-  "Audit Logs": "ऑडिट लॉग",
-  "Processors": "प्रोसेसर",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "Aggregators": "एग्रीगेटर",
-  "CCC Buyers": "कार्बन खरीदार",
-  "Diverted": "मार्ग बदल दिया गया",
-  "CSR Partners": "सीएसआर पार्टनर्स",
-  "Fraud Alerts & Flagged Events": "धोखाधड़ी की चेतावनियाँ और चिह्नित घटनाएँ",
-  "User Management": "प्रयोक्ता प्रबंधन",
-  "EPR Partners": "ईपीआर पार्टनर्स",
-  "Wallet Disbursed": "बटुआ वितरित",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Growth & Impact Trends": "विकास एवं प्रभाव रुझान",
-  "Total Waste Events": "कुल अपशिष्ट घटनाएँ",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Trees": "पेड़",
-  "Trees Equivalent": "पेड़ समतुल्य",
-  "Water Saved": "पानी बचाया",
-  "Processed Events": "संसाधित घटनाएँ",
-  "Methane Avoided": "मीथेन से परहेज किया गया",
-  "Operational Health": "परिचालन स्वास्थ्य",
-  "Avg Price / kg": "औसत मूल्य/किलो",
-  "Govt Cost Savings": "सरकारी लागत बचत",
-  "Total Minted CCC Units": "कुल ढली हुई कार्बन इकाइयाँ",
-  "Waste Composition": "अपशिष्ट संरचना",
-  "Processing Efficiency": "प्रसंस्करण दक्षता",
-  "No flagged events detected.": "कोई चिह्नित ईवेंट नहीं पाया गया.",
-  "MRV Rejection Rate": "एमआरवी अस्वीकृति दर",
-  "Geospatial Fraud Distribution": "भू-स्थानिक धोखाधड़ी वितरण",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* सरकारी बचत की गणना टाले गए लैंडफिल प्रबंधन और पर्यावरणीय उपचार लागत के आधार पर की जाती है।",
-  "Super Admin": "सुपर एडमिन",
-  "Location": "जगह",
-  "Role": "भूमिका",
-  "Municipal Admin": "नगर प्रशासन",
-  "CSR Partner": "सीएसआर पार्टनर",
-  "User": "उपयोगकर्ता",
-  "Regulator": "रेगुलेटर",
-  "Actions": "कार्रवाई",
-  "Wallet": "बटुआ",
-  "State Admin": "राज्य प्रशासन",
-  "CCC Buyer": "कार्बन क्रेता",
-  "User ID": "उपयोगकर्ता पहचान",
-  "Total Events": "कुल घटनाएँ",
-  "Delete User": "उपयोगकर्ता हटाएँ",
-  "No ward data available.": "कोई वार्ड डेटा उपलब्ध नहीं है.",
-  "No users found.": "कोई उपयोगकर्ता नहीं मिला.",
-  "Action": "कार्रवाई",
-  "No audit logs available.": "कोई ऑडिट लॉग उपलब्ध नहीं है.",
-  "Total Waste": "कुल बर्बादी",
-  "EPR Partner": "ईपीआर पार्टनर",
-  "Add ₹10,000": "₹10,000 जोड़ें",
-  "Enable browser push notifications.": "ब्राउज़र पुश सूचनाएँ सक्षम करें.",
-  "Receive updates about your transactions via email.": "ईमेल के माध्यम से अपने लेनदेन के बारे में अपडेट प्राप्त करें।",
-  "Email Notifications": "ईमेल सूचनाएं",
-  "SMS Alerts": "एसएमएस अलर्ट",
-  "Notification Preferences": "अधिसूचना प्राथमिकताएँ",
-  "Save Changes": "परिवर्तनों को सुरक्षित करें",
-  "Push Notifications": "सूचनाएं धक्का",
-  "Get instant SMS alerts for critical updates.": "महत्वपूर्ण अपडेट के लिए तत्काल एसएमएस अलर्ट प्राप्त करें।",
-  "Saving...": "सहेजा जा रहा है...",
-  "Village: ": "गाँव:",
-  "Type: ": "प्रकार:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 रुपेकेजी सर्कुलर इकोनॉमी ओएस। सर्वाधिकार सुरक्षित।",
-  "FRAUD ALERT": "धोखाधड़ी चेतावनी",
-  "How the Engine Works": "इंजन कैसे काम करता है",
-  " Context (": "प्रसंग (",
-  "GENESIS": "उत्पत्ति",
-  "Value: ": "कीमत:",
-  "Currently Active: ": "वर्तमान में सक्रिय:",
-  "Weight: ": "वज़न:",
-  "Farmer": "किसान",
-  "RUPAYKG": "रुपायकेजी",
-  "Privacy": "गोपनीयता",
-  "rural": "ग्रामीण",
-  "urban": "शहरी",
-  "Terms": "शर्तें",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संग्रह एवं परिवहन)",
-  "Admin": "व्यवस्थापक",
-  "Processor (Recycler)": "प्रोसेसर (रीसाइक्लर)",
-  "No audit logs found": "कोई ऑडिट लॉग नहीं मिला",
-  "Circular Economy Intake Form": "सर्कुलर इकोनॉमी इंटेक फॉर्म",
-  "GPS Captured: ": "जीपीएस से कैप्चर किया गया:",
-  "GPS Capture Failed": "जीपीएस कैप्चर विफल",
-  "Name": "नाम",
-  "Acreage (acres)": "एकड़ (एकड़)",
-  "Wallet Balance": "वॉलेट बैलेंस",
-  "No records found": "कोई रिकॉर्ड नहीं मिला",
-  "Database Connection Failed": "डेटाबेस कनेक्शन विफल",
-  "Capturing GPS Coordinates...": "जीपीएस निर्देशांक कैप्चर किया जा रहा है...",
-  "GPS Required": "जीपीएस आवश्यक",
-  "Farmer registered successfully! ID: ": "किसान सफलतापूर्वक पंजीकृत! पहचान:",
-  "Retry GPS": "जीपीएस पुनः प्रयास करें",
-  "e.g., Paddy, Wheat": "जैसे, धान, गेहूँ",
-  "Failed to get location. Please enter manually.": "स्थान प्राप्त करने में विफल. कृपया मैन्युअल रूप से दर्ज करें.",
-  "Geolocation is not supported by this browser.": "जियोलोकेशन इस ब्राउज़र द्वारा समर्थित नहीं है.",
-  "Failed to register farmer": "किसान का पंजीयन नहीं हो सका",
-  "Drivers Online": "ड्राइवर ऑनलाइन",
-  "Active Queue": "सक्रिय कतार",
-  "Active Fleet": "सक्रिय बेड़ा",
-  "Output Material": "आउटपुट सामग्री",
-  "Total Capacity": "कुल क्षमता",
-  "Biomass in Stock": "स्टॉक में बायोमास",
-  "Available for Pickup": "बटोरने के लिए उपलब्ध",
-  "No new tasks available.": "कोई नया कार्य उपलब्ध नहीं है.",
-  "Storage Utilization": "भंडारण उपयोग",
-  "Incoming for Processing": "प्रसंस्करण हेतु आवक",
-  "Current Load": "वर्तमान भार",
-  "Accept Pickup": "पिकअप स्वीकार करें",
-  "Utilization": "उपयोग",
-  "Recently Processed": "हाल ही में संसाधित",
-  "Timestamp": "समय-चिह्न",
-  "Value": "कीमत",
-  "Pending MRV": "लंबित एमआरवी",
-  "MRV Status": "एमआरवी स्थिति",
-  "Accept Receipt": "रसीद स्वीकार करें",
-  "Type": "प्रकार",
-  "No active tasks in your possession.": "आपके पास कोई सक्रिय कार्य नहीं है.",
-  "Weight": "वज़न",
-  "No records found for the selected filter.": "चयनित फ़िल्टर के लिए कोई रिकॉर्ड नहीं मिला.",
-  "No MRV history found": "कोई एमआरवी इतिहास नहीं मिला",
-  "Verified By": "द्वारा सत्यापित",
-  "High": "उच्च",
-  "AI Risk": "एआई जोखिम",
-  "Check back later for newly verified CCCs.": "नए सत्यापित कार्बन क्रेडिट के लिए बाद में दोबारा जाँच करें।",
-  "Details": "विवरण",
-  "Record ID": "रिकॉर्ड आईडी",
-  "No credits available": "कोई क्रेडिट उपलब्ध नहीं है",
-  "Low": "कम",
-  "Med": "मेड",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "रुपेकेजी की मूलभूत संरचना और संचालन सिद्धांत",
-  "Verified": "सत्यापित",
-  "Profile updated successfully": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
-  "Insufficient Funds": "अपर्याप्त कोष",
-  "Profile Settings": "प्रोफ़ाइल सेटिंग्स",
-  "Purchase Credit": "क्रेडिट खरीदें",
-  "Offset": "ओफ़्सेट",
-  "Failed to update profile": "प्रोफ़ाइल अपडेट करने में विफल",
-  "An error occurred": "एक त्रुटि पाई गई",
-  "I. Introduction": "I. प्रस्तावना",
-  "Context": "प्रसंग",
-  "Urban": "शहरी",
-  "Category": "वर्ग",
-  "Rural": "ग्रामीण",
-  "II. Unified Operating System Model": "द्वितीय. एकीकृत ऑपरेटिंग सिस्टम मॉडल",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "रुपेकेजी को एक परियोजना डेवलपर, कार्बन व्यापारी या रीसाइक्लिंग इकाई के रूप में संरचित नहीं किया गया है। यह एक बुनियादी ढांचा परत है जिसे वास्तुशिल्प दोहराव के बिना शहरी और ग्रामीण प्रशासनिक ढांचे में संचालित करने के लिए डिज़ाइन किया गया है।",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "यह प्लेटफ़ॉर्म भारत के कार्बन पारिस्थितिकी तंत्र में एक संरचनात्मक अंतर को संबोधित करता है: एक एकीकृत, नियामक-संरेखित डिजिटल बुनियादी ढांचे की अनुपस्थिति जो सत्यापित अपशिष्ट डायवर्जन को अनुपालन-ग्रेड कार्बन आपूर्ति में परिवर्तित करने में सक्षम है।",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "रुपेकेजी को एक एकीकृत अपशिष्ट-से-CCC डिजिटल ऑपरेटिंग सिस्टम के रूप में स्थापित किया गया है जो अनुपालन-आधारित CCC बाजार की ओर भारत के संक्रमण का समर्थन करने के लिए डिज़ाइन किया गया है।",
-  "Anchor": "लंगर",
-  "CSR Contributors": "सीएसआर योगदानकर्ता",
-  "III. Unified Stakeholder Architecture": "तृतीय. एकीकृत हितधारक वास्तुकला",
-  "Administrative Authority": "प्रशासनिक प्राधिकारी",
-  "Methane avoidance through diversion": "डायवर्जन के माध्यम से मीथेन से बचाव",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सभी ग्रामीण कृषि अवशेष और बायोमास गतिविधि को बायोमास के अंतर्गत वर्गीकृत किया गया है। कोई अलग कृषि कार्यक्षेत्र मौजूद नहीं है।",
-  "Producers (EPR)": "निर्माता (ईपीआर)",
-  "Biomass-based fossil substitution": "बायोमास-आधारित जीवाश्म प्रतिस्थापन",
-  "IV. CCC Origination": "चतुर्थ. CCC उत्पत्ति",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटर को संरचनात्मक रूप से मर्ज की गई इकाई के रूप में परिभाषित किया गया है जो संग्रह और सॉर्टिंग सत्यापन के लिए जिम्मेदार है, श्रृंखला-ऑफ-कस्टडी सत्यापन को सरल बनाता है।",
-  "Gram Panchayat + Village": "ग्राम पंचायत + गाँव",
-  "Recycling substitution": "पुनर्चक्रण प्रतिस्थापन",
-  "Recycler Rail": "रिसाइक्लर रेल",
-  "Governance Layer": "शासन परत",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी करने वाला प्राधिकरण नियामक-नियंत्रित रहता है। रुपेकेजी स्वतंत्र रूप से क्रेडिट का खनन नहीं करता है। सभी क्रेडिट इवेंट-ट्रेस करने योग्य, रजिस्ट्री-संगत होने चाहिए और राष्ट्रीय कार्बन शासन ढांचे के साथ संरेखित होने चाहिए।",
-  "V. Multi-Rail Architecture": "वी. मल्टी-रेल आर्किटेक्चर",
-  "CCC Rail": "कार्बन रेल",
-  "EPR Rail": "ईपीआर रेल",
-  "VII. Strategic Position": "सातवीं. सामरिक स्थिति",
-  "VI. Regulator Sovereignty": "VI. नियामक संप्रभुता",
-  "CSR Rail": "सीएसआर रेल",
-  "Legally Styled": "कानूनी तौर पर स्टाइल किया गया",
-  "Article I — Unified Operating System": "अनुच्छेद I - एकीकृत ऑपरेटिंग सिस्टम",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जब हमने रुपेकेजी का निर्माण शुरू किया, तो हमने रीसाइक्लिंग से शुरुआत नहीं की। हमने एक संरचनात्मक प्रश्न से शुरुआत की: कोई एकीकृत बुनियादी ढांचा क्यों नहीं है जो कचरे को विनियमित कार्बन मूल्य में परिवर्तित करता है?",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "उन्हें एकजुट करने के लिए रुपेकेजी का निर्माण किया गया था। कार्बन व्यापारी के रूप में नहीं. रीसाइक्लिंग स्टार्टअप के रूप में नहीं। लेकिन एक एकल ऑपरेटिंग सिस्टम के रूप में नगरपालिका वार्ड स्तर और ग्राम पंचायत ग्राम स्तर पर संरचनात्मक दोहराव के बिना काम करने में सक्षम है।",
-  "— Founder, RupayKg": "- संस्थापक, रुपेकेजी",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "कचरे का अब निपटान नहीं रह गया है। यह शासन से जुड़ा जलवायु बुनियादी ढांचा है।",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत अनुपालन कार्बन युग में प्रवेश कर रहा है। नगरपालिका प्रणालियाँ मापने योग्य मीथेन उत्पन्न करती हैं। ग्रामीण बायोमास जला दिया जाता है या कम उपयोग किया जाता है। फिर भी प्रणालियाँ खंडित बनी हुई हैं।",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "रुपेकेजी एक एकल डिजिटल प्रणाली संचालित करेगा जो निम्नलिखित के तहत लागू होगी: (ए) नगर निगम + वार्ड (शहरी संदर्भ) (बी) ग्राम पंचायत + गांव (ग्रामीण संदर्भ)। संदर्भों के बीच कोई संरचनात्मक दोहराव मौजूद नहीं होगा।",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "मूलभूत संरचना की घोषणा",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद II - एकीकृत हितधारक सिद्धांत",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "हितधारक संरचना देश भर में एक समान रहेगी और इसमें शामिल होंगे: अपशिष्ट जनरेटर, एग्रीगेटर, प्रोसेसर, प्रशासनिक प्राधिकरण, निर्माता (ईपीआर), सीएसआर योगदानकर्ता, कार्बन खरीदार, नियामक।",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "अपशिष्ट को विशेष रूप से इस प्रकार वर्गीकृत किया जाएगा: (ए) शहरी संदर्भ में एमएसडब्ल्यू (बी) ग्रामीण संदर्भ में बायोमास। सभी कृषि अवशेषों को बायोमास के अंतर्गत वर्गीकृत किया जाएगा।",
-  "Article IV — CCC Engine": "अनुच्छेद IV - CCC इंजन",
-  "Article III — Waste Classification": "अनुच्छेद III - अपशिष्ट वर्गीकरण",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन टकसाल प्राधिकरण नियामक नियंत्रण में रहेगा। रुपेकेजी स्वतंत्र रूप से कार्बन क्रेडिट जारी नहीं करेगा।",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद VI - नियामक संप्रभुता",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सभी उत्सर्जन कटौती को इवेंट-स्तरीय एमआरवी सत्यापन के साथ एकल CCC गणना इंजन के माध्यम से संसाधित किया जाएगा।",
-  "Institutional Identity": "संस्थागत पहचान",
-  "Article V — Rail Separation": "अनुच्छेद V - रेल पृथक्करण",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "रुपेकेजी निम्नलिखित के बीच सख्त अलगाव बनाए रखेगा: रिसाइक्लर अकाउंटिंग, सीएसआर अकाउंटिंग, ईपीआर अनुपालन, गवर्नेंस वैल्यू, CCC जारी करना। दोहरी गिनती निषिद्ध है.",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "रुपेकेजी को इस प्रकार परिभाषित किया गया है: एक एकीकृत अपशिष्ट-से-CCC अवसंरचना मंच जो नियामक-संरेखित CCC उत्पत्ति क्षमता के साथ एकल राष्ट्रीय हितधारक वास्तुकला के तहत काम कर रहा है।"
-  } },
-  ne: { translation: {
-  "Dashboard": "ड्यासबोर्ड",
-  "Upload Waste": "अपशिष्ट अपलोड गर्नुहोस्",
-  "CCC Market": "कार्बन बजार",
-  "MRV Dashboard": "MRV ड्यासबोर्ड",
-  "Genesis": "उत्पत्ति",
-  "National KPI": "राष्ट्रिय KPI",
-  "History": "इतिहास",
-  "Settings": "सेटिङहरू",
-  "Task Board": "कार्य बोर्ड",
-  "Logout": "लगआउट",
-  "Total Earnings": "कुल आम्दानी",
-  "English": "अंग्रेजी",
-  "Total Collected": "जम्मा जम्मा",
-  "CCC Offset": "कार्बन अफसेट",
-  "Welcome back": "फेरि स्वागत छ",
-  "Language": "भाषा",
-  "System Overview": "प्रणाली अवलोकन",
-  "Hindi": "हिन्दी",
-  "Community Rank": "सामुदायिक श्रेणी",
-  "Farmers Registered": "किसानहरू दर्ता भएका छन्",
-  "Fleet Efficiency": "फ्लीट दक्षता",
-  "Logistics Margin": "रसद मार्जिन",
-  "Total Processed": "कुल प्रशोधित",
-  "Seed Demo Data": "बीज डेमो डाटा",
-  "ESG Score": "ESG स्कोर",
-  "Processing Yield": "प्रशोधन उपज",
-  "Value Generated": "मूल्य उत्पन्न",
-  "Total Investment": "कुल लगानी",
-  "Platform Statistics": "प्लेटफर्म तथ्याङ्क",
-  "CCCs": "कार्बन क्रेडिट",
-  "Total Users": "कुल प्रयोगकर्ताहरू",
-  "Total Value": "कुल मूल्य",
-  "Recent Activity": "हालको गतिविधि",
-  "Waste Distribution": "फोहोर वितरण",
-  "Register New Farmer": "नयाँ किसान दर्ता गर्नुहोस्",
-  "CCCs Generated": "कार्बन घट्यो",
-  "New Collection Record": "नयाँ संग्रह रेकर्ड",
-  "Reset Demo Data": "डेमो डाटा रिसेट गर्नुहोस्",
-  "Total Weight": "कुल वजन",
-  "Performance Analytics": "प्रदर्शन विश्लेषण",
-  "Full Name": "पूरा नाम",
-  "New Processing Record": "नयाँ प्रशोधन रेकर्ड",
-  "Latitude": "अक्षांश",
-  "New Intake Record": "नयाँ इनटेक रेकर्ड",
-  "Mobile Number": "मोबाइल नम्बर",
-  "Farm Location": "फार्म स्थान",
-  "Get Current Location": "हालको स्थान प्राप्त गर्नुहोस्",
-  "Longitude": "देशान्तर",
-  "Land Area (Acres)": "जग्गा क्षेत्र (एकड)",
-  "Crop Type": "फसल प्रकार",
-  "Register Farmer": "किसान दर्ता गर्नुहोस्",
-  "Registering...": "दर्ता गर्दै...",
-  "All": "सबै",
-  "Foundational Doctrine": "आधारभूत सिद्धान्त",
-  "In Transit": "ट्रान्जिट मा",
-  "Pending Pickup": "पेन्डिङ पिकअप",
-  "Account Settings": "खाता सेटिङहरू",
-  "Transaction Ledger": "लेनदेन खाता",
-  "Operations Management": "सञ्चालन व्यवस्थापन",
-  "Processed": "प्रशोधन गरियो",
-  "Base Value (Recycler)": "आधार मूल्य (पुनर्चक्रक)",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "Location Confirmation (Google Maps)": "स्थान पुष्टि (Google नक्सा)",
-  "Total Sovereign Value": "कुल सार्वभौम मूल्य",
-  "Waste Type": "फोहोरको प्रकार",
-  "Confirm Intake & Mint Value": "सेवन र मिन्ट मान पुष्टि गर्नुहोस्",
-  "Verification Image": "प्रमाणीकरण छवि",
-  "Estimated Value Breakdown": "अनुमानित मान ब्रेकडाउन",
-  "Processing...": "प्रशोधन गर्दै...",
-  "Weight (kg)": "वजन (किग्रा)",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्राम फोहोरलाई मा रूपान्तरण गर्नुहोस्",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "RupayKg बहु-रेल मूल्य इन्जिन मार्फत कृषि, नगरपालिका, र औद्योगिक फोहोरहरू मुद्रीकरण गर्न समुदायहरूलाई सशक्तिकरण गर्ने गोलाकार अर्थव्यवस्था अपरेटिङ सिस्टम हो।",
-  "Global Circular Value": "ग्लोबल सर्कुलर मान",
-  "Ecosystem Roles": "इकोसिस्टम भूमिकाहरू",
-  "Intake": "सेवन",
-  "Access the OS": "OS पहुँच गर्नुहोस्",
-  "How it Works": "यसले कसरी काम गर्छ",
-  "Features": "सुविधाहरू",
-  "Launch OS": "ओएस सुरु गर्नुहोस्",
-  "Sovereign-Grade Circular Economy Engine": "सार्वभौम-ग्रेड सर्कुलर इकोनोमी इन्जिन",
-  "Rural Wealth Creation": "ग्रामीण धन सृजन",
-  "Live Network Impact": "प्रत्यक्ष नेटवर्क प्रभाव",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "फोहोरको प्रकार, तौल र भौगोलिक स्थानको स्वचालित प्रमाणीकरणले अपरिवर्तनीय, सार्वभौम-ग्रेड डेटा अखण्डता सुनिश्चित गर्दछ।",
-  "Multi-Rail Value Engine": "बहु-रेल मूल्य इन्जिन",
-  "AI-Verified Intake": "AI-प्रमाणित सेवन",
-  "Read Whitepaper": "श्वेतपत्र पढ्नुहोस्",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "एकैसाथ प्रशोधित बायोमासको प्रत्येक किलोग्रामको लागि रिसाइक्लर, CSR, नगरपालिका, कार्बन, र EPR रेलहरूबाट मूल्य निकाल्नुहोस्।",
-  "Live Stream": "लाइभ स्ट्रिम",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिक वालेटहरूमा प्रत्यक्ष रूपमा रकम वितरण गर्नुहोस्, वातावरणीय दायित्वहरूलाई स्थानीयकृत आर्थिक वृद्धिमा रूपान्तरण गर्नुहोस्।",
-  "Real-time waste throughput across the RupayKg OS": "RupayKg OS मा वास्तविक समय बर्बाद थ्रुपुट",
-  "Generate": "उत्पन्न गर्नुहोस्",
-  "Aggregate": "कुल",
-  "nodes": "नोडहरू",
-  "Distributed biomass collection nodes": "बायोमास सङ्कलन नोडहरू वितरित",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटरहरू प्रमाणीकरण, तौल, र सुविधाहरूमा फोहोर ढुवानी गर्छन्।",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिकहरूले कृषि, नगरपालिका वा औद्योगिक फोहोर सङ्कलन गर्छन्।",
-  "A seamless pipeline from waste generation to value realization.": "फोहोर उत्पादन देखि मूल्य प्राप्ति सम्म एक सिमलेस पाइपलाइन।",
-  "Active Nodes": "सक्रिय नोडहरू",
-  "Network Topology": "नेटवर्क टोपोलोजी",
-  "Value Minted": "मूल्य मिन्टेड",
-  "Process": "प्रक्रिया",
-  "Citizen": "नागरिक",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट अनुबंधहरूले सबै 5 मूल्य रेलहरूमा रकम वितरण गर्दछ।",
-  "Choose your part in the circular economy.": "गोलाकार अर्थतन्त्रमा आफ्नो भाग छान्नुहोस्।",
-  "Mint Value": "टकसाल मूल्य",
-  "Upload waste records": "फोहोर रेकर्डहरू अपलोड गर्नुहोस्",
-  "Waste Generator": "फोहोर जेनेरेटर",
-  "Instant wallet funding": "तत्काल वालेट कोष",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि, नगरपालिका, वा औद्योगिक फोहोरहरू सङ्कलन र जम्मा गर्नुहोस्। प्रदान गरिएको फोहोरको वजन र प्रकारको आधारमा प्रत्यक्ष वालेट निक्षेपहरू कमाउनुहोस्।",
-  "Recyclers convert waste into usable materials or energy.": "रिसाइकलहरूले फोहोरलाई प्रयोगयोग्य सामग्री वा ऊर्जामा रूपान्तरण गर्छन्।",
-  "Aggregator": "एग्रीगेटर",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिक निक्षेपहरू प्रमाणित गर्नुहोस्, फोहोर मिलाउनुहोस्, र प्रशोधन सुविधाहरूमा सामग्री ढुवानी गर्न रसद व्यवस्थापन गर्नुहोस्।",
-  "Earn logistics margins": "रसद मार्जिन कमाउनुहोस्",
-  "Log collection batches": "लग सङ्कलन ब्याचहरू",
-  "Processor": "प्रोसेसर",
-  "Recycler": "रिसाइक्लर",
-  "Track environmental impact": "वातावरणीय प्रभाव ट्र्याक गर्नुहोस्",
-  "Route optimization data": "मार्ग अनुकूलन डेटा",
-  "Collection & Transport": "संकलन र यातायात",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "जम्मा भएको फोहोर प्राप्त गर्नुहोस् र यसलाई अन्तिम उत्पादनहरूमा प्रशोधन गर्नुहोस्। सबै रेलहरूमा अन्तिम मूल्य प्राप्ति ट्रिगर गर्नुहोस्।",
-  "Generate CCCs": "कार्बन क्रेडिट उत्पन्न गर्नुहोस्",
-  "Access CSR/EPR funds": "CSR/EPR कोषहरू पहुँच गर्नुहोस्",
-  "Circular Economy Operating System": "सर्कुलर इकोनोमी अपरेटिङ सिस्टम",
-  "Context:": "सन्दर्भ:",
-  "District": "जिल्ला",
-  "Log processing yields": "लग प्रशोधन उपज",
-  "Login": "लगइन गर्नुहोस्",
-  "Account Type": "खाता प्रकार",
-  "Organization Name": "संस्थाको नाम",
-  "Register": "दर्ता गर्नुहोस्",
-  "Global Impact Map": "विश्वव्यापी प्रभाव नक्सा",
-  "State": "राज्य",
-  "Submission Heatmap": "सबमिशन हीटम्याप",
-  "Password": "पासवर्ड",
-  "Back to Home": "घर फर्कनुहोस्",
-  "Quick Demo Access": "द्रुत डेमो पहुँच",
-  "System Audit Logs": "प्रणाली अडिट लगहरू",
-  "Access OS": "OS पहुँच गर्नुहोस्",
-  "Phone Number": "फोन नम्बर",
-  "Create Account": "खाता सिर्जना गर्नुहोस्",
-  "MRV Verification Dashboard": "MRV प्रमाणीकरण ड्यासबोर्ड",
-  "Portfolio Composition": "पोर्टफोलियो संरचना",
-  "Farmers Supported": "किसानहरुले साथ दिएका छन्",
-  "Total Offset": "कुल अफसेट",
-  "All processed waste has been verified.": "सबै प्रशोधित फोहोरहरू प्रमाणित गरिएको छ।",
-  "No pending MRV records": "कुनै पेन्डिङ MRV रेकर्ड छैन",
-  "Waste Diverted": "फोहोर विस्थापित",
-  "Impact Distribution": "प्रभाव वितरण",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी गर्न प्रशोधित फोहोर रेकर्डहरू प्रमाणित गर्नुहोस्।",
-  "Pending": "विचाराधीन",
-  "Acreage": "क्षेत्रफल",
-  "Available Credits": "उपलब्ध क्रेडिटहरू",
-  "Reject": "अस्वीकार गर्नुहोस्",
-  "Credit Value": "क्रेडिट मूल्य",
-  "Verify & Issue Credits": "प्रमाणित गर्नुहोस् र क्रेडिट जारी गर्नुहोस्",
-  "Location Verification": "स्थान प्रमाणीकरण",
-  "AI Risk Score": "AI जोखिम स्कोर",
-  "Purchase verified CCCs to offset your footprint.": "तपाईंको पदचिह्न अफसेट गर्न प्रमाणित कार्बन क्रेडिटहरू खरिद गर्नुहोस्।",
-  "Carbon Reduction": "कार्बन न्यूनीकरण",
-  "Purchase Credits": "क्रेडिटहरू खरिद गर्नुहोस्",
-  "Confirm Purchase": "खरिद पुष्टि गर्नुहोस्",
-  "Recent Transactions": "हालको लेनदेन",
-  "Project": "परियोजना",
-  "Cancel": "रद्द गर्नुहोस्",
-  "Price per Tonne": "मूल्य प्रति टन",
-  "Your Offset Balance": "तपाईंको अफसेट ब्यालेन्स",
-  "Amount": "रकम",
-  "Amount to Purchase (Tonnes)": "खरिद रकम (टन)",
-  "Total Cost": "कुल लागत",
-  "Status": "स्थिति",
-  "Network Active": "नेटवर्क सक्रिय",
-  "MSW": "MSW",
-  "Municipal Corporation": "महानगरपालिका",
-  "Price": "मूल्य",
-  "Ward Analytics": "वार्ड विश्लेषण",
-  "Date": "मिति",
-  "Ward-Level Analytics": "वडा-स्तर विश्लेषण",
-  "National Dashboard": "राष्ट्रिय ड्यासबोर्ड",
-  "Ward": "वार्ड",
-  "Village": "गाउँ",
-  "Village Analytics": "गाउँ विश्लेषण",
-  "Biomass": "बायोमास",
-  "Farmer / FPO (Biomass Generator)": "किसान / FPO (बायोमास जेनरेटर)",
-  "Village-Level Analytics": "गाउँ-स्तर विश्लेषण",
-  "All Roles": "सबै भूमिकाहरू",
-  "Citizen (MSW Generator)": "नागरिक (MSW जेनरेटर)",
-  "Gram Panchayat": "ग्राम पञ्चायत",
-  "Citizens": "नागरिकहरू",
-  "Farmers / FPOs": "किसान / एफपीओ",
-  "Audit Logs": "अडिट लगहरू",
-  "CSR Partners": "CSR साझेदारहरू",
-  "EPR Partners": "EPR साझेदारहरू",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "User Management": "प्रयोगकर्ता व्यवस्थापन",
-  "CCC Buyers": "कार्बन खरीददारहरू",
-  "Fraud Alerts & Flagged Events": "धोखाधडी अलर्ट र फ्ल्याग गरिएका घटनाहरू",
-  "Diverted": "मोडियो",
-  "Processors": "प्रोसेसरहरू",
-  "Aggregators": "एग्रीगेटरहरू",
-  "Trees Equivalent": "रुख बराबर",
-  "Total Waste Events": "कुल अपशिष्ट घटनाहरू",
-  "Processed Events": "प्रशोधित घटनाहरू",
-  "Methane Avoided": "मिथेन बेवास्ता गरियो",
-  "Water Saved": "पानी बचत",
-  "Wallet Disbursed": "वालेट वितरण गरियो",
-  "Trees": "रूखहरू",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Environmental Impact": "वातावरणीय प्रभाव",
-  "Growth & Impact Trends": "वृद्धि र प्रभाव प्रवृत्ति",
-  "Processing Efficiency": "प्रशोधन दक्षता",
-  "Govt Cost Savings": "सरकारी लागत बचत",
-  "Operational Health": "सञ्चालन स्वास्थ्य",
-  "Waste Composition": "अपशिष्ट संरचना",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* ल्यान्डफिल व्यवस्थापन र वातावरणीय सुधार लागतहरूमा आधारित सरकारी बचत गणना।",
-  "Total Minted CCC Units": "कुल Minted कार्बन एकाइहरू",
-  "No flagged events detected.": "कुनै फ्ल्याग गरिएका घटनाहरू फेला परेनन्।",
-  "Geospatial Fraud Distribution": "भौगोलिक धोखाधडी वितरण",
-  "Avg Price / kg": "औसत मूल्य / किग्रा",
-  "MRV Rejection Rate": "MRV अस्वीकार दर",
-  "Actions": "कार्यहरू",
-  "Regulator": "नियामक",
-  "Super Admin": "सुपर एडमिन",
-  "Location": "स्थान",
-  "Municipal Admin": "नगरपालिका प्रशासन",
-  "State Admin": "राज्य प्रशासन",
-  "CSR Partner": "CSR साझेदार",
-  "Wallet": "वालेट",
-  "Role": "भूमिका",
-  "User": "प्रयोगकर्ता",
-  "Delete User": "प्रयोगकर्ता मेट्नुहोस्",
-  "No users found.": "कुनै प्रयोगकर्ता फेला परेनन्।",
-  "EPR Partner": "EPR साझेदार",
-  "Action": "कार्य",
-  "User ID": "प्रयोगकर्ता आईडी",
-  "CCC Buyer": "कार्बन क्रेता",
-  "Total Events": "कुल घटनाहरू",
-  "No audit logs available.": "कुनै अडिट लगहरू उपलब्ध छैनन्।",
-  "Total Waste": "कुल फोहोर",
-  "No ward data available.": "कुनै वडा डाटा उपलब्ध छैन।",
-  "Enable browser push notifications.": "ब्राउजर पुश सूचनाहरू सक्षम गर्नुहोस्।",
-  "Notification Preferences": "अधिसूचना प्राथमिकताहरू",
-  "Saving...": "बचत गर्दै...",
-  "Push Notifications": "पुश सूचनाहरू",
-  "Add ₹10,000": "₹10,000 थप्नुहोस्",
-  "Receive updates about your transactions via email.": "इमेल मार्फत आफ्नो लेनदेन बारे अद्यावधिकहरू प्राप्त गर्नुहोस्।",
-  "Email Notifications": "इमेल सूचनाहरू",
-  "SMS Alerts": "एसएमएस अलर्टहरू",
-  "Get instant SMS alerts for critical updates.": "महत्वपूर्ण अपडेटहरूको लागि तत्काल SMS अलर्टहरू प्राप्त गर्नुहोस्।",
-  "Save Changes": "परिवर्तनहरू बचत गर्नुहोस्",
-  "Village: ": "गाउँ:",
-  "Value: ": "मान:",
-  "Type: ": "प्रकार:",
-  "GENESIS": "उत्पत्ति",
-  " Context (": "सन्दर्भ (",
-  "FRAUD ALERT": "धोखाधडी चेतावनी",
-  "How the Engine Works": "कसरी इन्जिन काम गर्दछ",
-  "Currently Active: ": "हाल सक्रिय:",
-  "Weight: ": "वजन:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 RupayKg सर्कुलर इकोनोमी OS। सबै अधिकार सुरक्षित।",
-  "urban": "सहरी",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संकलन र यातायात)",
-  "Admin": "व्यवस्थापक",
-  "Terms": "सर्तहरू",
-  "National Regulator": "राष्ट्रिय नियामक",
-  "Processor (Recycler)": "प्रोसेसर (रिसाइक्लर)",
-  "rural": "ग्रामीण",
-  "Privacy": "गोपनीयता",
-  "Farmer": "किसान",
-  "RUPAYKG": "RUPAYKG",
-  "Database Connection Failed": "डाटाबेस जडान असफल भयो",
-  "Circular Economy Intake Form": "सर्कुलर इकोनोमी इनटेक फारम",
-  "Capturing GPS Coordinates...": "GPS निर्देशांकहरू खिच्दै...",
-  "No audit logs found": "कुनै अडिट लगहरू फेला परेन",
-  "GPS Capture Failed": "GPS क्याप्चर असफल भयो",
-  "No records found": "कुनै अभिलेख भेटिएन",
-  "Name": "नाम",
-  "Acreage (acres)": "क्षेत्रफल (एकड़)",
-  "GPS Captured: ": "GPS कैद गरिएको:",
-  "Wallet Balance": "वालेट ब्यालेन्स",
-  "Failed to register farmer": "किसान दर्ता गर्न असफल",
-  "e.g., Paddy, Wheat": "जस्तै, धान, गहुँ",
-  "Drivers Online": "ड्राइभरहरू अनलाइन",
-  "Active Fleet": "सक्रिय फ्लीट",
-  "Retry GPS": "GPS पुन: प्रयास गर्नुहोस्",
-  "Geolocation is not supported by this browser.": "भौगोलिक स्थान यस ब्राउजर द्वारा समर्थित छैन।",
-  "Active Queue": "सक्रिय लाम",
-  "Failed to get location. Please enter manually.": "स्थान प्राप्त गर्न असफल। कृपया म्यानुअल रूपमा प्रविष्ट गर्नुहोस्।",
-  "GPS Required": "GPS आवश्यक छ",
-  "Farmer registered successfully! ID: ": "किसान सफलतापूर्वक दर्ता! ID:",
-  "Incoming for Processing": "प्रशोधनका लागि आगमन",
-  "Utilization": "उपयोगिता",
-  "Total Capacity": "कुल क्षमता",
-  "Accept Pickup": "पिकअप स्वीकार गर्नुहोस्",
-  "Output Material": "आउटपुट सामग्री",
-  "Current Load": "हालको लोड",
-  "No new tasks available.": "कुनै नयाँ कार्यहरू उपलब्ध छैनन्।",
-  "Available for Pickup": "पिकअपको लागि उपलब्ध छ",
-  "Storage Utilization": "भण्डारण उपयोगिता",
-  "Biomass in Stock": "स्टकमा बायोमास",
-  "Accept Receipt": "रसिद स्वीकार गर्नुहोस्",
-  "MRV Status": "MRV स्थिति",
-  "Timestamp": "टाइमस्ट्याम्प",
-  "Value": "मूल्य",
-  "Pending MRV": "पेन्डिङ MRV",
-  "Type": "टाइप गर्नुहोस्",
-  "Recently Processed": "भर्खरै प्रशोधन गरिएको",
-  "No active tasks in your possession.": "तपाईंको स्वामित्वमा कुनै सक्रिय कार्यहरू छैनन्।",
-  "No records found for the selected filter.": "चयन गरिएको फिल्टरको लागि कुनै रेकर्ड फेला परेन।",
-  "Weight": "वजन",
-  "No MRV history found": "कुनै MRV इतिहास फेला परेन",
-  "Record ID": "रेकर्ड आईडी",
-  "No credits available": "कुनै क्रेडिट उपलब्ध छैन",
-  "Verified By": "द्वारा प्रमाणित",
-  "Check back later for newly verified CCCs.": "नयाँ प्रमाणित कार्बन क्रेडिटहरूको लागि पछि फेरि जाँच गर्नुहोस्।",
-  "Low": "कम",
-  "AI Risk": "AI जोखिम",
-  "Details": "विवरणहरू",
-  "High": "उच्च",
-  "Med": "मेड",
-  "Verified": "प्रमाणित",
-  "Failed to update profile": "प्रोफाइल अपडेट गर्न असफल",
-  "Profile updated successfully": "प्रोफाइल सफलतापूर्वक अपडेट गरियो",
-  "Offset": "अफसेट",
-  "I. Introduction": "I. परिचय",
-  "Purchase Credit": "क्रेडिट खरिद गर्नुहोस्",
-  "An error occurred": "एउटा त्रुटि भयो",
-  "Insufficient Funds": "अपर्याप्त कोष",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "RupayKg को आधारभूत संरचना र सञ्चालन सिद्धान्त",
-  "RupayKg AI": "RupayKg AI",
-  "Thinking...": "सोच्दै...",
-  "Read Aloud": "ठूलो स्वरले पढ्नुहोस्",
-  "Playing...": "बजिरहेको छ...",
-  "Use Maps": "नक्सा प्रयोग गर्नुहोस्",
-  "Maps Grounding On": "नक्सा ग्राउन्डिङ अन",
-  "Ask RupayKg AI...": "RupayKg AI लाई सोध्नुहोस्...",
-  "Sources:": "स्रोतहरू:",
-  "Map Location": "नक्सा स्थान",
-  "Hello! I am RupayKg AI. How can I help you with waste management, CCCs, or finding nearby facilities?": "नमस्ते! म RupayKg AI हुँ। म तपाईंलाई फोहोर व्यवस्थापन, कार्बन क्रेडिट, वा नजिकैका सुविधाहरू फेला पार्न कसरी मद्दत गर्न सक्छु?",
-  "Sorry, I encountered an error.": "माफ गर्नुहोस्, मैले एउटा त्रुटि सामना गरें।",
-  "Agricultural": "कृषि",
-  "Municipal": "नगरपालिका",
-  "Industrial": "औद्योगिक",
-  "Forestry": "वन",
-  "Livestock": "पशुपालन",
-  "Aquatic": "जलीय",
-  "Construction": "निर्माण",
-  "Plastics": "प्लास्टिक",
-  "Metals": "धातु",
-  "E-Waste": "ई-फोहोर",
-  "Textiles": "कपडा",
-  "Hazardous": "खतरनाक",
-  "Crop Residue (Stubble/Straw)": "बाली अवशेष (पराल)",
-  "Rice Husk & Bran": "धानको भुस र ढुटो",
-  "Wheat Bran": "गहुँको ढुटो",
-  "Sugarcane Bagasse": "उखुको खोया",
-  "Pressmud": "प्रेसमड",
-  "Cotton Stalks": "कपासको डाँठ",
-  "Maize Cobs & Stalks": "मकैको खोया र डाँठ",
-  "Coconut Shells & Coir": "नरिवलको खोल र जटा",
-  "Groundnut Shells": "बदामको बोक्रा",
-  "Fruit & Vegetable Pomace": "फलफूल र तरकारीको गुदी",
-  "Spent Grain (Brewery)": "खर्च गरिएको अन्न (ब्रुअरी)",
-  "Coffee Grounds/Husks": "कफीको धुलो/बोक्रा",
-  "Tea Waste": "चियाको फोहोर",
-  "Municipal Organic Waste": "नगरपालिका जैविक फोहोर",
-  "Food & Kitchen Waste": "खाना र भान्साको फोहोर",
-  "Garden & Leaf Litter": "बगैचा र पातको फोहोर",
-  "Paper & Cardboard Waste": "कागज र गत्ता फोहोर",
-  "Used Cooking Oil": "प्रयोग गरिएको खाना पकाउने तेल",
-  "Textile Waste (Natural)": "कपडा फोहोर (प्राकृतिक)",
-  "Glass Bottles & Jars": "काँचका बोतल र जारहरू",
-  "Industrial Sludge (Organic)": "औद्योगिक हिलो (जैविक)",
-  "Leather Scraps": "छालाका टुक्राहरू",
-  "Rubber Waste": "रबर फोहोर",
-  "Distillery Spent Wash": "डिस्टिलरी खर्च गरिएको धुलाई",
-  "Fly Ash": "फ्लाइ एश",
-  "Slag": "स्ल्याग",
-  "Forestry Wood Chips": "वन काठका टुक्राहरू",
-  "Sawdust & Bark": "काठको धुलो र बोक्रा",
-  "Bamboo Waste": "बाँसको फोहोर",
-  "Pine Needles": "पाइनका सल्लाह",
-  "Invasive Species (Lantana)": "आक्रामक प्रजाति (लन्टाना)",
-  "Livestock Manure": "पशुको मल",
-  "Poultry Litter": "कुखुराको मल",
-  "Bone Meal": "हड्डीको धुलो",
-  "Feather Waste": "प्वाँखको फोहोर",
-  "Aquatic Algae/Seaweed": "जलीय शैवाल/समुद्री झार",
-  "Invasive Species (Water Hyacinth)": "आक्रामक प्रजाति (जलकुम्भी)",
-  "Fish Processing Waste": "माछा प्रशोधन फोहोर",
-  "Construction Wood Waste": "निर्माण काठ फोहोर",
-  "Concrete Rubble (Recycled)": "कंक्रीटको भग्नावशेष (पुनर्चक्रित)",
-  "Brick & Tile Waste": "ईंट र टाइल फोहोर",
-  "Gypsum Board Scraps": "जिप्सम बोर्डका टुक्राहरू",
-  "PET Bottles (Clear)": "PET बोतलहरू (स्पष्ट)",
-  "HDPE Containers": "HDPE कन्टेनरहरू",
-  "LDPE Film/Wrap": "LDPE फिल्म/र्याप",
-  "PP Rigid Plastic": "PP कडा प्लास्टिक",
-  "PVC Scraps": "PVC टुक्राहरू",
-  "Multi-Layered Plastic (MLP)": "बहु-स्तरित प्लास्टिक (MLP)",
-  "Aluminum Cans": "एल्युमिनियम क्यान",
-  "Copper Wire Scraps": "तामाको तारका टुक्राहरू",
-  "Steel/Iron Scrap": "इस्पात/फलामको टुक्रा",
-  "Brass/Bronze Fittings": "पित्तल/कास्य फिटिङहरू",
-  "Printed Circuit Boards (PCBs)": "प्रिन्ट गरिएको सर्किट बोर्ड (PCBs)",
-  "Computer/Laptop Scraps": "कम्प्युटर/ल्यापटप टुक्राहरू",
-  "Mobile Phone Waste": "मोबाइल फोन फोहोर",
-  "Lithium-Ion Batteries": "लिथियम-आयन ब्याट्रीहरू",
-  "Cables & Connectors": "केबल र जडानकर्ताहरू",
-  "Cotton Textile Scraps": "कपास कपडा टुक्राहरू",
-  "Polyester/Synthetic Fabric": "पोलिएस्टर/सिंथेटिक कपडा",
-  "Wool Waste": "ऊनको फोहोर",
-  "Used Footwear": "प्रयोग गरिएको जुत्ता",
-  "Lead-Acid Batteries": "लेड-एसिड ब्याट्रीहरू",
-  "Used Engine Oil": "प्रयोग गरिएको इन्जिन तेल",
-  "Paint & Solvent Waste": "पेन्ट र विलायक फोहोर",
-  "E-Waste Batteries (Ni-Cd/Ni-MH)": "ई-फोहोर ब्याट्रीहरू (Ni-Cd/Ni-MH)",
-  "Rice": "धान",
-  "Wheat": "गहुँ",
-  "Maize": "मकै",
-  "Profile Settings": "प्रोफाइल सेटिङहरू",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "RupayKg लाई एक एकीकृत अपशिष्ट-देखि-कार्बन डिजिटल अपरेटिङ सिस्टमको रूपमा स्थापना गरिएको छ जसले भारतको एक अनुपालन-आधारित कार्बन बजार तर्फको संक्रमणलाई समर्थन गर्न डिजाइन गरिएको छ।",
-  "Urban": "शहरी",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "प्लेटफर्मले भारतको कार्बन इकोसिस्टममा संरचनात्मक अन्तरलाई सम्बोधन गर्दछ: प्रमाणित फोहोर डाइभर्सनलाई अनुपालन-ग्रेड कार्बन आपूर्तिमा रूपान्तरण गर्न सक्षम एकीकृत, नियामक-पङ्क्तिबद्ध डिजिटल पूर्वाधारको अभाव।",
-  "II. Unified Operating System Model": "II। एकीकृत अपरेटिङ सिस्टम मोडेल",
-  "Rural": "ग्रामीण",
-  "Category": "श्रेणी",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "RupayKg परियोजना विकासकर्ता, कार्बन ट्रेडर वा रिसाइक्लिङ्ग निकायको रूपमा संरचित छैन। यो एक पूर्वाधार तह हो जुन शहरी र ग्रामीण प्रशासनिक ढाँचाहरूमा वास्तुकलाको नक्कल बिना सञ्चालन गर्न डिजाइन गरिएको हो।",
-  "Anchor": "एंकर",
-  "Context": "सन्दर्भ",
-  "Methane avoidance through diversion": "डाइभर्सन मार्फत मिथेन बच्ने",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सबै ग्रामीण कृषि अवशेष र बायोमास गतिविधि बायोमास अन्तर्गत वर्गीकृत गरिएको छ। कुनै छुट्टै कृषि ठाडो अवस्थित छैन।",
-  "Administrative Authority": "प्रशासनिक प्राधिकरण",
-  "Producers (EPR)": "उत्पादकहरू (ईपीआर)",
-  "III. Unified Stakeholder Architecture": "III। एकीकृत हितधारक वास्तुकला",
-  "IV. CCC Origination": "IV। CCC उत्पत्ति",
-  "Gram Panchayat + Village": "ग्राम पञ्चायत + गाउँ",
-  "Biomass-based fossil substitution": "बायोमास आधारित जीवाश्म प्रतिस्थापन",
-  "CSR Contributors": "CSR योगदानकर्ताहरू",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटरलाई संरचनात्मक रूपमा सङ्कलन र क्रमबद्ध प्रमाणीकरणका लागि जिम्मेवार मर्ज गरिएको संस्थाको रूपमा परिभाषित गरिएको छ, चेन-अफ-कस्टडी प्रमाणीकरणलाई सरल बनाउँदै।",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी गर्ने प्राधिकरण नियामक-नियन्त्रित रहन्छ। RupayKg ले स्वतन्त्र रूपमा मिन्ट क्रेडिट गर्दैन। सबै क्रेडिटहरू घटना-ट्रेस-योग्य, रजिस्ट्री-कम्प्याटिबल, र राष्ट्रिय कार्बन गभर्नेन्स फ्रेमवर्कहरूसँग पङ्क्तिबद्ध हुनुपर्छ।",
-  "Recycler Rail": "रिसाइक्लर रेल",
-  "EPR Rail": "EPR रेल",
-  "VII. Strategic Position": "VII। रणनीतिक स्थिति",
-  "CCC Rail": "कार्बन रेल",
-  "V. Multi-Rail Architecture": "V. बहु-रेल वास्तुकला",
-  "CSR Rail": "CSR रेल",
-  "Governance Layer": "शासन तह",
-  "Recycling substitution": "पुनर्चक्रण प्रतिस्थापन",
-  "VI. Regulator Sovereignty": "VI। नियामक सार्वभौमसत्ता",
-  "— Founder, RupayKg": "- संस्थापक, RupayKg",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद II - एकीकृत सरोकारवाला सिद्धान्त",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "अब फोहोर फाल्ने अवस्था छैन । यो शासन-सम्बन्धित जलवायु पूर्वाधार हो।",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जब हामीले RupayKg बनाउन थालेका थियौं, हामीले रिसाइक्लिंगको साथ सुरु गरेका थिएनौं। हामीले संरचनात्मक प्रश्नको साथ सुरु गर्यौं: फोहोरलाई नियमित कार्बन मूल्यमा रूपान्तरण गर्ने एकीकृत पूर्वाधार किन छैन?",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "RupayKg ले निम्न अन्तर्गत प्रयोग गर्न मिल्ने एकल डिजिटल प्रणाली सञ्चालन गर्नेछ: (क) नगरपालिका + वार्ड (शहरी सन्दर्भ) (ख) ग्राम पञ्चायत + गाउँ (ग्रामीण सन्दर्भ)। सन्दर्भहरू बीच कुनै संरचनात्मक नक्कल अवस्थित हुँदैन।",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत एक अनुपालन कार्बन युगमा प्रवेश गर्दैछ। नगरपालिका प्रणालीहरूले मापनयोग्य मिथेन उत्पन्न गर्दछ। ग्रामीण बायोमास जलाइन्छ वा कम प्रयोग गरिन्छ। तैपनि संयन्त्रहरू टुक्रिएका छन् ।",
-  "Legally Styled": "कानूनी रूपमा स्टाइल गरिएको",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "तिनीहरूलाई एकीकरण गर्न RupayKg निर्माण गरिएको थियो। कार्बन व्यापारीको रूपमा होइन। रिसाइक्लिंग स्टार्टअपको रूपमा होइन। तर एकल अपरेटिङ सिस्टमको रूपमा नगर वार्ड स्तर र ग्राम पञ्चायत गाउँ स्तरमा संरचनात्मक नक्कल बिना काम गर्न सक्षम छ।",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "आधारभूत संरचनाको घोषणा",
-  "Article I — Unified Operating System": "अनुच्छेद I - एकीकृत अपरेटिङ सिस्टम",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "सरोकारवाला संरचना राष्ट्रव्यापी रूपमा समान रहनेछ र यसमा समावेश हुनेछ: फोहोर उत्पादन गर्ने, एग्रीगेटर, प्रोसेसर, प्रशासनिक प्राधिकरण, उत्पादकहरू (ईपीआर), CSR योगदानकर्ताहरू, कार्बन क्रेताहरू, नियामकहरू।",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सबै उत्सर्जन कटौती घटना-स्तर MRV प्रमाणीकरणको साथ एकल कार्बन गणना इन्जिन मार्फत प्रशोधन गरिनेछ।",
-  "Article VI — Regulator Sovereignty": "धारा VI - नियामक सार्वभौमिकता",
-  "Article III — Waste Classification": "धारा III - फोहोर वर्गीकरण",
-  "Article IV — CCC Engine": "लेख IV - कार्बन इन्जिन",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन टकसाल प्राधिकरण नियामक नियन्त्रणमा रहनेछ। RupayKg ले स्वतन्त्र रूपमा कार्बन क्रेडिट जारी गर्दैन।",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "RupayKg ले बीचमा कडा पृथकता कायम गर्नेछ: रिसाइकल लेखा, CSR लेखा, EPR अनुपालन, शासन मूल्य, कार्बन जारी। दोहोरो गणना निषेधित छ।",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "फोहोरलाई विशेष रूपमा वर्गीकृत गरिनेछ: (क) शहरी सन्दर्भमा एमएसडब्ल्यू (ख) ग्रामीण सन्दर्भमा बायोमास। सबै कृषि अवशेषहरू बायोमास अन्तर्गत वर्गीकृत गरिनेछ।",
-  "Article V — Rail Separation": "लेख V - रेल विभाजन",
-  "Institutional Identity": "संस्थागत पहिचान",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "RupayKg लाई यसरी परिभाषित गरिएको छ: नियामक-पङ्क्तिबद्ध CCC उत्पत्ति क्षमताको साथ एकल राष्ट्रिय सरोकारवाला वास्तुकला अन्तर्गत संचालित एक एकीकृत फोहोर-देखि-कार्बन पूर्वाधार प्लेटफर्म।"
-  } },
-  kok: { translation: {
-  "MRV Dashboard": "MRV डॅशबोर्ड",
-  "CCC Market": "कार्बन मार्केट",
-  "Upload Waste": "कचरा अपलोड करा",
-  "Task Board": "कार्य मंडळ",
-  "Dashboard": "डॅशबोर्ड",
-  "National KPI": "राष्ट्रीय KPI",
-  "Genesis": "उत्पत्ती",
-  "History": "इतिहास",
-  "Logout": "लॉगआउट करा",
-  "Settings": "सेटिंग्ज",
-  "Community Rank": "समुदाय रँक",
-  "English": "इंग्रजी",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "System Overview": "सिस्टम विहंगावलोकन",
-  "Total Collected": "एकूण गोळा",
-  "Hindi": "हिंदी",
-  "Farmers Registered": "शेतकऱ्यांनी नोंदणी केली",
-  "Welcome back": "परत स्वागत आहे",
-  "Total Earnings": "एकूण कमाई",
-  "Language": "भाषा",
-  "CCCs": "कार्बन क्रेडिट्स",
-  "Logistics Margin": "लॉजिस्टिक मार्जिन",
-  "Total Processed": "एकूण प्रक्रिया",
-  "ESG Score": "ईएसजी स्कोअर",
-  "Value Generated": "मूल्य व्युत्पन्न",
-  "Processing Yield": "प्रक्रिया उत्पन्न",
-  "Total Investment": "एकूण गुंतवणूक",
-  "Seed Demo Data": "सीड डेमो डेटा",
-  "Fleet Efficiency": "फ्लीट कार्यक्षमता",
-  "Platform Statistics": "प्लॅटफॉर्म आकडेवारी",
-  "Total Value": "एकूण मूल्य",
-  "Performance Analytics": "कामगिरी विश्लेषण",
-  "Register New Farmer": "नवीन शेतकरी नोंदणी करा",
-  "Reset Demo Data": "डेमो डेटा रीसेट करा",
-  "Total Users": "एकूण वापरकर्ते",
-  "Recent Activity": "अलीकडील क्रियाकलाप",
-  "Total Weight": "एकूण वजन",
-  "Waste Distribution": "कचरा वितरण",
-  "CCCs Generated": "कार्बन कमी",
-  "New Collection Record": "नवीन संग्रह रेकॉर्ड",
-  "New Processing Record": "नवीन प्रक्रिया रेकॉर्ड",
-  "Crop Type": "पीक प्रकार",
-  "Longitude": "रेखांश",
-  "Mobile Number": "मोबाईल नंबर",
-  "Get Current Location": "वर्तमान स्थान मिळवा",
-  "Latitude": "अक्षांश",
-  "New Intake Record": "नवीन सेवन रेकॉर्ड",
-  "Full Name": "पूर्ण नाव",
-  "Land Area (Acres)": "जमीन क्षेत्र (एकर)",
-  "Farm Location": "फार्म स्थान",
-  "Pending Pickup": "प्रलंबित पिकअप",
-  "Transaction Ledger": "व्यवहार खातेवही",
-  "Register Farmer": "शेतकरी नोंदणी करा",
-  "Operations Management": "ऑपरेशन्स व्यवस्थापन",
-  "All": "सर्व",
-  "Processed": "प्रक्रिया केली",
-  "In Transit": "संक्रमण मध्ये",
-  "Foundational Doctrine": "पायाभूत सिद्धांत",
-  "Account Settings": "खाते सेटिंग्ज",
-  "Registering...": "नोंदणी करत आहे...",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "Waste Type": "कचरा प्रकार",
-  "Processing...": "प्रक्रिया करत आहे...",
-  "Estimated Value Breakdown": "अंदाजे मूल्य ब्रेकडाउन",
-  "Location Confirmation (Google Maps)": "स्थान पुष्टीकरण (Google नकाशे)",
-  "Base Value (Recycler)": "मूळ मूल्य (रीसायकल)",
-  "Weight (kg)": "वजन (किलो)",
-  "Total Sovereign Value": "एकूण सार्वभौम मूल्य",
-  "Verification Image": "पडताळणी प्रतिमा",
-  "Confirm Intake & Mint Value": "सेवन आणि मिंट व्हॅल्यूची पुष्टी करा",
-  "Intake": "सेवन",
-  "Access the OS": "OS मध्ये प्रवेश करा",
-  "How it Works": "ते कसे कार्य करते",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "RupayKg ही वर्तुळाकार अर्थव्यवस्था कार्यप्रणाली आहे जी समुदायांना बहु-रेल्वे मूल्य इंजिनद्वारे कृषी, नगरपालिका आणि औद्योगिक कचऱ्याचे कमाई करण्यासाठी सक्षम करते.",
-  "Ecosystem Roles": "इकोसिस्टम भूमिका",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्रॅम कचरा मध्ये रूपांतरित करा",
-  "Global Circular Value": "जागतिक परिपत्रक मूल्य",
-  "Sovereign-Grade Circular Economy Engine": "सार्वभौम-ग्रेड वर्तुळाकार इकॉनॉमी इंजिन",
-  "Features": "वैशिष्ट्ये",
-  "Launch OS": "OS लाँच करा",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "कचरा प्रकार, वजन आणि भौगोलिक स्थानाची स्वयंचलित पडताळणी अपरिवर्तनीय, सार्वभौम-ग्रेड डेटा अखंडता सुनिश्चित करते.",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "पर्यावरणीय दायित्वांचे स्थानिक आर्थिक वाढीमध्ये रूपांतर करून, नागरिकांच्या वॉलेटमध्ये थेट निधी वितरित करा.",
-  "Multi-Rail Value Engine": "मल्टी-रेल व्हॅल्यू इंजिन",
-  "AI-Verified Intake": "AI-सत्यापित सेवन",
-  "Live Stream": "थेट प्रवाह",
-  "Real-time waste throughput across the RupayKg OS": "RupayKg OS वर रिअल-टाइम कचरा थ्रूपुट",
-  "Rural Wealth Creation": "ग्रामीण संपत्ती निर्मिती",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "सोबतच प्रक्रिया केलेल्या प्रत्येक किलोग्रॅम बायोमाससाठी रिसायकल, सीएसआर, म्युनिसिपल, कार्बन आणि ईपीआर रेलमधून मूल्य काढा.",
-  "Live Network Impact": "थेट नेटवर्क प्रभाव",
-  "Read Whitepaper": "श्वेतपत्रिका वाचा",
-  "Network Topology": "नेटवर्क टोपोलॉजी",
-  "Active Nodes": "सक्रिय नोडस्",
-  "Generate": "निर्माण करा",
-  "A seamless pipeline from waste generation to value realization.": "कचरा निर्मितीपासून ते मूल्य प्राप्तीपर्यंत एक अखंड पाइपलाइन.",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटर्स कचऱ्याची पडताळणी करतात, वजन करतात आणि सुविधांमध्ये कचरा वाहतूक करतात.",
-  "Value Minted": "मूल्य मिंटेड",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिक कृषी, नगरपालिका किंवा औद्योगिक कचरा गोळा करतात.",
-  "Aggregate": "एकूण",
-  "Distributed biomass collection nodes": "वितरित बायोमास संकलन नोड्स",
-  "nodes": "नोडस्",
-  "Upload waste records": "कचरा नोंदी अपलोड करा",
-  "Choose your part in the circular economy.": "वर्तुळाकार अर्थव्यवस्थेत तुमचा भाग निवडा.",
-  "Process": "प्रक्रिया",
-  "Citizen": "नागरिक",
-  "Mint Value": "मिंट व्हॅल्यू",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट कॉन्ट्रॅक्ट सर्व 5 व्हॅल्यू रेलमध्ये निधी वितरित करतात.",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषी, नगरपालिका किंवा औद्योगिक कचरा गोळा आणि जमा करा. वजन आणि कचऱ्याच्या प्रकारावर आधारित थेट वॉलेट ठेवी मिळवा.",
-  "Instant wallet funding": "झटपट वॉलेट निधी",
-  "Waste Generator": "कचरा जनरेटर",
-  "Recyclers convert waste into usable materials or energy.": "पुनर्वापर करणारे कचऱ्याचे वापरण्यायोग्य पदार्थ किंवा ऊर्जेत रूपांतर करतात.",
-  "Collection & Transport": "संकलन आणि वाहतूक",
-  "Log collection batches": "लॉग संग्रह बॅचेस",
-  "Track environmental impact": "पर्यावरणीय प्रभावाचा मागोवा घ्या",
-  "Aggregator": "एग्रीगेटर",
-  "Earn logistics margins": "लॉजिस्टिक मार्जिन मिळवा",
-  "Route optimization data": "मार्ग ऑप्टिमायझेशन डेटा",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "एकत्रित कचरा प्राप्त करा आणि अंतिम उत्पादनांमध्ये त्यावर प्रक्रिया करा. सर्व रेलमध्ये अंतिम मूल्य प्राप्ती ट्रिगर करा.",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिकांच्या ठेवींची पडताळणी करा, कचऱ्याचे एकत्रिकरण करा आणि प्रक्रिया सुविधांपर्यंत साहित्य वाहतूक करण्यासाठी रसद व्यवस्थापित करा.",
-  "Processor": "प्रोसेसर",
-  "Recycler": "रिसायकल",
-  "Context:": "संदर्भ:",
-  "Register": "नोंदणी करा",
-  "Login": "लॉगिन करा",
-  "Access CSR/EPR funds": "सीएसआर/ईपीआर निधीमध्ये प्रवेश करा",
-  "Organization Name": "संस्थेचे नाव",
-  "District": "जिल्हा",
-  "Circular Economy Operating System": "सर्कुलर इकॉनॉमी ऑपरेटिंग सिस्टम",
-  "Generate CCCs": "कार्बन क्रेडिट्स तयार करा",
-  "Log processing yields": "लॉग प्रक्रिया उत्पन्न",
-  "Account Type": "खाते प्रकार",
-  "State": "राज्य",
-  "Access OS": "OS वर प्रवेश करा",
-  "Back to Home": "घरी परत",
-  "Submission Heatmap": "सबमिशन हीटमॅप",
-  "Password": "पासवर्ड",
-  "Create Account": "खाते तयार करा",
-  "Quick Demo Access": "द्रुत डेमो प्रवेश",
-  "Phone Number": "फोन नंबर",
-  "Global Impact Map": "जागतिक प्रभाव नकाशा",
-  "System Audit Logs": "सिस्टम ऑडिट लॉग",
-  "Pending": "प्रलंबित",
-  "Impact Distribution": "प्रभाव वितरण",
-  "Farmers Supported": "शेतकऱ्यांनी पाठिंबा दिला",
-  "Waste Diverted": "कचरा वळवला",
-  "Portfolio Composition": "पोर्टफोलिओ रचना",
-  "All processed waste has been verified.": "सर्व प्रक्रिया केलेल्या कचऱ्याची पडताळणी करण्यात आली आहे.",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी करण्यासाठी प्रक्रिया केलेल्या कचरा रेकॉर्डची पडताळणी करा.",
-  "Total Offset": "एकूण ऑफसेट",
-  "MRV Verification Dashboard": "MRV पडताळणी डॅशबोर्ड",
-  "No pending MRV records": "MRV नोंदी प्रलंबित नाहीत",
-  "Reject": "नकार द्या",
-  "Carbon Reduction": "कार्बन कमी करणे",
-  "Verify & Issue Credits": "सत्यापित करा आणि क्रेडिट जारी करा",
-  "Purchase verified CCCs to offset your footprint.": "तुमचा फूटप्रिंट ऑफसेट करण्यासाठी सत्यापित कार्बन क्रेडिट्स खरेदी करा.",
-  "Available Credits": "उपलब्ध क्रेडिट्स",
-  "Location Verification": "स्थान सत्यापन",
-  "Acreage": "एकरी",
-  "AI Risk Score": "AI जोखीम स्कोअर",
-  "Credit Value": "क्रेडिट मूल्य",
-  "Recent Transactions": "अलीकडील व्यवहार",
-  "Project": "प्रकल्प",
-  "Purchase Credits": "क्रेडिट्स खरेदी करा",
-  "Confirm Purchase": "खरेदीची पुष्टी करा",
-  "Total Cost": "एकूण खर्च",
-  "Cancel": "रद्द करा",
-  "Your Offset Balance": "तुमची ऑफसेट शिल्लक",
-  "Amount": "रक्कम",
-  "Price per Tonne": "प्रति टन किंमत",
-  "Amount to Purchase (Tonnes)": "खरेदीची रक्कम (टन)",
-  "Ward-Level Analytics": "प्रभाग-स्तरीय विश्लेषण",
-  "Ward": "वार्ड",
-  "Status": "स्थिती",
-  "MSW": "एमएसडब्ल्यू",
-  "Municipal Corporation": "महानगरपालिका",
-  "National Dashboard": "राष्ट्रीय डॅशबोर्ड",
-  "Price": "किंमत",
-  "Date": "तारीख",
-  "Ward Analytics": "प्रभाग विश्लेषण",
-  "Network Active": "नेटवर्क सक्रिय",
-  "Farmer / FPO (Biomass Generator)": "शेतकरी / FPO (बायोमास जनरेटर)",
-  "Citizens": "नागरिक",
-  "All Roles": "सर्व भूमिका",
-  "Village-Level Analytics": "गाव-स्तरीय विश्लेषण",
-  "Biomass": "बायोमास",
-  "Gram Panchayat": "ग्रामपंचायत",
-  "Farmers / FPOs": "शेतकरी / एफपीओ",
-  "Village": "गाव",
-  "Citizen (MSW Generator)": "नागरिक (MSW जनरेटर)",
-  "Village Analytics": "गाव विश्लेषण",
-  "EPR Partners": "EPR भागीदार",
-  "CCC Buyers": "कार्बन खरेदीदार",
-  "Aggregators": "एकत्रित करणारे",
-  "Fraud Alerts & Flagged Events": "फसवणूक सूचना आणि ध्वजांकित इव्हेंट",
-  "CSR Partners": "CSR भागीदार",
-  "Audit Logs": "ऑडिट नोंदी",
-  "Diverted": "वळवले",
-  "User Management": "वापरकर्ता व्यवस्थापन",
-  "CCC Pool Status": "कार्बन पूल स्थिती",
-  "Processors": "प्रोसेसर",
-  "Methane Avoided": "मिथेन टाळले",
-  "Trees": "झाडे",
-  "Water Saved": "पाण्याची बचत",
-  "Growth & Impact Trends": "वाढ आणि प्रभाव ट्रेंड",
-  "Economic Efficiency": "आर्थिक कार्यक्षमता",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Wallet Disbursed": "वॉलेट वितरित केले",
-  "Trees Equivalent": "झाडे समतुल्य",
-  "Total Waste Events": "एकूण कचरा घटना",
-  "Processed Events": "प्रक्रिया केलेले कार्यक्रम",
-  "Avg Price / kg": "सरासरी किंमत / किलो",
-  "Waste Composition": "कचरा रचना",
-  "MRV Rejection Rate": "MRV नकार दर",
-  "Processing Efficiency": "प्रक्रिया कार्यक्षमता",
-  "Total Minted CCC Units": "एकूण मिंटेड कार्बन युनिट्स",
-  "Operational Health": "ऑपरेशनल आरोग्य",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* टाळलेल्या लँडफिल व्यवस्थापन आणि पर्यावरणीय उपायांच्या खर्चावर आधारित सरकारी बचतीची गणना.",
-  "Geospatial Fraud Distribution": "भौगोलिक फसवणूक वितरण",
-  "No flagged events detected.": "कोणतेही ध्वजांकित इव्हेंट आढळले नाहीत.",
-  "Govt Cost Savings": "सरकारी खर्च बचत",
-  "Location": "स्थान",
-  "Regulator": "नियामक",
-  "CSR Partner": "CSR भागीदार",
-  "Municipal Admin": "महापालिका प्रशासन",
-  "Role": "भूमिका",
-  "Wallet": "पाकीट",
-  "Super Admin": "सुपर ॲडमिन",
-  "Actions": "क्रिया",
-  "User": "वापरकर्ता",
-  "State Admin": "राज्य प्रशासन",
-  "CCC Buyer": "कार्बन खरेदीदार",
-  "Total Events": "एकूण घटना",
-  "No users found.": "कोणतेही वापरकर्ते आढळले नाहीत.",
-  "Action": "कृती",
-  "Delete User": "वापरकर्ता हटवा",
-  "EPR Partner": "EPR भागीदार",
-  "No audit logs available.": "कोणतेही ऑडिट लॉग उपलब्ध नाहीत.",
-  "Total Waste": "एकूण कचरा",
-  "No ward data available.": "प्रभाग डेटा उपलब्ध नाही.",
-  "User ID": "वापरकर्ता आयडी",
-  "Notification Preferences": "सूचना प्राधान्ये",
-  "Email Notifications": "ईमेल सूचना",
-  "Add ₹10,000": "₹10,000 जोडा",
-  "Get instant SMS alerts for critical updates.": "गंभीर अद्यतनांसाठी त्वरित SMS सूचना मिळवा.",
-  "Save Changes": "बदल जतन करा",
-  "Receive updates about your transactions via email.": "ईमेलद्वारे तुमच्या व्यवहारांबद्दल अपडेट्स मिळवा.",
-  "Push Notifications": "पुश सूचना",
-  "SMS Alerts": "एसएमएस अलर्ट",
-  "Enable browser push notifications.": "ब्राउझर पुश सूचना सक्षम करा.",
-  "Saving...": "सेव्ह करत आहे...",
-  "Type: ": "प्रकार:",
-  "How the Engine Works": "इंजिन कसे कार्य करते",
-  "GENESIS": "उत्पत्ती",
-  "Village: ": "गाव:",
-  "Weight: ": "वजन:",
-  "Currently Active: ": "सध्या सक्रिय:",
-  "Value: ": "मूल्य:",
-  " Context (": "संदर्भ (",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 RupayKg सर्कुलर इकॉनॉमी OS. सर्व हक्क राखीव.",
-  "FRAUD ALERT": "फसवणूक सूचना",
-  "Terms": "अटी",
-  "urban": "शहरी",
-  "RUPAYKG": "RUPAYKG",
-  "Processor (Recycler)": "प्रोसेसर (रीसायकल)",
-  "Farmer": "शेतकरी",
-  "Admin": "ॲडमिन",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संकलन आणि वाहतूक)",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "Privacy": "गोपनीयता",
-  "rural": "ग्रामीण",
-  "Database Connection Failed": "डेटाबेस कनेक्शन अयशस्वी",
-  "No audit logs found": "कोणतेही ऑडिट लॉग आढळले नाहीत",
-  "Acreage (acres)": "एकर (एकर)",
-  "Capturing GPS Coordinates...": "GPS निर्देशांक कॅप्चर करत आहे...",
-  "Circular Economy Intake Form": "परिपत्रक अर्थव्यवस्था सेवन फॉर्म",
-  "Name": "नाव",
-  "GPS Captured: ": "जीपीएस कॅप्चर केले:",
-  "No records found": "कोणतेही रेकॉर्ड आढळले नाही",
-  "Wallet Balance": "वॉलेट शिल्लक",
-  "GPS Capture Failed": "GPS कॅप्चर अयशस्वी",
-  "Retry GPS": "GPS पुन्हा प्रयत्न करा",
-  "GPS Required": "GPS आवश्यक",
-  "Geolocation is not supported by this browser.": "भौगोलिक स्थान या ब्राउझरद्वारे समर्थित नाही.",
-  "e.g., Paddy, Wheat": "उदा., भात, गहू",
-  "Active Fleet": "सक्रिय फ्लीट",
-  "Failed to register farmer": "शेतकऱ्याची नोंदणी करण्यात अयशस्वी",
-  "Active Queue": "सक्रिय रांग",
-  "Farmer registered successfully! ID: ": "शेतकऱ्यांनी यशस्वी नोंदणी केली! आयडी:",
-  "Drivers Online": "ड्रायव्हर्स ऑनलाइन",
-  "Failed to get location. Please enter manually.": "स्थान मिळवण्यात अयशस्वी. कृपया व्यक्तिचलितपणे प्रविष्ट करा.",
-  "Output Material": "आउटपुट साहित्य",
-  "Utilization": "उपयोग",
-  "Incoming for Processing": "प्रक्रियेसाठी येणारे",
-  "Available for Pickup": "पिकअपसाठी उपलब्ध",
-  "Biomass in Stock": "स्टॉक मध्ये बायोमास",
-  "Accept Pickup": "पिकअप स्वीकारा",
-  "Total Capacity": "एकूण क्षमता",
-  "No new tasks available.": "कोणतीही नवीन कार्ये उपलब्ध नाहीत.",
-  "Storage Utilization": "स्टोरेज वापर",
-  "Current Load": "वर्तमान भार",
-  "Accept Receipt": "पावती स्वीकारा",
-  "MRV Status": "MRV स्थिती",
-  "No active tasks in your possession.": "तुमच्या ताब्यात कोणतीही सक्रिय कार्ये नाहीत.",
-  "Timestamp": "टाईमस्टॅम्प",
-  "Value": "मूल्य",
-  "No records found for the selected filter.": "निवडलेल्या फिल्टरसाठी कोणतेही रेकॉर्ड आढळले नाहीत.",
-  "Recently Processed": "अलीकडे प्रक्रिया केली",
-  "Type": "प्रकार",
-  "Weight": "वजन",
-  "Pending MRV": "प्रलंबित MRV",
-  "Low": "कमी",
-  "Med": "मेड",
-  "No credits available": "कोणतेही क्रेडिट उपलब्ध नाहीत",
-  "Check back later for newly verified CCCs.": "नवीन सत्यापित कार्बन क्रेडिटसाठी नंतर पुन्हा तपासा.",
-  "Details": "तपशील",
-  "AI Risk": "AI धोका",
-  "Record ID": "रेकॉर्ड आयडी",
-  "Verified By": "द्वारे सत्यापित",
-  "High": "उच्च",
-  "No MRV history found": "कोणताही MRV इतिहास आढळला नाही",
-  "Verified": "सत्यापित",
-  "An error occurred": "एक त्रुटी आली",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "RupayKg ची पायाभूत रचना आणि ऑपरेटिंग सिद्धांत",
-  "Offset": "ऑफसेट",
-  "Failed to update profile": "प्रोफाइल अपडेट करण्यात अयशस्वी",
-  "I. Introduction": "I. परिचय",
-  "Profile updated successfully": "प्रोफाइल यशस्वीरित्या अपडेट केले",
-  "Profile Settings": "प्रोफाइल सेटिंग्ज",
-  "Purchase Credit": "खरेदी क्रेडिट",
-  "Insufficient Funds": "अपुरा निधी",
-  "Urban": "शहरी",
-  "Context": "संदर्भ",
-  "II. Unified Operating System Model": "II. युनिफाइड ऑपरेटिंग सिस्टम मॉडेल",
-  "Rural": "ग्रामीण",
-  "Municipal Corp + Ward": "महानगरपालिका + प्रभाग",
-  "Anchor": "अँकर",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "RupayKg ची स्थापना एक युनिफाइड वेस्ट-टू-कार्बन डिजिटल ऑपरेटिंग सिस्टीम म्हणून करण्यात आली आहे, जी भारताच्या अनुपालन-आधारित कार्बन मार्केटकडे संक्रमणास समर्थन देण्यासाठी डिझाइन केलेली आहे.",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "RupayKg ची रचना प्रकल्प विकासक, कार्बन व्यापारी किंवा पुनर्वापर करणारी संस्था म्हणून केलेली नाही. हा एक पायाभूत सुविधा स्तर आहे जो शहरी आणि ग्रामीण प्रशासकीय फ्रेमवर्कमध्ये वास्तुशास्त्रीय डुप्लिकेशनशिवाय ऑपरेट करण्यासाठी डिझाइन केलेला आहे.",
-  "Category": "श्रेणी",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "प्लॅटफॉर्म भारताच्या कार्बन इकोसिस्टममधील स्ट्रक्चरल गॅपला संबोधित करतो: एका एकीकृत, नियामक-संरेखित डिजिटल पायाभूत सुविधांचा अभाव, जो सत्यापित कचरा वळवण्याला अनुपालन-ग्रेड कार्बन पुरवठ्यामध्ये रूपांतरित करण्यास सक्षम आहे.",
-  "Gram Panchayat + Village": "ग्रामपंचायत + गाव",
-  "III. Unified Stakeholder Architecture": "III. युनिफाइड स्टेकहोल्डर आर्किटेक्चर",
-  "Biomass-based fossil substitution": "बायोमास-आधारित जीवाश्म प्रतिस्थापन",
-  "CSR Contributors": "CSR योगदानकर्ते",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सर्व ग्रामीण कृषी अवशेष आणि बायोमास क्रियाकलाप बायोमास अंतर्गत वर्गीकृत आहेत. कोणतेही वेगळे कृषी अनुलंब अस्तित्वात नाही.",
-  "Administrative Authority": "प्रशासकीय प्राधिकरण",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटरची संरचनात्मकरित्या व्याख्या केली जाते विलीन केलेली संस्था जी संकलन आणि क्रमवारी प्रमाणीकरणासाठी जबाबदार असते, साखळी-ऑफ-कस्टडी पडताळणी सुलभ करते.",
-  "Methane avoidance through diversion": "वळवून मिथेन टाळणे",
-  "IV. CCC Origination": "IV. कार्बन उत्पत्ती",
-  "Producers (EPR)": "उत्पादक (ईपीआर)",
-  "V. Multi-Rail Architecture": "V. मल्टी-रेल आर्किटेक्चर",
-  "EPR Rail": "ईपीआर रेल",
-  "Recycler Rail": "रीसायकल रेल",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी करणारे प्राधिकरण नियामक-नियंत्रित राहते. RupayKg स्वतंत्रपणे क्रेडिट देत नाही. सर्व क्रेडिट्स इव्हेंट-ट्रेसेबल, नोंदणी-सुसंगत आणि राष्ट्रीय कार्बन गव्हर्नन्स फ्रेमवर्कसह संरेखित असणे आवश्यक आहे.",
-  "Governance Layer": "शासन स्तर",
-  "CSR Rail": "सीएसआर रेल",
-  "VI. Regulator Sovereignty": "सहावा. नियामक सार्वभौमत्व",
-  "CCC Rail": "कार्बन रेल",
-  "VII. Strategic Position": "VII. धोरणात्मक स्थिती",
-  "Recycling substitution": "पुनर्वापराचा पर्याय",
-  "Article I — Unified Operating System": "लेख I - युनिफाइड ऑपरेटिंग सिस्टम",
-  "Article II — Unified Stakeholder Doctrine": "कलम II — युनिफाइड स्टेकहोल्डर डॉक्ट्रीन",
-  "— Founder, RupayKg": "- संस्थापक, RupayKg",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जेव्हा आम्ही RupayKg बनवायला सुरुवात केली तेव्हा आम्ही रिसायकलिंगपासून सुरुवात केली नाही. आम्ही एका स्ट्रक्चरल प्रश्नापासून सुरुवात केली: कचऱ्याचे नियमन केलेल्या कार्बन व्हॅल्यूमध्ये रूपांतर करणारी कोणतीही एकीकृत पायाभूत सुविधा का नाही?",
-  "Legally Styled": "कायदेशीर शैलीत",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "RupayKg खालील अंतर्गत उपयोजित करण्यायोग्य एकल डिजिटल प्रणाली ऑपरेट करेल: (अ) महानगरपालिका + प्रभाग (शहरी संदर्भ) (ब) ग्रामपंचायत + गाव (ग्रामीण संदर्भ). संदर्भांमध्ये कोणतेही स्ट्रक्चरल डुप्लिकेशन अस्तित्वात नसावे.",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत एक अनुपालन कार्बन युगात प्रवेश करत आहे. महानगरपालिका यंत्रणा मोजता येण्याजोगे मिथेन तयार करतात. ग्रामीण बायोमास जाळला जातो किंवा कमी वापरला जातो. तरीही यंत्रणा खंडित राहतात.",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "पायाभूत संरचनेची घोषणा",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "त्यांना एकत्र करण्यासाठी RupayKg बांधले गेले. कार्बन व्यापारी म्हणून नाही. रिसायकलिंग स्टार्टअप म्हणून नाही. परंतु संरचनात्मक डुप्लिकेशनशिवाय महापालिका प्रभाग स्तरावर आणि ग्रामपंचायत ग्राम स्तरावर काम करण्यास सक्षम एकल कार्यप्रणाली म्हणून.",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "कचऱ्याची आता विल्हेवाट नाही. ही शासनाशी निगडीत हवामान पायाभूत सुविधा आहे.",
-  "Article III — Waste Classification": "कलम III — कचरा वर्गीकरण",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन मिंट प्राधिकरण नियामक नियंत्रणाखाली राहील. RupayKg स्वतंत्रपणे कार्बन क्रेडिट जारी करणार नाही.",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "RupayKg यामधील कठोर पृथक्करण राखेल: रीसायकल अकाउंटिंग, CSR अकाउंटिंग, EPR अनुपालन, गव्हर्नन्स व्हॅल्यू, कार्बन जारी करणे. दुहेरी मोजणी करण्यास मनाई आहे.",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "कचऱ्याचे वर्गीकरण केवळ खालीलप्रमाणे केले जाईल: (अ) शहरी संदर्भात एमएसडब्ल्यू (ब) ग्रामीण संदर्भात बायोमास. सर्व कृषी अवशेष बायोमास अंतर्गत वर्गीकृत केले जातील.",
-  "Article V — Rail Separation": "कलम V — रेल्वे वेगळे करणे",
-  "Article IV — CCC Engine": "कलम IV - कार्बन इंजिन",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "भागधारकांची रचना देशभरात एकसमान राहील आणि त्यात खालील गोष्टींचा समावेश असेल: कचरा जनरेटर, एग्रीगेटर, प्रोसेसर, प्रशासकीय प्राधिकरण, उत्पादक (ईपीआर), CSR योगदानकर्ते, कार्बन खरेदीदार, नियामक.",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सर्व उत्सर्जन कमी करण्याची प्रक्रिया घटना-स्तरीय MRV प्रमाणीकरणासह एकाच कार्बन गणना इंजिनद्वारे केली जाईल.",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद VI — नियामक सार्वभौमत्व",
-  "Institutional Identity": "संस्थात्मक ओळख",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "RupayKg ची याद्वारे व्याख्या केली आहे: एक युनिफाइड वेस्ट-टू-कार्बन इन्फ्रास्ट्रक्चर प्लॅटफॉर्म जो नियामक-संरेखित कार्बन उत्पत्ती क्षमतेसह एकल राष्ट्रीय स्टेकहोल्डर आर्किटेक्चर अंतर्गत कार्यरत आहे."
-  } },
-  sd: { translation: {
-  "History": "تاريخ",
-  "Upload Waste": "اپ لوڊ فضل",
-  "Logout": "لاگ آئوٽ",
-  "CCC Market": "ڪاربن مارڪيٽ",
-  "MRV Dashboard": "MRV ڊيش بورڊ",
-  "Genesis": "پيدائش",
-  "Dashboard": "ڊيش بورڊ",
-  "National KPI": "نيشنل KPI",
-  "Settings": "سيٽنگون",
-  "Task Board": "ٽاسڪ بورڊ",
-  "Language": "ٻولي",
-  "Farmers Registered": "فارمرز رجسٽرڊ",
-  "Total Collected": "ڪل جمع",
-  "CCC Offset": "ڪاربن آف سيٽ",
-  "Welcome back": "واپس ڀلي ڪري آيا",
-  "Community Rank": "ڪميونٽي جو درجو",
-  "System Overview": "سسٽم جو جائزو",
-  "Hindi": "هندي",
-  "English": "انگريزي",
-  "Total Earnings": "ڪل آمدني",
-  "Seed Demo Data": "ٻج ڊيمو ڊيٽا",
-  "Value Generated": "قدر پيدا ٿيل",
-  "Processing Yield": "پروسيسنگ پيداوار",
-  "Fleet Efficiency": "جهاز جي ڪارڪردگي",
-  "Total Investment": "مجموعي سيڙپڪاري",
-  "ESG Score": "ESG سکور",
-  "Logistics Margin": "لاجسٽڪ مارجن",
-  "Platform Statistics": "پليٽ فارم جي شماريات",
-  "Total Processed": "مڪمل پروسيس ٿيل",
-  "CCCs": "ڪاربن ڪريڊٽ",
-  "Total Users": "ڪل استعمال ڪندڙ",
-  "Performance Analytics": "ڪارڪردگي تجزياتي",
-  "Reset Demo Data": "ري سيٽ ڪريو Demo ڊيٽا",
-  "Total Value": "ڪل قدر",
-  "New Collection Record": "نئون مجموعو رڪارڊ",
-  "Register New Farmer": "نئون فارمر رجسٽر ٿيو",
-  "Recent Activity": "تازي سرگرمي",
-  "Waste Distribution": "فضول تقسيم",
-  "CCCs Generated": "ڪاربن جي گھٽتائي",
-  "Total Weight": "ڪل وزن",
-  "Crop Type": "فصل جو قسم",
-  "Latitude": "ويڪرائي ڦاڪ",
-  "Full Name": "پورو نالو",
-  "Farm Location": "فارم جي جڳھ",
-  "New Intake Record": "نئون داخلا رڪارڊ",
-  "Mobile Number": "موبائل نمبر",
-  "Longitude": "ڊگھائي",
-  "Get Current Location": "موجوده مقام حاصل ڪريو",
-  "Land Area (Acres)": "زمين جي ايراضي (ايڪڙ)",
-  "New Processing Record": "نئون پروسيسنگ رڪارڊ",
-  "Account Settings": "اڪائونٽ سيٽنگون",
-  "Transaction Ledger": "ٽرانزيڪشن ليجر",
-  "Foundational Doctrine": "بنيادي اصول",
-  "All": "سڀ",
-  "Register Farmer": "رجسٽر فارمر",
-  "Processed": "پروسيس ٿيل",
-  "In Transit": "ٽرانسپورٽ ۾",
-  "Registering...": "رجسٽر ٿي رهيو آهي...",
-  "Pending Pickup": "انتظار ۾ کڻڻ",
-  "Operations Management": "آپريشن جو انتظام",
-  "Weight (kg)": "وزن (ڪلو)",
-  "Total Sovereign Value": "ڪل خود مختيار قدر",
-  "Processing...": "پروسيسنگ...",
-  "Confirm Intake & Mint Value": "Intake & Mint Value جي تصديق ڪريو",
-  "Base Value (Recycler)": "بنيادي قدر (Recycler)",
-  "Waste Type": "فضول قسم",
-  "Verification Image": "تصديق ٿيل تصوير",
-  "Estimated Value Breakdown": "تخميني قدر جي ڀڃڪڙي",
-  "CCC Value": "ڪاربن ڪريڊٽ ويليو",
-  "Location Confirmation (Google Maps)": "مقام جي تصديق (Google Maps)",
-  "Intake": "اُٿڻ",
-  "Ecosystem Roles": "ماحولياتي نظام جا ڪردار",
-  "How it Works": "اهو ڪيئن ڪم ڪري ٿو",
-  "Global Circular Value": "گلوبل سرڪيولر ويليو",
-  "Launch OS": "OS لانچ ڪريو",
-  "Convert Every Kilogram of Waste into": "هر ڪلوگرام فضول ۾ تبديل ڪريو",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "RupayKg هڪ سرڪلر معيشت جو آپريٽنگ سسٽم آهي جيڪو ڪميونٽيز کي بااختيار بڻائيندو آهي ته جيئن زرعي، ميونسپل ۽ صنعتي فضول کي ملٽي ريل ويليو انجڻ ذريعي مانيٽائيز ڪري.",
-  "Access the OS": "OS تائين رسائي ڪريو",
-  "Sovereign-Grade Circular Economy Engine": "خودمختار-گريڊ سرڪيولر اقتصادي انجڻ",
-  "Features": "خاصيتون",
-  "Read Whitepaper": "وائيٽ پيپر پڙهو",
-  "Live Stream": "لائيو وهڪرو",
-  "Live Network Impact": "لائيو نيٽورڪ اثر",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "سڌي طرح شهرين جي ويلٽس ۾ فنڊ ورهايو، ماحولياتي ذميواريون مقامي معاشي ترقي ۾ تبديل ڪريو.",
-  "Real-time waste throughput across the RupayKg OS": "RupayKg OS تي حقيقي وقت ضايع ڪرڻ جي ذريعي",
-  "AI-Verified Intake": "AI-تصديق ٿيل انٽيڪ",
-  "Rural Wealth Creation": "ڳوٺاڻي دولت جي تخليق",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "فضول جي قسم، وزن، ۽ جغرافيائي مقام جي خودڪار تصديق کي يقيني بڻائي ٿي، غير مستحڪم، خود مختيار-گريڊ ڊيٽا جي سالميت.",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "گڏو گڏ هر ڪلوگرام بايوماس پروسيس لاءِ ريسائيڪلر، سي ايس آر، ميونسپل، ڪاربن، ۽ اي پي آر ريل مان قيمت ڪڍيو.",
-  "Multi-Rail Value Engine": "ملٽي ريل ويليو انجڻ",
-  "Generate": "پيدا ڪرڻ",
-  "Aggregate": "مجموعي",
-  "Value Minted": "قدر ڪيو ويو",
-  "Aggregators verify, weigh, and transport waste to facilities.": "Aggregators تصديق، وزن، ۽ سهولتن ۾ فضول ٽرانسپورٽ.",
-  "nodes": "نوڊس",
-  "Citizens collect agricultural, municipal, or industrial waste.": "شهري گڏ ڪن ٿا زرعي، ميونسپل، يا صنعتي فضول.",
-  "A seamless pipeline from waste generation to value realization.": "فضول جي پيداوار کان قدر جي حقيقت تائين هڪ بيحد پائيپ لائين.",
-  "Distributed biomass collection nodes": "ورهايل بايوماس گڏ ڪرڻ جا نوڊس",
-  "Active Nodes": "فعال نوڊس",
-  "Network Topology": "نيٽ ورڪ ٽوپولوجي",
-  "Process": "عمل",
-  "Citizen": "شهري",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "گڏ ڪريو ۽ جمع زرعي، ميونسپل، يا صنعتي فضول. مهيا ڪيل فضول جي وزن ۽ قسم جي بنياد تي سڌو والٽ جمع حاصل ڪريو.",
-  "Instant wallet funding": "فوري والٽ فنڊنگ",
-  "Waste Generator": "فضول پيدا ڪندڙ",
-  "Choose your part in the circular economy.": "سرکلر معيشت ۾ پنهنجو حصو چونڊيو.",
-  "Recyclers convert waste into usable materials or energy.": "ريسائيڪلرز فضول کي استعمال لائق مواد يا توانائي ۾ تبديل ڪن ٿا.",
-  "Upload waste records": "فضول رڪارڊ اپ لوڊ ڪريو",
-  "Smart contracts distribute funds across all 5 value rails.": "سمارٽ معاهدو سڀني 5 ويل ريل ۾ فنڊ ورهائي ٿو.",
-  "Mint Value": "مٽيءَ جو قدر",
-  "Processor": "پروسيسر",
-  "Aggregator": "جمع ڪندڙ",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "مجموعي فضول حاصل ڪريو ۽ ان کي آخري مصنوعات ۾ پروسيس ڪريو. سڀني ريل ۾ حتمي قدر جي حقيقي کي ڇڪايو.",
-  "Collection & Transport": "گڏ ڪرڻ ۽ ٽرانسپورٽ",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "شهرين جي جمعن جي تصديق ڪريو، فضول کي مضبوط ڪريو، ۽ سامان کي پروسيسنگ سهولتن ڏانهن منتقل ڪرڻ لاء رسد جو انتظام ڪريو.",
-  "Track environmental impact": "ماحولياتي اثر کي ٽريڪ ڪريو",
-  "Earn logistics margins": "لاجسٽڪ مارجن حاصل ڪريو",
-  "Route optimization data": "رستي جي اصلاح جي ڊيٽا",
-  "Recycler": "ريچائيندڙ",
-  "Log collection batches": "لاگ گڏ ڪرڻ جي بيچ",
-  "Organization Name": "تنظيم جو نالو",
-  "Access CSR/EPR funds": "رسائي CSR / EPR فنڊ",
-  "Log processing yields": "لاگ پروسيسنگ جي پيداوار",
-  "Register": "رجسٽر",
-  "Generate CCCs": "ڪاربن ڪريڊٽ ٺاهيو",
-  "Context:": "حوالو:",
-  "Account Type": "اڪائونٽ جو قسم",
-  "District": "ضلعو",
-  "Circular Economy Operating System": "سرڪلر اقتصادي آپريٽنگ سسٽم",
-  "Login": "لاگ ان",
-  "Password": "پاسورڊ",
-  "Access OS": "او ايس تائين رسائي",
-  "Back to Home": "واپس گھر ڏانھن",
-  "Phone Number": "فون نمبر",
-  "Global Impact Map": "گلوبل اثر نقشو",
-  "Submission Heatmap": "موڪلڻ جو گرمي نقشو",
-  "Create Account": "اڪائونٽ ٺاهيو",
-  "System Audit Logs": "سسٽم آڊٽ لاگز",
-  "Quick Demo Access": "تڪڙي Demo رسائي",
-  "State": "رياست",
-  "Farmers Supported": "هارين جي حمايت",
-  "Impact Distribution": "اثر تقسيم",
-  "Waste Diverted": "فضول ڦيرايو ويو",
-  "All processed waste has been verified.": "سڀ پروسيس ٿيل فضول تصديق ڪئي وئي آهي.",
-  "Portfolio Composition": "پورٽ فوليو جي جوڙجڪ",
-  "Pending": "باقي رهيو",
-  "No pending MRV records": "ڪوبه MRV رڪارڊ نه آهي",
-  "Verify processed waste records to issue CCCs.": "ڪاربان ڪريڊٽ جاري ڪرڻ لاءِ پروسيس ٿيل فضول رڪارڊ جي تصديق ڪريو.",
-  "MRV Verification Dashboard": "MRV تصديق ڊيش بورڊ",
-  "Total Offset": "ڪل آفسٽ",
-  "CCC Reduction": "CCC جي گھٽتائي",
-  "Available Credits": "دستياب ڪريڊٽ",
-  "Reject": "رد ڪرڻ",
-  "Acreage": "ايڪڙ",
-  "Credit Value": "ڪريڊٽ جو قدر",
-  "AI Risk Score": "AI خطراتي اسڪور",
-  "Verify & Issue Credits": "تصديق ڪريو ۽ ڪريڊٽ جاري ڪريو",
-  "Location Verification": "جڳھ جي تصديق",
-  "Purchase verified CCCs to offset your footprint.": "خريد ڪريو تصديق ٿيل ڪاربن ڪريڊٽ توهان جي پيرن جي نشان کي ختم ڪرڻ لاء.",
-  "Price per Tonne": "في ٽون جي قيمت",
-  "Purchase Credits": "ڪريڊٽ خريد ڪريو",
-  "Confirm Purchase": "خريداري جي تصديق ڪريو",
-  "Amount": "رقم",
-  "Total Cost": "ڪل لاڳت",
-  "Your Offset Balance": "توهان جو آفسٽ بيلنس",
-  "Amount to Purchase (Tonnes)": "خريداري جي رقم (ٽن)",
-  "Cancel": "منسوخ ڪريو",
-  "Project": "پروجيڪٽ",
-  "Recent Transactions": "تازو ٽرانزيڪشن",
-  "Status": "حيثيت",
-  "Price": "قيمت",
-  "Ward": "وارڊ",
-  "MSW": "ايم ايس ڊبليو",
-  "Municipal Corporation": "ميونسپل ڪارپوريشن",
-  "Ward Analytics": "وارڊ تجزياتي",
-  "Date": "تاريخ",
-  "National Dashboard": "نيشنل ڊيش بورڊ",
-  "Network Active": "نيٽ ورڪ فعال",
-  "Ward-Level Analytics": "وارڊ-سطح تجزياتي",
-  "Village": "ڳوٺ",
-  "Farmers / FPOs": "هاري / ايف پي اوز",
-  "Biomass": "بايوماس",
-  "Citizen (MSW Generator)": "شهري (MSW جنريٽر)",
-  "Citizens": "شهرين",
-  "Farmer / FPO (Biomass Generator)": "هاري / ايف پي او (بايوماس جنريٽر)",
-  "Gram Panchayat": "گرام پنچايت",
-  "All Roles": "سڀ ڪردار",
-  "Village-Level Analytics": "ڳوٺ جي سطح جا تجزياتي",
-  "Village Analytics": "ڳوٺ جي تجزياتي",
-  "Processors": "پروسيسرز",
-  "User Management": "استعمال ڪندڙ جو انتظام",
-  "CCC Pool Status": "ڪاربن تلاء جي حالت",
-  "Diverted": "ڦيرايو ويو",
-  "Aggregators": "جمع ڪندڙ",
-  "EPR Partners": "اي پي آر پارٽنرز",
-  "Fraud Alerts & Flagged Events": "فراڊ الرٽس ۽ پرچم ٿيل واقعا",
-  "Audit Logs": "آڊٽ لاگز",
-  "CCC Buyers": "ڪاربن خريد ڪندڙ",
-  "CSR Partners": "سي ايس آر پارٽنر",
-  "Trees": "وڻ",
-  "Processed Events": "پروسيس ٿيل واقعا",
-  "Environmental Impact": "ماحولياتي اثر",
-  "Methane Avoided": "ميٿين کان بچيل",
-  "Wallet Disbursed": "پرس ڏنو ويو",
-  "Economic Efficiency": "اقتصادي ڪارڪردگي",
-  "Growth & Impact Trends": "واڌ ۽ اثر رجحان",
-  "Water Saved": "پاڻي بچايو",
-  "Trees Equivalent": "وڻن جي برابر",
-  "Total Waste Events": "ڪُل فضول واقعا",
-  "Waste Composition": "فضول جوڙجڪ",
-  "Govt Cost Savings": "حڪومت جي خرچ جي بچت",
-  "Processing Efficiency": "پروسيسنگ ڪارڪردگي",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* گورنمينٽ بچت جو حساب ڪيو ويو لينڊ فل مينيجمينٽ ۽ ماحولياتي علاج جي خرچن جي بنياد تي.",
-  "Geospatial Fraud Distribution": "Geospatial فراڊ جي تقسيم",
-  "Avg Price / kg": "سراسري قيمت / ڪلو",
-  "Total Minted CCC Units": "ڪل Minted ڪاربان يونٽ",
-  "MRV Rejection Rate": "MRV رد ڪرڻ جي شرح",
-  "No flagged events detected.": "ڪوبه نشان لڳل واقعو نه مليو.",
-  "Operational Health": "آپريشنل صحت",
-  "User": "استعمال ڪندڙ",
-  "Location": "مقام",
-  "Regulator": "ريگيوليٽر",
-  "CSR Partner": "سي ايس آر پارٽنر",
-  "Role": "ڪردار",
-  "Wallet": "پرس",
-  "Municipal Admin": "ميونسپل ايڊمنسٽريشن",
-  "Super Admin": "سپر ايڊمن",
-  "Actions": "عمل",
-  "State Admin": "رياستي منتظم",
-  "User ID": "استعمال ڪندڙ جي سڃاڻپ",
-  "CCC Buyer": "ڪاربن خريد ڪندڙ",
-  "Action": "عمل",
-  "EPR Partner": "اي پي آر پارٽنر",
-  "No audit logs available.": "ڪوبه آڊٽ لاگ موجود ناهي.",
-  "Total Events": "ڪل واقعا",
-  "No ward data available.": "وارڊ ڊيٽا موجود ناهي.",
-  "Delete User": "استعمال ڪندڙ کي ختم ڪريو",
-  "Total Waste": "ڪُل فضول",
-  "No users found.": "ڪو به استعمال ڪندڙ نه مليو.",
-  "Saving...": "محفوظ ڪري رهيو آهي...",
-  "SMS Alerts": "ايس ايم ايس الرٽ",
-  "Push Notifications": "پش نوٽيفڪيشن",
-  "Get instant SMS alerts for critical updates.": "نازڪ اپڊيٽ لاءِ فوري ايس ايم ايس الرٽ حاصل ڪريو.",
-  "Email Notifications": "اي ميل نوٽيفڪيشن",
-  "Save Changes": "تبديليون محفوظ ڪريو",
-  "Add ₹10,000": "شامل ڪريو ₹10,000",
-  "Notification Preferences": "نوٽيفڪيشن ترجيحات",
-  "Enable browser push notifications.": "برائوزر پش اطلاعن کي فعال ڪريو.",
-  "Receive updates about your transactions via email.": "اي ميل ذريعي توهان جي ٽرانزيڪشن بابت تازه ڪاري حاصل ڪريو.",
-  "Value: ": "قدر:",
-  "Village: ": "ڳوٺ:",
-  "Currently Active: ": "في الحال فعال:",
-  "Type: ": "قسم:",
-  "GENESIS": "GENESIS",
-  "How the Engine Works": "ڪيئن انجڻ ڪم",
-  "Weight: ": "وزن:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 RupayKg سرڪيولر ايڪانومي او ايس. سڀ حق محفوظ آهن.",
-  " Context (": "حوالو (",
-  "FRAUD ALERT": "فراڊ الرٽ",
-  "urban": "شهري",
-  "Terms": "شرط",
-  "RUPAYKG": "روپي ڪي جي",
-  "Farmer": "هاري",
-  "National Regulator": "نيشنل ريگيوليٽر",
-  "Aggregator (Collection & Transport)": "جمع ڪندڙ (جمع ۽ ٽرانسپورٽ)",
-  "Privacy": "رازداري",
-  "Admin": "ايڊمن",
-  "rural": "ڳوٺاڻن",
-  "Processor (Recycler)": "پروسيسر (Recycler)",
-  "Acreage (acres)": "ايڪڙ (ايڪڙ)",
-  "No audit logs found": "ڪوبه آڊٽ لاگ نه مليو",
-  "Name": "نالو",
-  "Circular Economy Intake Form": "سرڪلر اقتصاديات جي انٽيڪ فارم",
-  "GPS Captured: ": "جي پي ايس قبضو ڪيو:",
-  "Wallet Balance": "والٽ بيلنس",
-  "Capturing GPS Coordinates...": "جي پي ايس ڪوآرڊينيٽس کي پڪڙڻ...",
-  "No records found": "ڪوبه رڪارڊ نه مليو",
-  "GPS Capture Failed": "GPS ڪيپچر ناڪام ٿيو",
-  "Database Connection Failed": "ڊيٽابيس ڪنيڪشن ناڪام ٿيو",
-  "Failed to register farmer": "هاري رجسٽر ڪرڻ ۾ ناڪام",
-  "GPS Required": "جي پي ايس گهربل",
-  "Retry GPS": "GPS جي ٻيهر ڪوشش ڪريو",
-  "Drivers Online": "ڊرائيور آن لائن",
-  "e.g., Paddy, Wheat": "مثال طور، چانور، ڪڻڪ",
-  "Active Fleet": "فعال جهاز",
-  "Farmer registered successfully! ID: ": "هاري ڪاميابي سان رجسٽر ٿيو! ID:",
-  "Geolocation is not supported by this browser.": "جغرافيائي مقام هن برائوزر سان سهڪار نه آهي.",
-  "Active Queue": "فعال قطار",
-  "Failed to get location. Please enter manually.": "مقام حاصل ڪرڻ ۾ ناڪام. مھرباني ڪري دستي طور داخل ڪريو.",
-  "Output Material": "آئوٽ پٽ مواد",
-  "No new tasks available.": "ڪو به نئون ڪم موجود ناهي.",
-  "Accept Pickup": "قبول ڪريو کڻڻ",
-  "Total Capacity": "ڪل ظرفيت",
-  "Biomass in Stock": "اسٽاڪ ۾ بايوماس",
-  "Available for Pickup": "کڻڻ لاءِ دستياب آهي",
-  "Current Load": "موجوده لوڊ",
-  "Incoming for Processing": "پروسيسنگ لاءِ آمد",
-  "Utilization": "استعمال",
-  "Storage Utilization": "اسٽوريج استعمال",
-  "Pending MRV": "منتظر MRV",
-  "Weight": "وزن",
-  "Recently Processed": "تازو پروسيس ٿيل",
-  "Value": "قدر",
-  "Timestamp": "ٽائم اسٽيمپ",
-  "Type": "قسم",
-  "No records found for the selected filter.": "منتخب ٿيل فلٽر لاءِ ڪوبه رڪارڊ نه مليو.",
-  "No active tasks in your possession.": "توهان جي قبضي ۾ ڪو به سرگرم ڪم نه آهي.",
-  "Accept Receipt": "رسيد قبول ڪريو",
-  "MRV Status": "MRV اسٽيٽس",
-  "Low": "گھٽ",
-  "High": "هاءِ",
-  "No credits available": "ڪو به ڪريڊٽ دستياب ناهي",
-  "Check back later for newly verified CCCs.": "نئين تصديق ٿيل ڪاربن ڪريڊٽ لاءِ بعد ۾ ٻيهر چيڪ ڪريو.",
-  "AI Risk": "AI خطرو",
-  "Verified By": "پاران تصديق ٿيل",
-  "Details": "تفصيل",
-  "Record ID": "رڪارڊ جي سڃاڻپ",
-  "Med": "ميڊ",
-  "No MRV history found": "MRV جي تاريخ نه ملي",
-  "Offset": "آفسيٽ",
-  "Purchase Credit": "خريداري ڪريڊٽ",
-  "Insufficient Funds": "ناکافي فنڊ",
-  "I. Introduction": "I. تعارف",
-  "An error occurred": "هڪ غلطي ٿي وئي",
-  "Verified": "تصديق ٿيل",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "RupayKg جو بنيادي ڍانچو ۽ آپريٽنگ نظريو",
-  "Profile updated successfully": "پروفائل کي ڪاميابي سان اپڊيٽ ڪيو ويو",
-  "Profile Settings": "پروفائل سيٽنگون",
-  "Failed to update profile": "پروفائل کي اپڊيٽ ڪرڻ ۾ ناڪام ٿيو",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "پليٽ فارم هندستان جي ڪاربن ايڪو سسٽم ۾ هڪ ساختي خال کي حل ڪري ٿو: هڪ متحد، ريگيوليٽر-الائنڊ ڊجيٽل انفراسٽرڪچر جي غير موجودگي تصديق ٿيل فضول موڙ کي تعميل گريڊ ڪاربن سپلائي ۾ تبديل ڪرڻ جي قابل.",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "RupayKg هڪ گڏيل فضول کان ڪاربن ڊجيٽل آپريٽنگ سسٽم جي طور تي قائم ڪيو ويو آهي جيڪو هندستان جي تعميل تي ٻڌل ڪاربان مارڪيٽ ڏانهن منتقلي کي سپورٽ ڪرڻ لاءِ ٺهيل آهي.",
-  "Category": "زمرو",
-  "Anchor": "لنگر",
-  "Urban": "شهري",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "RupayKg هڪ پروجيڪٽ ڊولپر، ڪاربن واپاري، يا ريسائڪلنگ ادارو جي طور تي منظم ناهي. اهو هڪ بنيادي ڍانچي پرت آهي جيڪو شهري ۽ ڳوٺاڻن انتظامي فريم ورڪ ۾ بغير تعميراتي نقل جي ڪم ڪرڻ لاءِ ٺهيل آهي.",
-  "II. Unified Operating System Model": "II. متحد آپريٽنگ سسٽم ماڊل",
-  "Rural": "ڳوٺاڻو",
-  "Context": "حوالو",
-  "Municipal Corp + Ward": "ميونسپل ڪارپوريشن + وارڊ",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "Aggregator ساخت جي طور تي بيان ڪيو ويو آهي ضم ٿيل ادارو گڏ ڪرڻ ۽ ترتيب جي تصديق لاءِ ذميوار آهي، زنجير جي حراست جي تصديق کي آسان ڪرڻ.",
-  "Producers (EPR)": "پيدا ڪندڙ (اي پي آر)",
-  "CSR Contributors": "CSR تعاون ڪندڙ",
-  "Administrative Authority": "انتظامي اٿارٽي",
-  "Gram Panchayat + Village": "گرام پنچايت + ڳوٺ",
-  "III. Unified Stakeholder Architecture": "III. متحد اسٽيڪ هولڊر آرڪيٽيڪچر",
-  "Biomass-based fossil substitution": "بايوماس جي بنياد تي فوسل متبادل",
-  "Methane avoidance through diversion": "ڦيرڦار ذريعي ميٿين کان بچڻ",
-  "IV. CCC Origination": "IV. ڪاربن جي پيدائش",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* سڀ ڳوٺاڻن زرعي بقايا ۽ بايوماس سرگرميون بايوماس جي تحت درجه بندي ڪئي وئي آهي. ڪابه الڳ زرعي عمودي موجود ناهي.",
-  "Recycler Rail": "ريسائيڪل ريل",
-  "EPR Rail": "اي پي آر ريل",
-  "CSR Rail": "سي ايس آر ريل",
-  "V. Multi-Rail Architecture": "V. ملٽي ريل آرڪيٽيڪچر",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "ڪاربن جاري ڪرڻ واري اٿارٽي ريگيوليٽر جي ڪنٽرول ۾ رهي ٿي. RupayKg آزاديءَ سان ڪريڊٽ نه ٿو ڏئي. سڀئي ڪريڊٽ لازمي طور تي ايونٽ-سرچ لائق، رجسٽري-مطابقت رکندڙ، ۽ قومي ڪاربن گورننس فريم ورڪ سان ترتيب ڏيڻ گهرجن.",
-  "VI. Regulator Sovereignty": "VI. ريگيوليٽر خودمختياري",
-  "Governance Layer": "گورننس پرت",
-  "Recycling substitution": "ري سائیکلنگ جي متبادل",
-  "CCC Rail": "ڪاربن ريل",
-  "VII. Strategic Position": "VII. اسٽريٽجڪ پوزيشن",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "فضول هاڻي ڊسپوزل ناهي. اهو گورننس سان لاڳاپيل آبهوا انفراسٽرڪچر آهي.",
-  "— Founder, RupayKg": "- باني، RupayKg",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "هندستان هڪ تعميل ڪاربن دور ۾ داخل ٿي رهيو آهي. ميونسپل سسٽم ماپيبل ميٿين پيدا ڪري ٿو. ڳوٺاڻن بايوماس کي ساڙيو ويو آهي يا گهٽ استعمال ڪيو ويو آهي. تنهن هوندي به نظام ٽڪرا ٽڪرا آهن.",
-  "Article II — Unified Stakeholder Doctrine": "آرٽيڪل II - متحد اسٽيڪ هولڊر نظريي",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "بنيادي ڍانچي جو اعلان",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "RupayKg هڪ واحد ڊجيٽل سسٽم کي هلائيندو جنهن هيٺ ترتيب ڏئي سگهجي ٿو: (a) ميونسپل ڪارپوريشن + وارڊ (شهري حوالي سان) (b) گرام پنچائت + ڳوٺ (ڳوٺاڻن حوالي سان). ڪو به ڍانچي نقل نه هجڻ گهرجي حوالن جي وچ ۾.",
-  "Legally Styled": "قانوني انداز ۾",
-  "Article I — Unified Operating System": "آرٽيڪل I - متحد آپريٽنگ سسٽم",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "جڏهن اسان RupayKg ٺاهڻ شروع ڪيو، اسان ري سائيڪلنگ سان شروع نه ڪيو. اسان هڪ ڍانچي سوال سان شروع ڪيو: ڇو ڪو گڏيل انفراسٽرڪچر نه آهي جيڪو فضول کي منظم ڪاربن جي قيمت ۾ تبديل ڪري؟",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "RupayKg انھن کي متحد ڪرڻ لاء ٺاھيو ويو. ڪاربان واپاري جي حيثيت ۾ نه. نه هڪ ريزائنگنگ شروعاتي طور تي. پر هڪ واحد آپريٽنگ سسٽم جي طور تي ميونسپل وارڊ جي سطح تي ڪم ڪرڻ جي قابل ۽ گرام پنچايت ڳوٺ جي سطح تي بغير ساخت جي نقل جي.",
-  "Article III — Waste Classification": "آرٽيڪل III - فضول درجي بندي",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "اسٽيڪ هولڊر جو ڍانچو سڄي ملڪ ۾ يونيفارم هوندو ۽ ان تي مشتمل هوندو: ويسٽ جنريٽر، ايگريگيٽر، پروسيسر، انتظامي اٿارٽي، پروڊيوسر (اي پي آر)، سي ايس آر ڪنٽريبيوٽر، ڪاربن خريد ڪندڙ، ريگيوليٽر.",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "فضول کي خاص طور تي درجه بندي ڪيو ويندو: (a) MSW شهري حوالي سان (b) بايوماس ڳوٺاڻن حوالي سان. سڀ زرعي بقايا بايوماس جي تحت درجه بندي ڪيا ويندا.",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "سڀ اخراج جي گھٽتائي تي عمل ڪيو ويندو هڪ واحد ڪاربان ڳڻپيوڪر انجڻ جي ذريعي واقعي جي سطح جي ايم آر وي جي تصديق سان.",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "RupayKg جي وچ ۾ سخت علحدگي برقرار رکندي: ريسائيڪل اڪائونٽنگ، CSR اڪائونٽنگ، EPR تعميل، گورننس ويليو، ڪاربن جاري ڪرڻ. ٻيڻو ڳڻڻ منع آهي.",
-  "Article V — Rail Separation": "آرٽيڪل V - ريل جي الڳ ٿيڻ",
-  "Article IV — CCC Engine": "آرٽيڪل IV - ڪاربن انجڻ",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "ڪاربن مائيٽ اٿارٽي ريگيوليٽر ڪنٽرول هيٺ رهندي. RupayKg آزاديءَ سان ڪاربان ڪريڊٽ جاري نه ڪندو.",
-  "Institutional Identity": "اداري جي سڃاڻپ",
-  "Article VI — Regulator Sovereignty": "آرٽيڪل VI - ريگيوليٽر خودمختاري",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "RupayKg هن ريت بيان ڪيو ويو آهي: هڪ گڏيل فضول کان ڪاربن انفرااسٽرڪچر پليٽ فارم جيڪو هڪ واحد قومي اسٽيڪ هولڊر آرڪيٽيڪچر تحت ڪم ڪري ٿو ريگيوليٽر-الائنڊ ڪاربن جي اصليت جي صلاحيت سان."
-  } },
-  doi: { translation: {
-  "Dashboard": "डैशबोर्ड",
-  "MRV Dashboard": "एमआरवी डैशबोर्ड",
-  "Genesis": "उत्पत्ति",
-  "Settings": "सेटिंग्स",
-  "National KPI": "राष्ट्रीय के.पी.आई",
-  "Logout": "लॉग आउट",
-  "Upload Waste": "अपशिष्ट अपलोड करें",
-  "CCC Market": "कार्बन बाज़ार",
-  "Task Board": "कार्य मंडल",
-  "History": "इतिहास",
-  "Hindi": "हिंदी",
-  "System Overview": "तंत्र अवलोकन",
-  "Total Earnings": "कुल कमाई",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "Language": "भाषा",
-  "Welcome back": "वापसी पर स्वागत है",
-  "Community Rank": "सामुदायिक रैंक",
-  "English": "अंग्रेज़ी",
-  "Farmers Registered": "किसानों का पंजीयन किया गया",
-  "Total Collected": "कुल एकत्रित",
-  "Logistics Margin": "लॉजिस्टिक्स मार्जिन",
-  "Seed Demo Data": "बीज डेमो डेटा",
-  "Total Investment": "कुल निवेश",
-  "Total Processed": "कुल संसाधित",
-  "Fleet Efficiency": "बेड़े की दक्षता",
-  "Processing Yield": "प्रसंस्करण उपज",
-  "ESG Score": "ईएसजी स्कोर",
-  "Platform Statistics": "प्लेटफार्म सांख्यिकी",
-  "CCCs": "कार्बन क्रेडिट",
-  "Value Generated": "मूल्य उत्पन्न",
-  "Recent Activity": "हाल की गतिविधि",
-  "Waste Distribution": "अपशिष्ट वितरण",
-  "CCCs Generated": "कार्बन कम हुआ",
-  "Register New Farmer": "नए किसान का पंजीकरण करें",
-  "Reset Demo Data": "डेमो डेटा रीसेट करें",
-  "Performance Analytics": "प्रदर्शन विश्लेषण",
-  "Total Value": "कुल मूल्य",
-  "Total Weight": "कुल वजन",
-  "New Collection Record": "नया संग्रह रिकॉर्ड",
-  "Total Users": "कुल उपयोगकर्ता",
-  "New Processing Record": "नया प्रसंस्करण रिकॉर्ड",
-  "Land Area (Acres)": "भूमि क्षेत्र (एकड़)",
-  "Mobile Number": "मोबाइल नंबर",
-  "Full Name": "पूरा नाम",
-  "Farm Location": "खेत का स्थान",
-  "Crop Type": "फसल का प्रकार",
-  "New Intake Record": "नया सेवन रिकॉर्ड",
-  "Latitude": "अक्षांश",
-  "Get Current Location": "वर्तमान स्थान प्राप्त करें",
-  "Longitude": "देशान्तर",
-  "Register Farmer": "किसान पंजीयन करें",
-  "Pending Pickup": "लंबित पिकअप",
-  "Foundational Doctrine": "मूलभूत सिद्धांत",
-  "Account Settings": "अकाउंट सेटिंग",
-  "Registering...": "पंजीकरण हो रहा है...",
-  "In Transit": "पारगमन में",
-  "Operations Management": "संचालन प्रबंधन",
-  "All": "सभी",
-  "Processed": "प्रसंस्कृत",
-  "Transaction Ledger": "लेन-देन बही",
-  "Verification Image": "सत्यापन छवि",
-  "Weight (kg)": "वजन (किलो)",
-  "Location Confirmation (Google Maps)": "स्थान की पुष्टि (Google मानचित्र)",
-  "Total Sovereign Value": "कुल संप्रभु मूल्य",
-  "Confirm Intake & Mint Value": "सेवन और टकसाल मूल्य की पुष्टि करें",
-  "Processing...": "प्रसंस्करण...",
-  "Base Value (Recycler)": "आधार मूल्य (पुनर्चक्रणकर्ता)",
-  "Waste Type": "अपशिष्ट प्रकार",
-  "Estimated Value Breakdown": "अनुमानित मूल्य टूटना",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "How it Works": "यह काम किस प्रकार करता है",
-  "Intake": "प्रवेश",
-  "Features": "विशेषताएँ",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "रुपेकेजी एक सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम है जो समुदायों को मल्टी-रेल वैल्यू इंजन के माध्यम से कृषि, नगरपालिका और औद्योगिक कचरे का मुद्रीकरण करने के लिए सशक्त बनाता है।",
-  "Sovereign-Grade Circular Economy Engine": "सॉवरेन-ग्रेड सर्कुलर इकोनॉमी इंजन",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्राम अपशिष्ट को परिवर्तित करें",
-  "Access the OS": "ओएस तक पहुंचें",
-  "Global Circular Value": "वैश्विक परिपत्र मूल्य",
-  "Launch OS": "ओएस लॉन्च करें",
-  "Ecosystem Roles": "पारिस्थितिकी तंत्र भूमिकाएँ",
-  "Rural Wealth Creation": "ग्रामीण धन सृजन",
-  "Live Stream": "लाइव स्ट्रीम",
-  "AI-Verified Intake": "एआई-सत्यापित सेवन",
-  "Read Whitepaper": "श्वेतपत्र पढ़ें",
-  "Multi-Rail Value Engine": "मल्टी-रेल वैल्यू इंजन",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "अपशिष्ट प्रकार, वजन और जियोलोकेशन का स्वचालित सत्यापन अपरिवर्तनीय, संप्रभु-ग्रेड डेटा अखंडता सुनिश्चित करता है।",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "साथ ही संसाधित प्रत्येक किलोग्राम बायोमास के लिए रिसाइक्लर, सीएसआर, म्यूनिसिपल, कार्बन और ईपीआर रेल से मूल्य निकालें।",
-  "Live Network Impact": "लाइव नेटवर्क प्रभाव",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिकों के बटुए में सीधे धनराशि वितरित करना, पर्यावरणीय देनदारियों को स्थानीय आर्थिक विकास में बदलना।",
-  "Real-time waste throughput across the RupayKg OS": "रुपेकेजी ओएस पर वास्तविक समय अपशिष्ट थ्रूपुट",
-  "nodes": "नोड्स",
-  "Active Nodes": "सक्रिय नोड्स",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटर्स कचरे का सत्यापन, वजन और सुविधाओं तक परिवहन करते हैं।",
-  "Aggregate": "सकल",
-  "Value Minted": "मूल्य अंकित",
-  "Distributed biomass collection nodes": "वितरित बायोमास संग्रह नोड्स",
-  "A seamless pipeline from waste generation to value realization.": "अपशिष्ट उत्पादन से मूल्य प्राप्ति तक एक निर्बाध पाइपलाइन।",
-  "Network Topology": "नेटवर्क टोपोलॉजी",
-  "Generate": "उत्पन्न",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिक कृषि, नगरपालिका या औद्योगिक कचरा एकत्र करते हैं।",
-  "Recyclers convert waste into usable materials or energy.": "पुनर्चक्रणकर्ता अपशिष्ट को उपयोगी सामग्री या ऊर्जा में परिवर्तित करते हैं।",
-  "Upload waste records": "अपशिष्ट रिकॉर्ड अपलोड करें",
-  "Waste Generator": "अपशिष्ट जनरेटर",
-  "Choose your part in the circular economy.": "सर्कुलर इकोनॉमी में अपना हिस्सा चुनें।",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि, नगरपालिका, या औद्योगिक अपशिष्ट एकत्र करें और जमा करें। प्रदान किए गए कचरे के वजन और प्रकार के आधार पर सीधे वॉलेट जमा अर्जित करें।",
-  "Process": "प्रक्रिया",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट अनुबंध सभी 5 मूल्य रेलों पर धन वितरित करते हैं।",
-  "Mint Value": "टकसाल मूल्य",
-  "Citizen": "नागरिक",
-  "Instant wallet funding": "तत्काल वॉलेट फंडिंग",
-  "Collection & Transport": "संग्रहण एवं परिवहन",
-  "Processor": "प्रोसेसर",
-  "Log collection batches": "लॉग संग्रह बैच",
-  "Route optimization data": "मार्ग अनुकूलन डेटा",
-  "Earn logistics margins": "लॉजिस्टिक्स मार्जिन अर्जित करें",
-  "Aggregator": "एग्रीगेटर",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "एकत्रित अपशिष्ट प्राप्त करें और इसे अंतिम उत्पादों में संसाधित करें। सभी रेलों पर अंतिम मूल्य प्राप्ति को ट्रिगर करें।",
-  "Track environmental impact": "पर्यावरणीय प्रभाव को ट्रैक करें",
-  "Recycler": "रेमंड",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिक जमाओं को सत्यापित करें, कचरे को समेकित करें, और प्रसंस्करण सुविधाओं तक सामग्री पहुंचाने के लिए रसद का प्रबंधन करें।",
-  "District": "ज़िला",
-  "Access CSR/EPR funds": "सीएसआर/ईपीआर फंड तक पहुंचें",
-  "Log processing yields": "लॉग प्रोसेसिंग पैदावार",
-  "Generate CCCs": "कार्बन क्रेडिट उत्पन्न करें",
-  "Register": "पंजीकरण करवाना",
-  "Organization Name": "संगठन का नाम",
-  "Login": "लॉग इन करें",
-  "Context:": "प्रसंग:",
-  "Circular Economy Operating System": "सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम",
-  "Account Type": "खाता प्रकार",
-  "Create Account": "खाता बनाएं",
-  "Global Impact Map": "वैश्विक प्रभाव मानचित्र",
-  "Back to Home": "घर वापिस जा रहा हूँ",
-  "State": "राज्य",
-  "Submission Heatmap": "सबमिशन हीटमैप",
-  "Password": "पासवर्ड",
-  "Phone Number": "फ़ोन नंबर",
-  "System Audit Logs": "सिस्टम ऑडिट लॉग",
-  "Access OS": "ओएस तक पहुंचें",
-  "Quick Demo Access": "त्वरित डेमो एक्सेस",
-  "Pending": "लंबित",
-  "Farmers Supported": "किसानों का समर्थन किया",
-  "MRV Verification Dashboard": "एमआरवी सत्यापन डैशबोर्ड",
-  "Portfolio Composition": "पोर्टफोलियो संरचना",
-  "Waste Diverted": "अपशिष्ट डायवर्ट किया गया",
-  "Impact Distribution": "प्रभाव वितरण",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी करने के लिए संसाधित अपशिष्ट रिकॉर्ड सत्यापित करें।",
-  "No pending MRV records": "कोई लंबित एमआरवी रिकॉर्ड नहीं",
-  "All processed waste has been verified.": "सभी संसाधित कचरे का सत्यापन कर लिया गया है।",
-  "Total Offset": "कुल ऑफसेट",
-  "Acreage": "रकबा",
-  "Carbon Reduction": "कार्बन कटौती",
-  "Credit Value": "क्रेडिट मूल्य",
-  "Purchase verified CCCs to offset your footprint.": "अपने पदचिह्न को संतुलित करने के लिए सत्यापित कार्बन क्रेडिट खरीदें।",
-  "Reject": "अस्वीकार करना",
-  "Verify & Issue Credits": "सत्यापित करें और क्रेडिट जारी करें",
-  "Available Credits": "उपलब्ध क्रेडिट",
-  "AI Risk Score": "एआई जोखिम स्कोर",
-  "Location Verification": "स्थान सत्यापन",
-  "Cancel": "रद्द करना",
-  "Confirm Purchase": "खरीद की पुष्टि करें",
-  "Amount to Purchase (Tonnes)": "खरीद की राशि (टन)",
-  "Recent Transactions": "हाल के लेनदेन",
-  "Total Cost": "कुल लागत",
-  "Your Offset Balance": "आपका ऑफसेट बैलेंस",
-  "Price per Tonne": "कीमत प्रति टन",
-  "Project": "परियोजना",
-  "Amount": "मात्रा",
-  "Purchase Credits": "क्रेडिट खरीदें",
-  "Date": "तारीख",
-  "National Dashboard": "राष्ट्रीय डैशबोर्ड",
-  "Ward": "वार्ड",
-  "Status": "स्थिति",
-  "Network Active": "नेटवर्क सक्रिय",
-  "Ward Analytics": "वार्ड विश्लेषण",
-  "Municipal Corporation": "नगर निगम",
-  "Ward-Level Analytics": "वार्ड-स्तरीय विश्लेषण",
-  "Price": "कीमत",
-  "MSW": "एमएसडब्ल्यू",
-  "Farmer / FPO (Biomass Generator)": "किसान/एफपीओ (बायोमास जेनरेटर)",
-  "All Roles": "सभी भूमिकाएँ",
-  "Farmers / FPOs": "किसान/एफपीओ",
-  "Village-Level Analytics": "ग्राम-स्तरीय विश्लेषिकी",
-  "Citizens": "नागरिकों",
-  "Village Analytics": "ग्राम विश्लेषिकी",
-  "Gram Panchayat": "ग्राम पंचायत",
-  "Village": "गाँव",
-  "Biomass": "बायोमास",
-  "Citizen (MSW Generator)": "नागरिक (एमएसडब्ल्यू जेनरेटर)",
-  "Aggregators": "एग्रीगेटर",
-  "CCC Buyers": "कार्बन खरीदार",
-  "EPR Partners": "ईपीआर पार्टनर्स",
-  "Diverted": "मार्ग बदल दिया गया",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "Fraud Alerts & Flagged Events": "धोखाधड़ी की चेतावनियाँ और चिह्नित घटनाएँ",
-  "Audit Logs": "ऑडिट लॉग",
-  "CSR Partners": "सीएसआर पार्टनर्स",
-  "Processors": "प्रोसेसर",
-  "User Management": "प्रयोक्ता प्रबंधन",
-  "Trees Equivalent": "पेड़ समतुल्य",
-  "Water Saved": "पानी बचाया",
-  "Total Waste Events": "कुल अपशिष्ट घटनाएँ",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Growth & Impact Trends": "विकास एवं प्रभाव रुझान",
-  "Wallet Disbursed": "बटुआ वितरित",
-  "Processed Events": "संसाधित घटनाएँ",
-  "Trees": "पेड़",
-  "Methane Avoided": "मीथेन से परहेज किया गया",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* सरकारी बचत की गणना टाले गए लैंडफिल प्रबंधन और पर्यावरणीय उपचार लागत के आधार पर की जाती है।",
-  "Govt Cost Savings": "सरकारी लागत बचत",
-  "Processing Efficiency": "प्रसंस्करण दक्षता",
-  "Waste Composition": "अपशिष्ट संरचना",
-  "Avg Price / kg": "औसत मूल्य/किलो",
-  "MRV Rejection Rate": "एमआरवी अस्वीकृति दर",
-  "Geospatial Fraud Distribution": "भू-स्थानिक धोखाधड़ी वितरण",
-  "Total Minted CCC Units": "कुल ढली हुई कार्बन इकाइयाँ",
-  "Operational Health": "परिचालन स्वास्थ्य",
-  "No flagged events detected.": "कोई चिह्नित ईवेंट नहीं पाया गया.",
-  "Wallet": "बटुआ",
-  "State Admin": "राज्य प्रशासन",
-  "User": "उपयोगकर्ता",
-  "Location": "जगह",
-  "Regulator": "रेगुलेटर",
-  "CSR Partner": "सीएसआर पार्टनर",
-  "Actions": "कार्रवाई",
-  "Super Admin": "सुपर एडमिन",
-  "Municipal Admin": "नगर प्रशासन",
-  "Role": "भूमिका",
-  "No audit logs available.": "कोई ऑडिट लॉग उपलब्ध नहीं है.",
-  "EPR Partner": "ईपीआर पार्टनर",
-  "Action": "कार्रवाई",
-  "Total Events": "कुल घटनाएँ",
-  "No ward data available.": "कोई वार्ड डेटा उपलब्ध नहीं है.",
-  "Total Waste": "कुल बर्बादी",
-  "Delete User": "उपयोगकर्ता हटाएँ",
-  "No users found.": "कोई उपयोगकर्ता नहीं मिला.",
-  "User ID": "उपयोगकर्ता पहचान",
-  "CCC Buyer": "कार्बन क्रेता",
-  "Add ₹10,000": "₹10,000 जोड़ें",
-  "SMS Alerts": "एसएमएस अलर्ट",
-  "Email Notifications": "ईमेल सूचनाएं",
-  "Push Notifications": "सूचनाएं धक्का",
-  "Get instant SMS alerts for critical updates.": "महत्वपूर्ण अपडेट के लिए तत्काल एसएमएस अलर्ट प्राप्त करें।",
-  "Save Changes": "परिवर्तनों को सुरक्षित करें",
-  "Notification Preferences": "अधिसूचना प्राथमिकताएँ",
-  "Saving...": "सहेजा जा रहा है...",
-  "Receive updates about your transactions via email.": "ईमेल के माध्यम से अपने लेनदेन के बारे में अपडेट प्राप्त करें।",
-  "Enable browser push notifications.": "ब्राउज़र पुश सूचनाएँ सक्षम करें.",
-  "Value: ": "कीमत:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 रुपेकेजी सर्कुलर इकोनॉमी ओएस। सर्वाधिकार सुरक्षित।",
-  "Weight: ": "वज़न:",
-  "FRAUD ALERT": "धोखाधड़ी चेतावनी",
-  "Currently Active: ": "वर्तमान में सक्रिय:",
-  "Village: ": "गाँव:",
-  " Context (": "प्रसंग (",
-  "GENESIS": "उत्पत्ति",
-  "Type: ": "प्रकार:",
-  "How the Engine Works": "इंजन कैसे काम करता है",
-  "RUPAYKG": "रुपायकेजी",
-  "Farmer": "किसान",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "Privacy": "गोपनीयता",
-  "rural": "ग्रामीण",
-  "Terms": "शर्तें",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संग्रह एवं परिवहन)",
-  "Admin": "व्यवस्थापक",
-  "urban": "शहरी",
-  "Processor (Recycler)": "प्रोसेसर (रीसाइक्लर)",
-  "Database Connection Failed": "डेटाबेस कनेक्शन विफल",
-  "GPS Capture Failed": "जीपीएस कैप्चर विफल",
-  "Wallet Balance": "वॉलेट बैलेंस",
-  "Capturing GPS Coordinates...": "जीपीएस निर्देशांक कैप्चर किया जा रहा है...",
-  "No records found": "कोई रिकॉर्ड नहीं मिला",
-  "Name": "नाम",
-  "Acreage (acres)": "एकड़ (एकड़)",
-  "Circular Economy Intake Form": "सर्कुलर इकोनॉमी इंटेक फॉर्म",
-  "No audit logs found": "कोई ऑडिट लॉग नहीं मिला",
-  "GPS Captured: ": "जीपीएस से कैप्चर किया गया:",
-  "Retry GPS": "जीपीएस पुनः प्रयास करें",
-  "Failed to register farmer": "किसान का पंजीयन नहीं हो सका",
-  "Farmer registered successfully! ID: ": "किसान सफलतापूर्वक पंजीकृत! पहचान:",
-  "GPS Required": "जीपीएस आवश्यक",
-  "Drivers Online": "ड्राइवर ऑनलाइन",
-  "Active Queue": "सक्रिय कतार",
-  "Geolocation is not supported by this browser.": "जियोलोकेशन इस ब्राउज़र द्वारा समर्थित नहीं है.",
-  "Active Fleet": "सक्रिय बेड़ा",
-  "e.g., Paddy, Wheat": "जैसे, धान, गेहूँ",
-  "Failed to get location. Please enter manually.": "स्थान प्राप्त करने में विफल. कृपया मैन्युअल रूप से दर्ज करें.",
-  "Current Load": "वर्तमान भार",
-  "No new tasks available.": "कोई नया कार्य उपलब्ध नहीं है.",
-  "Available for Pickup": "बटोरने के लिए उपलब्ध",
-  "Output Material": "आउटपुट सामग्री",
-  "Storage Utilization": "भंडारण उपयोग",
-  "Biomass in Stock": "स्टॉक में बायोमास",
-  "Incoming for Processing": "प्रसंस्करण हेतु आवक",
-  "Utilization": "उपयोग",
-  "Total Capacity": "कुल क्षमता",
-  "Accept Pickup": "पिकअप स्वीकार करें",
-  "Accept Receipt": "रसीद स्वीकार करें",
-  "Pending MRV": "लंबित एमआरवी",
-  "Recently Processed": "हाल ही में संसाधित",
-  "No active tasks in your possession.": "आपके पास कोई सक्रिय कार्य नहीं है.",
-  "Type": "प्रकार",
-  "No records found for the selected filter.": "चयनित फ़िल्टर के लिए कोई रिकॉर्ड नहीं मिला.",
-  "MRV Status": "एमआरवी स्थिति",
-  "Timestamp": "समय-चिह्न",
-  "Weight": "वज़न",
-  "Value": "कीमत",
-  "Med": "मेड",
-  "No MRV history found": "कोई एमआरवी इतिहास नहीं मिला",
-  "Check back later for newly verified CCCs.": "नए सत्यापित कार्बन क्रेडिट के लिए बाद में दोबारा जाँच करें।",
-  "Record ID": "रिकॉर्ड आईडी",
-  "AI Risk": "एआई जोखिम",
-  "Verified By": "द्वारा सत्यापित",
-  "Details": "विवरण",
-  "No credits available": "कोई क्रेडिट उपलब्ध नहीं है",
-  "High": "उच्च",
-  "Low": "कम",
-  "Failed to update profile": "प्रोफ़ाइल अपडेट करने में विफल",
-  "Profile updated successfully": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "रुपेकेजी की मूलभूत संरचना और संचालन सिद्धांत",
-  "Profile Settings": "प्रोफ़ाइल सेटिंग्स",
-  "An error occurred": "एक त्रुटि पाई गई",
-  "Offset": "ओफ़्सेट",
-  "I. Introduction": "I. प्रस्तावना",
-  "Purchase Credit": "क्रेडिट खरीदें",
-  "Insufficient Funds": "अपर्याप्त कोष",
-  "Verified": "सत्यापित",
-  "Anchor": "लंगर",
-  "Urban": "शहरी",
-  "Context": "प्रसंग",
-  "Category": "वर्ग",
-  "Rural": "ग्रामीण",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "रुपेकेजी को एक परियोजना डेवलपर, कार्बन व्यापारी या रीसाइक्लिंग इकाई के रूप में संरचित नहीं किया गया है। यह एक बुनियादी ढांचा परत है जिसे वास्तुशिल्प दोहराव के बिना शहरी और ग्रामीण प्रशासनिक ढांचे में संचालित करने के लिए डिज़ाइन किया गया है।",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "रुपेकेजी को एक एकीकृत अपशिष्ट-से-CCC डिजिटल ऑपरेटिंग सिस्टम के रूप में स्थापित किया गया है जो अनुपालन-आधारित CCC बाजार की ओर भारत के संक्रमण का समर्थन करने के लिए डिज़ाइन किया गया है।",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "यह प्लेटफ़ॉर्म भारत के कार्बन पारिस्थितिकी तंत्र में एक संरचनात्मक अंतर को संबोधित करता है: एक एकीकृत, नियामक-संरेखित डिजिटल बुनियादी ढांचे की अनुपस्थिति जो सत्यापित अपशिष्ट डायवर्जन को अनुपालन-ग्रेड कार्बन आपूर्ति में परिवर्तित करने में सक्षम है।",
-  "II. Unified Operating System Model": "द्वितीय. एकीकृत ऑपरेटिंग सिस्टम मॉडल",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटर को संरचनात्मक रूप से मर्ज की गई इकाई के रूप में परिभाषित किया गया है जो संग्रह और सॉर्टिंग सत्यापन के लिए जिम्मेदार है, श्रृंखला-ऑफ-कस्टडी सत्यापन को सरल बनाता है।",
-  "Producers (EPR)": "निर्माता (ईपीआर)",
-  "Administrative Authority": "प्रशासनिक प्राधिकारी",
-  "III. Unified Stakeholder Architecture": "तृतीय. एकीकृत हितधारक वास्तुकला",
-  "Biomass-based fossil substitution": "बायोमास-आधारित जीवाश्म प्रतिस्थापन",
-  "Gram Panchayat + Village": "ग्राम पंचायत + गाँव",
-  "IV. CCC Origination": "चतुर्थ. CCC उत्पत्ति",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सभी ग्रामीण कृषि अवशेष और बायोमास गतिविधि को बायोमास के अंतर्गत वर्गीकृत किया गया है। कोई अलग कृषि कार्यक्षेत्र मौजूद नहीं है।",
-  "CSR Contributors": "सीएसआर योगदानकर्ता",
-  "Methane avoidance through diversion": "डायवर्जन के माध्यम से मीथेन से बचाव",
-  "CSR Rail": "सीएसआर रेल",
-  "Recycler Rail": "रिसाइक्लर रेल",
-  "CCC Rail": "कार्बन रेल",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी करने वाला प्राधिकरण नियामक-नियंत्रित रहता है। रुपेकेजी स्वतंत्र रूप से क्रेडिट का खनन नहीं करता है। सभी क्रेडिट इवेंट-ट्रेस करने योग्य, रजिस्ट्री-संगत होने चाहिए और राष्ट्रीय कार्बन शासन ढांचे के साथ संरेखित होने चाहिए।",
-  "Governance Layer": "शासन परत",
-  "V. Multi-Rail Architecture": "वी. मल्टी-रेल आर्किटेक्चर",
-  "VI. Regulator Sovereignty": "VI. नियामक संप्रभुता",
-  "Recycling substitution": "पुनर्चक्रण प्रतिस्थापन",
-  "VII. Strategic Position": "सातवीं. सामरिक स्थिति",
-  "EPR Rail": "ईपीआर रेल",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "कचरे का अब निपटान नहीं रह गया है। यह शासन से जुड़ा जलवायु बुनियादी ढांचा है।",
-  "Article I — Unified Operating System": "अनुच्छेद I - एकीकृत ऑपरेटिंग सिस्टम",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "मूलभूत संरचना की घोषणा",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद II - एकीकृत हितधारक सिद्धांत",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "उन्हें एकजुट करने के लिए रुपेकेजी का निर्माण किया गया था। कार्बन व्यापारी के रूप में नहीं. रीसाइक्लिंग स्टार्टअप के रूप में नहीं। लेकिन एक एकल ऑपरेटिंग सिस्टम के रूप में नगरपालिका वार्ड स्तर और ग्राम पंचायत ग्राम स्तर पर संरचनात्मक दोहराव के बिना काम करने में सक्षम है।",
-  "Legally Styled": "कानूनी तौर पर स्टाइल किया गया",
-  "— Founder, RupayKg": "- संस्थापक, रुपेकेजी",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "रुपेकेजी एक एकल डिजिटल प्रणाली संचालित करेगा जो निम्नलिखित के तहत लागू होगी: (ए) नगर निगम + वार्ड (शहरी संदर्भ) (बी) ग्राम पंचायत + गांव (ग्रामीण संदर्भ)। संदर्भों के बीच कोई संरचनात्मक दोहराव मौजूद नहीं होगा।",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत अनुपालन कार्बन युग में प्रवेश कर रहा है। नगरपालिका प्रणालियाँ मापने योग्य मीथेन उत्पन्न करती हैं। ग्रामीण बायोमास जला दिया जाता है या कम उपयोग किया जाता है। फिर भी प्रणालियाँ खंडित बनी हुई हैं।",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जब हमने रुपेकेजी का निर्माण शुरू किया, तो हमने रीसाइक्लिंग से शुरुआत नहीं की। हमने एक संरचनात्मक प्रश्न से शुरुआत की: कोई एकीकृत बुनियादी ढांचा क्यों नहीं है जो कचरे को विनियमित कार्बन मूल्य में परिवर्तित करता है?",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "हितधारक संरचना देश भर में एक समान रहेगी और इसमें शामिल होंगे: अपशिष्ट जनरेटर, एग्रीगेटर, प्रोसेसर, प्रशासनिक प्राधिकरण, निर्माता (ईपीआर), सीएसआर योगदानकर्ता, कार्बन खरीदार, नियामक।",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद VI - नियामक संप्रभुता",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन टकसाल प्राधिकरण नियामक नियंत्रण में रहेगा। रुपेकेजी स्वतंत्र रूप से कार्बन क्रेडिट जारी नहीं करेगा।",
-  "Article IV — CCC Engine": "अनुच्छेद IV - CCC इंजन",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "रुपेकेजी निम्नलिखित के बीच सख्त अलगाव बनाए रखेगा: रिसाइक्लर अकाउंटिंग, सीएसआर अकाउंटिंग, ईपीआर अनुपालन, गवर्नेंस वैल्यू, CCC जारी करना। दोहरी गिनती निषिद्ध है.",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "अपशिष्ट को विशेष रूप से इस प्रकार वर्गीकृत किया जाएगा: (ए) शहरी संदर्भ में एमएसडब्ल्यू (बी) ग्रामीण संदर्भ में बायोमास। सभी कृषि अवशेषों को बायोमास के अंतर्गत वर्गीकृत किया जाएगा।",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सभी उत्सर्जन कटौती को इवेंट-स्तरीय एमआरवी सत्यापन के साथ एकल CCC गणना इंजन के माध्यम से संसाधित किया जाएगा।",
-  "Article V — Rail Separation": "अनुच्छेद V - रेल पृथक्करण",
-  "Institutional Identity": "संस्थागत पहचान",
-  "Article III — Waste Classification": "अनुच्छेद III - अपशिष्ट वर्गीकरण",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "रुपेकेजी को इस प्रकार परिभाषित किया गया है: एक एकीकृत अपशिष्ट-से-CCC अवसंरचना मंच जो नियामक-संरेखित CCC उत्पत्ति क्षमता के साथ एकल राष्ट्रीय हितधारक वास्तुकला के तहत काम कर रहा है।"
-  } },
-  mni: { translation: {
-  "MRV Dashboard": "एमआरवी डैशबोर्ड",
-  "Task Board": "कार्य मंडल",
-  "Logout": "लॉग आउट",
-  "Dashboard": "डैशबोर्ड",
-  "CCC Market": "कार्बन बाज़ार",
-  "Genesis": "उत्पत्ति",
-  "Settings": "सेटिंग्स",
-  "Upload Waste": "अपशिष्ट अपलोड करें",
-  "National KPI": "राष्ट्रीय के.पी.आई",
-  "History": "इतिहास",
-  "Community Rank": "सामुदायिक रैंक",
-  "System Overview": "तंत्र अवलोकन",
-  "Total Collected": "कुल एकत्रित",
-  "Hindi": "हिंदी",
-  "Farmers Registered": "किसानों का पंजीयन किया गया",
-  "Total Earnings": "कुल कमाई",
-  "Language": "भाषा",
-  "Welcome back": "वापसी पर स्वागत है",
-  "English": "अंग्रेज़ी",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "Processing Yield": "प्रसंस्करण उपज",
-  "Fleet Efficiency": "बेड़े की दक्षता",
-  "CCCs": "कार्बन क्रेडिट",
-  "ESG Score": "ईएसजी स्कोर",
-  "Total Processed": "कुल संसाधित",
-  "Total Investment": "कुल निवेश",
-  "Value Generated": "मूल्य उत्पन्न",
-  "Logistics Margin": "लॉजिस्टिक्स मार्जिन",
-  "Seed Demo Data": "बीज डेमो डेटा",
-  "Platform Statistics": "प्लेटफार्म सांख्यिकी",
-  "Reset Demo Data": "डेमो डेटा रीसेट करें",
-  "Waste Distribution": "अपशिष्ट वितरण",
-  "Performance Analytics": "प्रदर्शन विश्लेषण",
-  "Total Weight": "कुल वजन",
-  "CCCs Generated": "कार्बन कम हुआ",
-  "Register New Farmer": "नए किसान का पंजीकरण करें",
-  "Total Users": "कुल उपयोगकर्ता",
-  "Recent Activity": "हाल की गतिविधि",
-  "New Collection Record": "नया संग्रह रिकॉर्ड",
-  "Total Value": "कुल मूल्य",
-  "New Intake Record": "नया सेवन रिकॉर्ड",
-  "Land Area (Acres)": "भूमि क्षेत्र (एकड़)",
-  "Farm Location": "खेत का स्थान",
-  "Full Name": "पूरा नाम",
-  "New Processing Record": "नया प्रसंस्करण रिकॉर्ड",
-  "Mobile Number": "मोबाइल नंबर",
-  "Get Current Location": "वर्तमान स्थान प्राप्त करें",
-  "Latitude": "अक्षांश",
-  "Crop Type": "फसल का प्रकार",
-  "Longitude": "देशान्तर",
-  "Operations Management": "संचालन प्रबंधन",
-  "In Transit": "पारगमन में",
-  "Registering...": "पंजीकरण हो रहा है...",
-  "Transaction Ledger": "लेन-देन बही",
-  "All": "सभी",
-  "Register Farmer": "किसान पंजीयन करें",
-  "Pending Pickup": "लंबित पिकअप",
-  "Account Settings": "अकाउंट सेटिंग",
-  "Foundational Doctrine": "मूलभूत सिद्धांत",
-  "Processed": "प्रसंस्कृत",
-  "Waste Type": "अपशिष्ट प्रकार",
-  "Weight (kg)": "वजन (किलो)",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "Location Confirmation (Google Maps)": "स्थान की पुष्टि (Google मानचित्र)",
-  "Confirm Intake & Mint Value": "सेवन और टकसाल मूल्य की पुष्टि करें",
-  "Estimated Value Breakdown": "अनुमानित मूल्य टूटना",
-  "Base Value (Recycler)": "आधार मूल्य (पुनर्चक्रणकर्ता)",
-  "Processing...": "प्रसंस्करण...",
-  "Total Sovereign Value": "कुल संप्रभु मूल्य",
-  "Verification Image": "सत्यापन छवि",
-  "Features": "विशेषताएँ",
-  "How it Works": "यह काम किस प्रकार करता है",
-  "Intake": "प्रवेश",
-  "Sovereign-Grade Circular Economy Engine": "सॉवरेन-ग्रेड सर्कुलर इकोनॉमी इंजन",
-  "Global Circular Value": "वैश्विक परिपत्र मूल्य",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्राम अपशिष्ट को परिवर्तित करें",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "रुपेकेजी एक सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम है जो समुदायों को मल्टी-रेल वैल्यू इंजन के माध्यम से कृषि, नगरपालिका और औद्योगिक कचरे का मुद्रीकरण करने के लिए सशक्त बनाता है।",
-  "Ecosystem Roles": "पारिस्थितिकी तंत्र भूमिकाएँ",
-  "Access the OS": "ओएस तक पहुंचें",
-  "Launch OS": "ओएस लॉन्च करें",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "साथ ही संसाधित प्रत्येक किलोग्राम बायोमास के लिए रिसाइक्लर, सीएसआर, म्यूनिसिपल, कार्बन और ईपीआर रेल से मूल्य निकालें।",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "अपशिष्ट प्रकार, वजन और जियोलोकेशन का स्वचालित सत्यापन अपरिवर्तनीय, संप्रभु-ग्रेड डेटा अखंडता सुनिश्चित करता है।",
-  "Multi-Rail Value Engine": "मल्टी-रेल वैल्यू इंजन",
-  "Live Stream": "लाइव स्ट्रीम",
-  "Read Whitepaper": "श्वेतपत्र पढ़ें",
-  "Rural Wealth Creation": "ग्रामीण धन सृजन",
-  "AI-Verified Intake": "एआई-सत्यापित सेवन",
-  "Live Network Impact": "लाइव नेटवर्क प्रभाव",
-  "Real-time waste throughput across the RupayKg OS": "रुपेकेजी ओएस पर वास्तविक समय अपशिष्ट थ्रूपुट",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिकों के बटुए में सीधे धनराशि वितरित करना, पर्यावरणीय देनदारियों को स्थानीय आर्थिक विकास में बदलना।",
-  "Value Minted": "मूल्य अंकित",
-  "Network Topology": "नेटवर्क टोपोलॉजी",
-  "Aggregate": "सकल",
-  "Generate": "उत्पन्न",
-  "Active Nodes": "सक्रिय नोड्स",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटर्स कचरे का सत्यापन, वजन और सुविधाओं तक परिवहन करते हैं।",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिक कृषि, नगरपालिका या औद्योगिक कचरा एकत्र करते हैं।",
-  "A seamless pipeline from waste generation to value realization.": "अपशिष्ट उत्पादन से मूल्य प्राप्ति तक एक निर्बाध पाइपलाइन।",
-  "nodes": "नोड्स",
-  "Distributed biomass collection nodes": "वितरित बायोमास संग्रह नोड्स",
-  "Choose your part in the circular economy.": "सर्कुलर इकोनॉमी में अपना हिस्सा चुनें।",
-  "Mint Value": "टकसाल मूल्य",
-  "Instant wallet funding": "तत्काल वॉलेट फंडिंग",
-  "Process": "प्रक्रिया",
-  "Recyclers convert waste into usable materials or energy.": "पुनर्चक्रणकर्ता अपशिष्ट को उपयोगी सामग्री या ऊर्जा में परिवर्तित करते हैं।",
-  "Waste Generator": "अपशिष्ट जनरेटर",
-  "Citizen": "नागरिक",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि, नगरपालिका, या औद्योगिक अपशिष्ट एकत्र करें और जमा करें। प्रदान किए गए कचरे के वजन और प्रकार के आधार पर सीधे वॉलेट जमा अर्जित करें।",
-  "Upload waste records": "अपशिष्ट रिकॉर्ड अपलोड करें",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट अनुबंध सभी 5 मूल्य रेलों पर धन वितरित करते हैं।",
-  "Recycler": "रेमंड",
-  "Processor": "प्रोसेसर",
-  "Route optimization data": "मार्ग अनुकूलन डेटा",
-  "Log collection batches": "लॉग संग्रह बैच",
-  "Track environmental impact": "पर्यावरणीय प्रभाव को ट्रैक करें",
-  "Aggregator": "एग्रीगेटर",
-  "Collection & Transport": "संग्रहण एवं परिवहन",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिक जमाओं को सत्यापित करें, कचरे को समेकित करें, और प्रसंस्करण सुविधाओं तक सामग्री पहुंचाने के लिए रसद का प्रबंधन करें।",
-  "Earn logistics margins": "लॉजिस्टिक्स मार्जिन अर्जित करें",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "एकत्रित अपशिष्ट प्राप्त करें और इसे अंतिम उत्पादों में संसाधित करें। सभी रेलों पर अंतिम मूल्य प्राप्ति को ट्रिगर करें।",
-  "Circular Economy Operating System": "सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम",
-  "Context:": "प्रसंग:",
-  "Login": "लॉग इन करें",
-  "Log processing yields": "लॉग प्रोसेसिंग पैदावार",
-  "Access CSR/EPR funds": "सीएसआर/ईपीआर फंड तक पहुंचें",
-  "District": "ज़िला",
-  "Generate CCCs": "कार्बन क्रेडिट उत्पन्न करें",
-  "Account Type": "खाता प्रकार",
-  "Register": "पंजीकरण करवाना",
-  "Organization Name": "संगठन का नाम",
-  "Create Account": "खाता बनाएं",
-  "Password": "पासवर्ड",
-  "Global Impact Map": "वैश्विक प्रभाव मानचित्र",
-  "Phone Number": "फ़ोन नंबर",
-  "Access OS": "ओएस तक पहुंचें",
-  "Back to Home": "घर वापिस जा रहा हूँ",
-  "State": "राज्य",
-  "Quick Demo Access": "त्वरित डेमो एक्सेस",
-  "System Audit Logs": "सिस्टम ऑडिट लॉग",
-  "Submission Heatmap": "सबमिशन हीटमैप",
-  "Pending": "लंबित",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी करने के लिए संसाधित अपशिष्ट रिकॉर्ड सत्यापित करें।",
-  "Waste Diverted": "अपशिष्ट डायवर्ट किया गया",
-  "Farmers Supported": "किसानों का समर्थन किया",
-  "Impact Distribution": "प्रभाव वितरण",
-  "MRV Verification Dashboard": "एमआरवी सत्यापन डैशबोर्ड",
-  "Portfolio Composition": "पोर्टफोलियो संरचना",
-  "Total Offset": "कुल ऑफसेट",
-  "No pending MRV records": "कोई लंबित एमआरवी रिकॉर्ड नहीं",
-  "All processed waste has been verified.": "सभी संसाधित कचरे का सत्यापन कर लिया गया है।",
-  "Credit Value": "क्रेडिट मूल्य",
-  "Reject": "अस्वीकार करना",
-  "AI Risk Score": "एआई जोखिम स्कोर",
-  "Carbon Reduction": "कार्बन कटौती",
-  "Acreage": "रकबा",
-  "Purchase verified CCCs to offset your footprint.": "अपने पदचिह्न को संतुलित करने के लिए सत्यापित कार्बन क्रेडिट खरीदें।",
-  "Location Verification": "स्थान सत्यापन",
-  "Verify & Issue Credits": "सत्यापित करें और क्रेडिट जारी करें",
-  "Available Credits": "उपलब्ध क्रेडिट",
-  "Price per Tonne": "कीमत प्रति टन",
-  "Project": "परियोजना",
-  "Purchase Credits": "क्रेडिट खरीदें",
-  "Your Offset Balance": "आपका ऑफसेट बैलेंस",
-  "Amount": "मात्रा",
-  "Cancel": "रद्द करना",
-  "Amount to Purchase (Tonnes)": "खरीद की राशि (टन)",
-  "Recent Transactions": "हाल के लेनदेन",
-  "Confirm Purchase": "खरीद की पुष्टि करें",
-  "Total Cost": "कुल लागत",
-  "MSW": "एमएसडब्ल्यू",
-  "Price": "कीमत",
-  "National Dashboard": "राष्ट्रीय डैशबोर्ड",
-  "Status": "स्थिति",
-  "Network Active": "नेटवर्क सक्रिय",
-  "Ward": "वार्ड",
-  "Date": "तारीख",
-  "Municipal Corporation": "नगर निगम",
-  "Ward Analytics": "वार्ड विश्लेषण",
-  "Ward-Level Analytics": "वार्ड-स्तरीय विश्लेषण",
-  "Citizens": "नागरिकों",
-  "Citizen (MSW Generator)": "नागरिक (एमएसडब्ल्यू जेनरेटर)",
-  "Village Analytics": "ग्राम विश्लेषिकी",
-  "Gram Panchayat": "ग्राम पंचायत",
-  "Farmers / FPOs": "किसान/एफपीओ",
-  "All Roles": "सभी भूमिकाएँ",
-  "Farmer / FPO (Biomass Generator)": "किसान/एफपीओ (बायोमास जेनरेटर)",
-  "Biomass": "बायोमास",
-  "Village": "गाँव",
-  "Village-Level Analytics": "ग्राम-स्तरीय विश्लेषिकी",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "CSR Partners": "सीएसआर पार्टनर्स",
-  "User Management": "प्रयोक्ता प्रबंधन",
-  "Aggregators": "एग्रीगेटर",
-  "CCC Buyers": "कार्बन खरीदार",
-  "Diverted": "मार्ग बदल दिया गया",
-  "Fraud Alerts & Flagged Events": "धोखाधड़ी की चेतावनियाँ और चिह्नित घटनाएँ",
-  "Processors": "प्रोसेसर",
-  "Audit Logs": "ऑडिट लॉग",
-  "EPR Partners": "ईपीआर पार्टनर्स",
-  "Methane Avoided": "मीथेन से परहेज किया गया",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Growth & Impact Trends": "विकास एवं प्रभाव रुझान",
-  "Total Waste Events": "कुल अपशिष्ट घटनाएँ",
-  "Water Saved": "पानी बचाया",
-  "Trees": "पेड़",
-  "Wallet Disbursed": "बटुआ वितरित",
-  "Processed Events": "संसाधित घटनाएँ",
-  "Trees Equivalent": "पेड़ समतुल्य",
-  "MRV Rejection Rate": "एमआरवी अस्वीकृति दर",
-  "Avg Price / kg": "औसत मूल्य/किलो",
-  "No flagged events detected.": "कोई चिह्नित ईवेंट नहीं पाया गया.",
-  "Geospatial Fraud Distribution": "भू-स्थानिक धोखाधड़ी वितरण",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* सरकारी बचत की गणना टाले गए लैंडफिल प्रबंधन और पर्यावरणीय उपचार लागत के आधार पर की जाती है।",
-  "Operational Health": "परिचालन स्वास्थ्य",
-  "Waste Composition": "अपशिष्ट संरचना",
-  "Govt Cost Savings": "सरकारी लागत बचत",
-  "Processing Efficiency": "प्रसंस्करण दक्षता",
-  "Total Minted CCC Units": "कुल ढली हुई कार्बन इकाइयाँ",
-  "Role": "भूमिका",
-  "User": "उपयोगकर्ता",
-  "Super Admin": "सुपर एडमिन",
-  "Municipal Admin": "नगर प्रशासन",
-  "Location": "जगह",
-  "Regulator": "रेगुलेटर",
-  "Wallet": "बटुआ",
-  "CSR Partner": "सीएसआर पार्टनर",
-  "State Admin": "राज्य प्रशासन",
-  "Actions": "कार्रवाई",
-  "EPR Partner": "ईपीआर पार्टनर",
-  "Action": "कार्रवाई",
-  "CCC Buyer": "कार्बन क्रेता",
-  "Total Waste": "कुल बर्बादी",
-  "Delete User": "उपयोगकर्ता हटाएँ",
-  "No users found.": "कोई उपयोगकर्ता नहीं मिला.",
-  "Total Events": "कुल घटनाएँ",
-  "No audit logs available.": "कोई ऑडिट लॉग उपलब्ध नहीं है.",
-  "User ID": "उपयोगकर्ता पहचान",
-  "No ward data available.": "कोई वार्ड डेटा उपलब्ध नहीं है.",
-  "Add ₹10,000": "₹10,000 जोड़ें",
-  "Push Notifications": "सूचनाएं धक्का",
-  "Saving...": "सहेजा जा रहा है...",
-  "Get instant SMS alerts for critical updates.": "महत्वपूर्ण अपडेट के लिए तत्काल एसएमएस अलर्ट प्राप्त करें।",
-  "Enable browser push notifications.": "ब्राउज़र पुश सूचनाएँ सक्षम करें.",
-  "Email Notifications": "ईमेल सूचनाएं",
-  "Notification Preferences": "अधिसूचना प्राथमिकताएँ",
-  "Receive updates about your transactions via email.": "ईमेल के माध्यम से अपने लेनदेन के बारे में अपडेट प्राप्त करें।",
-  "SMS Alerts": "एसएमएस अलर्ट",
-  "Save Changes": "परिवर्तनों को सुरक्षित करें",
-  " Context (": "प्रसंग (",
-  "GENESIS": "उत्पत्ति",
-  "Value: ": "कीमत:",
-  "How the Engine Works": "इंजन कैसे काम करता है",
-  "Currently Active: ": "वर्तमान में सक्रिय:",
-  "FRAUD ALERT": "धोखाधड़ी चेतावनी",
-  "Type: ": "प्रकार:",
-  "Village: ": "गाँव:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 रुपेकेजी सर्कुलर इकोनॉमी ओएस। सर्वाधिकार सुरक्षित।",
-  "Weight: ": "वज़न:",
-  "Privacy": "गोपनीयता",
-  "Terms": "शर्तें",
-  "urban": "शहरी",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संग्रह एवं परिवहन)",
-  "RUPAYKG": "रुपायकेजी",
-  "Admin": "व्यवस्थापक",
-  "Farmer": "किसान",
-  "Processor (Recycler)": "प्रोसेसर (रीसाइक्लर)",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "rural": "ग्रामीण",
-  "Wallet Balance": "वॉलेट बैलेंस",
-  "GPS Captured: ": "जीपीएस से कैप्चर किया गया:",
-  "No audit logs found": "कोई ऑडिट लॉग नहीं मिला",
-  "Capturing GPS Coordinates...": "जीपीएस निर्देशांक कैप्चर किया जा रहा है...",
-  "Circular Economy Intake Form": "सर्कुलर इकोनॉमी इंटेक फॉर्म",
-  "Acreage (acres)": "एकड़ (एकड़)",
-  "Database Connection Failed": "डेटाबेस कनेक्शन विफल",
-  "Name": "नाम",
-  "No records found": "कोई रिकॉर्ड नहीं मिला",
-  "GPS Capture Failed": "जीपीएस कैप्चर विफल",
-  "e.g., Paddy, Wheat": "जैसे, धान, गेहूँ",
-  "Farmer registered successfully! ID: ": "किसान सफलतापूर्वक पंजीकृत! पहचान:",
-  "Failed to register farmer": "किसान का पंजीयन नहीं हो सका",
-  "GPS Required": "जीपीएस आवश्यक",
-  "Active Fleet": "सक्रिय बेड़ा",
-  "Geolocation is not supported by this browser.": "जियोलोकेशन इस ब्राउज़र द्वारा समर्थित नहीं है.",
-  "Retry GPS": "जीपीएस पुनः प्रयास करें",
-  "Drivers Online": "ड्राइवर ऑनलाइन",
-  "Active Queue": "सक्रिय कतार",
-  "Failed to get location. Please enter manually.": "स्थान प्राप्त करने में विफल. कृपया मैन्युअल रूप से दर्ज करें.",
-  "Utilization": "उपयोग",
-  "Incoming for Processing": "प्रसंस्करण हेतु आवक",
-  "Storage Utilization": "भंडारण उपयोग",
-  "Accept Pickup": "पिकअप स्वीकार करें",
-  "No new tasks available.": "कोई नया कार्य उपलब्ध नहीं है.",
-  "Biomass in Stock": "स्टॉक में बायोमास",
-  "Output Material": "आउटपुट सामग्री",
-  "Available for Pickup": "बटोरने के लिए उपलब्ध",
-  "Current Load": "वर्तमान भार",
-  "Total Capacity": "कुल क्षमता",
-  "Value": "कीमत",
-  "Weight": "वज़न",
-  "MRV Status": "एमआरवी स्थिति",
-  "Timestamp": "समय-चिह्न",
-  "No active tasks in your possession.": "आपके पास कोई सक्रिय कार्य नहीं है.",
-  "Accept Receipt": "रसीद स्वीकार करें",
-  "Pending MRV": "लंबित एमआरवी",
-  "No records found for the selected filter.": "चयनित फ़िल्टर के लिए कोई रिकॉर्ड नहीं मिला.",
-  "Recently Processed": "हाल ही में संसाधित",
-  "Type": "प्रकार",
-  "Record ID": "रिकॉर्ड आईडी",
-  "Low": "कम",
-  "No MRV history found": "कोई एमआरवी इतिहास नहीं मिला",
-  "Verified By": "द्वारा सत्यापित",
-  "No credits available": "कोई क्रेडिट उपलब्ध नहीं है",
-  "Details": "विवरण",
-  "Check back later for newly verified CCCs.": "नए सत्यापित कार्बन क्रेडिट के लिए बाद में दोबारा जाँच करें।",
-  "High": "उच्च",
-  "AI Risk": "एआई जोखिम",
-  "Med": "मेड",
-  "Offset": "ओफ़्सेट",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "रुपेकेजी की मूलभूत संरचना और संचालन सिद्धांत",
-  "I. Introduction": "I. प्रस्तावना",
-  "Profile Settings": "प्रोफ़ाइल सेटिंग्स",
-  "Insufficient Funds": "अपर्याप्त कोष",
-  "Verified": "सत्यापित",
-  "Profile updated successfully": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
-  "An error occurred": "एक त्रुटि पाई गई",
-  "Failed to update profile": "प्रोफ़ाइल अपडेट करने में विफल",
-  "Purchase Credit": "क्रेडिट खरीदें",
-  "Anchor": "लंगर",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "रुपेकेजी को एक एकीकृत अपशिष्ट-से-CCC डिजिटल ऑपरेटिंग सिस्टम के रूप में स्थापित किया गया है जो अनुपालन-आधारित CCC बाजार की ओर भारत के संक्रमण का समर्थन करने के लिए डिज़ाइन किया गया है।",
-  "Context": "प्रसंग",
-  "Urban": "शहरी",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "रुपेकेजी को एक परियोजना डेवलपर, कार्बन व्यापारी या रीसाइक्लिंग इकाई के रूप में संरचित नहीं किया गया है। यह एक बुनियादी ढांचा परत है जिसे वास्तुशिल्प दोहराव के बिना शहरी और ग्रामीण प्रशासनिक ढांचे में संचालित करने के लिए डिज़ाइन किया गया है।",
-  "II. Unified Operating System Model": "द्वितीय. एकीकृत ऑपरेटिंग सिस्टम मॉडल",
-  "Category": "वर्ग",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "Rural": "ग्रामीण",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "यह प्लेटफ़ॉर्म भारत के कार्बन पारिस्थितिकी तंत्र में एक संरचनात्मक अंतर को संबोधित करता है: एक एकीकृत, नियामक-संरेखित डिजिटल बुनियादी ढांचे की अनुपस्थिति जो सत्यापित अपशिष्ट डायवर्जन को अनुपालन-ग्रेड कार्बन आपूर्ति में परिवर्तित करने में सक्षम है।",
-  "CSR Contributors": "सीएसआर योगदानकर्ता",
-  "Gram Panchayat + Village": "ग्राम पंचायत + गाँव",
-  "Producers (EPR)": "निर्माता (ईपीआर)",
-  "Biomass-based fossil substitution": "बायोमास-आधारित जीवाश्म प्रतिस्थापन",
-  "Administrative Authority": "प्रशासनिक प्राधिकारी",
-  "III. Unified Stakeholder Architecture": "तृतीय. एकीकृत हितधारक वास्तुकला",
-  "Methane avoidance through diversion": "डायवर्जन के माध्यम से मीथेन से बचाव",
-  "IV. CCC Origination": "चतुर्थ. CCC उत्पत्ति",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटर को संरचनात्मक रूप से मर्ज की गई इकाई के रूप में परिभाषित किया गया है जो संग्रह और सॉर्टिंग सत्यापन के लिए जिम्मेदार है, श्रृंखला-ऑफ-कस्टडी सत्यापन को सरल बनाता है।",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सभी ग्रामीण कृषि अवशेष और बायोमास गतिविधि को बायोमास के अंतर्गत वर्गीकृत किया गया है। कोई अलग कृषि कार्यक्षेत्र मौजूद नहीं है।",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी करने वाला प्राधिकरण नियामक-नियंत्रित रहता है। रुपेकेजी स्वतंत्र रूप से क्रेडिट का खनन नहीं करता है। सभी क्रेडिट इवेंट-ट्रेस करने योग्य, रजिस्ट्री-संगत होने चाहिए और राष्ट्रीय कार्बन शासन ढांचे के साथ संरेखित होने चाहिए।",
-  "CSR Rail": "सीएसआर रेल",
-  "CCC Rail": "कार्बन रेल",
-  "Recycler Rail": "रिसाइक्लर रेल",
-  "Governance Layer": "शासन परत",
-  "VII. Strategic Position": "सातवीं. सामरिक स्थिति",
-  "EPR Rail": "ईपीआर रेल",
-  "VI. Regulator Sovereignty": "VI. नियामक संप्रभुता",
-  "V. Multi-Rail Architecture": "वी. मल्टी-रेल आर्किटेक्चर",
-  "Recycling substitution": "पुनर्चक्रण प्रतिस्थापन",
-  "Article I — Unified Operating System": "अनुच्छेद I - एकीकृत ऑपरेटिंग सिस्टम",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "मूलभूत संरचना की घोषणा",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत अनुपालन कार्बन युग में प्रवेश कर रहा है। नगरपालिका प्रणालियाँ मापने योग्य मीथेन उत्पन्न करती हैं। ग्रामीण बायोमास जला दिया जाता है या कम उपयोग किया जाता है। फिर भी प्रणालियाँ खंडित बनी हुई हैं।",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "उन्हें एकजुट करने के लिए रुपेकेजी का निर्माण किया गया था। कार्बन व्यापारी के रूप में नहीं. रीसाइक्लिंग स्टार्टअप के रूप में नहीं। लेकिन एक एकल ऑपरेटिंग सिस्टम के रूप में नगरपालिका वार्ड स्तर और ग्राम पंचायत ग्राम स्तर पर संरचनात्मक दोहराव के बिना काम करने में सक्षम है।",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "रुपेकेजी एक एकल डिजिटल प्रणाली संचालित करेगा जो निम्नलिखित के तहत लागू होगी: (ए) नगर निगम + वार्ड (शहरी संदर्भ) (बी) ग्राम पंचायत + गांव (ग्रामीण संदर्भ)। संदर्भों के बीच कोई संरचनात्मक दोहराव मौजूद नहीं होगा।",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "कचरे का अब निपटान नहीं रह गया है। यह शासन से जुड़ा जलवायु बुनियादी ढांचा है।",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जब हमने रुपेकेजी का निर्माण शुरू किया, तो हमने रीसाइक्लिंग से शुरुआत नहीं की। हमने एक संरचनात्मक प्रश्न से शुरुआत की: कोई एकीकृत बुनियादी ढांचा क्यों नहीं है जो कचरे को विनियमित कार्बन मूल्य में परिवर्तित करता है?",
-  "— Founder, RupayKg": "- संस्थापक, रुपेकेजी",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद II - एकीकृत हितधारक सिद्धांत",
-  "Legally Styled": "कानूनी तौर पर स्टाइल किया गया",
-  "Article III — Waste Classification": "अनुच्छेद III - अपशिष्ट वर्गीकरण",
-  "Article IV — CCC Engine": "अनुच्छेद IV - CCC इंजन",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "हितधारक संरचना देश भर में एक समान रहेगी और इसमें शामिल होंगे: अपशिष्ट जनरेटर, एग्रीगेटर, प्रोसेसर, प्रशासनिक प्राधिकरण, निर्माता (ईपीआर), सीएसआर योगदानकर्ता, कार्बन खरीदार, नियामक।",
-  "Institutional Identity": "संस्थागत पहचान",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सभी उत्सर्जन कटौती को इवेंट-स्तरीय एमआरवी सत्यापन के साथ एकल CCC गणना इंजन के माध्यम से संसाधित किया जाएगा।",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन टकसाल प्राधिकरण नियामक नियंत्रण में रहेगा। रुपेकेजी स्वतंत्र रूप से कार्बन क्रेडिट जारी नहीं करेगा।",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "अपशिष्ट को विशेष रूप से इस प्रकार वर्गीकृत किया जाएगा: (ए) शहरी संदर्भ में एमएसडब्ल्यू (बी) ग्रामीण संदर्भ में बायोमास। सभी कृषि अवशेषों को बायोमास के अंतर्गत वर्गीकृत किया जाएगा।",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "रुपेकेजी निम्नलिखित के बीच सख्त अलगाव बनाए रखेगा: रिसाइक्लर अकाउंटिंग, सीएसआर अकाउंटिंग, ईपीआर अनुपालन, गवर्नेंस वैल्यू, CCC जारी करना। दोहरी गिनती निषिद्ध है.",
-  "Article V — Rail Separation": "अनुच्छेद V - रेल पृथक्करण",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद VI - नियामक संप्रभुता",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "रुपेकेजी को इस प्रकार परिभाषित किया गया है: एक एकीकृत अपशिष्ट-से-CCC अवसंरचना मंच जो नियामक-संरेखित CCC उत्पत्ति क्षमता के साथ एकल राष्ट्रीय हितधारक वास्तुकला के तहत काम कर रहा है।"
-  } },
-  brx: { translation: {
-  "National KPI": "राष्ट्रीय के.पी.आई",
-  "History": "इतिहास",
-  "Task Board": "कार्य मंडल",
-  "Upload Waste": "अपशिष्ट अपलोड करें",
-  "Logout": "लॉग आउट",
-  "Dashboard": "डैशबोर्ड",
-  "MRV Dashboard": "एमआरवी डैशबोर्ड",
-  "Genesis": "उत्पत्ति",
-  "Settings": "सेटिंग्स",
-  "CCC Market": "कार्बन बाज़ार",
-  "Welcome back": "वापसी पर स्वागत है",
-  "Language": "भाषा",
-  "Farmers Registered": "किसानों का पंजीयन किया गया",
-  "Community Rank": "सामुदायिक रैंक",
-  "Total Collected": "कुल एकत्रित",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "Hindi": "हिंदी",
-  "Total Earnings": "कुल कमाई",
-  "English": "अंग्रेज़ी",
-  "System Overview": "तंत्र अवलोकन",
-  "Fleet Efficiency": "बेड़े की दक्षता",
-  "Platform Statistics": "प्लेटफार्म सांख्यिकी",
-  "Processing Yield": "प्रसंस्करण उपज",
-  "Value Generated": "मूल्य उत्पन्न",
-  "CCCs": "कार्बन क्रेडिट",
-  "Total Processed": "कुल संसाधित",
-  "Total Investment": "कुल निवेश",
-  "Logistics Margin": "लॉजिस्टिक्स मार्जिन",
-  "ESG Score": "ईएसजी स्कोर",
-  "Seed Demo Data": "बीज डेमो डेटा",
-  "Recent Activity": "हाल की गतिविधि",
-  "Performance Analytics": "प्रदर्शन विश्लेषण",
-  "Waste Distribution": "अपशिष्ट वितरण",
-  "Register New Farmer": "नए किसान का पंजीकरण करें",
-  "Total Users": "कुल उपयोगकर्ता",
-  "Total Value": "कुल मूल्य",
-  "CCCs Generated": "कार्बन कम हुआ",
-  "Reset Demo Data": "डेमो डेटा रीसेट करें",
-  "Total Weight": "कुल वजन",
-  "New Collection Record": "नया संग्रह रिकॉर्ड",
-  "Farm Location": "खेत का स्थान",
-  "New Intake Record": "नया सेवन रिकॉर्ड",
-  "New Processing Record": "नया प्रसंस्करण रिकॉर्ड",
-  "Full Name": "पूरा नाम",
-  "Get Current Location": "वर्तमान स्थान प्राप्त करें",
-  "Longitude": "देशान्तर",
-  "Latitude": "अक्षांश",
-  "Mobile Number": "मोबाइल नंबर",
-  "Land Area (Acres)": "भूमि क्षेत्र (एकड़)",
-  "Crop Type": "फसल का प्रकार",
-  "Transaction Ledger": "लेन-देन बही",
-  "Pending Pickup": "लंबित पिकअप",
-  "Processed": "प्रसंस्कृत",
-  "Operations Management": "संचालन प्रबंधन",
-  "Register Farmer": "किसान पंजीयन करें",
-  "In Transit": "पारगमन में",
-  "Foundational Doctrine": "मूलभूत सिद्धांत",
-  "Account Settings": "अकाउंट सेटिंग",
-  "All": "सभी",
-  "Registering...": "पंजीकरण हो रहा है...",
-  "Estimated Value Breakdown": "अनुमानित मूल्य टूटना",
-  "Weight (kg)": "वजन (किलो)",
-  "Total Sovereign Value": "कुल संप्रभु मूल्य",
-  "Processing...": "प्रसंस्करण...",
-  "Location Confirmation (Google Maps)": "स्थान की पुष्टि (Google मानचित्र)",
-  "CCC Value": "कार्बन क्रेडिट मूल्य",
-  "Confirm Intake & Mint Value": "सेवन और टकसाल मूल्य की पुष्टि करें",
-  "Base Value (Recycler)": "आधार मूल्य (पुनर्चक्रणकर्ता)",
-  "Waste Type": "अपशिष्ट प्रकार",
-  "Verification Image": "सत्यापन छवि",
-  "Launch OS": "ओएस लॉन्च करें",
-  "How it Works": "यह काम किस प्रकार करता है",
-  "Sovereign-Grade Circular Economy Engine": "सॉवरेन-ग्रेड सर्कुलर इकोनॉमी इंजन",
-  "Intake": "प्रवेश",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "रुपेकेजी एक सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम है जो समुदायों को मल्टी-रेल वैल्यू इंजन के माध्यम से कृषि, नगरपालिका और औद्योगिक कचरे का मुद्रीकरण करने के लिए सशक्त बनाता है।",
-  "Access the OS": "ओएस तक पहुंचें",
-  "Global Circular Value": "वैश्विक परिपत्र मूल्य",
-  "Convert Every Kilogram of Waste into": "प्रत्येक किलोग्राम अपशिष्ट को परिवर्तित करें",
-  "Ecosystem Roles": "पारिस्थितिकी तंत्र भूमिकाएँ",
-  "Features": "विशेषताएँ",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "अपशिष्ट प्रकार, वजन और जियोलोकेशन का स्वचालित सत्यापन अपरिवर्तनीय, संप्रभु-ग्रेड डेटा अखंडता सुनिश्चित करता है।",
-  "Real-time waste throughput across the RupayKg OS": "रुपेकेजी ओएस पर वास्तविक समय अपशिष्ट थ्रूपुट",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "साथ ही संसाधित प्रत्येक किलोग्राम बायोमास के लिए रिसाइक्लर, सीएसआर, म्यूनिसिपल, कार्बन और ईपीआर रेल से मूल्य निकालें।",
-  "Read Whitepaper": "श्वेतपत्र पढ़ें",
-  "AI-Verified Intake": "एआई-सत्यापित सेवन",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिकों के बटुए में सीधे धनराशि वितरित करना, पर्यावरणीय देनदारियों को स्थानीय आर्थिक विकास में बदलना।",
-  "Live Network Impact": "लाइव नेटवर्क प्रभाव",
-  "Live Stream": "लाइव स्ट्रीम",
-  "Multi-Rail Value Engine": "मल्टी-रेल वैल्यू इंजन",
-  "Rural Wealth Creation": "ग्रामीण धन सृजन",
-  "Aggregate": "सकल",
-  "Aggregators verify, weigh, and transport waste to facilities.": "एग्रीगेटर्स कचरे का सत्यापन, वजन और सुविधाओं तक परिवहन करते हैं।",
-  "nodes": "नोड्स",
-  "Value Minted": "मूल्य अंकित",
-  "Distributed biomass collection nodes": "वितरित बायोमास संग्रह नोड्स",
-  "Network Topology": "नेटवर्क टोपोलॉजी",
-  "A seamless pipeline from waste generation to value realization.": "अपशिष्ट उत्पादन से मूल्य प्राप्ति तक एक निर्बाध पाइपलाइन।",
-  "Generate": "उत्पन्न",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिक कृषि, नगरपालिका या औद्योगिक कचरा एकत्र करते हैं।",
-  "Active Nodes": "सक्रिय नोड्स",
-  "Instant wallet funding": "तत्काल वॉलेट फंडिंग",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट अनुबंध सभी 5 मूल्य रेलों पर धन वितरित करते हैं।",
-  "Recyclers convert waste into usable materials or energy.": "पुनर्चक्रणकर्ता अपशिष्ट को उपयोगी सामग्री या ऊर्जा में परिवर्तित करते हैं।",
-  "Choose your part in the circular economy.": "सर्कुलर इकोनॉमी में अपना हिस्सा चुनें।",
-  "Citizen": "नागरिक",
-  "Mint Value": "टकसाल मूल्य",
-  "Upload waste records": "अपशिष्ट रिकॉर्ड अपलोड करें",
-  "Process": "प्रक्रिया",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि, नगरपालिका, या औद्योगिक अपशिष्ट एकत्र करें और जमा करें। प्रदान किए गए कचरे के वजन और प्रकार के आधार पर सीधे वॉलेट जमा अर्जित करें।",
-  "Waste Generator": "अपशिष्ट जनरेटर",
-  "Recycler": "रेमंड",
-  "Aggregator": "एग्रीगेटर",
-  "Earn logistics margins": "लॉजिस्टिक्स मार्जिन अर्जित करें",
-  "Processor": "प्रोसेसर",
-  "Collection & Transport": "संग्रहण एवं परिवहन",
-  "Track environmental impact": "पर्यावरणीय प्रभाव को ट्रैक करें",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिक जमाओं को सत्यापित करें, कचरे को समेकित करें, और प्रसंस्करण सुविधाओं तक सामग्री पहुंचाने के लिए रसद का प्रबंधन करें।",
-  "Route optimization data": "मार्ग अनुकूलन डेटा",
-  "Log collection batches": "लॉग संग्रह बैच",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "एकत्रित अपशिष्ट प्राप्त करें और इसे अंतिम उत्पादों में संसाधित करें। सभी रेलों पर अंतिम मूल्य प्राप्ति को ट्रिगर करें।",
-  "Circular Economy Operating System": "सर्कुलर इकोनॉमी ऑपरेटिंग सिस्टम",
-  "Generate CCCs": "कार्बन क्रेडिट उत्पन्न करें",
-  "Account Type": "खाता प्रकार",
-  "Context:": "प्रसंग:",
-  "Organization Name": "संगठन का नाम",
-  "Log processing yields": "लॉग प्रोसेसिंग पैदावार",
-  "Register": "पंजीकरण करवाना",
-  "Login": "लॉग इन करें",
-  "Access CSR/EPR funds": "सीएसआर/ईपीआर फंड तक पहुंचें",
-  "District": "ज़िला",
-  "Quick Demo Access": "त्वरित डेमो एक्सेस",
-  "Phone Number": "फ़ोन नंबर",
-  "Access OS": "ओएस तक पहुंचें",
-  "State": "राज्य",
-  "System Audit Logs": "सिस्टम ऑडिट लॉग",
-  "Submission Heatmap": "सबमिशन हीटमैप",
-  "Password": "पासवर्ड",
-  "Global Impact Map": "वैश्विक प्रभाव मानचित्र",
-  "Create Account": "खाता बनाएं",
-  "Back to Home": "घर वापिस जा रहा हूँ",
-  "Pending": "लंबित",
-  "MRV Verification Dashboard": "एमआरवी सत्यापन डैशबोर्ड",
-  "Verify processed waste records to issue CCCs.": "कार्बन क्रेडिट जारी करने के लिए संसाधित अपशिष्ट रिकॉर्ड सत्यापित करें।",
-  "Farmers Supported": "किसानों का समर्थन किया",
-  "Impact Distribution": "प्रभाव वितरण",
-  "Total Offset": "कुल ऑफसेट",
-  "No pending MRV records": "कोई लंबित एमआरवी रिकॉर्ड नहीं",
-  "Portfolio Composition": "पोर्टफोलियो संरचना",
-  "All processed waste has been verified.": "सभी संसाधित कचरे का सत्यापन कर लिया गया है।",
-  "Waste Diverted": "अपशिष्ट डायवर्ट किया गया",
-  "Location Verification": "स्थान सत्यापन",
-  "Reject": "अस्वीकार करना",
-  "Verify & Issue Credits": "सत्यापित करें और क्रेडिट जारी करें",
-  "Carbon Reduction": "कार्बन कटौती",
-  "Purchase verified CCCs to offset your footprint.": "अपने पदचिह्न को संतुलित करने के लिए सत्यापित कार्बन क्रेडिट खरीदें।",
-  "Acreage": "रकबा",
-  "Available Credits": "उपलब्ध क्रेडिट",
-  "AI Risk Score": "एआई जोखिम स्कोर",
-  "Credit Value": "क्रेडिट मूल्य",
-  "Amount to Purchase (Tonnes)": "खरीद की राशि (टन)",
-  "Price per Tonne": "कीमत प्रति टन",
-  "Your Offset Balance": "आपका ऑफसेट बैलेंस",
-  "Recent Transactions": "हाल के लेनदेन",
-  "Cancel": "रद्द करना",
-  "Amount": "मात्रा",
-  "Total Cost": "कुल लागत",
-  "Purchase Credits": "क्रेडिट खरीदें",
-  "Project": "परियोजना",
-  "Confirm Purchase": "खरीद की पुष्टि करें",
-  "Date": "तारीख",
-  "Ward-Level Analytics": "वार्ड-स्तरीय विश्लेषण",
-  "Status": "स्थिति",
-  "Price": "कीमत",
-  "Municipal Corporation": "नगर निगम",
-  "Network Active": "नेटवर्क सक्रिय",
-  "MSW": "एमएसडब्ल्यू",
-  "Ward Analytics": "वार्ड विश्लेषण",
-  "Ward": "वार्ड",
-  "National Dashboard": "राष्ट्रीय डैशबोर्ड",
-  "Citizen (MSW Generator)": "नागरिक (एमएसडब्ल्यू जेनरेटर)",
-  "Village": "गाँव",
-  "Biomass": "बायोमास",
-  "Farmer / FPO (Biomass Generator)": "किसान/एफपीओ (बायोमास जेनरेटर)",
-  "Citizens": "नागरिकों",
-  "Farmers / FPOs": "किसान/एफपीओ",
-  "Gram Panchayat": "ग्राम पंचायत",
-  "Village Analytics": "ग्राम विश्लेषिकी",
-  "All Roles": "सभी भूमिकाएँ",
-  "Village-Level Analytics": "ग्राम-स्तरीय विश्लेषिकी",
-  "User Management": "प्रयोक्ता प्रबंधन",
-  "Diverted": "मार्ग बदल दिया गया",
-  "Aggregators": "एग्रीगेटर",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "Fraud Alerts & Flagged Events": "धोखाधड़ी की चेतावनियाँ और चिह्नित घटनाएँ",
-  "Audit Logs": "ऑडिट लॉग",
-  "CSR Partners": "सीएसआर पार्टनर्स",
-  "EPR Partners": "ईपीआर पार्टनर्स",
-  "CCC Buyers": "कार्बन खरीदार",
-  "Processors": "प्रोसेसर",
-  "Trees Equivalent": "पेड़ समतुल्य",
-  "Total Waste Events": "कुल अपशिष्ट घटनाएँ",
-  "Processed Events": "संसाधित घटनाएँ",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Growth & Impact Trends": "विकास एवं प्रभाव रुझान",
-  "Wallet Disbursed": "बटुआ वितरित",
-  "Methane Avoided": "मीथेन से परहेज किया गया",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Water Saved": "पानी बचाया",
-  "Trees": "पेड़",
-  "Govt Cost Savings": "सरकारी लागत बचत",
-  "No flagged events detected.": "कोई चिह्नित ईवेंट नहीं पाया गया.",
-  "Waste Composition": "अपशिष्ट संरचना",
-  "MRV Rejection Rate": "एमआरवी अस्वीकृति दर",
-  "Avg Price / kg": "औसत मूल्य/किलो",
-  "Processing Efficiency": "प्रसंस्करण दक्षता",
-  "Operational Health": "परिचालन स्वास्थ्य",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* सरकारी बचत की गणना टाले गए लैंडफिल प्रबंधन और पर्यावरणीय उपचार लागत के आधार पर की जाती है।",
-  "Geospatial Fraud Distribution": "भू-स्थानिक धोखाधड़ी वितरण",
-  "Total Minted CCC Units": "कुल ढली हुई कार्बन इकाइयाँ",
-  "Location": "जगह",
-  "Actions": "कार्रवाई",
-  "Role": "भूमिका",
-  "Regulator": "रेगुलेटर",
-  "Municipal Admin": "नगर प्रशासन",
-  "CSR Partner": "सीएसआर पार्टनर",
-  "Wallet": "बटुआ",
-  "Super Admin": "सुपर एडमिन",
-  "State Admin": "राज्य प्रशासन",
-  "User": "उपयोगकर्ता",
-  "EPR Partner": "ईपीआर पार्टनर",
-  "Delete User": "उपयोगकर्ता हटाएँ",
-  "No audit logs available.": "कोई ऑडिट लॉग उपलब्ध नहीं है.",
-  "No ward data available.": "कोई वार्ड डेटा उपलब्ध नहीं है.",
-  "User ID": "उपयोगकर्ता पहचान",
-  "No users found.": "कोई उपयोगकर्ता नहीं मिला.",
-  "Action": "कार्रवाई",
-  "Total Waste": "कुल बर्बादी",
-  "CCC Buyer": "कार्बन क्रेता",
-  "Total Events": "कुल घटनाएँ",
-  "Enable browser push notifications.": "ब्राउज़र पुश सूचनाएँ सक्षम करें.",
-  "Receive updates about your transactions via email.": "ईमेल के माध्यम से अपने लेनदेन के बारे में अपडेट प्राप्त करें।",
-  "SMS Alerts": "एसएमएस अलर्ट",
-  "Notification Preferences": "अधिसूचना प्राथमिकताएँ",
-  "Save Changes": "परिवर्तनों को सुरक्षित करें",
-  "Add ₹10,000": "₹10,000 जोड़ें",
-  "Saving...": "सहेजा जा रहा है...",
-  "Email Notifications": "ईमेल सूचनाएं",
-  "Get instant SMS alerts for critical updates.": "महत्वपूर्ण अपडेट के लिए तत्काल एसएमएस अलर्ट प्राप्त करें।",
-  "Push Notifications": "सूचनाएं धक्का",
-  " Context (": "प्रसंग (",
-  "Village: ": "गाँव:",
-  "Weight: ": "वज़न:",
-  "How the Engine Works": "इंजन कैसे काम करता है",
-  "Value: ": "कीमत:",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 रुपेकेजी सर्कुलर इकोनॉमी ओएस। सर्वाधिकार सुरक्षित।",
-  "Type: ": "प्रकार:",
-  "Currently Active: ": "वर्तमान में सक्रिय:",
-  "FRAUD ALERT": "धोखाधड़ी चेतावनी",
-  "GENESIS": "उत्पत्ति",
-  "Aggregator (Collection & Transport)": "एग्रीगेटर (संग्रह एवं परिवहन)",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "Privacy": "गोपनीयता",
-  "Processor (Recycler)": "प्रोसेसर (रीसाइक्लर)",
-  "Admin": "व्यवस्थापक",
-  "rural": "ग्रामीण",
-  "Terms": "शर्तें",
-  "urban": "शहरी",
-  "RUPAYKG": "रुपायकेजी",
-  "Farmer": "किसान",
-  "Circular Economy Intake Form": "सर्कुलर इकोनॉमी इंटेक फॉर्म",
-  "No audit logs found": "कोई ऑडिट लॉग नहीं मिला",
-  "Database Connection Failed": "डेटाबेस कनेक्शन विफल",
-  "Name": "नाम",
-  "Acreage (acres)": "एकड़ (एकड़)",
-  "Capturing GPS Coordinates...": "जीपीएस निर्देशांक कैप्चर किया जा रहा है...",
-  "No records found": "कोई रिकॉर्ड नहीं मिला",
-  "GPS Capture Failed": "जीपीएस कैप्चर विफल",
-  "Wallet Balance": "वॉलेट बैलेंस",
-  "GPS Captured: ": "जीपीएस से कैप्चर किया गया:",
-  "GPS Required": "जीपीएस आवश्यक",
-  "Retry GPS": "जीपीएस पुनः प्रयास करें",
-  "e.g., Paddy, Wheat": "जैसे, धान, गेहूँ",
-  "Drivers Online": "ड्राइवर ऑनलाइन",
-  "Active Queue": "सक्रिय कतार",
-  "Farmer registered successfully! ID: ": "किसान सफलतापूर्वक पंजीकृत! पहचान:",
-  "Active Fleet": "सक्रिय बेड़ा",
-  "Failed to get location. Please enter manually.": "स्थान प्राप्त करने में विफल. कृपया मैन्युअल रूप से दर्ज करें.",
-  "Geolocation is not supported by this browser.": "जियोलोकेशन इस ब्राउज़र द्वारा समर्थित नहीं है.",
-  "Failed to register farmer": "किसान का पंजीयन नहीं हो सका",
-  "Total Capacity": "कुल क्षमता",
-  "Utilization": "उपयोग",
-  "No new tasks available.": "कोई नया कार्य उपलब्ध नहीं है.",
-  "Available for Pickup": "बटोरने के लिए उपलब्ध",
-  "Current Load": "वर्तमान भार",
-  "Incoming for Processing": "प्रसंस्करण हेतु आवक",
-  "Output Material": "आउटपुट सामग्री",
-  "Biomass in Stock": "स्टॉक में बायोमास",
-  "Accept Pickup": "पिकअप स्वीकार करें",
-  "Storage Utilization": "भंडारण उपयोग",
-  "Type": "प्रकार",
-  "MRV Status": "एमआरवी स्थिति",
-  "Accept Receipt": "रसीद स्वीकार करें",
-  "Recently Processed": "हाल ही में संसाधित",
-  "Pending MRV": "लंबित एमआरवी",
-  "No records found for the selected filter.": "चयनित फ़िल्टर के लिए कोई रिकॉर्ड नहीं मिला.",
-  "No active tasks in your possession.": "आपके पास कोई सक्रिय कार्य नहीं है.",
-  "Timestamp": "समय-चिह्न",
-  "Value": "कीमत",
-  "Weight": "वज़न",
-  "Med": "मेड",
-  "AI Risk": "एआई जोखिम",
-  "Details": "विवरण",
-  "Check back later for newly verified CCCs.": "नए सत्यापित कार्बन क्रेडिट के लिए बाद में दोबारा जाँच करें।",
-  "Low": "कम",
-  "High": "उच्च",
-  "No MRV history found": "कोई एमआरवी इतिहास नहीं मिला",
-  "Record ID": "रिकॉर्ड आईडी",
-  "Verified By": "द्वारा सत्यापित",
-  "No credits available": "कोई क्रेडिट उपलब्ध नहीं है",
-  "Purchase Credit": "क्रेडिट खरीदें",
-  "Profile Settings": "प्रोफ़ाइल सेटिंग्स",
-  "I. Introduction": "I. प्रस्तावना",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "रुपेकेजी की मूलभूत संरचना और संचालन सिद्धांत",
-  "Insufficient Funds": "अपर्याप्त कोष",
-  "Profile updated successfully": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
-  "Failed to update profile": "प्रोफ़ाइल अपडेट करने में विफल",
-  "Verified": "सत्यापित",
-  "Offset": "ओफ़्सेट",
-  "An error occurred": "एक त्रुटि पाई गई",
-  "Urban": "शहरी",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "यह प्लेटफ़ॉर्म भारत के कार्बन पारिस्थितिकी तंत्र में एक संरचनात्मक अंतर को संबोधित करता है: एक एकीकृत, नियामक-संरेखित डिजिटल बुनियादी ढांचे की अनुपस्थिति जो सत्यापित अपशिष्ट डायवर्जन को अनुपालन-ग्रेड कार्बन आपूर्ति में परिवर्तित करने में सक्षम है।",
-  "II. Unified Operating System Model": "द्वितीय. एकीकृत ऑपरेटिंग सिस्टम मॉडल",
-  "Rural": "ग्रामीण",
-  "Context": "प्रसंग",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "रुपेकेजी को एक एकीकृत अपशिष्ट-से-CCC डिजिटल ऑपरेटिंग सिस्टम के रूप में स्थापित किया गया है जो अनुपालन-आधारित CCC बाजार की ओर भारत के संक्रमण का समर्थन करने के लिए डिज़ाइन किया गया है।",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "रुपेकेजी को एक परियोजना डेवलपर, कार्बन व्यापारी या रीसाइक्लिंग इकाई के रूप में संरचित नहीं किया गया है। यह एक बुनियादी ढांचा परत है जिसे वास्तुशिल्प दोहराव के बिना शहरी और ग्रामीण प्रशासनिक ढांचे में संचालित करने के लिए डिज़ाइन किया गया है।",
-  "Anchor": "लंगर",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "Category": "वर्ग",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "एग्रीगेटर को संरचनात्मक रूप से मर्ज की गई इकाई के रूप में परिभाषित किया गया है जो संग्रह और सॉर्टिंग सत्यापन के लिए जिम्मेदार है, श्रृंखला-ऑफ-कस्टडी सत्यापन को सरल बनाता है।",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सभी ग्रामीण कृषि अवशेष और बायोमास गतिविधि को बायोमास के अंतर्गत वर्गीकृत किया गया है। कोई अलग कृषि कार्यक्षेत्र मौजूद नहीं है।",
-  "Biomass-based fossil substitution": "बायोमास-आधारित जीवाश्म प्रतिस्थापन",
-  "Producers (EPR)": "निर्माता (ईपीआर)",
-  "Gram Panchayat + Village": "ग्राम पंचायत + गाँव",
-  "III. Unified Stakeholder Architecture": "तृतीय. एकीकृत हितधारक वास्तुकला",
-  "Methane avoidance through diversion": "डायवर्जन के माध्यम से मीथेन से बचाव",
-  "Administrative Authority": "प्रशासनिक प्राधिकारी",
-  "CSR Contributors": "सीएसआर योगदानकर्ता",
-  "IV. CCC Origination": "चतुर्थ. CCC उत्पत्ति",
-  "EPR Rail": "ईपीआर रेल",
-  "VII. Strategic Position": "सातवीं. सामरिक स्थिति",
-  "V. Multi-Rail Architecture": "वी. मल्टी-रेल आर्किटेक्चर",
-  "Recycler Rail": "रिसाइक्लर रेल",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बन जारी करने वाला प्राधिकरण नियामक-नियंत्रित रहता है। रुपेकेजी स्वतंत्र रूप से क्रेडिट का खनन नहीं करता है। सभी क्रेडिट इवेंट-ट्रेस करने योग्य, रजिस्ट्री-संगत होने चाहिए और राष्ट्रीय कार्बन शासन ढांचे के साथ संरेखित होने चाहिए।",
-  "Recycling substitution": "पुनर्चक्रण प्रतिस्थापन",
-  "Governance Layer": "शासन परत",
-  "CCC Rail": "कार्बन रेल",
-  "VI. Regulator Sovereignty": "VI. नियामक संप्रभुता",
-  "CSR Rail": "सीएसआर रेल",
-  "Legally Styled": "कानूनी तौर पर स्टाइल किया गया",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "कचरे का अब निपटान नहीं रह गया है। यह शासन से जुड़ा जलवायु बुनियादी ढांचा है।",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद II - एकीकृत हितधारक सिद्धांत",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "मूलभूत संरचना की घोषणा",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "जब हमने रुपेकेजी का निर्माण शुरू किया, तो हमने रीसाइक्लिंग से शुरुआत नहीं की। हमने एक संरचनात्मक प्रश्न से शुरुआत की: कोई एकीकृत बुनियादी ढांचा क्यों नहीं है जो कचरे को विनियमित कार्बन मूल्य में परिवर्तित करता है?",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारत अनुपालन कार्बन युग में प्रवेश कर रहा है। नगरपालिका प्रणालियाँ मापने योग्य मीथेन उत्पन्न करती हैं। ग्रामीण बायोमास जला दिया जाता है या कम उपयोग किया जाता है। फिर भी प्रणालियाँ खंडित बनी हुई हैं।",
-  "— Founder, RupayKg": "- संस्थापक, रुपेकेजी",
-  "Article I — Unified Operating System": "अनुच्छेद I - एकीकृत ऑपरेटिंग सिस्टम",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "उन्हें एकजुट करने के लिए रुपेकेजी का निर्माण किया गया था। कार्बन व्यापारी के रूप में नहीं. रीसाइक्लिंग स्टार्टअप के रूप में नहीं। लेकिन एक एकल ऑपरेटिंग सिस्टम के रूप में नगरपालिका वार्ड स्तर और ग्राम पंचायत ग्राम स्तर पर संरचनात्मक दोहराव के बिना काम करने में सक्षम है।",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "रुपेकेजी एक एकल डिजिटल प्रणाली संचालित करेगा जो निम्नलिखित के तहत लागू होगी: (ए) नगर निगम + वार्ड (शहरी संदर्भ) (बी) ग्राम पंचायत + गांव (ग्रामीण संदर्भ)। संदर्भों के बीच कोई संरचनात्मक दोहराव मौजूद नहीं होगा।",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "रुपेकेजी निम्नलिखित के बीच सख्त अलगाव बनाए रखेगा: रिसाइक्लर अकाउंटिंग, सीएसआर अकाउंटिंग, ईपीआर अनुपालन, गवर्नेंस वैल्यू, CCC जारी करना। दोहरी गिनती निषिद्ध है.",
-  "Article V — Rail Separation": "अनुच्छेद V - रेल पृथक्करण",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सभी उत्सर्जन कटौती को इवेंट-स्तरीय एमआरवी सत्यापन के साथ एकल CCC गणना इंजन के माध्यम से संसाधित किया जाएगा।",
-  "Article III — Waste Classification": "अनुच्छेद III - अपशिष्ट वर्गीकरण",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद VI - नियामक संप्रभुता",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बन टकसाल प्राधिकरण नियामक नियंत्रण में रहेगा। रुपेकेजी स्वतंत्र रूप से कार्बन क्रेडिट जारी नहीं करेगा।",
-  "Institutional Identity": "संस्थागत पहचान",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "हितधारक संरचना देश भर में एक समान रहेगी और इसमें शामिल होंगे: अपशिष्ट जनरेटर, एग्रीगेटर, प्रोसेसर, प्रशासनिक प्राधिकरण, निर्माता (ईपीआर), सीएसआर योगदानकर्ता, कार्बन खरीदार, नियामक।",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "अपशिष्ट को विशेष रूप से इस प्रकार वर्गीकृत किया जाएगा: (ए) शहरी संदर्भ में एमएसडब्ल्यू (बी) ग्रामीण संदर्भ में बायोमास। सभी कृषि अवशेषों को बायोमास के अंतर्गत वर्गीकृत किया जाएगा।",
-  "Article IV — CCC Engine": "अनुच्छेद IV - CCC इंजन",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "रुपेकेजी को इस प्रकार परिभाषित किया गया है: एक एकीकृत अपशिष्ट-से-CCC अवसंरचना मंच जो नियामक-संरेखित CCC उत्पत्ति क्षमता के साथ एकल राष्ट्रीय हितधारक वास्तुकला के तहत काम कर रहा है।"
-  } },
-  sa: { translation: {
-  "Task Board": "कार्यफलकम्",
-  "Genesis": "उत्पत्तिः",
-  "Dashboard": "डैशबोर्ड",
-  "Logout": "लॉगआउट",
-  "National KPI": "राष्ट्रीय केपीआई",
-  "MRV Dashboard": "एमआरवी डैशबोर्ड",
-  "CCC Market": "कार्बन मार्केट",
-  "Settings": "सेटिंग्स्",
-  "History": "इतिहास",
-  "Upload Waste": "अपशिष्ट अपलोड करें",
-  "Hindi": "हिन्दी",
-  "Welcome back": "पुनः स्वागतम्",
-  "Farmers Registered": "किसान पंजीकृत",
-  "Total Earnings": "कुल अर्जन",
-  "Community Rank": "सामुदायिक श्रेणी",
-  "Total Collected": "कुल संगृहीत",
-  "System Overview": "प्रणाली अवलोकन",
-  "Language": "भाषा",
-  "CCC Offset": "कार्बन ऑफसेट",
-  "English": "आंग्ल",
-  "Fleet Efficiency": "बेडा दक्षता",
-  "CCCs": "कार्बन क्रेडिट्",
-  "Value Generated": "मूल्य उत्पन्नम्",
-  "Logistics Margin": "रसद मार्जिन",
-  "Total Investment": "कुल निवेश",
-  "Total Processed": "कुल संसाधित",
-  "Processing Yield": "प्रसंस्करण उपज",
-  "ESG Score": "ईएसजी स्कोर",
-  "Seed Demo Data": "बीज डेमो डाटा",
-  "Platform Statistics": "मञ्च सांख्यिकी",
-  "Performance Analytics": "कार्यप्रदर्शन विश्लेषणात्मकता",
-  "New Collection Record": "नवीन संग्रह अभिलेख",
-  "Recent Activity": "अद्यतन गतिविधि",
-  "Total Weight": "कुल भार",
-  "Register New Farmer": "रजिस्टर नव किसान",
-  "CCCs Generated": "कार्बन न्यूनीकृत",
-  "Reset Demo Data": "Demo Data पुनः सेट् कुर्वन्तु",
-  "Total Users": "कुल उपयोक्तारः",
-  "Total Value": "कुल मूल्य",
-  "Waste Distribution": "अपशिष्टवितरणम्",
-  "New Processing Record": "नवीन प्रसंस्करण अभिलेख",
-  "Mobile Number": "मोबाईल नम्बर",
-  "Farm Location": "कृषि स्थानं",
-  "Get Current Location": "वर्तमान स्थानं प्राप्नुत",
-  "Crop Type": "सस्यप्रकारः",
-  "Land Area (Acres)": "भूमिक्षेत्रम् (एकर्) २.",
-  "New Intake Record": "नवीन सेवन अभिलेख",
-  "Latitude": "अक्षांश",
-  "Full Name": "सम्पूर्ण नाम",
-  "Longitude": "देशान्तर",
-  "Transaction Ledger": "लेनदेन लेजर",
-  "All": "सर्वे",
-  "Account Settings": "खाता सेटिंग्स्",
-  "In Transit": "पारगमने",
-  "Pending Pickup": "पेण्डिंग पिकअप",
-  "Operations Management": "संचालन प्रबन्धन",
-  "Register Farmer": "रजिस्टर किसान",
-  "Processed": "संसाधितम्",
-  "Foundational Doctrine": "आधारभूत सिद्धान्त",
-  "Registering...": "पञ्जीकरणं...",
-  "Location Confirmation (Google Maps)": "स्थानस्य पुष्टिः (Google Maps) २.",
-  "Weight (kg)": "भारः (किलो) २.",
-  "Verification Image": "सत्यापन प्रतिमा",
-  "Waste Type": "अपशिष्टप्रकारः",
-  "Confirm Intake & Mint Value": "सेवन एवं टकसाल मूल्य की पुष्टि करें",
-  "Estimated Value Breakdown": "अनुमानित मूल्य विभाजन",
-  "Base Value (Recycler)": "आधार मूल्य (पुनःप्रयोगकर्ता) ९.",
-  "Processing...": "प्रसंस्करण...",
-  "Total Sovereign Value": "कुल सार्वभौम मूल्य",
-  "CCC Value": "कार्बन ऋण मूल्य",
-  "Launch OS": "ओएस प्रारम्भ",
-  "Ecosystem Roles": "पारिस्थितिकीतन्त्र भूमिकाएँ",
-  "Features": "गुणाः",
-  "Convert Every Kilogram of Waste into": "प्रत्येकं किलोग्रामं अपशिष्टं परिवर्तयन्तु",
-  "RupayKg is the circular economy operating system empowering communities to monetize agricultural, municipal, and industrial waste through a multi-rail value engine.": "रूपायकेजी बहु-रेल-मूल्य-इञ्जिनस्य माध्यमेन कृषि-नगरपालिका-औद्योगिक-अपशिष्टानां मुद्राकरणाय समुदायानाम् सशक्तीकरणं कुर्वती परिपत्र-अर्थव्यवस्था-सञ्चालन-प्रणाली अस्ति",
-  "Sovereign-Grade Circular Economy Engine": "सार्वभौम-श्रेणी परिपत्र अर्थव्यवस्था इञ्जिन",
-  "Access the OS": "ओएस-प्रवेशं कुर्वन्तु",
-  "How it Works": "कथं कार्यं करोति",
-  "Intake": "सेवनम्",
-  "Global Circular Value": "वैश्विक परिपत्र मूल्य",
-  "Live Stream": "लाइव स्ट्रीम",
-  "Simultaneously extract value from Recycler, CSR, Municipal, CCC, and EPR rails for every kilogram of biomass processed.": "एकत्रितरूपेण संसाधितस्य प्रत्येकं किलोग्रामस्य जैवद्रव्यस्य कृते पुनर्चक्रकर्, सीएसआर, नगरपालिका, कार्बन, ईपीआर रेलतः मूल्यं निष्कासयन्तु।",
-  "Read Whitepaper": "श्वेतपत्रं पठन्तु",
-  "Live Network Impact": "लाइव नेटवर्क इम्पैक्ट",
-  "Automated verification of waste type, weight, and geolocation ensures immutable, sovereign-grade data integrity.": "अपशिष्टप्रकारस्य, भारस्य, भूस्थानस्य च स्वचालितसत्यापनं अपरिवर्तनीयं, सार्वभौम-श्रेणीयाः आँकडा-अखण्डतां सुनिश्चितं करोति ।",
-  "Multi-Rail Value Engine": "बहु-रेल मूल्य इञ्जिन",
-  "Real-time waste throughput across the RupayKg OS": "RupayKg OS मध्ये वास्तविकसमयस्य अपशिष्टस्य थ्रूपुट्",
-  "AI-Verified Intake": "ऐ-सत्यापित सेवन",
-  "Directly disburse funds to citizen wallets, transforming environmental liabilities into localized economic growth.": "नागरिकबटुकेषु प्रत्यक्षतया धनं वितरन्ति, पर्यावरणीयदायित्वं स्थानीयीकृता आर्थिकवृद्धौ परिणमयन्ति।",
-  "Rural Wealth Creation": "ग्रामीण धन सृष्टि",
-  "nodes": "नोड्स इति",
-  "Value Minted": "मूल्य टकसाल",
-  "Network Topology": "संजाल टोपोलॉजी",
-  "Distributed biomass collection nodes": "वितरित जैवद्रव्य संग्रह नोड्स",
-  "Aggregators verify, weigh, and transport waste to facilities.": "सङ्ग्रहकाः अपशिष्टं सत्यापयन्ति, तौलयन्ति, सुविधासु परिवहनं च कुर्वन्ति ।",
-  "Generate": "उद्- पद्",
-  "Citizens collect agricultural, municipal, or industrial waste.": "नागरिकाः कृषि-नगरपालिका-औद्योगिक-अपशिष्टान् संग्रहयन्ति ।",
-  "Aggregate": "समुच्चयम्",
-  "Active Nodes": "सक्रिय नोड्स",
-  "A seamless pipeline from waste generation to value realization.": "अपशिष्टजननात् मूल्यसाक्षात्कारपर्यन्तं निर्विघ्नपाइपलाइनम्।",
-  "Mint Value": "टकसाल मूल्य",
-  "Process": "प्रक्रिया",
-  "Collect and deposit agricultural, municipal, or industrial waste. Earn direct wallet deposits based on the weight and type of waste provided.": "कृषि-नगरपालिका-औद्योगिक-कचराणां संग्रहणं, निक्षेपणं च । प्रदत्तस्य अपशिष्टस्य भारस्य प्रकारस्य च आधारेण प्रत्यक्षं बटुकनिक्षेपं अर्जयन्तु।",
-  "Recyclers convert waste into usable materials or energy.": "पुनःप्रयोक्तारः अपशिष्टं उपयोगयोग्यं सामग्रीं वा ऊर्जां वा परिवर्तयन्ति ।",
-  "Upload waste records": "अपशिष्टस्य अभिलेखान् अपलोड् कुर्वन्तु",
-  "Choose your part in the circular economy.": "वृत्ताकार अर्थव्यवस्थायां स्वस्य भागं चिनुत।",
-  "Citizen": "नागरिक",
-  "Instant wallet funding": "तत्क्षणं बटुकवित्तपोषणम्",
-  "Waste Generator": "अपशिष्ट जनरेटर",
-  "Smart contracts distribute funds across all 5 value rails.": "स्मार्ट-अनुबन्धाः सर्वेषु ५ मूल्य-रेल्-मध्ये धनं वितरन्ति ।",
-  "Route optimization data": "मार्ग अनुकूलनदत्तांशः",
-  "Receive aggregated waste and process it into end-products. Trigger the final value realization across all rails.": "समुचितं अपशिष्टं प्राप्य अन्त्योत्पादरूपेण संसाधयन्तु। सर्वेषु रेलमार्गेषु अन्तिममूल्यसाक्षात्कारं प्रेरयन्तु।",
-  "Processor": "संसाधकः",
-  "Collection & Transport": "संग्रह एवं परिवहन",
-  "Log collection batches": "लॉग संग्रह बैच",
-  "Recycler": "पुनर्चक्रणकर्ता",
-  "Aggregator": "समुच्चयकारः",
-  "Track environmental impact": "पर्यावरणप्रभावस्य निरीक्षणं कुर्वन्तु",
-  "Verify citizen deposits, consolidate waste, and manage logistics to transport materials to processing facilities.": "नागरिकनिक्षेपाणां सत्यापनम्, अपशिष्टानां समेकनं, सामग्रीं प्रसंस्करणसुविधासु परिवहनार्थं रसदव्यवस्थापनं च ।",
-  "Earn logistics margins": "रसद मार्जिन अर्जित करें",
-  "Account Type": "खाताप्रकारः",
-  "Login": "प्रवेशः",
-  "Register": "पंजीकर्",
-  "Generate CCCs": "कार्बन क्रेडिट् उत्पन्नं कुर्वन्तु",
-  "Log processing yields": "लॉग प्रोसेसिंग् उपजं ददाति",
-  "Access CSR/EPR funds": "CSR/EPR निधिं प्राप्तुं शक्नुवन्ति",
-  "Circular Economy Operating System": "परिपत्र अर्थव्यवस्था संचालन प्रणाली",
-  "District": "जनपद",
-  "Context:": "सन्दर्भ:",
-  "Organization Name": "संगठन नाम",
-  "Password": "समाभाष्",
-  "Phone Number": "फ़ोन नम्बर",
-  "State": "राज्यम्‌",
-  "Create Account": "खाता रचयन्तु",
-  "Quick Demo Access": "त्वरित प्रदर्शन अभिगम",
-  "Access OS": "एक्सेस ओएस",
-  "System Audit Logs": "प्रणाली लेखापरीक्षा लॉग",
-  "Global Impact Map": "वैश्विक प्रभाव मानचित्र",
-  "Submission Heatmap": "प्रस्तुति हीटमैप",
-  "Back to Home": "गृहं प्रति पुनः आगच्छन्तु",
-  "All processed waste has been verified.": "सर्वाणि संसाधितानि अपशिष्टानि सत्यापितानि सन्ति।",
-  "Total Offset": "कुल ऑफसेट",
-  "Impact Distribution": "प्रभाव वितरण",
-  "Waste Diverted": "अपशिष्टं विमुखीकृतम्",
-  "Pending": "विचाराधीनः",
-  "No pending MRV records": "एमआरवी अभिलेखाः लम्बिताः नास्ति",
-  "Farmers Supported": "किसान समर्थित",
-  "Portfolio Composition": "पोर्टफोलियो रचना",
-  "MRV Verification Dashboard": "एमआरवी सत्यापन डैशबोर्ड",
-  "Verify processed waste records to issue CCCs.": "कार्बनक्रेडिट् निर्गन्तुं संसाधित-अपशिष्ट-अभिलेखानां सत्यापनम्।",
-  "Location Verification": "स्थान सत्यापन",
-  "Credit Value": "ऋण मूल्य",
-  "Verify & Issue Credits": "सत्यापन एवं क्रेडिट जारी करें",
-  "Available Credits": "उपलब्धं श्रेयः",
-  "Carbon Reduction": "कार्बन न्यूनीकरण",
-  "AI Risk Score": "ए आई जोखिम स्कोर",
-  "Acreage": "एकर",
-  "Purchase verified CCCs to offset your footprint.": "स्वस्य पदचिह्नस्य प्रतिपूर्तिं कर्तुं सत्यापितं कार्बनक्रेडिट् क्रियताम्।",
-  "Reject": "अस्वीकार",
-  "Recent Transactions": "अद्यतन लेनदेन",
-  "Total Cost": "कुल व्ययः",
-  "Amount": "राशिः",
-  "Cancel": "निरसयतु",
-  "Your Offset Balance": "भवतः ऑफसेट बैलेन्स",
-  "Project": "प्रकल्प",
-  "Confirm Purchase": "क्रयणस्य पुष्टिः कुर्वन्तु",
-  "Amount to Purchase (Tonnes)": "क्रयणार्थं राशिः (टन) २.",
-  "Price per Tonne": "प्रति टन मूल्य",
-  "Purchase Credits": "क्रय क्रेडिट्",
-  "Municipal Corporation": "नगर निगम",
-  "MSW": "MSW",
-  "Network Active": "संजाल सक्रियः",
-  "Price": "मूल्य",
-  "Ward": "वार्ड",
-  "Date": "दिनाङ्कः",
-  "National Dashboard": "राष्ट्रीय डैशबोर्ड",
-  "Ward-Level Analytics": "वार्ड-स्तरीय विश्लेषणात्मकता",
-  "Status": "स्थितिः",
-  "Ward Analytics": "वार्ड विश्लेषणात्मकता",
-  "Village": "ग्राम",
-  "Citizen (MSW Generator)": "नागरिक (MSW जनरेटर) ९.",
-  "Village Analytics": "ग्राम विश्लेषण",
-  "Citizens": "नागरिकाः",
-  "Farmer / FPO (Biomass Generator)": "कृषक / FPO (बायोमास जनरेटर) ९.",
-  "Village-Level Analytics": "ग्रामस्तरीय विश्लेषणात्मकता",
-  "Farmers / FPOs": "कृषक / एफपीओ",
-  "Gram Panchayat": "ग्राम पंचायत",
-  "All Roles": "सर्वाणि भूमिकानि",
-  "Biomass": "जैवद्रव्यम्",
-  "Processors": "संसाधकाः",
-  "Fraud Alerts & Flagged Events": "धोखाधड़ी अलर्ट एवं ध्वजबद्ध घटनाएँ",
-  "Aggregators": "समुच्चयकाः",
-  "Diverted": "विमुखीकृतः",
-  "Audit Logs": "लेखापरीक्षा लॉग",
-  "CCC Pool Status": "कार्बन पूल स्थिति",
-  "CSR Partners": "सीएसआर भागीदार",
-  "CCC Buyers": "कार्बन क्रेतारः",
-  "User Management": "उपयोक्तृप्रबन्धनम्",
-  "EPR Partners": "ईपीआर पार्टनर्स्",
-  "Methane Avoided": "मीथेन परिहृतम्",
-  "Wallet Disbursed": "बटुआ वितरित",
-  "Trees": "वृक्षाः",
-  "Trees Equivalent": "वृक्षाः समतुल्यम्",
-  "Growth & Impact Trends": "वृद्धि एवं प्रभाव प्रवृत्तियाँ",
-  "Total Waste Events": "कुल अपशिष्टघटना",
-  "Processed Events": "संसाधित घटनाएँ",
-  "Water Saved": "जलं रक्षितम्",
-  "Economic Efficiency": "आर्थिक दक्षता",
-  "Environmental Impact": "पर्यावरणीय प्रभाव",
-  "Geospatial Fraud Distribution": "भूस्थानिक धोखाधड़ी वितरण",
-  "Processing Efficiency": "प्रसंस्करणदक्षता",
-  "* Government savings calculated based on avoided landfill management and environmental remediation costs.": "* परिहारित भूमिकम्पनप्रबन्धनस्य पर्यावरणनिवारणव्ययस्य च आधारेण सर्वकारीयबचतस्य गणना।",
-  "Avg Price / kg": "औसत मूल्य / किलो",
-  "MRV Rejection Rate": "एमआरवी अस्वीकृति दर",
-  "Waste Composition": "अपशिष्ट रचना",
-  "Total Minted CCC Units": "कुल टकसाल कार्बन इकाइयाँ",
-  "Govt Cost Savings": "Govt लागत बचत",
-  "Operational Health": "परिचालन स्वास्थ्य",
-  "No flagged events detected.": "कोऽपि ध्वजयुक्ताः घटनाः न ज्ञाताः ।",
-  "User": "उपयोक्ता",
-  "Wallet": "लघुपुट",
-  "Super Admin": "सुपर एडमिन",
-  "State Admin": "राज्य प्रशासक",
-  "Actions": "कर्माणि",
-  "CSR Partner": "सीएसआर भागीदार",
-  "Role": "भूमिका",
-  "Regulator": "नियामक",
-  "Municipal Admin": "नगरपालिका व्यवस्थापक",
-  "Location": "स्थानीय",
-  "Action": "नामपत्र",
-  "No audit logs available.": "लेखापरीक्षावृत्तलेखाः उपलब्धाः नास्ति।",
-  "Delete User": "उपयोक्तारं विलोपयन्तु",
-  "Total Events": "कुल घटनाः",
-  "No users found.": "कोऽपि उपयोक्ता न लब्धः।",
-  "EPR Partner": "ईपीआर भागीदार",
-  "CCC Buyer": "कार्बन क्रेता",
-  "User ID": "उपयोक्तृपरिचयः",
-  "Total Waste": "कुल अपशिष्ट",
-  "No ward data available.": "वार्डदत्तांशः उपलब्धः नास्ति।",
-  "Receive updates about your transactions via email.": "ईमेलद्वारा स्वव्यवहारस्य विषये अद्यतनं प्राप्नुवन्तु।",
-  "Save Changes": "परिवर्तनं रक्षतु",
-  "SMS Alerts": "एस एम एस अलर्ट",
-  "Add ₹10,000": "₹10,000 योजयतु",
-  "Push Notifications": "पुश सूचनाएँ",
-  "Get instant SMS alerts for critical updates.": "महत्त्वपूर्ण अपडेट् कृते तत्क्षणं SMS अलर्ट्स् प्राप्नुवन्तु।",
-  "Notification Preferences": "अधिसूचना प्राधान्यानि",
-  "Enable browser push notifications.": "ब्राउजर् पुश सूचनाः सक्षमाः कुर्वन्तु ।",
-  "Saving...": "बचतम्...",
-  "Email Notifications": "ईमेल सूचना",
-  "Village: ": "ग्राम:",
-  "Weight: ": "भारः:",
-  "Value: ": "मूल्यम्‌:",
-  "GENESIS": "उत्पत्तिः",
-  "FRAUD ALERT": "FRAUD ALERT",
-  "Type: ": "प्रकारः:",
-  " Context (": "सन्दर्भ (",
-  "How the Engine Works": "इञ्जिनं कथं कार्यं करोति",
-  "Currently Active: ": "सम्प्रति सक्रियः : १.",
-  "© 2026 RupayKg Circular Economy OS. All rights reserved.": "© 2026 RupayKg परिपत्र अर्थव्यवस्था ओएस. सर्वे अधिकाराः सुरक्षिताः।",
-  "RUPAYKG": "रूपायक्जी",
-  "Terms": "उपधा",
-  "Privacy": "निजता",
-  "Aggregator (Collection & Transport)": "समुच्चय (संग्रह एवं परिवहन) 1 .",
-  "urban": "नगरीय",
-  "National Regulator": "राष्ट्रीय नियामक",
-  "Processor (Recycler)": "संसाधकः (पुनःप्रयोगकः) २.",
-  "rural": "ग्रामीयः",
-  "Farmer": "कृषक",
-  "Admin": "एडमिनिस्ट्री",
-  "Wallet Balance": "बटुआ शेष",
-  "No audit logs found": "लेखापरीक्षावृत्तलेखाः न प्राप्ताः",
-  "Capturing GPS Coordinates...": "जीपीएस निर्देशांक कैप्चरिंग...",
-  "No records found": "न कोऽपि अभिलेखः प्राप्तः",
-  "GPS Captured: ": "जीपीएस गृहीतम् : १.",
-  "Circular Economy Intake Form": "परिपत्र अर्थव्यवस्था सेवन प्रपत्र",
-  "Database Connection Failed": "दत्तांशकोशसंयोजनं विफलम्",
-  "Name": "नामः",
-  "Acreage (acres)": "एकर (एकर्) २.",
-  "GPS Capture Failed": "जीपीएस कैप्चर विफलम्",
-  "Failed to register farmer": "कृषकस्य पञ्जीकरणं कर्तुं असफलः",
-  "Active Fleet": "सक्रिय बेडा",
-  "Active Queue": "सक्रिय कतार",
-  "GPS Required": "जीपीएस आवश्यक",
-  "e.g., Paddy, Wheat": "यथा धानं गोधूमम्",
-  "Drivers Online": "चालकाः ऑनलाइन",
-  "Retry GPS": "GPS पुनः प्रयासं कुर्वन्तु",
-  "Failed to get location. Please enter manually.": "स्थानं प्राप्तुं असफलम्। कृपया स्वहस्तेन प्रविशन्तु।",
-  "Geolocation is not supported by this browser.": "भूस्थानम् अस्मिन् ब्राउजरे समर्थितं नास्ति ।",
-  "Farmer registered successfully! ID: ": "कृषकः सफलतया पञ्जीकरणं कृतवान्! आईडी : १.",
-  "Biomass in Stock": "बायोमासः स्टॉक् अस्ति",
-  "Storage Utilization": "भण्डारण उपयोग",
-  "Total Capacity": "कुल क्षमता",
-  "No new tasks available.": "न नूतनानि कार्याणि उपलब्धानि।",
-  "Output Material": "आउटपुट सामग्री",
-  "Accept Pickup": "पिकअप स्वीकार करें",
-  "Current Load": "वर्तमान भार",
-  "Utilization": "उपयोग",
-  "Incoming for Processing": "प्रसंस्करणार्थं आगच्छन्ति",
-  "Available for Pickup": "पिकअप कृते उपलब्धम्",
-  "Weight": "भारः",
-  "Recently Processed": "सद्यः संसाधितः",
-  "No records found for the selected filter.": "चयनितस्य फ़िल्टरस्य कृते कोऽपि अभिलेखः न प्राप्यते ।",
-  "No active tasks in your possession.": "भवतः स्वामित्वे सक्रियकार्यं नास्ति।",
-  "Type": "प्रकारः",
-  "Timestamp": "समयमुद्रिका",
-  "MRV Status": "एमआरवी स्थिति",
-  "Pending MRV": "लंबित एम.आर.वी",
-  "Value": "मूल्यम्‌",
-  "Accept Receipt": "रसीद स्वीकार करें",
-  "Details": "वर्णन",
-  "Med": "मेड",
-  "Low": "न्यूनम्‌",
-  "Record ID": "अभिलेख ID",
-  "No credits available": "क्रेडिट् उपलब्धं नास्ति",
-  "AI Risk": "ऐ रिस्क",
-  "Check back later for newly verified CCCs.": "नवसत्यापितकार्बनक्रेडिट् कृते पश्चात् पुनः पश्यन्तु।",
-  "No MRV history found": "न एमआरवी इतिहासः प्राप्तः",
-  "High": "उच्चैः",
-  "Verified By": "Verified By",
-  "I. Introduction": "I. परिचयः",
-  "Purchase Credit": "क्रय श्रेय",
-  "Profile Settings": "प्रोफाइल सेटिंग्स्",
-  "Offset": "ऑफसेट्",
-  "Verified": "सत्यापित",
-  "Failed to update profile": "प्रोफाइल अपडेट् कर्तुं असफलम्",
-  "Insufficient Funds": "अपर्याप्तनिधिः",
-  "Profile updated successfully": "प्रोफाइल सफलतया अद्यतनं कृतम्",
-  "An error occurred": "एकः दोषः अभवत्",
-  "The Foundational Structure and Operating Doctrine of RupayKg": "रुपयस्य आधारभूतसंरचना तथा संचालनसिद्धान्तःKg",
-  "II. Unified Operating System Model": "II. एकीकृत प्रचालन प्रणाली प्रतिरूप",
-  "Anchor": "लाङ्गल",
-  "The platform addresses a structural gap in India’s CCC ecosystem: the absence of a unified, regulator-aligned digital infrastructure capable of converting verified waste diversion into compliance-grade CCC supply.": "मञ्चः भारतस्य कार्बनपारिस्थितिकीतन्त्रे संरचनात्मकं अन्तरं सम्बोधयति: सत्यापित-अपशिष्ट-विपथनं अनुपालन-श्रेणी-कार्बन-आपूर्ति-रूपेण परिवर्तयितुं समर्थस्य एकीकृतस्य, नियामक-संरेखितस्य डिजिटल-अन्तर्निर्मितस्य अभावः |.",
-  "Urban": "नगरीय",
-  "RupayKg has been established as a Unified Waste-to-CCC Digital Operating System designed to support India’s transition toward a compliance-based CCC market.": "रूपायकेजी इत्यस्य स्थापना एकीकृत-अपशिष्ट-कार्बन-पर्यन्तं डिजिटल-सञ्चालन-प्रणालीरूपेण कृता अस्ति, यत् भारतस्य अनुपालन-आधारित-कार्बन-विपण्यं प्रति संक्रमणस्य समर्थनार्थं विनिर्मितम् अस्ति ।",
-  "Category": "कोटी",
-  "Municipal Corp + Ward": "नगर निगम + वार्ड",
-  "Rural": "ग्रामीयः",
-  "RupayKg is not structured as a project developer, CCC trader, or recycling entity. It is an infrastructure layer designed to operate across urban and rural administrative frameworks without architectural duplication.": "RupayKg परियोजनाविकासकः, कार्बनव्यापारी, पुनःप्रयोगसंस्था वा इति संरचितः नास्ति । इदं वास्तुकलानां द्वितीयकं विना नगरीयग्रामीणप्रशासनिकरूपरेखासु कार्यं कर्तुं विनिर्मितः आधारभूतसंरचनास्तरः अस्ति ।",
-  "Context": "सन्दर्भ",
-  "Methane avoidance through diversion": "विपथद्वारा मीथेनपरिहारः",
-  "Biomass-based fossil substitution": "जैवद्रव्याधारित जीवाश्म प्रतिस्थापन",
-  "Administrative Authority": "प्रशासनिक प्राधिकरण",
-  "III. Unified Stakeholder Architecture": "III. एकीकृत हितधारक वास्तुकला",
-  "IV. CCC Origination": "IV. CCC उत्पत्ति",
-  "* All rural agricultural residue and biomass activity is classified under Biomass. No separate agricultural vertical exists.": "* सर्वेषां ग्रामीणकृषिअवशेषाणां जैवद्रव्यस्य च गतिविधिः जैवद्रव्यस्य अन्तर्गतं वर्गीकृतः अस्ति । न कोऽपि पृथक् कृषिः ऊर्ध्वाधरः विद्यते ।",
-  "Gram Panchayat + Village": "ग्राम पंचायत + ग्राम",
-  "CSR Contributors": "सीएसआर योगदानकर्ता",
-  "Producers (EPR)": "उत्पादकाः (EPR) ९.",
-  "The Aggregator is structurally defined as the merged entity responsible for collection and sorting validation, simplifying chain-of-custody verification.": "समुच्चयकर्ता संरचनात्मकरूपेण परिभाषितः अस्ति यत् संग्रहणं क्रमणं च प्रमाणीकरणाय उत्तरदायी विलीनसत्ता अस्ति, येन श्रृङ्खला-अभिरक्षणसत्यापनं सरलं भवति",
-  "Governance Layer": "शासन स्तर",
-  "VII. Strategic Position": "VII. सामरिक स्थिति",
-  "CSR Rail": "सीएसआर रेल",
-  "V. Multi-Rail Architecture": "वि बहु-रेल वास्तुकला",
-  "EPR Rail": "ईपीआर रेल",
-  "CCC Rail": "कार्बन रेल",
-  "VI. Regulator Sovereignty": "VI. नियामक संप्रभुता",
-  "CCC issuance authority remains regulator-controlled. RupayKg does not independently mint credits. All credits must be event-traceable, registry-compatible, and align with national CCC governance frameworks.": "कार्बननिर्गमनप्राधिकरणं नियामकनियन्त्रितम् एव तिष्ठति। रूपायKg स्वतन्त्रतया क्रेडिट् न टकसालं करोति। सर्वे क्रेडिट् घटना-अनुसन्धानयोग्याः, रजिस्ट्री-सङ्गताः, राष्ट्रियकार्बनशासनरूपरेखाभिः सह सङ्गताः च भवेयुः ।",
-  "Recycler Rail": "पुनर्चक्रणकर्ता रेल",
-  "Recycling substitution": "पुनःप्रयोग प्रतिस्थापन",
-  "— Founder, RupayKg": "— संस्थापक, रूपायKg",
-  "When we began building RupayKg, we did not start with recycling. We started with a structural question: Why is there no unified infrastructure that converts waste into regulated CCC value?": "यदा वयं RupayKg इत्यस्य निर्माणं आरब्धवन्तः तदा पुनःप्रयोगेन न आरब्धाः। वयं संरचनात्मकप्रश्नेन आरब्धाः यत् अपशिष्टं विनियमितकार्बनमूल्ये परिवर्तयति इति एकीकृता आधारभूतसंरचना किमर्थं नास्ति ?",
-  "Article I — Unified Operating System": "प्रथमः लेखः — एकीकृतप्रचालनप्रणाली",
-  "India is entering a compliance CCC era. Municipal systems generate measurable methane. Rural biomass is burned or underutilized. Yet the systems remain fragmented.": "भारतं अनुपालनकार्बनयुगं प्रविशति। नगरपालिकाप्रणाल्याः मापनीयं मीथेनं उत्पद्यते । ग्रामीणजैवद्रव्यं दग्धं भवति अथवा अल्पप्रयोगः भवति । तथापि व्यवस्थाः विखण्डिताः एव तिष्ठन्ति।",
-  "RupayKg was built to unify them. Not as a CCC trader. Not as a recycling startup. But as a single operating system capable of working at Municipal Ward level and Gram Panchayat Village level without structural duplication.": "तेषां एकीकरणाय रूपायक्ग् निर्मितम् आसीत् । न तु कार्बनव्यापारित्वेन। न तु पुनःप्रयोगस्य स्टार्टअपरूपेण। परन्तु संरचनात्मक द्वितीयकता विना नगरपालिका वार्ड स्तर तथा ग्राम पंचायत ग्राम स्तर पर कार्य करने समर्थ एकल संचालन प्रणाली के रूप में।",
-  "Article II — Unified Stakeholder Doctrine": "अनुच्छेद द्वितीय — एकीकृत हितधारक सिद्धान्त",
-  "Waste is no longer disposal. It is governance-linked climate infrastructure.": "अपशिष्टं न पुनः निष्कासनम्। शासनसम्बद्धजलवायुसंरचना अस्ति ।",
-  "DECLARATION OF FOUNDATIONAL STRUCTURE": "आधारभूतसंरचनायाः घोषणा",
-  "Legally Styled": "कानूनीरूपेण शैलीकृतम्",
-  "RupayKg shall operate a single digital system deployable under: (a) Municipal Corporation + Ward (Urban Context) (b) Gram Panchayat + Village (Rural Context). No structural duplication shall exist between contexts.": "RupayKg निम्नलिखित अन्तर्गत परिनियोजनीय एकल डिजिटल प्रणाली संचालित करते हैं: (क) नगर निगम + वार्ड (शहरी सन्दर्भ) (ख) ग्राम पंचायत + ग्राम (ग्रामीण सन्दर्भ)। सन्दर्भाणां मध्ये कोऽपि संरचनात्मकः द्वितीयकः न भविष्यति।",
-  "Article III — Waste Classification": "अनुच्छेद तृतीय — अपशिष्ट वर्गीकरण",
-  "RupayKg shall maintain strict separation between: Recycler accounting, CSR accounting, EPR compliance, Governance value, CCC issuance. Double counting is prohibited.": "RupayKg इत्येतयोः मध्ये सख्तं पृथक्करणं निर्वाहयिष्यति: पुनर्चक्रकलेखा, सीएसआर लेखा, ईपीआर अनुपालन, शासनमूल्यं, कार्बननिर्गमनम्। द्विगुणगणना निषिद्धा अस्ति।",
-  "Article IV — CCC Engine": "अनुच्छेद चतुर्थ — कार्बन इञ्जिन",
-  "All emission reductions shall be processed through a single CCC calculation engine with event-level MRV validation.": "सर्वाणि उत्सर्जननिवृत्तयः घटना-स्तरीय-एमआरवी-प्रमाणीकरणेन सह एकस्य कार्बन-गणना-इञ्जिनस्य माध्यमेन संसाधिताः भविष्यन्ति ।",
-  "The stakeholder structure shall remain uniform nationwide and consist of: Waste Generator, Aggregator, Processor, Administrative Authority, Producers (EPR), CSR Contributors, CCC Buyers, Regulator.": "हितधारकसंरचना राष्ट्रव्यापीरूपेण एकरूपं भविष्यति तथा च अत्र सन्ति: अपशिष्टजननकर्ता, समुच्चयकर्ता, संसाधकः, प्रशासनिकप्राधिकरणं, उत्पादकाः (ईपीआर), सीएसआरयोगदातारः, कार्बनक्रेतारः, नियामकाः।",
-  "Article V — Rail Separation": "अनुच्छेद पंचम — रेल पृथक्करण",
-  "Article VI — Regulator Sovereignty": "अनुच्छेद षष्ठ — नियामक संप्रभुता",
-  "Waste shall be classified exclusively as: (a) MSW in Urban context (b) Biomass in Rural context. All agricultural residue shall be classified under Biomass.": "अपशिष्टस्य वर्गीकरणं अनन्यतया भविष्यति : (क) नगरीयसन्दर्भे एमएसडब्ल्यू (ख) ग्रामीणसन्दर्भे जैवद्रव्यमानम्। सर्वेषां कृषि अवशेषाणां वर्गीकरणं जैवद्रव्यस्य अन्तर्गतं भविष्यति।",
-  "CCC mint authority shall remain under regulator control. RupayKg shall not independently issue CCCs.": "कार्बनटकसालप्राधिकरणं नियामकस्य नियन्त्रणे एव तिष्ठति। रूपायकेजी स्वतन्त्रतया कार्बनक्रेडिट् न निर्गमिष्यति।",
-  "Institutional Identity": "संस्थागत पहिचान",
-  "RupayKg is hereby defined as: A Unified Waste-to-CCC Infrastructure Platform operating under a single national stakeholder architecture with regulator-aligned CCC origination capability.": "RupayKg इत्येतत् एतेन परिभाषितं भवति यत्: नियामक-संरेखित-कार्बन-उत्पत्ति-क्षमतायाः सह एकस्यैव राष्ट्रिय-हितधारक-वास्तुकला-अन्तर्गतं कार्यं कुर्वन् एकीकृतः अपशिष्ट-कार्बन-अन्तर्संरचना-मञ्चः"
-  } }
-};
+  "Rural Wealth Creation": "ਪੇਂਡੂ ਦੌਲਤ ਸਿx���[O\ٝ7|�~���HppO��ߌ�y�w[��Tm�^�I�0�F�D6����uhz�<�C5v��,EF�O��I��?��^��pf��c�j�����\g�����Y��Y��ߌ�?���\c���f���u��&�m��պ�A���f�],�ټ�Zk��qsenv�����Jִ_�2n�V�\��5���옅�m�y{��o4��v�l�3�(��NǬ��Z����ɿ�d�欿q�?1g����6���������_�Ͼ[��wp�ݗgv��}aw��S�����K�l�����#��jG���a��~��e���������|��>~���/����~�o����_�쬿��_���?������c��S\�A���wس�����)����=:������/_��yݲ�՘���m>�3��Zl�r��CsǾiB���q�� 8�g͉nc97�N77ݥv�[\Z�uMVk�ԺK����d��\4w��M�/;�;���n�]��L���ӱ۵c�x���n�&t�� 7���â}�L/�Xr���p�X,=�S8��M�b���o�шS����n^7�2�Z�m- L^��J>n�ť.�b^4�Y����y�4��{�l�i�)�@��	K���Գnf�n��ntW����,Oq���n|}��:�a?�#�_S���r$C�>
+��{����5~�wO����=y��cG�Er�/��,6i�" &�`�pt�8���W/�_p�4����K� ,�����>��-����{��P1��-ز���G��BR�qIO���_|����|ў(=�����B<w�{�����4��}�W܌/Dpl���kj]�Ţ�w�M0�#�n�q�Ǵ!_����W�n�1��X+�ͼ�d�r��E
+��H����-�PGtL,�W��?Y��w��e�J�^d���VT7Z��2k+L�V�$�d��O_#9��jq���>��ئ_���G�H��#�kπ,��h�Q��#�����7�a���B[S��g���Mc%oZ�H���}1o�m��n�z�me`���љw�V�+ߣ���::�����vbC�u¯�o�))���Vf���!ٶ�r�Ę���J�+�BVk4-��^�����n	ϓ2�%o�B�d��`)�¸��q�y �p�vp�ͮR�ۋ�����P��N�'K�d�=�D���~�[̨W�����բ�6+�ݬFu^�Ѷ|�Y@S+ZŲ���� ت'��k�|���b|��zE߼�oN���Z����l$�+{$;ߗ3��#�� �����V�B>�
++"�f�ת7Z���.��7�V�\����b�-�f�ՙ��v���ι8�H���%��@����H��˘ �6�.�۸GJ����P��/�@=���x��>b⎩�D�-�@��h�^D	�`G)����#����#�&i����D摀��$<U����ZVH�0�V�^�tZ�J6tѡ�2>��&e��"+��a	h�9cc��Ko����˽"j�ʿz�Rt�T��Z�nٳn�(�!<P��g�z1	B�$i-�t���9u5s>Bw���+����6�ŗ�4��f��W`{�AS��;�ib��R&�:1`��>����/�����X$�0�-���
+�1~����/�"ab����U(O�Ɓ�:E�aQ?M�m��V���8��h�:�n�v,f?fC�
+ݲBN����y�[w{Jj���n3�o���bB�$��n��β����2j�#\����9q�P	�-�l_hUhY�b�>SB��$�itIJ�����޳Z`��m7�6���F�
+���5���m�aZ;���`���ٽ�{LZ�8.®)S��Ăj�5d��aJ+���M~�9B.q�w���oO�A�]���VמM�� �� r#��ʉ��wP~9*���z�.���SKD,* c����|"�'�x��. �+�Ʋ�"t*�$�Jy��o|?�%�[T�N�Y���hu�MS͢
+���~ ���S,�f�|֭-���[��8~K����=G�9����_#poYh%�ܪ����_!�*��nġ[��Vy�^Z���߷A��u�
+�$I���KU����8��z�V+z�D�k���b��
+�}�n���Uy	� �8�	�%5�W�f/����r͚X����2�ʌ�ył����K>w�t�D���^�Z�u�����)��R"�~,�|��CqV�A�Y}�i!��&DJ�Dz�(~d���:���*؃^&��/�7KE+7�{��r4o����D���W�����|�0��7ԫ����R�0���j���gr�b5�%f&���p7����Y�[QO�bs+[�g��t|i'��� ��J3ի[`9VI�cg���X�� ����pK���,ˬN�Im�{t��M;`�V�
+����ɻ���>�{8!�������s��}5�,�>|[Ɖ�����woq��ܶ�5Go���K���gS|�O�1a��e��Oܭ��Ы �o��G�n�<�n[������r�hSlŤ�#r�-�ȸ� �\���*q�|����L��n�'�6�����=��>����׳�2��z+ T�̘>�X[7�"��G
+S0b�u8�b��l�2kZ��Ȣ �ZΞo��� <ؽE��'f�z��W�+�2�}��G�x<�Ѿ"ZxA�������Kf��kvKr��u��E�*���Ҷ
+o��e���X]w�ڗ���Z��>��� .a��JcN���ׂ(�|��3�9�W���ppz��(��$��`��/ �Xek:p	dL��F羙�BG�`,���!�6��#�q,_}aK/���+5K��������#�a��L<�va��]��O�4�F��Q�O&rE�Swn��%N%۱�E��w.���3wd��3�{տ��wh>�o�Ô	&k���9���i�X�[e�68�H$2����,K�L���"�k.gMx��'/�K:�X��/��&�� 0Fc�\�#�gW"^#Fѫ	bx����r�8w��^֣K��P:�ʕ��*j��Z����VF\Eu��7�y�L���*�����n'��C!�w�<����u�n��C�d�O�j�@��vU�Fη���H�SڈA�
+)V7/ HM��ܶ��5}���l�ҳ���ޕ�pO�b3Oq�a��.��3w:���"Zmo&�X�T+��F���@�ݗ8���D�y���CO����������e��k �Bb��� }abAv�f��X�V��X#aBҁ��Г�����3Z��͘%��"KNf�U�zx�*�����ѭ���(9�b��u���B<x�|���Nv+=���E��#�r��( �L�������o�O5r�":e��"B� �J� ��wW��Y��U����zV�4��;^\�'�h�v��U���>࿷�L�|�|���<���s �(���oH�Ӻ� ��.�V�v�9yj���G����	�8���T���W,8���p���s�7�ƃ��;-������!�-����P�v:'�]D=�9�9�kw�@�8���Sf(�Q5sm�b�Fު���:�a`����� ��7;@#�8���^Y�ʻKY�J��i���05q#��y+�D��k��\� �i�4�M�������s2��Q�󝧮NvH�xp��C�ɹ{��[d�U39]҆Ϟmv��e���ԃEC�����~���v�m�5���e��
+giY��4Ϛ�%��^e����ޫ
+�����}��W�5Rʨ$Ҭd%߉s���>�q_I�?77 ���t�v쎩eMS`��dD���%��r9���A�2�����5���e�s�SN���>W�a���PZa���B'��}%���bN�AY�=���9�Μ�aD?b��N�WD����J�y�$r(|,�V#)vS�hvl�l~@P��-�ۅY`e��43��k�T�[�_:��3���PXhå��h��t
 
-const getInitialLanguage = () => {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    const saved = localStorage.getItem('rupaykg_lang') || localStorage.getItem('i18nextLng');
-    if (saved) return saved;
-  }
-  return 'en';
-};
-
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: getInitialLanguage(),
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false
-    }
-  });
-
-i18n.on('languageChanged', (lng) => {
-  if (typeof window !== 'undefined') {
-    if (window.localStorage) {
-      localStorage.setItem('rupaykg_lang', lng);
-      localStorage.setItem('i18nextLng', lng);
-    }
-    if (document && document.documentElement) {
-      document.documentElement.lang = lng;
-      document.documentElement.dir = ['ur', 'sd', 'ar', 'fa'].includes(lng) ? 'rtl' : 'ltr';
-    }
-  }
-});
-
-export default i18n;
+�X�^:�LE�$��.����'*E�;~򁷆y�v}���. �!@o���Zf!�Z���T}��D�I�d"V�׉�G�	��_�ȉ* ���|ח@ x!�'�1�+�c)�Kb@��	�f�߹'�ńA�@��tL��J?!��>��):;���+�}�rH!�s��0���1�Xn�6-.�"��q%VM�ES��E�/?�6$݁��P�ZeQPu�	�'9��~�E�����+落��Y�'<��+G-����<t��@̑ቤ��=%5bb�b�n�����>��O`l��x�{(��c`^Ooҳ�I�=��w=�y��L�lw�w��
+2?��<�%���H��r��/{J	;���Z����H�g��Y2����e	u������sR��uEg
+~���P�Y/����\	P�+<wk�ddB�W�m�E'��A�N
+NۡSaW�.����1��pI��8�^����"�|!�x��G������C��H�>�?X'A,�V�Jxr�%Ӗɞ�}_�%��5ޟq��wOa v#[�HLh���	��%[�٬%zm�{��*{k�s"S8�KCIA�W��(0*&��y'��2�/��;�O~�Z�VN晛4�.lC�n�b`�Rx�O��E�n�9g�h�kI>��g�i�S�P��+����\)�n������Ej{ar��&9�o��٩Ϯ����f�r�$N�����ks�s�.(YPB֘�,��5~���3�l�=c?g��LL�-.d����}���L���7������^B���,Y{d�VcOr'���u�ƕ�6�:����n�^v �����z������=�쳺͘�^�gt:��B�
+4c���\�0�3�~�b��\Dy��	L{cf�\�V��vn�[�J��I�*�^x�Y����x����O$syWA���s|mQ��j)����/��_ja��@S��w�}��y�A���퀏�P�oh�m���8x3��rD�ZaU�� {OΛ���CB�.HT���}A����nu���Z�vu2���A$���L�M2�	��6I*Qr��%*�D�u��U��{O/9����_�r�*R�?�:v}�l6�W��ݻ��y���S��Hr&�� E}BL1z"�1if�9P���.g����J�<$�Z,8�&M��?�9��;��ZOdO��g8kwc6�M���EΞ8A0���^�w��t$�̯Z]n?e�>Y�N4�|_	��`����SO�6����9��,Ti1��6�a;�Xx�!��1wZM�2�R�C�"�K}�@5����;=�]�Y�����ZBxԥ����Jԍ���%�$���f�w})B��Ј�mM�=���丙����qso)�\,q��lX0P�(M���6��%,�mHQ��������l%�5��	�F`��cwz]��p�ˋ4����5W��z١Z��53���ފ�%al����SӭZ���Lv8��H.�cUNς�$��)m!9�Nx�ƕ�R�pn��y�a��z��[(�u�r�}kہ���*lo��E�SXQ�ݺ�\D�n��Y���K0�͘ɫ�.Q1NI$��}g�� �?���җ���Tz������`���\O�j�f@��Zq�N'��4��g\f3=},I�(��cZrc9�t��h݇B��<H��B0;y�f���.�Zp���@�tL��Y|�aF⑈�����0s}R�z~�g�¾��g#>97�X����<�9I!z�r0(��ȶ�\�c/����j:[UW_�d<��13���2��cD���(3XbP�x���G>�;�oy!��E)��M��*a����7~u�]6�1V��� 0m��Tѱ�� ��,��f�T�!J�2�2~���|����W�k��1{1I&p�F�:���y�6�܁i�?D�uz���$�L����F��b�F�SȆ�" /��7"Y�Mҭ<"�����u!
+�R�(,9����H�+c�S�Y�.��g7S|;s�v��>l���E��oZ� ~<t�K���[<���P���S^]s��.ؗGvC�n_J�����ݮ��p ��G�+)J"V�-�xz,j�bf(e?�k���K��i��ݶ<\�j J��d�'z�`�ފ��;&L���\�ߚ{^2m9������*D�5%��盍Β%}�YA~�E@����Xl`�UTj�y���"�eC�nd���e�?:Tjp;!�e�"�f�%���/g��9�j�d*]�^���n/�ɒZ ����]?��	�ZC4��D�R\vl$�5�R�hr�.�O?3��|�u�Q�H|ORdEZ��]/�~�J���E���S�(>:)%��Z�2�!�AӖm��J�r��Sa�42W��V/lD��Ta>;�}�
+�E��=&sm�^)�	�C�,3�
+�aX��7���hI�����5���jX�����Lwa��eQ�B;�-X�H�g�b����G:�Q����d�G�����l9�b��y��.A47�b��4��z�2[�5�r�巳p�����J68��)5u$is Q���KK�)�vC{�x�j�b+� xi�v#��tTJ�z,{4Ex�<�s,�M����Gr�,�Yz[�dx"�5��6�m�u���9}�x��y*(,F�h�l�ba�Ŵ˖F�m�c�Y��-).f+`D9� \c�~e�%����Ģ�d�Gbd|dĚȚ�(u�G;ղte�ǹ�0��k*�����о��Gԯ��L}�^T���+y�O=�r ��v�P���!WI�f�/r$�2��bC���7<��p��Q�Tp�Z����;`�t�P6�O#� Z'�d[j�+��r��Ka�w���ZAj?֣ &ĿW��x"�+���5D����(q�H�S�ڒ�1d�Ά�ŁQ`V��O")�i[Zo��>.O�E�]�e'/�iՏ�Eks��F�T0�r��\L�W��RX�&nA����N���a�'���4��V�s����ba�ֳvt}5�,;��bL�G^��Sl&qׁ���^��Q�Zlv��x�����DҹO��:4���B�;�H�b�P���̈́D0wȡAr��o"�$	���^�'�(�2��N��9��Gn�=;\�/X�hZ�:߱��e�'��i��F�q���S����I��^�;���l.u#(?�VRPW7�����n�G�s�]*�u�ku`,'�;��hlVd�1��� /��!é���m��T��b]��`?�!��^@��z�<ҷݤ 6���5�'��� Sä�m�|%#p��j����6����A���]��Wg8^N�,nɨ�ص5�J?��c��I����?����h}'�q�s�7���h�[����N�R�� $�J��0z6v*�r���@�t����(��2�&Gn%�;��d��8����Xi�nJ�?��n����)�����XM�� (�;mX���z���ذ`(��MjىN	w�Q_�j���T�0�Ssj�N�����R���!��^4�LK�0�E,��Y;S���KE��VIJ�A����Ҳ�	���� ��fW�N����. gvY��烴�	I�s�E�1�@�5dO?�;��qa��t�]|([�Q}��	�<�ѡ_�_�	bC�+y�#��^���V���7%��nM��|-a�×��4kZ���c)�ff���ϧ�3�����cV���z@�]o��r)#�!�� OXt�]"�o���HQ�7��̴�$}��ip���FL?�&0wu����z��4s5�;�]i�h/���dƲ&�L�}�f}Ԓ�z���_0Upʌ�3NL��<�O����݇����s��m���0 yA�"�L���D~[�z�b���[C��=~��¾[W^{���䉇쾄�(�/PW���.�scRx4�K��"*���'D��E� H$�菌<�-sf2 @K����/k�Oi�ii�,�<�ɉ�����P�C��M��)�q˗����v�_�C��t�v��2i.��;f�B��̐��
+�8|c�1$�`�G &�O؎~ ��4�E<��U��@�����I�<��.W��S���Ql�1� EG4�����<H^���A�.�'#� [��BHO��> 1���'�0A�vORV��'p>'�(�/*�� �i-h
+]otV�N֔�����W�[��<��#��������9FHxR
+�4?8�����E���n#9ҁ�@�v�xB�)H�t�ݲ�,���}ގI��&T_���M���v�������;�͝�����n_ſ�n�����]����5����Tz���2���xo�b����������4�\�b���<���'˓�^N_@\ �
+b�����̽%�kX��΁�9(G�ݕ�CǿC�MG�sc/����>���i����ϧ��?K�(3'���(CŦ��x�Ⱦ���8Q��$̗�H���5�x���tcd��T���(�K8�88�Z��bMtqOG�H�?J�T���a-/NE��v6�a���	�Yǒ2�_BNpX m���{m�m� z�K��_�]���a�>�E蜡]������� [�oMP����	j';U��K�_�ytǐ�a%�U�/H�,gS�i`��@EA�W���5?d��b.���6��WE�i֔#�)!k����>�����F��6�޷t餉Lʫ�����$XK'ũV��"н�cY~��0&��VG����~�-�U;l���^^q�*j�9H�� WQ��?� 8䉺�Xܱw�+�w�'�#���v�z�<�_y�O�W�R�~�*��/��M���A�n��'��T.���N.��@��:�)�ة�1����$��͝8\�I��F��Ĭ[�<pB�=�B�.��^�@.�Kz��ɨۻ%A�h6��wN9��ӄp�ғĻ=iM�h ����|C��m	-Äs���i��y��mMK#�\%|zDPT����Bk���ܗA��T9לBNe0���}����IV��P��Cٱ���;��ω+�	:�\���b���\*�A���Y<gxبS��u�\�p�Dwˍ{y�F+��MUH��~��8.-u0w���h�;'�z{*�R�Q�?c/�����X�2(x:�">xLj�d�ܹ$�΄�4,q��΅�cj�M �M�ş��x&�
+�:�(hk�!2n��N��ysa7�u9�6������{6����#����G<��:wī�p���P���'1��/H�����u,wڍ�:���z��I����+�#S����f2O ��01`4�Npa�؎���;��JY���p�	�ǈD���������●eK¶H9�l����&�����#�ѵ9E<U
+��b|QJ�7ͼ��v�L�K�CΌd�:�<ѩ"��J�˶���'���
+��G~~��pu@Jv�~dvV��WUM��-�N�U�J��RЦSN��	�YT��sY;��G�dU�Ҁ�E�)�����3�4����24���}sY�����}8�;9���l�.i�������/NM*���=����N����R�X�(u��lo�l����3�;;�&���)�ZV��X�7{8����#�î�������7a�<��g{}���M�J3�����8��E}J����|���{�W$���l���=����3f�K���/g�q ���?�v������g{��ڀ݀����ZH����c�	�Q�e�߷������/�⍿��{��S�y�IG+��%ݎu�궝��X�ޠ��	���{��+�2\�kQ�lֺ�Gv�?~��<%�18w|�L��{�X�A#��Z��S!�| v�1Of�=����Ym�!���.������}���Ss�UQ�ξ��2A�X��均H�00}X���{=8��g�Oi8iд�x�E�4�F�(�D��y���?�6�q���3\��b��b�yS_G2�?��^�;G�H��P%��t}���K�����!�	w*{�5�Z�So]LȦp�p"R��%aGoO�@d x��აLx�1(�_�]�ނ`?y�����y�A�I�h����5����a���@���7�V�[x+���m��;&"����Ous��x��U��ԾXb[e�ݭ/����s7�=NV\��z�����T,�YL�䝮���[(�� ¶�g���s_��̗�Lq.1��G\�{�A��LHJ?�m�N��ȐpEQ�K{c|^�OY����y&o���-��C����At�).H���+�(�)��?4^�=��]��IƳ�݇~�%��V�8�x[���&��@���|�_�r�B%Ҟ�3�+r�X���U��O��5�Hlm,呅Y,mư���ɔ�1U¼�a�%�U9���u^�cOz|���Ȓ�g�im�?����yD�[}|��M���UNw�&=�Y=ˢ��Ms�;�op���|o��p��gflʵ��������]���#x�\d�ص��<�@�G�:�Ł�}M���q����ޝ�(DG���V2��D��.V����'�NG�v��-0v��7/&�.�jN�M��3�d�J��n���.����A�L�_q�Jڕ��p�Z;�soa#U�����f^_��>�5��?�|��y�kN[l��hSX���&�i�!Wet�����X��'1�s�iz/bl"�?���s>n�k�sSep����� �΂?@4��P�a����`c�N������i,P�/EC��n�����{�)i9��'d=2N�T%c���e�O��
+_Yx����##vN_��PeG�S�d��լp���$ԛ�#_���%3v�O���&΁��-O�^�Iռ��؍� '֭lEdp,$uH8|^�-o�����z�YL��IRD���¸_/*:��y䄼F�P$?	3|�毚J�����jI���@����-����C6�I^;*�P<M$!\��1)�Lܠ��ݫ�����_���Y�0�	G�߸/�Sp���rP�qgה�7��h���z͹�����T 94�F|��|���OQ_�~�׉�{V�tm��D���oqǴT%�M$�c��=�+�i�c[���ݥ��|y�xH�X5��4r�tx�h�p_�7˒�E\�V��׮��]b�2֛��#��zN)	}��6bi>���>.I��Q�Fl�
+b��Ss:N��������@R��a0� aƄl�OU9�Q����)s{��xjB|KO�qV�GAͻ,��v���&yKQ~�AEW%c(����q���T�'T5�IY�p�K{����,!s�X�8:��F�mW5��j����Ǣϋ��G�^���QM��O����IK�>ҒQl����T����\�FO+q>YAV�k���J�"��G���*>�Wd�O$&���F�Z�� ���3п8��w�>Ğߝqrσ�Z���5�!�y��5�+Y�4jf｛Tc݂Lc��amG��R�8@����w|������SE�6n�
+�])��v�Wn�������2��v*�F�����<
+�Z<vgZ ���rS�nA �oW��8$�-���r�f$��f�y�j�4�r�R5oG�:5��ˇ�6�Ŷ��FE���]Jc`�	��?�N%�9�i����8D�9�"��8�5�ݑ�W"�4م�yp�18���K�����un��p�?���aHKU��6��3e�8���N���s��L���g�&H�	�n�P�CWjn� D�<�c��9�X�8�v���q�����ݯGi�`x�vĚc��&$h�u�&.�O�y���{���^�V^�:Vf濅b�.㘅v��)���5�2�1����� ���I9�������u�ʝ�,n�-o�hF2���T�6�3೷��?R��Iis.;y��?Ge���=��b+�^���^���C&>᠅�J]�7P�\G�ݬRG�1�#�M�ϡ�i6}��zs�B�k0�*��Z����K�I���?S�%����^q���H�$�&�����+7��f!�1
+p4��oK�����`:)�?8���a@.'H����%��P�"rmyBX��n�b��⪠%	�(3(f	�p�������U!K>ӱb�	V�Jc%��H�жs	5eQd�t��w�p�0�y�A{fs�jH4R��� Ϋ/Y�!��,u౗+��s �r�|���?�x+_/<Um�BW��,� ��X�,iSF��,�'*X�� �U������x�ҫ�,���<6ZI���z:�ke�Bz�a{�9TT�|K<q�,���q��,�4K~7Q�)]�+{��3:@/�Z���;��dR)�6M�?8U,1��k��"�@�VF�����[��|e�0;`I��c[��d���(�?��c֏�� J�����	l���7�.�EC8����(r���Ց��v����!�}�rpE$�U��oS?�T����`���-u�����d��:�����,x| �OFYE��̩�m:� g�Ї� :N����bRy�VD"��.����q�I:&��1	%��Nlq~��2�������:7�W�2� ��;���X��.�5[$��p�67Ɛp��@h�~�*jx�:�ѳ ��I'�%��(��Y,��z>�֖D��y%��<_�5,�`S�1ɍ8r�0�DFt5�b�j&�!k��έ����w�b�xF��̑�P���C�d���r.��VH&�N��۸nA%���+t-Ag�nDc�h��[h@��o}��+
+O�z��[)���S#	YR-�b�r)�.��N-�
+��y�#1e^���!Y���эsf�
+Ԋ�:�V��+:g��
+��e���˘b౉=Bg:(e?^q9D%+1�.I����lg����
+�>C!�ؚt�\��+��O�T������E�H��")#��8��ɡ�jΛ�j������S]`>��0�</�q�H<R]��P�$�2��&�N���^�Z"��d�����C�l�L�>�i���/�<[�\�E�t�c8�en�"� ��"��y��)S�@2�P�L0�L!� �����]�#��l�1������~�3�f�^��̈�A�4>�a�A�l<&�8]qE��87כ��
+��Yw9[ѕ��󅉑��ɷ�䭙��y���l�:��n������!�$��8������2(� ��4�,��a
+����Q������ia(#7L<���*Eɦ�{�㶺��Bx����3D�,(�+}v�j���
+s�X^�z����K89���9��!L�Y��i���.D��yV��;F���lcT��ճT�2'w�F�&�N1�S�ܩf�Q�_����+���rZ���~�\R���#�IC���ԏ\��ܷ-�q�B���&��P���g�%Y��'% ��㖳�vR"�j�c����u�8D����`
+�6��1�\��-�U��*s�|A�M����*�@�ـ)�M� ���4O�ӂ@�!^�������H7�.x�����p�S)'�� ��X���L�L��ތ4A�X�I�t��.�8o�B�ANꅢ讴����g����*O}��0���*�^Y�+c�����K=��%����+�-�1���]%�%$k�_�ޑ6��&T�T�_ ���I��ң(�n���;����p�S㣓Oҗ�miN���2��m�-ɛ�C�;�ڒ%�'��0��a�i"`ǚ�Vbg|	�P@���1��$(��AH�Z�c�t Y�r�׮W�NI�~M�K�C.sJOe��p��D(J�2� BW��Te�q����M�ľda�Z��	/���͠�5�G<h�!�ߚ��16b^��'\���N��(G���U��䴇��)���?��FI�K�Y�3�r¿��J%1X�s4-@4�t��̓�b?MOuW�}N�;σAΌaEE}���@��=�_����t4���۠���h�p�H��	K�`��
+оh���qbPP�Ez�g�?��D�q"�h*�$X��/�8z俞�nƤ/N|����2W:`V/�6���Y�h�d�nKk?�!	+��#��D�А�d�f]#�q� �K�)�}��e�}5���)����Ib�\@ � �R�4�I����vֳ��-�j�[r�;خAI%Pf��`=}"��%�ୄ����c׭`:�/����z�R�ܐ8��L�Ǣ]�#G��K�L]\D����;N�0�R+�
+�`�Q�;<d�v�����e��uէ�:�S/ׂ�������|O��qs�A���^�(`z���}��EF�s�br���s�f��>4�~�k<ȚJl[��'\nʬ�Г\[5�V����k:���G��7������`��g�NJ]�qҺIFH���z�(���iUA8ϕv�0,��l���.6,q���R��1�q<;v��2�{	�d!cM���*o��~�>P@�*��E%��s���E�/�I����*�s���Lr�x�E����(�G�2*���e�a˰�Z�������K�~��H)�}ϧ�5_V^3��߶F�ǋ7�w��AI���r\�PY42H�%x?�� *M��]{2CR�$e$�5���+J��aF�~Qop��»�p�$!6�Ԑ7j�ч� 	D��h؏H���'_��<_6�J�0Jj�d��:$
+Nb+	�����WE�G�-���U- %��bL �2L���IP	j~Ҝ끟�ۄ\u!�����Eռg��ؚ�No�lz���C�ZI6K3w�9�t8��p5������A텪�1�
+��L_u�'8ۗ���s�%�!��h��R���riѭ���ԗYs�Р�P�J�Y�ZdV���<5���f�������_������A�=<gQQ����gI0_	�=;`@�u�v��������+4?��I*(�z@�抅��q]kЋ��j�HK� $:C�u������'�|BCsƩ���ּ�$Fٍs��LF�$^��nН��HQ����[��dM�T�DULUɑ\��y��"�J[���
+�8�'i�y���]�Sn42M���*�( ���u�	�}�W�][
+�Խ����^g��t�h�vVsd� +{x�P$=���!�ykȀ�\���Mz���31���j\6�3%�jp0ޕkp`�m	N/~����%�$���������8�R࿓/�O��`�|�����Yi���q���
+�_ߙ_|���r��u�n�L�"{>�l���ۑ��o]���L�$r�4���T&�A�"	���1�N}v�Lݼ6{&��I����ks�s���@�*�j�]DJ-*@}A �(J<���MF �J�2N|�3�b�U��=�d�B����;�^w9�]��`Aa'+��>L	��ǵ^r�U3�Φ�0��
+�=W��D����o+Ä�]R�g3S�������U�o7���L�� #�j��`�='ohS�79z�_�-��.�1H\�13g�d+�
+�.���L�e1�֓4k�J���V���+�8q́��Q�YZ)4��vD �������'��qN�0c�� P�8J� i'����R�:�U�gr�r_B��w�,�M�嶍�b][�X�s��E���ō���'p&Ln���1��q�c�\S���4��@R%�HIBr�*�a?�WE�y��
+�Sy A_�RT������f�횎�יy����#��6L������͉�I��If��m�u̝VSۓ�����D��F��_gZh��^�s�ѱN2,=�х��'�������L�!Md?H��������qSdz(�\�73Y��:n�-���A5=T P�7��xD���8���k��a�]ҖĮ�o��j��C/���՟��"��~)nzC�5�y?	|��3Y̻Fhy��4s�j��|�=�R/(�naZq8����f0^AR�����9�<�]3����Ml�����<���+l�Ǆ\�̜l%�i�gg�+@=���gxUe�6E�37��^	��6��%���[�u��D]�������B/�[\������=�3�w8=@�	�T��H&%M�,��?�åӈg*�Ȣz���iwF�x��!�3���M"�A�P��ҭ^RB��
+=���nX�* �ĭ�aOC���Hƹ�)��gm��ek:�O��sϙr�5l��GR��^s���,4�]U�ڵB@.���Xk�bH�P���H�Z����K�/��m}/Q��h��1n�q�"@�FKfw�i�6����l,�n��4�#�0�1
+�>�0�C?jB���=߅�P�bM���;��D�T�I;W.bI/�.e���]���k�K���OQL���^]�Yu$�����3���}���41���j��Aʵc�]���5��	N"�����r�y��6}^�QҰ�f��M'f�e,d)7�e�I�eK���Ѳ�
+W�s���ȦZ&o��1�h|W"�&���F��D�y��4��@��M��,P�����!��V���]s�J�=�E�GPX��O��I�ଉ�'}L�L��J�h�Q��bɆ|_n:�2j	a�}��^�!vW�*m�%;:���%C������kf�km&鈊��n���$c��:5]1��lk����tw�Ѻ���_x	�>��������U�T��C�X���9�L3[�_.h!x���:Ի�练4j+�����.�q��i�1|?賳��)�cg�v�������L�:(bS�6g�W\L�'>�^�uD�/��O��h�4o6k�lٟ��v-k�/���
+ � �*�\�	v:�`c���a+���^��?�"9TYI����3�>���G"\4�q͐d�T��Je��s��o�A@Xz�Wx�p�W�Kd �Np��D��[�=�G��v{u�Z���Z��3V�� ���kR��nCK�D�$�n�5W�g�/�Nn��Q�d8�rhT�3�N�I�*ݗ��\Ѷ@����+�C�ǎ��>�U��oz�yj�t�����ݤ���[Ay�a�{�|g�7�[�
+^�g</F�	/ ��V� ��kMX���ڗ���i�OY�^�܏ȥ��'�i��Y��vl�ۛ�H�U{��b�����h	�ރc�����A"uq�B��=+,j.�%ʰ�{*n>�2/D��)�g�7Z�X�<�[��5H���-Z���D~i`�
+�K%��g˽�v
+A���vpdMw� S'�$r�·2�����y��C���?вb��F�RԊV�k��n�hW���7�(�����Ҷ2��{B;¾IԒnX�\ܓ8a83h����I|�/��=��˙ԏ����w�?&6K��
+��m�S{�r;��W/�|f�������ޞ���q��y��sHם����u�9�Xބ�y�'���I���]�!u��C����tZ�Elu{(�l@�?��|��_J��h6����߰"'����<[07ݮ˛�� 2�ELr"	>��K��П��������Aᐗ}�W��>"�Fs }�q���?��X��e5{���PM^H��
+43�9Z\����m��=V/�M���r	X����;1��S9=l暽:2�/R̄��`�>Q���c��T��ڊ�_�Q�ޑ�c$���h�}֝:�xF�(dq7�M��MĎ�����P]kJ6-%X\�$cȠo<$ wR� kf�~L�~�"sx��Rc�	� �x2�C���e�@A�f��>Q�!!��4��ly�(|�{+�5L�̀�|;����d%������;�z�u���J^��'�nf���D.�����CM���o�����X�N����W�Ec���^@��Qo)�/,�g�K���PL�ʭ���n���0x�^��옂���������1"�V�bf!`�=̽��1����捋�D�%�-�Z�Q�:J**�t�����_{�^<	ɛ��z���_o$���~����![�ļޫ�C���N��Ճ�XkCz�,"vͼ�k�n|=�NZN��Biǻy���~j�JcsE�H'<Ի��]VW:�e�>P
+g-aJ<-�f��U}8v��g.!���F[L�J�j���9��ӫ3�0�҂�ܫ�崔���#8��pƸ�h._�ז]�I����Q��Ԑ.b3f��ب�=�uH�T۝�I�� �t��+����j��.�67�Ut;�|�ح�3��(C)Q93N��6
+��p����F�̕����#e��%�\)V P�k��`����ya�~��y��tl���,B�&s��<��CX3�ӹx�a���߇}���{���M�8RZ�}[W�1���;H����e��+�;qjf�/�|N=a��Hh�������t�x3[�+��nj��}��֋�?�T���n�Q^(Ӄ�n�H(h����z��[���gx9���z�Jr�#�	�߾���m�`��)�in�����1��<� ÑcA,�hOClX�Es5����s�V���׳��'W�J�0��N����`�`�������]�wf�2\��9f���C+���s@����q�{F�5C�S5+AK���?�����xqR�>�D,%��V�Lw����l�x6�z@%�]���![�nE�Rk�6&��/������@wcb�����|z��.��<_���w#l
+�<3jO(�R�3̄���_T�H�G�����1v���d���"��Iާ�&���P�n���.��`T�����ȣ��p횙��hY�4ZV�h��	Zَ�i,�("L����RS�1��E &�Du(v�0E���C��Ɓ��)�Ӏ:}�}����R��r�D32#Nh�p�EE&ݸ(*�-ű�s�)6r��^l��Ι��'���-�*I? �Ɨ\���TD>_��G)����ߖV�s����ʕ�H��A�`�h9U�p�w�{ɹ������]��wɰ���4�rz�`�I���*��om��eX�����L���T��T��\"�,�f��u�.L�up�C=����l�[�F����� ��rW�%�B��;P�	)��т�!M�J7&�&�f��y�:!��Z���s�8�gۤ;��cj6�C����^��-�-�0-H/�L��^n��3 RR�ĆQ���e�=��"����Zb��O��?F���\�T�p�L!��4bGX�H��j^������<<�ЮBQ���qs���z��7Y��n�2nBk'����ʫ,+��O�W��3����� q;�NK�	ڐ 盍Β�<�S&���Uf��p��Mx,�U��*�3�!����������5h��0*�|�{n{R�����(�q�j~Y67���M�W	Xfk��d?L$瞦�s
+�VZy�8�L�swT[��XH�������**�¾��o���,��T!��۸�����
+�i_#�A5�RѬC���r҉�������1��<��ʓȲ�_���S�|Y�N��bK����2иz;�#wֵ!���Y8��ڈ�XF��������G���z�m����$���(R��z�5Oc�ff/��X�z4��l�#6U�s��-ĮAŐ�~@2{�'b���TkM��˳��k�� �.��bj��U0j$r굀��ja�ܶ�3_����D|=��6�nAA�u�����	���ʈ2��Z7��=8�c���pLV��������޹j9B߸<�\�k�J�^J��KK��I�x��C�p/{��h�2ȸ���+wp�+�UiR�]�'�)fxu��x�t�� ��X�h�&���Z��-��M��opM�b�ȕ���O���!.g|Jɏg^�%�O_�n����ң�R���F?�&�q#݊\;��-ݟ��dь�=�n���2rϙ6��t�4�n_�[�m�5n�B�����R��$48-V�4-��X����U��M�����@�����M'Yg3q��$*�:y����T653��)��4�&�e�(�`ẁ�Y��(�S(�fT��p�0U���+�7s�.� �T��8�A�ް�ĩ��q=�򚷬'��k4����������.I������s�^���+t�2�=���2����+ n����Zp72�"�.�
+ˎg�㍧ p듚(]/r��5�V��B�n��\�B�Q�6er/�sjs97��`ӏs�n{u+��C�����!���:�\�=3����6�k�$2��C�N�s��ۄ� T,���&�/DcĒ���y�?|�,x��q=������K��\1�
+n��ұ#q��V9�N� i�+���N:b;Q{���5��1sރ�%�Ŭe�{�&V�1�=�V]����#A��z����pd�W�s�7�����[B<)-�M�h��̪̮8�:�����l�������&�g|UԾ��q�ϣת䍒��g�@�{�'�J4� �����ٌ$ڜw(�V�v/'�p/�-�f0~_]Ǖk���G�̀������w@�ˣ�!�iW�ś��swP�K1��~�@}zڪ��'�y)����R�Ԯ���Z�4��=u��m,MT2&��E4=溫Mw�����"�E{%T`Da����b o@.�F&�2�]���H����g�4�L��=�2����N@��~qP����~���<�x(��I W;�$��	�8�%,��±d�nVZ!%�0�0�b���P"K�<A�-a}!G�)NLv��}�7�%>:s�2�A��cezAI邖����"�f*}B�G(=�'��Z ��+����ВK��w"kLW�EbIq��4�Udt]2c�����]�f=��4�����:���7���_J�O�K6tB8�F�u� �aĠ���N�6����(a���vZ��T�|H��K�ܼ�����ò[�j��3	k+uu�u����$�5������K����ǫv<��������k���^�v�������;�͝�����n_ſ�n�����]����5I.\wM��g�]a�����vF�c�XE{�٤�J�q�(�)/�Y�r��29u����-4����g���v����y�Z��d����e�zU�������t��Q	���'��~�tURU.Lq��J��{���N��¿��4I���KV�2��ͽ����O�����t���9%R�o�x�:�5/�Z��(��L�h-B�O��Rt���9���EZ�-�Y���GV�6���h=�Y���Ҵ�~����:!r�X�k�WN��KX0Z�~�;}�x��f��zD�����4{H@Ζ���j�7�=�bH=_p�N�Q�<����j�f}�KiF���Y�
+Q�0�$}aG��(���]�m�����`>�n���"��\���{��r����?."����G�[(t��]eɉI��(]�{EɾA�F��q($�s���6r��� O&I�S�9H�XQPQ}��}��QJ�.{JG�";��}��҇b�_�"�A�G;+K+I;+.��G�bx$²����� �aY0�o�;b:/��F�(��y�B=2'/p�b�?;ҾU�x��
+�贁I|�IبSȼAUk���4W�:����F[���$���,0n� �����M�2��6g�' v?Q��B	QK�1E��'J�_�3�ԇq㌁}�5�"?�8r����ϓ�1��C9�b\�2�M�d1B$˱����2/	#�m�ك�G+��s� ���횴�ƶ�a����"K�<��;�ďJls�W���ܹr*�7�g"���=�K:ܩ���G2q�p$�S�'Lu�NQ��,c^�9�|L~o�]i�6��9-�s%���b��S>*��P:	B�Q�J�`8�]2h�j���B>�����r6������!9+��Is���-�-d��Rc�!�s�r��ηҸ,�؀��/4��N�erJ����y��[ʠ������}�APr
+,��c�����3���࿯b�+�$�Wn��=��� 8�'M]2S���0@8#��.�@�Q����«x�%�g���
+�%I�	h����l����m�s<�)�Ȥ�KC��Ā�ps�D�����PU�=â��P֠��X�Ǝ��je@ �$�&�{0<Rx�@�%dK��l���J�K�Q�:Y��OLұԢR�׻��vw�^y�{ ��=�՛�;K��~����ӳ��v�^��l����AG�ݓ��g�;v������-�%_[�)�ȥn���vߟ�~П�,�U�����S�2g�Op�\}����r��Q����W�����v�^޵�ic��zm�
+��Y�>U,��8-�;�鿴��T�f��v����k�w����%���]wV�-,(���ٮ=w�?������;�ٛ��D����7��]�|P���l96������i�/K��ח��=&���7��$�X����S�d8�u!�#څw�v����Y!���5���!\��5��V�A�|/Ĵ����Z�=I�����7�-k�]Z:xdgD'r�<����������	^�D������� m�ꇁ��=�����G�ȧ��0�7*t�V�+�"Ne�>��:����:��7����~���h�kk���?�}�L���t:��e�ކ��}���E��WlzG��^�y��s�K�}��7~.��j�\��{�;�M��G�����;b�K{).�I,h�y�I�ੑ�2B0�,���k&�^�`_����,�m��� ���F�����d�O�#��h4;��T����M$r,��-��ȶ�ѿ�Y�z��T�w㫟a��-�n�ɂ�ؓ��
+�
+��a�j�6�}��tB�kܪPJ���v����{���k���.�zޢ�;�~���x��p	�7?;�����C��W�3
+�S\
+�2ꃈ\ߖ�7j_5+M�h-I&:�pO�Du|�o�lށ��Cگ�x#j��;��Ȗ+�>]��h%�D����ƻ)�Z��}�I'���}oD�n"�:J�����K�`��&�i��8%�{;1�&��{<�'A7�۽�y��!�)�����4�� �Rw�A����G�J�E�w{$ZE���{���Ӏ��	���A�p:��w��g��1*Y�F?�ֿ�5>ȿwS;
+�]��R%�d?��l�P��}i�"+)��ƪ����Y9�^�q_・nu��)0���v���)w7�E(pNv�O�#�!Ә ��B^�ڗW�{��#�C״�w�a+6���T�N5�
+g�W�0E^��>5l�3mǔM �2�5��mV������'-��B��6�i�q_�ȍ��-~��T,�D�݄����q0�������)��b�PwI"�~��&��,w-����E|�Z�O�3���������K��PȣB5c�/�  ]
+4G�N�#��Qi�s���L/+4?�AL�ⷤLJt�(2��/CK�d�%�`%��ŏ�>����{_�w�_u:їV�i�G@cji$C��Xb{�^�)-4,��?�n���*�j�"~S�>x�X�VBɣ�pCNUXi.|�۟�[���������V�(Z��r՜�d}͂�e̺��l���z��A�>�k`f�߸���d�ϡ�.wlrXpC.
+�G"�`����z��z��3�7B��$(FV���+T� 7·W�/�b2(�v�CmB4-aE�ܦ����g<�4Ao��9�郉�4FP:��A�B�A����g2*�G�E��Ht�#İIbL�q�C����zE$H7�y�CWm�~E���%l������)N:���B��:5v�1ة��s�qp@���Ӎf1��%��ޱs��3�:_z�������z��Rb�d��|�8A�9;W���|����|y�xH�5��@[�na��Vޅ��~�q�,K�#է5\�h��q�:�Xن ��p�Τx����٩�'���<��Ｕ!�Qm����|����8�����=k�2sᄏ�M��6T.�b=d�e�Y1u:N�Rǁ`�S�,�/�E��S�/hj�ʪ��52�`7�<��iK~��KH��O����F��P������V�/@�|��Z��e��O��{�W���.Z�-�4#��B-�F3_�r5��.v�&�F� ;v*4���O����*m���f�a��#i.�n�e$�o\8؁�w�;ą��P���}Q�]�}"C�փ}牝�`!o�Ǽr7��rת�e��d�3�Iz��λP>cኅ�����^�H6M�zpC�k�F����G��?��˳fw	ZzF_�q}���i�Ɓ���A4o��D^��Ji���;M�������c����Ha�S1Cp�P�nA�oʀ5M$U-z�2J�H�.z�F�� Ӱ�K�U����ZH�V�ؖP�Hx�8CD�ѶG�<`_������O���06W�f��4�N �����"��y=����ç��\TZ�ʋ^Ǌ���P��e��.�5o��]5 �"йA���������h���xMsZ3�����#�[O���)i�N,6��JB���O��C�d���?�㊪���)�i(�ˈѫ�m��D%���.c�J�	k��!D�����%`%�N�*�Cc���ۉP��{�.pziN{-d�.v�[ZE]P+ŕ^R|C��-ǆ����\�TYe	B���[��ޕm�*ɶ<}�%lu���H0wR����n�z �U��<&0��0�wβ`���Ԡ0��~�m��98"*�5��[�>;2����]z�X�BzqUO2�@w�"H��	�bw��:yM<*I �4S'<��U_!�o����QdT@�sA������ �;�HL�£&ؖ+���	E(���\���h�(C��8}N�� �_-�^{ L�l�\S	���68����ww:��\
+���3u��X�-C�L���X�ɒ�>KQ���{�3Pq����~`��/���~`�Nl;Hy�X(�fٻ�G���
+�,�5V�mX]��4����u �1�dF�=��^0
+	���9�}惨.1Ó[�<�A/�w+�~W����l�!!X�NsLv���A��3r�?����Eb��@��xru����סzK�\�ʧ�+X����M���lՅ!a�hh�xJ�ɶ����b�p�=�eWI�"��z��+���|�3q,�Q/'�u��*�Q�! amg�X���QW�:��A�w?)�e'��rH��o15H+pqjƻ[��!�_	�$���� ��Ҷ������c�DJ.�X��L`���<Q����A� %�3p�lq��'o�'V�N�Τ��n,B9)�Bbm%���_�'�*�sX0�������쳅�SzXt��JO1u�>��>�GV�,3v�=ي�׳_Hĩ]��I�1��1'�S���l>$'�s��X6�wޔ�@�b�,���&����W���>���j�#7a��M���~����LhFt鬪�R��8��XHʆ$�Qt�ij��eg[9�c?^q�%S+��eﾊ܇N%����r��5WJ��,��1�pK�0Z��Ϥ�^�g�H��Y�f��[H�\nډ��F�[��>-�t�QΙ�8L��i��G�_�$R��7�5(��L�Mي�a#����[.%s
+�.�)&.���$HG���P.5J�c���0J��6�M`5IIb�@:��B�g�r���ś���D"��s4����Ep �٤�њ�7�Xv~1Vv�U�,l��gbkl+v��Bjo��3Y��P��o�p�KI�����O!�o|Oہ��:�T�����D�7���� N�hBn��D����.bNQԩ^��{���w�w�"���8��W=��SLi�����V�w�\�p̦��d��k:�w�7/]>�{�,������=�N���xqjX"',�ٮ]D`=)ŝF����5�B�	Ty�}��ZC�~n�d��5'�ˠJ�1��U���g����A��}żZ�ٰ^�DA�͘��?F*� ��F[��vo����;�^������)���%�i��	��Vξe#9Q p��~j�y�	ZH`_Xp�O�KS$�-Q�2c�`�������^�mqq�L|�o	#*�!�8lC��E�w	>M����4�}�F2�
+r������l�s߯�������
+����컨��=�	���fP�E�@w�Zt�s���Q�����|�W��f��!���J -�g!�*+�p����D\��g��~�C�g�� ��+,���Bɡ�P���4�ֳ�>@|FJ�=
+�T��T
+��mM�|-��^$�%oS����N#���y�j�JZ�c�K0�];��.ԿpʲJ�����K�+E�$;�����ǂ��3�7�JJlj�^��%�^��$���v_6�Q��	����p�Q��{G���@�$2��	��������Į�q	���΋	ʘ�"5���#�=���w�m�v8��D��ԯ;NvU_{����:�(����5n����D/E0���0�J��A!�8��W��R͞..��'nb��A�Lx�G�4�VMGxnP�� �߂Gay��Za+�D"�O�*L>�J�I��H򠴽`��-�t�-���s1c�kGC_*�ocC���F�,g�BF�5 p/�ف�A�ɂ�/��3w���A���7�i����2c�y(ު����S��J#Q�:r�R����$��*�Bt{�9����U`q/�f$�{�&��	�a����[��	��;�}�x���M�t/�L��t
+�W��tǋ�
+���Ğ��c\og=+��x��O�u�Pp�5h�ȃ� 'K�*��Dx!ɜ���YZVqh6��
+��b���!��IH�#w
+�L��'2%�5;�6)�����`�������r�w]E?�Z?�La��5�k��5dM�iy�j���l�{@1sك<���x�zz�h4��Lx�ru��	�~\�d�S������K2z\o�H�N���}^Sp���R��ـA��{61�p�S�(��԰�g�F�Z��v͈?�i�HِO7�S����,�V;��w�����!�PO%�z��9T����с[��I$��2�'"CX��RH$<7S����>{OV^�d�(Gqa�#��+�N�_J	,�%[bO�W|�ܐ ]���'\�I��C�F�6p��Nȋ�������AK��~�������]n�=�sn�"�thN�R'%q%#�3�$�/4����������.^�w	fj��:�x�0����vx5�֜Vr��;@�o���h�xaف
+�<)/Գl��l���,!�zQU�ٴ�c���3w��Q_gĚ�A9�4��Ɣo��BK�����F;�gU��H����&�� ���O��E�7g�z�;cW��G	l�KX�<Pȋ��/�j�^�Py���-6d��<��ܞ\nF;%$�s��*<��yhsd�Y�H��{��~K*���:p����+Y�a�3 (*Ix-m�m�u���ޗ���&�F
+q9��.\I�����!���PZ�J	���
+���Y�+�����uUE�E�΋r2�ԒvE8QEoO�]@���h�^�p�$�T����+݊,ei���5y�c���j}.���F�l\�>U�������O�?��S�0�xձ][�B�Ď?�t!�����5�6�b��wBX�X�W�(�[�bj��OaR��[�3�maik7�������'-��sPT	����k���ě�������^2�C$��KK��Zc/գ[
+$�mVt�H?O�;y�&����0$�����A#3��9�8�u�A4%v:�ފ��� '���ȋc��p���$HD�/��#�	�W��b���rm�K��-�9�͵����T'Vv�Đ���y��u���lo^*e\ӧ u5�f�p�g�>�j�n^��;�3Rr��^����Kź~������Ræz2%3]E*�_ߙ_|���r��u2o����FV<`�Rc<Q�w�\&N����#Ϯ��\�8-��J�=��N��#J�#�ƻy{��_�Y��P���	��mWi �A&&��IE���ې�p2S%���MxqY�|63��_�P �ȳ�ݦGQ�~��R�޷Co���-uJ����|����M�JQ/ĞY3�Nw�0�coI�VgB_Pd$iG��bh4,�"@D��-%�E��˱�)g�̕l:��E�P��&�c��O�,^��X�D]J���T ݁{��f,�z��>l&Օ�[��n՝��KM��|Co���8�cL�DO���<���\���eԴҍ]�ܩ�z����Mv��k��(�J2 lx�p�
+K�а�"A͉M�k�·�gR�9�N�n.��v���@�kk���]�L]�taӄ�R3�ب�Bt�{����tz�v��k6Wb-m��×��Y���q�3��\w���	�Il�_Rg�6~h����}3�p�.�#H�Z��ep$�50�V"�=OMr�m�AǦN�]:�w۫@i���ux��1�ꨏ��|rqr��d��긹��g��.�d܈���I���@���oz�� ������̀X��{y%��qvS�b�5r��f���X��%�#ك똃�ّz}
+$wH�I�I#du��H	�}�f?"Ã��ݤ� ���vʌ�چ8j��i5���Ko�iI���ze�R���1pX��,2�>�@����������J����i]��E���t�����f`��G�ޭ>sݢv�?��כ�YV&Xا۠K���8�?hH ��ӭZ��p�4�0R��=�)�l�%�d���]v.%g����N�9nq���՞�R��F�jP\�ȣ�[&���fs�e}���# ����ΐ��7��N7[vI��d"
+�y&bl :�6m�:�Eb�Vl)��ًN'�d�I��%�O�ʎ�eW�5|��E2�{js��oͮ*��mUa�q�J��=J��G��ɀg�;��U+�D�	G�X��I���T*��Y;?���2��ǝ*�ϸ�odX�7[��ZU�� �&�h��Д���CE2����e��4*H��J4�%�~��W�K��4\�>�'�z�|�2<���^Y6�י|(\=�	��"Y��SҶO�j6������@S��R^��W��&&G �Y�g),H�v���=i�%��J@�{^��#���U6�TW��$�;Th��kz��Gb��#*�+K�J����J�pUW��t���{�\w%zҖ��A/X�b�G.X����/����2f�O��]�C�f����=��V��* =H66jNJ, ���ߢdi��	�s���͠��^�QuW�(ݹ�[�w� �ަJ���R#o4�����*���{��(j�>�]�$��&�(#31���4?�vL�;��f)<�q�U[*ھ��:s�/�|Q/�R�.�]��q�ƥ����]�nTG��z٣n�_"s�s&�yl��E���K�5�D1N�Dy�f$4�	JB2�~%ʗL��תSu�%o!��sN��}]{�d� �_�桤��.�<� 
++��	^,9��D��G {|��M�ݐ���=:� p �X3��,�X���e��H�
+r�,���Iٽ��A�j�Rs0���S�ļ���Ѕj���*��Ƕ+ ͏�zt�����|w�ۧ��4��C&u�1�;�4��P���4�Ɋ�y�E�|�Wߔ�־RW��lZ������͕6��a�0�Ӄ�l�$_����;1D�B,������rvt��i����X��<է����[ϼ�<1j6"�9s�J���L�'��xll]IK:>[2q
+��(���ʪ=��m���bj�ѡ���=���o��=�&i���B�cF�#Z�An���:�]wDx
+�p��y5��j<Q�I_c�8����p�wŕѯ��@�$U܈Cru�����|�Dh/ʃ��փ�f�%�:��27�ql������Bڭ;�b���w6F ���nmetC��g��C����o�Y�|��
+\(q�ٳH���]ʊd���c������N諟�Z_w#�4���H賏`]=\o(���,1G��\>�-�o�X[�n��p�@�� xo�K�O�TzȊ�ڬC�ګ/�ٔ59�b��t��P��r����x����qd�>��t�������aE�j����75��V&>�J��ɧ��}6���jȁ���p��5�K����}��`$��zc)��+�@,��#B4�=�D�	�³
+6D�X�A���ۯLT�|���ӨZN.��u{}o�6F ڦ�)��\7z0�z-�.����cN>L��nġW�84��A��2��|����࡭ �3�~G ���L��0�CꇐRl���uԻ��]r�,�~��r 
+W}�K0�p�/��ѱ�,	�h`����1�%k�*W�Y'.�f���O��l���G�sEer�k�Q?������XV�3F1�A����F�꜇�b��Q��4«����]�v�h@�C'0����r��	������No�=��ޜ�ƃ�^�C0�<��E^k-J4�X=�#\�Y:qA�D����l���
+��v��&	=1J8�Ǉ��I�`�<^�r~�+*��C�Fr�vx���#x����i^
+��X�E���%�8G�bL�e��p�W�_��jֺ�{wVk|��:x�j���FCMox�����L��8�|�ܣ>p&4�����\�쩞G�O�t�A��v����;��Ð�F������H'Æ1>L0-u�+��糠�"��+���_�420o���p��U�ڌL���bu�)�TXR�yW�G�E��h�� r�[@��t��
+��@V^�
+Bv�{mȌ�E��bH�B-��p��yK_�����ae��S��S�D���3)��/͚Ķ�$$z�P�T
+M���E.�~�����j�VJ����;�6pQ���J
+�6��.A��ɞ��V��m�g0�|+V�;^��/�{��£��I���<5N1�%˷%v��{�ac*ŦaҖM1í�&�Ʈ- �X��c]�cRi�TB����7ʠ@ݽ8�6�~U�(nuv�Ƥ�=kz !�	D���@�������
+� �STt���Q]v7o��ݰ��Օ��ⓘ1OF������G����yEu��wr�m��#zxL���r�A�"����tL�w��8S�����(���*-&���8n�,\i9
+�3i��e�C�mx��,k�v�!8>�Z8^礩˝�u�G�/��#�7�?��rm������w��'�υ������>9{��k�j1C7���a�9LG3ܡ����`e��|�?���w��������.��p�O�13��3�k����S���)��%���a?�=�+��/P6��v�B��[�@)����6$�c�h��O��4�]rg&�7��A%6��4%Z��/��h�3M���I��y��ܖ3��ޓзQ�W����&f�
+�Tp>Og���kH�t{-�j�7I�F`̙.�w���#׋���q��Q��G��w���2E��G�����fl7��_�U{C��U�>��c��Mv��Y�#7b�&(�tF���,WB��_����n�ӧKMTR��TcD+��bb1��@�I����QՏ�B�#�״r�C�؂6����ߔ��D2�L��������K��Wb��(��b�	[�Qh.)y(`95A���!�i7ߛ�P���C���%�&"5Q��VW��r0c�B�{��?`=���L��p�I�)��<|�vJw3'	<;��m���
+{Pnu��)���#��[�,�,��CȐ[('�]t��_�֑[@{��Zwֿ��J��^�wr���Mk���E�YXۊ�-;������=D�Ǧ�x̟h�N�����<�&��/���E�1��y�|<�M�h�/�.�=��8���F�>8���=�]E*���d��ojP�s:�i���5�p#Ap_V��t�n�S�͸�@*�L�j���~)n&�?�;2L.�Wۤ�1nxr{&�Kaw{]l$�����e��ƵL���d���Jm��!��J�Q�qH~���璀��v1M�~����ajp�z����:u@㯾��{A�?�����UB���)-c(��g���[�`m�0����5�C�;^���$�9�E����	��u�IZ����������cOZ��*�(������M�_tר/M\lԓݜ���/�7Y��i/��}��}����d�iϧ��{�o�	��&�bxk��Щ���mE���-Ⱦ���e�ת�T1Ψ�����X�[4��=^jS��Kα��_τՙ{�ߞ2�a-�hk��h��lP��AA��eQQw���Q#�	�o�i��r�*��F������	D�����{=M��lA�Fo��4:�HX�2B�wJ����o����5M�s$^�ٍ�O��������Tm�0�!'�-ޢ &������׏ń#����i��Q���v���3�dԩ��]E�t��8�@��ȇ�i�y��m��t���.=�ڣ�;rѻ���̍�G�l�����x2R���A�,�$�t��+d
+��bIF��R����0d��ȫ��K��&��dg�C;}���I�(@5��/�qqyZ�9��7o�۰��e���˯���{�R7+yw�,�Y�%�������j�&b��0�fDӗ����p��0����oS-�@u��]��OE7a2����|�d���i�	;�ia!.���:2~C~�>�}9ꌗ��p�ϻ�'OUO�-k���5�2�v[�p
+��U�����>�w}
+,ݗ"b6y���&�w�\����	�_��3z�tr��˛�ޮ���Ng삷�����>�@y�q�8��(0���`2�1A&y"BfQ���
+��21�����\?8�e�&���pG��!� 3�An����uv�v�b�/8Q}!9�K*�2�M]��槽�.#}c|�FސjGh��)��vjFR��<�	�P�d���G~�2^c���5���O��yo�{�۲G\�s��x?z�7��mS�e������Ͼ��]%�KA���9�x�m&tz�E����Χ�h��#��c�����E�$�G�Qwh�����>�.��:�t'��9�x����L$�������/�e�Υ�kN�bh�&"�E���6�A����c����p)ɚ��I�F�o��TN�,�7`���t�r�rL�B_�H^��:CT�l2B�6V��d0�����-��1s��7�jNY�	�>ܩ�`_�@-y������&Zzݠ����f�^��͓��
+MC�,�=Ogl��;Q,Ž�5֕�Z�T�E�	%�P�?M`^%lJ�+ê�V%���x��#��>�O����p}�X�#ݧƔ����Rܳ���`�O�ȁX�}�����XR9�m����3�7 �(���*�&O�1N杲���!����Q��58;�U�p SVV.k%I�Ka!l�W�?f��g)QD�&U�(kZ� ���i���#s2A�h�֪�V%��ж��?c%#r�U�9 �̰Vɨ�;��)ʍE)1: ,v�Ŵ�|�`�:Ww����U�>BȨ��T|]K���D�g�B���T�xކ�7:��pgkQ�w(�,�@Խ(�'A?��埂B�u�ё��_Z�Kc�CA�LS\E/)m�|,���#�H�{u[��|i��i�g�[�Dˋ�aZH����� �@�:��uRsRZ#����D.���`#��1����k�W��<R�it��>��p���Q�tw�F��/��tW<	�~�>Aӽ��X�ͼ���dg�B��zRL��I�قg���=�q�?����5�l�L��쩪�:�vSQԑ)���I�H�1j_DN��2�B-pv�/�v��PY�ڋ���|�-�Rɇ�Ҙ��xn�9�r-�.q��P�C�������.b'7��ѫ�"��`��Ө-�rی��	(�xO �����Z��bChÇ�U�g�Aͳ�� kk�q�&�u��������D�W5���X�c.Y�{9a5�=?���l��~�q��� ��[��G���Ţ{m��*s�X��"	i�]	�j��-㑜<L�Y��,΅�������G��ε��o{GQŇ�j�yn�/�L��]R}3.��A�ES��7�>;�'lH�!Ci= �3A�L�/��[���T�ɨ���`�rL��p�-��Тo)n3���@����T��1�����-�.u5�ZF�� �Ո����v|���rxA�t�e���
+ )��)`�8i�qlN+?�d������oK���p�Ԣ�u�$�\oXmB;�K"���`�?�$��A�b��f�4���J'�{��WF��<`�ɓ�6�V�iU��wlA߳�� �$��&%���g�Q���#r[���G�^��ϧ*r��RH��Q	�.��ѯ|7#	{j^؛�AHmZ�d�&����!��)�SBJ�'mˈT;#0p��Â1B�$�Bb�����[Cm�Ζ����^���DŘ�:�9���/���ԭ|�	��R�}��?�����ל@D�&�B�I�\�a�+���N�1_[� lb��T�M�݄^�ngW�pѰ����P\��f��1����FE�)W��m�v�Fn�^��_N��d��v}����ۂ�R=!�#�Z_۩�A��1)��ר��F�
+�!T���V�R���!�96o6�L��PؾŻp�͌cj�356�RG�@�.�B���fzn6ֱlB)LWJ�c`��  ����[oG�.�Wb^�Iy0�A/�j��%��1�JR+�u��gc I��x㠛V��9j�)���)薀�_"�/9�b]#22���y�XUy�X����V��D*1o
+3ņ��
+�{�Jj���[b�U��b�L�$Z�O����Y���Z�����z9��Zޙ<\}�Ϻ1�x�p�v���5�][8�y!Wt2����=�6W��9���$�k0�'
+]^K���oE��I�Ȃc��
+Uxꀋ�8x�VUy� �@����՛�:"M�����-��1���Zل�	�Co��N��$������+𐣹/��MX�FQn�)�2
+�Ժ�+l�`�Kߨa�α�c�)���c�h�� ��H��Pgt��G�
+Ļ8��� �L�֡��������Y�f�P���A��SDnں�VY)�x$e؈�`'�ò���qޑS|�̉ӧ��%�I&+'�N0%\~��f3u-7�D	�$�)�1��� �=L�v#�����r����KLSh� �p��mM�O�bn+�b��T����/fǎ#%5aE�P����6���\:���d`Pf�m*�/M��V����-�@{�
+��@ÿ4���oEa`�6o|v@�Q~2nA��~gn_�ݵAw�<@�w�JXsF�ٰ�"�j�I�^7��]!�/;�{�Ĵ��ɨH�q7���S;�tƞ�5y�*qu��*)�J����
+�sJ��[���F�f������yK�5�7�=aQ�]�bh��ef3�DS�;��~��<hc���\q��$�$p���g
+���[�����F�M>&��s�ȺP�\s���ر��X[�׸��ƹ�WX��dɺ&Y0!�&
+�z}�ٴ���7�ƆQ��; ��*W��ڭ2R��\6p�鴏��O���(P���l��љ8\p'E(�V��^�ɐI�Z&Z�2�o²�0ٵ�b�AX����y`��"&���<P��m0��#.m���&tg9$�[
+|Qa����i(��(�4�~��6'��?_�:�(��2�%�����k�VՏ�jH���$��h|!F���I�������1�����sM_������O+^�?|0��)�f�>�2Y�3���5#���(���㮿w@�ⶳ'I/��L�F�;<H���U�F��?�f�3_q�r����4\�@� s]���M#��]*�û��Q���~��G�$	���|�@�c�P*1ҟҬ�ѹ�q���&	6w�'haOq���2��C�m��,˼tQk�kt/�I������<qu�o�倿~'׽Y�s��VDP|`ڂ���`r�k(��[�03 ���-Ѵ�#�F��B񢗟�6�w+��m�Q䍧B��F����Yw�׉@����$�1�׮e$.���ͣ�2+*�L�3�,B&��@
+їx%������	������BS4m/�7�Y�΀p�+f��)j"�-#[�'SVC3�-� +�W��OE�fj��kA�a�y��F[�Ge"�����ES���wYN;H�M���t�c��-�Ѳ�<�k9���B��Z�M��]��}��{��j�
+��vm�;[���B��b"�#�c&�{��a�l1�+�sp��ǔ�.l��K���LxIF���ڑ�e���){5�Jʇ-N41��DG����X�O3Йzk$�$'�AY@E���Eb7���6&��m��Q�G�<��.���7'���hi��`Ǿ�w�|�r��F~
+3��ܓ��ߘ�8��Mn[�n����;�&�J�i�R׬u�&,M8��Yg�B��ORf5��(��f��H�:E)δ�L��	vi')!��=�����U�9��~:\�%Ǧ��.�(�����ʕG���B]�B�.˽���>Ʌ���C3��*�m�/�zT]�6H(qJ�O2��{�yn�I�R�i�O7�Lv�$4�k�舤|iT�XZ�R3��i���\�)O1�`%�@�-h�5�p"ͫ��%�Q� ��̌�4	M��v+q^3�L+m�}W�b�U/����]��	c�. �=���������>f��1 od��=�� ]!VNA���������䚬���LU�J3P�馛X�;O8Ў)�a~��|^���]�͸{��٭C3����`��D!�W�=�A��ï�"�'Io/ uD�����f�7\���ǌ����z0^π��e�P�-��[#�KV�<�-�"H�4şڢE-����G�G��/?�|�"M�+ŝ2ʨ��+c��-����|��o�(���;�y*4T �cJ���|H�Y��:VF��r��N�8��dN�s����T�DDQO�g�}'��OT�	F~�~,��I9�uG0v,��F8���%��̽���2���3
+1l��ש-CtKZ.�TC����w=�N��ъ��w-�<����^�OC�D<Eݽ����m�ZJ˄�j^�@�3�BL����ٓ!^{!�,����~��d�􁩩�=c�v��;b%�Nf60�]�FnQ�9o4Z�6gS��ĺo�U�	��mʏ�.I{�f%
+��8'U>�w�.��ƙ�=�J˫��M��Q���M--�6 Ab��-�5�AM��}b�� �5[�}�67�
+l�n7Z�����<��d�� ~��[���ӓ��5�!�WFb�-����"�B=�
+y]O�͚x��#��|���LX���E�Qa(��6��Ԟ�]���wH����Ż��i^�4�_�`� *��u`P��fFW=��=]�|�\�;���>Ǯ|�ꦪD�a�ǝ���i��v�Ժ��1%{р\C�+�o��Wɕr��E���[�l�?�ɲ�.No.�K0�4�����8��$[Kng��x�5O�LWKU��l�\�ƪw��Dn����VJ-����d�)��H(�6��c{��ɒ�YY��9��oy��Rt]r����˩�\�t�_����~��'�[���ʳ���&t en��Qa?e_�$v�H;�UN*#��uw�����|��;���I�!���OJkj���⽆r������9��'��sc�Ҟa85�u��U���]�raeqE�Q#�$���qd���&J��皆�ϡFȟj��>%*��6e��mD1)�Pf�e��r<{��d}�G���{Ѝ�W�U�]�ڄ���P�gW2�teFvp{K�?�J��������������]G@� �� ��Dyr��Y�1G�Y�fΦO�JZD�oL��ߵ�)5"����w�/,_���%��O� ��r��$j&U�����26��z�����_]��q�u��Gͯm.���I�F.�OHB���Q��m�\�Sw��5�Q����)8.|D}���j]�k�`s(��'/Nw3y��	iAx�`��J/|iiŝ+��B�ç��;sH�?��}̉�z��Oz����b5��!E�x*]@�H�0�uF��o!_2&؄�)����ޕJ�,��M�I(�ȏͅ3٫6D2����lF���?3w{����̖��U�$�����B�[
+$���REt�����(�qy�]t�����}��_'�/��PE:�f�3/�^M�pt��a9�-F�l��ג�M�|x���7��偿�� ��H�@Mg��{���(���(=���XF����6N� 8�	U�Rtq����nƴ��Ft�E�Ő��]n��_J��	j�"����ߘ��ax��=�n�*��#2�8WJC3��"l,J A6ʑ��wK��9L����sG]�S�4�����
+��|��3D��s��>:�����6�#���I.���0+�z+��v��	ӵ���I��Ţ�@h������د�߸�����7}���rh#ӣ��}����9���c�D2؅eް�/�{[o�%��.�&4c?U���x�D�Q�T����x�\�g'*�CC�ʨZ�m��i����5Vگ�Q�&��WxE�ʭQD*���V��ф��*��5a�՜��Q��N`�k�#�[�%G�y���Z�o 1����R����~~_�n~��U���L���ի
+��bV��g�@S�2Qb�C�2[#���
+|l�=�O�/q��_�e@�ϋ��skh�;fLOt���˵�f9��- �[sIuBK2�h�E<�J����).�-߭w{#�y�Q3�mz�MG��}��Ǐt#���0zkJA��|����2Hv�.�Vh$�_�v�Ȥ���k}G�n�[C\���T�66�MT�����&
+��Q��p�%���F2 [yz�[8p#��gdp��f��Qiu�	�-2�Cfs�|��Qpd�H~-%��~r��d�.Ww�v3��V�v;�q� ���M��������5�ڑ��Q$�/-�\B�-�a�l�?��n�]۔�KP�i٨_.|U l�wan�%��ZO�Op9{atE3+���.�]9�=�����i��d�	V�Q�?�4��lW����뤣��Fl�+2�
+����,�@0B��8U���
+�佈�;x�&S,D5��6v��y�w + y#��.�&� �h��XՈkT*,�(;�'=�\N�3Ş{�>.��cH��E��d�7��������f���d��[��ڏGb���6�Hw�U�����*�+������e80t�8�,mo����ԝ0����m�i�z�:�ǭy�@����N��˽b�K�g��[�I�s��
+s�T�)��9ά��1j�A�'YMR��F��6�����zt)�pf朅D���d��x����nz��BI��P��{:[�wYA9�M�\�2��!Ú��n�I�D�){@>�S>G�94O��BG
+P�N���V��/���ފ[�D6�YMB�!��P<pE<D�_l����a�.�H3r��3�2�fY���|��cv���@�z�Y����df�z�b-P���Z�L.iվ�N���_�K|���b��X6$�rJ�aձڥP&7�ʁ�K�8yu�o�>=�w4o��g���m�y�ĩIL�N�7���������\��B�9�zs<�-�Vt:��������(� �V��d��3!-V�P�?�pc�5����8��S<{��D��@�tl��\s�����8�E��J��$���g�i+8�5��W�=5�x4�[g��1p	��x>a�Z�-�p~H�Δ�[��κ����͚�i�9K�����K�&�1֚��\���7%��l��Jyv�Z���y�9��}�۵��)7��� �Wu�d}���V}�u$,��ƙ]1y�@^��������UEd��������A�l����)�*�r��0�/0�H���Y7��X�c/n��\�>�6���vĕ=�b6=���V��Gh��5�"�?��Dj�j����S�y��Z<T����/ĳ�g�u\J|��A�> s�j=^A��gmD��o��<�b)��P������͝Rq>ԟ�$`Y��[Yx��OP���	��;9���-��_5l� ���3��\��A8k=�<�8\�j.���ʭ=c{�`XxY���������v�&��hZ�t�2��ěC�-k���v�
+���D�L�[5ى��G�{E�~��TbQk��� =��^-��m,Q��w͒�V�Ύ�ڳ\������BgQ�ɳv�5�|��lGR6t�I+�QTޣP��^ݞ��V�0Q�Qf�s!0N�D�,nYD�P��B�xc��z����bx��L'0�7�ѫ`�G��r��V�}��(l/-��������#���Ov�Ed�yvsӐ��l�1��.��Q�fH��.����y,	��G���Í����+6.��`�/l0P�M+Xt�ϻC�"np+:���T%�<�^�?V�6���E���Ѧ�/�j�-Ms@�]�T�$�� ��r�z?�M!Y�����g�PQӤF3�Q3g�{�)0Y�Q&x�?i�#�a�%�p�4i>�ܦ��K�ӷ�jh�Z��r��/�c���:TQa����:u� �f�qN]/N�|%�A5�N\���2�5�T3)�L�F	�c�����K9 pX��x�-EM�oّ�
+��y��!Kʮ3
+)�u����(�[E*�/�~��H)�:̜�\���mF*'�8⎕�v/��O��(�w �N���ҽP�L���]�ڏ��@�������ȍ0��)S�GM�G�`4ޚwg��`H ��N�3����wN4�8Yz�"�O��0�~�s�&UTO��p�wQ$���L��K�d`��]�w���𼡚ۘ�m��T�̻iҴV>$�"��T������#d>]����,�M�H��3��S�97����2r�ZC�)s�i���r64�,��U}�Y�t�[հ�q�B��?���g�'py'�N5�5�I/
+�D�XRj�����|d�t�#P!�?�>�F����hm ��Zeс&n*�J��tr����s�+�r]��-`36�7�)�����7*5��8Ar�zm�8`�>�7�_<@>ʻ������_�#e�eї7m���=�9g2�y�H�G.��	Bg�gp��b�h;�r���gJSs(QC��q�౅;b~`��O>4�$���1��Mw)�&(3����!cM�7y�d.�R��aP:�t����./,/\[�z�]��.^�~�|���e�rm���kח/8m
+�����|�����f~���Mg����S�m�����`4��uّ�ѐ�	[�j;�p�θ��˲�Q��̈́*7�r3��R�Fr4n�;SjY7�8$�|l7��5��pR�f�3������l����9���M:v�����U8�{�9�Uy�HzL��	�H�T�ȥ��G�zT�Ň�v�O�����ީi\͈= ?Ӥ/jw�`/���GW.��;�>��1)?���x�` j�%g�'�J�&�y���&��\�x���f�@�>�*���C�3��m	>(���mZ���n�ء�jD�����2��֚Wx��0|���3׭b�l�� ��M�Mt�w�u��1y���|/��t�Z�`d�|��p���et��.�.�+,ȵ\�j���;b��s�tM��lp�X�_ZW�ji�o�z�a�G��>�%��r���׸�ko�c��>Ĥ[����g\<�(�[�pZ ���v�EC��+_���
+պ��4����6��F]=�e�i���俭-�� T"$h5ً2An:
+��}�}5�߮g}�!�JU�`���L�o����y�y�G���/I��^%�0�����y��EO����lZ.�F]��y�	ʞi2���~��Sz�|f�OwF�Ի��x�&�G��������Ԅ��D�#�潟='�/ 6zkP��v5Rl����:ul�§AE;���碓UP����:�ګA���|I��l�s�'}?-�e"c����ѩAs��Ju�,�_�%>#Ƒc��=���ዋ��`�!�ײ��Ƀ'	h�c�.>7�<4ֻ�<'����,y�̀��b�0.:Kp+��87>��k]�0�6$��&�H�@��jm�+��H�3��lo]�Ek"���D��;b*���z��u
+S���	��KO,V7�7�>x��A�����Z?㒁��h5��d�5��×,j�����1Cn�Y��y��˧Ҝ��`���=�����Y��}��3����F�c�v�4��t��k���{���O��!��R��ddR����@j@���9�h͆�@������*�*�G�9[��\����aC��v� n�'Xm�mb�U1<���2�q����i-���(�Q��� ������'w�ۉu;���=ecBs�1��dq���E�9��Q���p��.IUM�(�aZ�;�N�6�G/_[?!�Uo�ٴ���Z+*�x��'�O �����/l�Bc�� �8E�p��u֤9��菶�׊�mwV����r����q[j[�)��g�5�1T�~(�x���煵�Ao�6݈���_--N�	�M�G�<��������;���jn\ި�#n2dV%�ڠ����@�ؒ��� 4��TL/��������t�M~`9m���uw�Y���@���A/}!��<�}6��ν��sTP��U����w_Ǣ�S�R���Y�|�U��n��s��=��1��׭-�<�eYa2�/&_��@<���yP=�gHWUP���?���D��b�N9����>�邋e�9�34�Q�/S���-U�y^�%c���q�M�L�#_X�d'�=d�%�M���m�v	5��\#�IG�
+L�y��x��c���9�4���0hޞ�Ι'q +�!
+��7#'�a�|:�b�EJ��P��N��G�g�;��S��hr�)��e�m=�>[���kvS����x`i��ɬ�Wʻΐ#"?�t���tSd�+l�>��1���C<s`��qu��k8pNK%�M{������gN��POAz�r 2r`�h(9O�i����c�p+cb!���X�ϪU�)����Ǝ��v��e�e�f/�r�'�6����-3y;hm6��ӷa'���Iި�x�M�.�{=3���ܸ
+w,���$�:�\�������L�9�DើPD:�n��)'���-i`�:#i�+�KX��}����_�	�q��Cw��l��!�1s���f�9����]��A�#,LjB��Lx�Ȱ6�*��8�J�##o���?���#�4����ɖe\�(y�K#�$��1��1]�%=K�"J�x�,K~^)a�	)�BO��!�^.XD7s{㔜��u������>�Qh.'�c�RUA�b�uXz�v���ʱL澟��X��y���=�58���,<e.�6V�n޶敯j��ͺ@��,��O�2CG��b{���'qIh�/x�m3 2�~g���ݩ�)7�<��Թ����e"qZܔ�3�9����ꄡ�d�~����kӲh��MZW@��j�םk������F��9������U�Wm `�Z��: c�������紎pjL�U�z�Kk@�^%Z��	q�g��!~�d�<䃏��%dQH��m���������3k���W�B�̏`爒:�K�V��&2��r1���,d�<ά-L��$XGi�������/�g�	��/�6��$�A8�x]K��Z{H��U�E���w�e�Y�Y�K��jf�&C.�_���!���1�n���B%���SB$O"U'�}�u�ǹ�������I˄���jK#H������������Z[��f-�x����m�P��s�6�/,�	[�U�D9��!�ٝc�@��*�o��!�-�`y��Hp�P�6-x��p]/�#���C��0{
+��m��2��0��	ݏ	�QltT�������F=��}��V������<��f�	�'�}��<�N���#�����L��Dϕ.艢_V�aoە��.�i��A�)0�P��U�w�@�$ N�*���m�7�q�A�TzgAvi����}+��v�5�lr�Y���ԔH?F��SCy����\UR���c,"IXy't3#i�f E-��n[�1�g+�i?0�hB��Fo�;�elr���h����)d���k@5���g�byn����>`畒�练r@����ց���͠��g��3$ȳ#c{],	�� mP��|w�m�a��p{̆�=��O#��D�����(L�+��^��OF*c� &�R2D�F��S�4n��f�-1}���;I��~�ɭ�Mk�Syp����g�ɬ�����-2���ӯ:�I��,�PT ����Ѥn��D�9�y?|�*�^��xM"A��E���X��E$Ł�pD��w&W�a�dT��,µjI��ʭcX��Jf�;��3���.���Vmyoec[�+c!��`'�(�����PO�S7��@��x���D^�kqF۽���9q���[�D�[ݭˠ�G��6M$�%��Z�����٣s����H�]&����"��B����v�A����	�q�r�芅�][ɤ�!WT8322�Ӑ;{lc�x���4�c�+�����iSS���Tx\ic�>�XT���/�D��t�d��2{I�&ZDɃ����c��Ov���y��d��BC��	�1��}`�a�wQ��y�2������w*{Ry�5�9�@X'�qԶ���BrmI-1jE��قl"�y�H��A9JƮ��~nĩ�I��[U�=2�!w�~6y�1�ԉ�t��>�T��x�zL�.~��ۦ�R�*EW��B���GUC�?��J3����u+R�8)�P �暩�����J���w��?��oƙl8Ћ4b�������N�����J����̕���T�d,^�o̓Gf?o�cm/aΎ@�"���y�UCub����q���?�2�q�ҁ>� ��������'���w7�JN�z
+5�n��
+c=ը�&Տ]�����q@�<� ����hI�xh8
+靧�L��>5k�(���_0��(qH�59�	Q[�����nF�U�	<j3���>j�n�L?��<X�T��%g�=�*���B��6C�ݼ��s�Է��R�A-��8�O����iT}�ٌ��������&8~�����
+E�|�\⅓�#�^����j��r��h�V�ף|��Z���ؗT`F��u7Ymu�eE��5��k�WI!��FZ��X{��k�� ��>�Zᦒṕ�Ӑ-]�*i��t=SHFS7���șwR�ke��`N����-O�����q&[�t&w��:𿎸Ʈ;�=i@C��1�&�@eF_��`��L)�K��"LW}
+y��鿥��طv�6)�?�u*+�㮷KۈR��UN��G��o�H�1���#��#���}b���b8�+�1&h�Q�6�z6VF ��^ˮ�<�p��횟�E�,t��+�S�	۰���z(�%��/���^d5��Is�����[�O+��?ؤ��T�sC�H�z�VՏ1�8��+|��I�Y;R#G�g�n�)Z�'�F3��I"�)̸�khw0�*� �2�gr�L���M�+<~y�
+��H�>n���x%Q���� M�U&M|l�%.���ʝ�6�"���&Oa0W�mz��5B�Q6"�nH
+��/��xjJ���1:�&eOB����Z�0���,���xI��C,
+�f�9Ǚ��&Tھ�o�s*��jʹb���f�^�f1��l��%�P����b�4`D��R��[#B2N1�e�b����m|���I��0Q�	��q�IGm�l:��N~4^=�1���֌��&Ȁc�"m�,�im�"�����^g
+m��մ�Ǹ$��w�V�:%T2��9l;K�q���B{��=���끨��4I�����_+�<f�_���ʥ��w���U��^_�FQN�l?w�k��	�Ҳ��*w�s�ES^u(ҟV0j{��!����pZe#f�1L;����>�/vJR�A��X/:iΑ9�����{o�����q�+=&g��m��l��J��(d�|O��_0}��{�� ��3������p5+sm�ܴR�;w9p��mʜ��胵�S8&�� �!���v�N��KW5`Wo�t؝����XB��g��ѝ�/A-N��迱��~��Ӫ����w�Wv3L*'U�SS���i���ӯ�n�
+~4'���&���j9Ù��om���m�3�^�ܪ������#���SR��Y�iNZK����:��%�"��k�UG3UfPyqo��pf�z�i��L.�?�}�e��Q�lRu`.���yL��{�����p�p��@�D��]g�+�����ǌ�;�q��-Y29D�*���7�Y��u�����ۯ�i���������	�s��	���H�/\��) �K;�3��|7����_��k�R��)Ζ�j&b!�u���0��{�>S>���ׅ�ȴ��E&�\��2A����܅ߌ�w����$ 8�1��M�Ӹ��N������QTǑ�I�C>��/O�Z��^
+t/3���g��#K[�_�O�1��Q�<V�g��;����6�d~��Nf�懂�&�hug\nXW�cr���bG�/K���n]�􁹱�c=�kw��;��lʢ��ɋy>�c��C=���?�W*�N�6��]�&�Q�+�=Z��(�%�-��yMbR"����I���84�^/Ė]*�!�������m��c���I��-�n��qC�:�'�'�
+<t·���n`e���qi|�?�t���J�'��L�60"|J�/k�E�D�x771�FEO�ж�NLk<�Rt�Z�T��<
+A�4p*fe�w ������
+�j�ǹ�q��x�u�^��o]�4�4��P3ëWs}N���{aSCm� Buh�6�ظD����X�$%ć֧H=	S���U�Z��ѩ*"����Z<?yA��bJS"���y�x��o_��v!'�(��לw!���
+N�մf�����2i�����n�2n(j�����U��;o�f���g(B���S�;碩�����}e$��R�?{j7�޿�qy��|2��'��o����ϒ�����]��1���xx�%m�E�W&����V�#�۠�[!�ٜ?+�>���7���ߎU�2�#�2tw���޼�ʡt�L����i�Q/���6�v��~&��I9����a�.h���+Ǖ��V(����Y8�&a`���y�\/}���a���jGwM^�1/) x����7L3v��֕t��?�C��0�f�e
+�]P-!P�t	�
+KX`H��8֙�m^R�n�N��>���jN>;i�N"F��[�mp�r�eL�4��e��$�����D_�?����'�?�3���Y�I��� /�L���?��9˯���ɰ¥>��~0���F��e���p��[�|a�ڄ�L-/��8 ��l��@;�P`�.ڕ�õe��<L��d#�G��(��\XY\����J��ǚ��%���6%����4+�Tf %��r��c.��b���!g2�d�/-��W��E:��Vf$u�����qǣ�����L^��;c�����!tB���P>�51K�%5��X����)S7�G����J��v��L?�΃��Gl@�� �@S��5�|^�1�QFA��O弲�N�5x�\Ht�\���0`,��ޥ�w��v��CH`�2x��W�1G��lՙڵ�E�Zp,s�̅1�RZ;"a!	��f
+��\}.��G�ݨ��6����W*A�e�|�(����
+�P&�dWKc&���}6M_'�f����
+{Q��q�I�u��m|�T{>p+i���wx���7��E���Bx�w�z�@X}�pP���^o�o|(�F�hj��/Ò�����b��>PpHu�M�
+|x4؆�l||��g�6���}�B���>��t�g��[e!�a�ó��94$~!-Qb w�Q��̻�^	���Blӯ�����9Q{��6�x�D��ϥ���N�W��� ��'�x��~	#zG~�	��Va�6�l�xP$Z1�:?�!��Q�s�l�@�)�֝`Iu�-��QcaLo�{1�9PI�����<3﵃^��}ۯ����^z�$9S��~H�dȋ�v1s�g�3#%�/�n#��/�P>�V�&\Ě�аݺRf��ʨZ�m��iPһ�P7Baq�e�|���-�4#��_z���n��(m����\�E(���J^��������,���|��V����R��򎢑��E��F���\
+��8�?��Vn��-�<]+��h��Rd��`>�H�G�.� n�+���,}���p~ ��KJ<&��|� �_���ʏHda�YX�wH|m�$Rx+��V[�xh��?��σ?�ة]�U��2��jf�ftXtp�N��*�P0����恗8��w{#�B�Q�ˮ�� ʄ��w��Ij�����{������w����P��%5����,�!�*ˑ��>ܜ�Hn���tǭr�v��z����թ?�nZ;0�kp̵��x�^"�7��DV�E�S���@[���DyٓrM^:���gr�<�!
+X�K*�=zM� �cs��<�(y�-c��[�����1C4�eP/N��2r���|��IW�d����ƣ��<�2/ʻQ���Xfz���AJ=��'�Hv}R��I�R!�!��P
+#wQ@�s�>�:�a�|�1�w�S�}��o9A�E�2R�ǣ�֨�q��I[�zݸ��F/1����9!�!U�w�`��N��~��_�&1�<x��@[�0ުyH� i�!��.r����;�	I�|ʕ���9�B2�H�.�z�H@.���Qji�����0�_L�!��w�ac'aw=�OGT>\��N����d0/� e��ũ�#����p§ߗ\�觓�{Ŷ�6�r��ܠ-g[���"�f�J�\W����6K �È8(��q����V�JIS����C̣�8����V�K��G�FS��k���S��S��z��R��G~c�H#��):�8�j��z�:��r���Ȋ��ąB���Į��q�o��7�w4ϛ�M�q�m|�y�D%��}&OSsSP�>1��i.t�ԁ��wN;1r�!��0�[<���tN����o�Ql���#��/��mNiɌ�g��]��>�Af�z4����nt�I||ü�^�9�����[.;!�rN�l�s��b�P�I#y�O[�O�qw�FX�,V�������O	�s#U#燿|(���ة*yK�$���h��_����L�9}xD�d-R�>,�OSfq�)��t��% �;��6�ji����?�չ�3�E���C����昤����a�&bHA��XA���y�����,��{��5�u�3n��1�
+{x�	��C"Of�2.�����:���j¢J�nQ�>UY��"6�j�2/S�*�+xӠN�I
+�PM����[��B�V%��Ԅ{g�)ӍP�	s��5��Ȼ`��-���戞p4�)HgFl'��c�������ƭ��1T��oV[툳���8bv�͠_k3C��1�g�݂�������Iʔ��wW�"����
+l3����vT����|�]��t<f�FŨ7����2T-����($��	���jzQX����2�j (Ӯ���� T��eO�c�Ż�:pۈ��BJ~�GBݞ7�C?�I��2������,�S�^��]�1��U��-I�=Y��ͷΛV���\�,��ڳ�Ńw�YBWG"�TlU�"r�Ȱ��AV�}�y��y��`.׷ä�[E�?W�ϭ�����M̘Dݝ�t�n`�"+�ڛG(��x�Ơ��jy䬥� �w:5�Yb�Ě�'pH�O�B,+<8�?�r������2̅W'� �w��y# �}=G���j}��sU�\��!�J���%�Q?�m��Ӟ3S9�Ʒy�lʱ�El�	��r��"�<����@�~Q�u��F�&�$�p�:� �T%&���� ��6�����l��?p�_��9 �-q����s���s�g9��!������g�����O3wU3K�;�)�Y|ںL�%�xQN�'��J	�4��鑦J�ӷ�j0�Z��2��/�c���|Q�R���Sv� &&e}:����F_�e����{^��Fef�#�τ������|��X�K?����_��y���,�{y��)�=�`{�Ud^7��;��NG��� �k ��R�����*��˚���:�Ģ��a��K��o�l|z�d#��L6"��F�,�D/w���K���{���}�C�p�bz��(�%u�J
+x��Yt����ԽT�0B���wh)�O��_���2�-�Sz�Q�������0��6���yP����w7K� v�Q�D�͸�l�q7omӄ�A����4%胫'�v��Y��_
+��U8x ��5�1��]Ν���G��,��W���k������2�I���z��^�̡	g�?�[ow:�B*AS��w���v�ZL�n�n�$����x��6 @��}�)b�~g��B&΋|���c�	��3rZ�2�U���ּ;;�� �)�t��u���xI�|~ ���pa�	c�\�2�^�����Ttؑ���j�?��3�Tw�y��6�Z����i���g�Y�6�m�������|�eJs�e*PTБW��A���21J�+�eĪ��)kpi�����`"V���2'ϗv��6J/��a��U}�����a��Z��
+s����f�x��O�F5~���.�19`٫y�T�TV#��t;b����qB��I�x�ڡ� +P�AM��ż�\���<3
+�.��+�0�������l$���H�x7/��8 @!N�u9B(]�J�6�$Bh9�t{&��W5��X:��Lr�8�7��dʕ�7�)	ӡ������-��g+�|��3��׈ڊ	)l&H�4�C���¯��6h���%�S߳G�~��Τ3jئo����A���kg[�j;�h��3n�8�̋��n&`x���Y=��iI�x�2�ֳ�8$ֽ>���5��pRU�f~2E��Z��,n����3xj�&U������*��f/���<�n	L��	`��ɥ�`�z�����.�O��	��ީiL������i:0��H�#���RG�@H��?��~N�|E� X��./,/\[�z�]��.^�~�|���e�rm���kח/t
+H&%��� D��$j��V[�c�h{����}mPP��h$�Ǌ����u�t��n�c0i�]�~�%s�fM�a�I��k*.�/��M��UV�<���蘗>��˧;�B�ԏ�&ڱ�C�Gj���?��S*陵�+���q��@�u-u�Y���6_��ԅY�i
+q�\ˍw6f���݀�K�$sX���Er����k���KRo��d�Vn�
+��w�{scZ�оЇ�0��s������0S#u����˔��L���~�7���L�*�T�[�X��D�ҏ��q�2���Jw�f��V��Q���o���Ln��7��Ƃ��Q�f � q��xY�F�� /r�w��Ƌ W�B��5���d� S�I�O��z�i�Q&O��<�6��Q�O���}$fFSs�俤�S{�|�&�w�+A��bA��rИ�o�('O郶+y0πGEU���F�H  2�D����WB�K��d��-��|Hl&�1s)�ԧU��v������(����F4�zz���У��%��L��6��vt!��$iH�e��D�P��@����IZ�F�%��%���=�#�: �1��C���a<v�Iy��)[^�п�����Jf������\9����P� �E����v5�Ѩ ���4(y��s�d��C'���VN����<��sV0_�hKʳ��j�~Zv̤u�rA���F�(����҉�V�YŚ ��5��ܳ�g���S�4�@uk��θ�<�w1�{-1_h�Do	���;�[���\
+���U���J��ܞ����}�����	�"���-T��p��c�$-&��Pgb*�ˠM��7��ʪ7ҼJ�Hg�!J�z��'�O ����_GS���7�X�gƾ���A͆�2﹥���3z�JxSu�>��F��]m���0�+@X�#}��5"���WK��L\A��W��:�x��w� I����o��c������;�����g��r�Q�G��~$\����
+Y�lD8��*���7Av�� �r
+���a�T���n��[ �W���`#��y[�vs�����<��h�܌�h����X@|���a��⪷�w���*�N?��=��a��SQtm&g�VU�<���qb��/�'����-)���b/W��1�¼����r&�%��#�+��w��ti�������P���<��e���Y�4m�)�_��J[�I(=T:-�A۠�Ly�F���)���<q�hIsK��T���%�P�`����Ab3���a0p���j5^�<1�!�K4��!SݱK�ؿSG:yC�D<7=��> �n�}X���o{2� \��p�l�h��}r�����dpH�М*�p��y�.��9Hs���!��/&�P`ssu�����pY|>��Jy�Yz�}[͊�f�DN���T�2��6O�e.<���Dڊ�f0�o�����%G�᠙����'�(Q^���#��Z* �!�JF(���"Gl|�A^�>
+TJCn
+d�˱��`A�Rh\м�ȯ���zV�]���ޚ�'o�����~V���|h8R(|�g{��A�]<f॑CŐ<�=P*+���qzB���� D����YO˙�/)q:naPnf��U>��H���~%��Ac�jˌGNK��v�#+������z��i��/���\�	86Pm�v[~���g[��bbR���R�2��S����1xꬓ�[1�X@H�P����s�z1�[{��l�VW\Y��岳QJ%�߰��5�'��k#��2����#���5ux$>R^�Ȍ:�g��=��r7�L�'3�m)���6�Vz�Tsƈ��Y������TU�������Q�V���(I{|�ZIQ睌��E�����������=��o��<m�4�/� &�H(�Gd@h�%�>l^��#]��)��<+�:m!��#�.xgs3�Q��z}z�S�M����P�H�����]� �L��j�ѯ�6t'���SB���3�p�xJ6��0Ne��~��U �֩�x��A8Iϖ����w).%���<t)S'1Y���L�f"B���%X�P���Vua~k�v�0�z��03�*ϺMFHa���y��7��X}-�l��d�C�
+-a�9�� Hל�ܧ��Nl��p�$�� K��<Jo�����RI<Baw�=Hs��Y��̾8�U؈��n�����J�)5L >"�\��&_?�o=o����p�Ka��K�c�Z��ˏQH�؃F���%w#=W�C�^`�;9v������g�F��e�"��{}���}u�Q�	�h�&�$���٩�ѥ���[[P��-���Ų�̼f���3}��Ÿ�v��Y�U8��D�Nxn�ks��'尷��������L��
+���jh�|ls�|΄y<�|��Tk�w0W<:�q��b��׈�&Ӣ�c/ƣ
+�m�m�༝��(�*�7-v��~��ץ#�Rʎ _Q��c7Z���g�F��Z��-���C�\�h&^�A�m�^$�I�iC33f���8E�>����̫[.�����|�D�/B�W����=+�cfH�bU���kf��S��\B�
+u[Ŗ�W�:aX�������w����{ۮ�-4E��̮�M)W����CA���`�q�Q|����a��@)��`7�Y���OҺ<n�&�S�N�S���$�j�iz�	�@�� �#�b�7�P-�qU�:Af�DR�[y%�)5|���Az���|:��k V��d�|�ଭ���a��p�~�#CE;b����/�y���W� 7���6��c��=6��-%�,�Cl�.�V��=j,��m�nV�@�8�ؙ���"���.�U��׶�}>�����g��o�|U�N4P��%83�4������!�%�xj�H�z��~���笝�s�T��K�oF���0�:��~�a��g�C$)�Ry�k��}R�Vj�eIo���֖� zt�����L%ޱʭkt�&��ػ��^c�9jit!EҪş�$䑗J;�rxՈ�rs��;I�נ-��Ǎ��j$�S�j�o|�7�����Vw���h:qC����Ȳz��C
+rn����qPD��e�I�nd��\�悹�����!��Ǝ��k"��=+J���c/�Z��܍m9�_�n����\�Do'��+�QN��(��x����i]Ax�RH~�&P����`HI��)%m���M)��cs{A�'�S�����f���>��1��ݪ*��x�n?����kBNaOM��Qh_����q�����h��g��ΤX	��G�&?�O`Z������!(�'\��1Y�7���A���9-����S�8��3�$I#{��)��r�d�9��ă�OD�v�m���`WC_	܁Y�:gڄۉ�ݲ�F�U��Em.�ձ/$�,���*�1�����Q�6��lEl
+/8�k����vvY�|��Eb�7d�K�2b?6M|���do(4	�"�D��1u]Gw��͙QR*������5�S]���M��L	d[(>��5�
+�������<4Ip'������?o)P��fb�	"Иlh�Ru��c��4��yT`��|�7���EB��A��������X��`�	�L@n6 Y-Fk�ح�IX>R���_�8$�"K�Jc'�w�q嬇T��n'��dK���4/��Y^dw��\�����|`K^s�}��[��:Q����i�0���\[�eۉ��5�1~q��);p���B�?�βߙ�¹ �y��0���\�6�X?������������5�7~k��Fu��4HiI��K�y;�~n�W�y��#"�#�����F��),?�[Y>Y�u����.��'�Nէ�g��NR���P(r�:>#wa�3���36��&T)���J���Rn�6V�S�m}ܷ���i�*���A�򐍫����]A��&7:���1Z�Y�ǥ�,V� #����2��mE5z����x$y:<|Ol�2^��O�b�Y���W�W��F����G!�W�w�x�5I&<c̒7_^�~Z�������t�*���0�x(Y�=1-�\�0�/�XsŽ|�I��#@�J`d�I'||9z�VՏ!�h.�M*Ej�k�H���7eL��D�m"�P�gthr�Β7����ܹjs+�=0�~�+��A�s��q��
++n阸o�6T�z���^�i�dq��2�+й����s�<�|3o���YH�c��.ā�搮��EG�ƙ�]�����( i��Pj���� �w"���L���
+*�:b?��2�}
+��]���^�L�0E}�L��2X'u�@i�O�*�9aq�����Z��:�?���{2�G
+j�]:�2�b��\.a2� ��l'�F�)Tgf�2YF�_�E��>'_yr�O$'Q'�[�{���ڗ�a��6?�?$3]]��'GF]�Ƚ��0�^U������%�I�y��ɨ�T[6�t��;��}���T�\1X�3f.d���d�@���+���6
+�ɟ5�����N��*���7RL��7�H�g"�*��J�[���/�������V���QJ ���kZ4��lу�h�TDmj�'cyP���_Tα����	���h׸4�O���U�\ &�OҌ��s���m���zH�������#,V�GQ?������f����A'm�:2G�㢴�뼄:��R���.����>go&�F�ɓ�{�����i\d���2�xR	�3�G�o�_��>D�����;�..]u3�Y&��S�����VJ�Ekl��W�o���Iv|tSV7|(�*�n���׭e�÷��,��`eђ�^��r��1�Ha���	�K�g��e��xR�9K�`ԧa�7������`�4�����0�6�wО�TU=gU`�tc��O�I?BGs��kBG����K� �������{m�#~�.�� s�. �]�v�����L�?I@�8�BGB�УZ�^�h��� ��[����I�#3�\iE1Y�"��R�Cw�7�W�E���#P��fP�9D�v!��>ÁҸ*ҽ]�1*l��\������;%�~� d<���[qj�n��SFI9*���Aa����?���ֲ�p���aCdɌ<#QS6�(3OHq!�}-~d�51�a!0�̃�~G��J�(���4��\g�1}��K�3����T����2ΘD6n����>K�_�OCˆ\$ӹjWX�E�Z��L�y��O��-1��f�!��p�8��+
+���z7P������ :�t�D�Uٱ�V�I��%�/&�u'�E��a]ou#����0��V��9��',�2������n���Ӭ�����+�N�&']�
+�y{uJ�5��#�XR��O���j����U�'	�-3y��.��pt�v�)����){iV)xMi����1��9(�jc��X���-{]˨����-%�v ~��$"����gь3R�$T���N58A��MQ�^%*M��������5m��X���F�1�:�Sy��"��f���W(Y;,�S!W �n�:7���Lwʌ;��[a�Ȫ��O�_���3e�bz�L�n��e]�F��/qB��y����wn��C!�͎S�$Yiㆦ��� ��b��t��p�n����\�����_�.l��xx��%1�%�W���e��[t��߆s�����Y@�3�W���n.�K�������0��L��#���BWJ�"s�q,��اRo����t:�/���Of?�����Å=���\�x��^DWaNXH͏L
+���(�{�F;�`��g��BE���+�u�2җ<���C�S �T��s��E��|�B��o-�|'?J�.���R��a������i�m�S�јa
+���Ē�v'0��XC��4=�_���s>��(E|�W��ͽ2��y�v��I���C�|ǟ� }`�$E��W.]�raeqE*��l�<���H��B��G�dY^�~�-\��|�-��X�6 ��B�bW�%�e�V�{^\��X�0� 1k��)w�+C�Lƞ�yQ��r�����v����O�8���Vp�� �#��)�Cn���Ю��@�ύ� 7���L��vS3d;��9M ��<��Ԅ�d����bm.�kK�H���r�iv�����<���j
+y�_�p5^�|:^�wL�;�f�L�y��s���b\2}m}�Fr42vח~��K�9�'w��Pi����Eo2Ja<f��3e4��.��,�B�ߤ�jg���.V��@]�Uƾ��3Ҳ��=ϥ��>ՠ4�ޮ�/��Gd�������`5�%�kC�pR��!r �^�4;��k���.�i݃+��uZ��Gƛ�`��G�m�FM�P� 0n�0̀�P�|����T��;�g��ڶ�b�j�4kT�N��*ϸ��&#���G1F���.�7�g}���lϺ���B�Bc�p�q��	�HGt E�����	G�3�/v��E���7-�\z?%P��K�[#
+cv�G�m8T�/Dww&��9	�kH`�`ё2�Э�Xa�y�A����݂��k
+�^�����<�s�{�(���ǥ�Ֆ�'{ T�6ʑ�w�wK�Tm�
+��1LO��e�'􌄍�C��@&XH1���Ć��J�l{�b��e���r��qw`��<�	�{��5Sr��*��>�k�7n�<�Y��W%���GR�Г.��\�U���-4�$��_��:��t=La5��h�''C���pŚ�.kz"���r�Vn�2Or�h�G����G�����I��ˠ���B�TQ�Z�G��Uщ<hp�JP��K�����@)t&U{����-��7�c>t�݅Ӭ� �]M ~4�L�d�w�baf����ݶ����s-�����R��[D}��@r]a �j�W��u7K�o��>e�s���Jҁ	[� �{Z-�4���87y���o�x=&l�?��N�����AD��"�7�*���
+��%B\�_H�3��E�''LR1��0U��!n���)~.���}KO9𬝭�Rw��"���e���zg�48�(�;�V�NܖV���%��y�4��f᫪�2J����A���ad�Y�&�&�&~�\�悸^ 5��{5�OCZ��c�_�/��Ahy/����(�I@�V�7���sß�@n�5��U$����§^ ��c���1'
+�Qrޮ���l��������ax��a�,O��%�$�!v�&�g��}��b;�2}?��(�&b2��O&��X�D��gz�N_�r0�'�Z[g�#��/���Amp�PF��{�?6e�.�#ͣI$O�WBc�#^����mce�y`�Lb��HR1û�:֚���������8��Z[��������۶6�6�n&�H z՘��� D���M��\��IM�	���ޑ"��N���y�E�ih��n
+��_�]T�k�c���m�������$tx���қ�D�w_�YrO'/��]��OYϿ&U�Ȼ$�)����>-{��e�ش� ׿V�����xJ8����8���g����/���!��<���������.Z�'q3�����.^�߮11��0�:����>#�ve��!?�����Br(�!��x�ޱ��K���`{�oF���!B/Hj}���e���b���I�Sbͨ�v�B�j��I�<�*%H�	����$����j��Zw��2,5p =��Τg��؟�5��az�lع���-�q�5���2��C.�>�gޙ�	�k.�)�xa��$�e��������F�t����t*���/��d,���L��gVF�U���v��{JT�m?���3l���'^0٧c��~���vŖ��8�@~K��O$h�4����[��OV��`��g��+�����o��)�ޒ����8���Dt(��j4� P�nG�}̇T�E�����0L8W�����PUI�T� ��UkU<r+^��j窮�ऌ�SrE��~bYg����d�_HA���:�rk0���(7��	͂��y���7��N�r�Gagt���8b�0�x�젼[�mY�u�Q���c׍�/� �'�0��˒���4ȩ��K�p?p��W����ZYX0�cS�̱�$*�!�ƚ�D��I��#I�g�}��:~k~�&����|�X�~4���	�|ɫ�
+˗�b�]��U�ć�ҕH��\p	x�A���CY�	�P�L� j���v��x;xn�^�%>`,:����ѵ�y���G�Z)f��؝Jp�+���Dˌ{����zM�5�_�����h���"�6��g���-1�ԭ��� �ԝj3����4�W�����za݂^���x�߱�˓>e�+/Cz���1��W� �n���-�oI�}le/k����\J:K B�k�4v��%d��+6�C!�c��݄�y�VwK�����+�R܅M�Zn[	�cFy�x���bs����bQ{�z~!��R���Ss�_�cÎ�/�y����rH�g.���!t��}���p�'�\ރX��쩜aNv���m<��y�j��o�����*7�~���������g%;����,oIH���e?0��pϖ�'O�������ni��$}?�y�2�_���w�M���T�n� �?��1{�ݒ�\]�Q�����Ai����h>J�g�z�x�b�:�z���6 p�rp�Z�Q�������(D>.%��N�fL0�^�k�:; ��_�kbs(��&G��4 �/moǛ8�;R���p(��g5�SIK���9��AX��5U!ϰ�<�Z6���.�w��4�)<���ޯ[���ŋ����$���?�5���Ij�^a�-w7�G\x�%�(��`n��9����C^.�!��;���./i�E�^��[r���CW@m�ov�~��}����C���J:�M����g������
+P��ǮȔ�lT��Ӌ���LĶc$��i�-�%�4��I�>��ï�];,�����P/�|-K���\P���|�����sg�	�5�J��0�:N�G���J˿�5�����bk�#v��R�5�
+��ӱ;r��)�G�"K[����^յM�2���Vw�9���l��k�e�s��n.X�ZZ4�p��K��!��P8�"+3�{G���k�L�{
+@I��A>���S��7�f�z�%�hN�l{Z���X�8��3H4��9͙��	�T|�4�s8�>��ʹ4EK>V����$�ғ��I Й[X󺳶�!�:�	�
+;���g$t�	��<��
+����[�zw(�0~؎=�ʭ���uc�M�:]v��uN�����Si�ɫ�\FRlQZ�d�҄��DE����On)-� �����B���՞w� ?=t4ꆢuX��Q5�n����	����F묄=t>����oCl���@��%V��ϭ^@�s�B���1R9J�tj�&���ܓ��e;����l!��'lB����.���T�"�)�/�`��{,��9�rF�G�Ú��F
+��I|.ۜ�y�W�k��|�Қ5��[|W�"@gLkk�8��M�Uj׵?��?"�mr�ih_(������=�DP���#�?�N2�Ћ�T��7�(� D��	�W��3�S���J���Y��%�=�=����n��1RP^+�B����"�a$�:�P�@�mNNk�ǂ�$�V�!I8_��Y�2R!� u�V2����v�Њ�������R\�s,�}a�S�K�o��h�ȗxk��OG:�1�_�h����T#�\�a4UM��8��υ+3S���� �)���y�)z���8/����?�:�{�����F�:I!:%�1�{y���sŨܨ���ٷ�E7�����ǌL��y#t�����P��Ӂ�� y �G8�ɧnqW+����Ax�3�[]2�~h�
+���n�u��؀�E���송���`�o����!_�A^j�����p�{�%�V��3��N�MT�Y$����d�TI�O��N�����S^|�2�sx��q�w�H�{��כ�a��O&�������٣�@R�ωC}�#��Ф���ɣz>�FF#��k�����ギQ�b�zF�V��)��.FG��벍�u�'�A����ؚ�'� �M3����<ŀ���N��SPM����:�rϻ+ޣ,�
+<�����B�s�ۮ%��μ�(���%rv�Q�8�1G�{"y����>�S�Kx����l���8K��︐�������1<�31TS;�$l�[{�5�����ekd�(�ƴZ�:�f.,-��2 d7J4>���d[�؆#�����Ȃj��X�{�@{5�mǟ�|c>��������xn��x�,��eM2�t��O����i�ɠ�i��n����Co��P^23aÓ�R�h���S_�\Y���rTY^E�P��&�^�i���@�u:\�w�h��7�,��)�r�,[�/�/�Ie3���.�@-��Y7삧�F���۟������Q�َF�O����m.s�x���P,r������G���|4�7�I^�4N����o����HUN����$�R�r�#�%3C�%#Fy_�	�_�D۟S`�f�`�l~�&��9Az:�n�T%:�]o�`>v�lBR�����[6�ڻZ"+��,!������y^��ABC(� �>C��7�\xj�*��4Һﴩ�||"J�p��b)?V�&k�� r��A��&��#��#�q1�ַ5F8K�4{�o�y����O���\&���@��dZr%Bf�l��T;�3��ZNl�ξr�#�&Ŗ�أ�o��a>�\t�=4�������ͱ���� W�1_w�-V�l��� ��=�5��rpL�)3��}�a~Rsn�;[�{#d>|�w�h���^�SJ���:W{O�����yK:�������B��V��J�|�ٻA���;/�v�Lx���{��.�M��\֪ �K���(x�ޖ/.:�V���i AY~̂,p����+����T`��-������T��U}���zdX�8���{�o�m��~Sa>g�m��x�깯��PF�'����.
+�U�梜������>bW���8=�Roj�n��F�w��n/t�f��z�0���P�`�$3�n��$D�(I��q9�?�n�
+"�pJXt�Ʀ���8�:��g��S�!L�� *^9�X� 1�/5g֯�����dG|..�x0��\k��1��u�s��h(l����[~��_ӟ����u��e����Z��L*��9S�B[�"jU>a�UZ!��&»Rf����8�8��3%�� ��+%�?�z�V��)���θ��ˎ�pX�p3����_����)� ���:�/cD�I"���?���P�[��k���b�&0�v�|���-K<��j��f>��5�c�R��C�����rR���k5!�M�C�$�N���=�>& ���L��˚~���%�$�3�$�I�|�G�2ԇ�q� %�T@��-��żp<����Ͳz���1�A+����f<�8���Ԍ��[�.G�"O����hVV��bs��e+@y]�X�G9���[U�2��h2{�ʴq�����r�4�:a��y���5�01�E�&9)	�&�^��zȱ�o�^d�-�P'��
+왉�N[ͽ?Y���v��KDS� C�L)I�cA@��$X���Z�,$p*�)��];�V�������ּ;;���XTRh#sa��Ň62�)�^�"��,�Q�/pY)o�
+�=QF�6�Y7����cp3�q���u��I��i��טXB�bG"�	.T" o��#B�I���<�X5�נA�[%uꅭ�Y�d:]پ���+�n�pk����s���-^��^t�^�r>�k�[��|�ܵ���>E����¾�ujFAa~�tS@��d�4d��&���02\�N ��	���V�� Q���j�5%ɨ�Y� �uB�9��3�K��2��t<��q�Ϭ�:�uB�k�i��A5����%w������j�%c�C �4V�̕O}�Yגȟ5������4��DE���c�U�p���L�_�~��Q� �@�&x���'OI�WK3��k�b�@�x6
+��DHh��1!�6(�� S9,�&��'��=��
+Z��5:u�<�L��j?���^�A��)�O�"i�u'wU\c�Ψ�c��\fW��);н�b�|�̡r�%�0�]��Zfxr\���r���F��
+"�-��[�x.��k
+8Tc���h��#�jR�G+<��z�g�A�O�|�f�2��QS��{�1�򯮴LPZl�גҨ1^AXm���]1h� �%�8)-8�kTz��P7��s֙zHޡU�޼;_����@��Uԭ�j���ڢQ�mFۆ�9�����,0�t"��kJ�P	||�z���#���tT�2d*_��QR��W��g��M�.B% ߀s�߮���u�OH1����M��b~k�Y�WO9Cǈ� �+�Y|P�1 Hz|�iGD�@Or&#pj	�I$��q��bʘ>�'��RFr�LT�)�6���)	���_�Wj4chŠҶ"� V���B� 	��p�/�0��A؇�IAI2����i?VX^C@1a�"Kθ�|��b\fXbp��(��I��	Zr!$Œ��*Ea� ���;"^�������g2&inr���$�D�w[ݬ���ऱ&�&�(-�e~e3qa�c�&���������x��'�O ����g�����?��{�� gtq�}x�yPP�QͰU����F��z���2��V�*R�����q�L�Ď�&Z)���ײ~_Jx>��?(�ϧn{%�?�EA&�d{��+X��!�����C�\���4����Rn�ڨ�#Qc_�"��t�6-ۍ��M�����u].�BZ�� Ac�yA'���5]f��1�|��>������'HcDI�W��u�[ޕJ!�G�@85u�R�+J�g����Vu��`>~��p��p4�z)��^�siء������$4c��/��B0�X����,{��,��� �a���4��wh_�B1��G�����.����AEi��5fΡ�B�,b��f� 6�}+�1���VD��U�����dt��ǅ�Kne�(:HO؟"���?P}N�X���f���UK&Af��_w�^J�>��V_�:,���D�p�r|?��^����7�������Q	�P>#l���Oe�|��\�h�D��bZv^��������H
+Y(G"�`�ʾgư�Gk��"�3��n�+�m}�]vEq�A'��l,�%��Z�])�:;�g�Iڱ�DuÛe`��r9�q��5�c�CZ�f���ɜZ8�ț(��jY�qĖ8�����2}�O�.��	q�t4|�飨�A`}�m�	1"O=��ң�Ua!�!��w�L�Br��F���;�v��>�k�x�6u�x��Ĩ4���ݍ�^�r�1a��L@x��#&�+��U�bK��7y?�D���@@� avG*L&��F�����a����h��ya�iUˆ���o[͋c��4�tD!Q��츅AY��3�	��j�aI|c��m%�-�{i��0]+�^H����=���潄���\O���t���ﴔQ��儰Ed��D�޳:�#Ԝ�[W����j��)�����5�3]��l��kټďh;z�k���Qy]�}{`~x��f�vH�F��1t�S{�!C�u� �@П��L8t�\����fٳ��x�B+���Sgt3v���H��՘�Sy��-lz�����L�����|�S���y��������+�����H �k���w���1s�� E���	��!¬%���)|�1W���1����ˤ�����3�6���>ő�h7s{�h�P�	_C��W��Y�BQ�7�/
+����r��� �&w�C$6��j��φ��3(֘�,�H f�J/j�w�=�|j(����Y�������@{�೫a �ՕT���Ӛtt`]��dUR�x��A�á~�&'�a�x�cI�k��rs���h�5J  �ͨr�U���M�ϺM�a�QW�F-�����&1��m(�P!7IC��\|�����:���3����%%%�L��H4��y��Ar��'�By�x�m &؟ߣBz#&P�������S<19��.��[x��(�asT�X�2��[������ñ�2��a@�������U�Wm B�Z�j1��k�'�G��=���<����Y(��4O�G�R�Z�D��b�H���6�:�|É��&�:w	yY�1����W�suJ�	�F���:��A������Z��FDH�;t���nYe��}F�5]�*4Ӷ+6�Qcx�=�T�R�0�(���u�ra�P�)n�ή�m �^���� A�H�$�kš%"�H��wەK7j�2�"q!��+�j���,��t�@�;�7ofg.����R�=@d���@��h)j�i�Պ���#�����xv�ӽF�>��?�z�DN]��l	�Q�wY��f8&�U_.JCΠ]:8������Lu��X ��z�\fe>��g�Q�	|���}��lvA�i2)�"?o��~��t�U��kD���tA7�������~���>�>�C�/��5vo�q�`�A=�M�>OJ��R[n*f�xw̉CB��X<��y���6C<q���PǗy��>5���v�dv �>`#ᅃ�\D����f�5Gǳ��i`&w�#`�����/���rh���hP-pO��b���[�b
+S�L4ߙf�[��T�t�ټЧ��x���S����^02:+�s�k�J��/��R2�P����&)z�oƓ�)	��f:�A[��U2�z�	��k�r�� �����2���a�-�s�]{���(j�=(�Ti#JZG
+e���^QƏ��່�p�ؖ����Z����k�(�uY�&$(s'Q�*D6���ʚ>��+�"ky���N���A������T����(#�̯ϐY��]��?�I���"+R��M�@��Q�G���2�5����'��E7yG����s�Qu��{�D�r�Ym~�f��u���+�<���R��%��L��m "�Z4��	F �B��@��g`��~���o��\Q.�}����}�n��T���	q\A𤒞-��*4�i��~�f��_��˲z���S����!�G�`�J�{a��5s��t/�2TN����x�]�e#&�>H�y|mTM��4�����4��a�p <�G���^��x�����Y�ܐ��]�"G���e��;F{-r� �1�9< ,Nvn�,�2�h�ATG�I8���Y|n��S�:F�9<�����   ��ܽ]S�ו/~>Ş�E
+� ��j�B7SX/6�&B�ʗ-�u	h�/R�SS%#��T��h���Ƃ`�$d1�Q�|
+�ܸ�I�^�{��짻Q2�9��������^/��[k�r;���`�p|>N�q��^,@��}dY�5�����P�Q_�&�Ŧ��}�BW�g]k�����Ug�|�R�1j�o��!���%�˶�
+O�8��V(�Z�S����Y��U����������+A����(ꀩuYO5��v[�=�^�6U � /.m��Ìi�k���ܻn�W1�W�٤������-	�Ywe����Am�(�������3db�4�v]YC�]��`���S)�,��Q_Pg���机� �r�R�[f'J�/�o�R�����b��ɬr��3������԰�6A�7|��>0"_j#�*�������|��i&֕IB�߿&���r�|SB�OI1_Y�y��Q/5��b�r�IҒ�n���:�POۃ����m	���+�?35}UN�z"J}�dյ���0r�~���|מbQ��,*P'FlKE�X!�E4����������/��d D,��[��D��ufYZ$���^[��e2��K�t�B>��T�Z��Ϗ\�����x���7�1�*�ش)�9EW4U4'��5#'c�A������%zW�Y�S���䅷 Кc�S��2l<��'Xi"k���@����-H\bz���91mĹO�:��r3���/����@qU��¸7c��d�}��_��[��oċBL��Dd�<��a�$�<>�|��P�:�BH���k���"�!������^�
+���ZgN�Xa5p6��İ�M,�	�_Wƛ��VY�l(�Qfy�w�']&��SZ����I�&b����ϊ��,�0́*�	)�J�(�dz$Pc�E������X�� vb(�(e�i�J,��ՎCz�2c5�6R�*.,���5��l����M'�����tZY-6۞s���sL{/��`���)�SY�oL��Wd��o�2�L�>��:�G撌&:n��U�ox#4��^.c�G�2�oà��AJ�(|���+�;����f�Zڗ���^�����]�����{�eyg�i�p	�S԰�/��~�~?f{����G���kk��H����v�W"���'���z(�Ԝ�:�p�9ﶦ� �P'!������:�lv`��6y��N����o�#Y�/۽��8��G9���cIl���T�0����u���ie;��,��:2�X�X�~=�������P���^�g8s������L�n1k7'��~�x�W�G�C�1H8E�%��m%R��lo���˪��20�S��9=態&��*B�jR��K~G�t�{�6�)+q㣣����
+���Om:�>�(e�0Kl9TTA��c�^�n�^Hh��e���p!{�?r��$UX��tw���Q�nϰ�Ҫ�0�m�苇��ﶓ�.�O^�m��PA6���
+��9��ـiy@\�L�I����A��V�n�i~��"�K�oC����	�ЋL���#��rg'>pC��C���&��-(#4_f�r�WV�WC`���<c�[&��K��/ּt��[ruo�Q�@
+�lk�8 ��lW�2�o[�U���F솠MK����9~�r��e~A�� F�VG&�S�ǂ���L	?�������}ݰ6�`�Q·w�U��S8���������3g��Y[bh��R�%�$�<��u��$ja��#ͺ��}uhd׋�U�WcGu�(f#Q|�"@�j�(���d;�%��DFM��	�lm@fc� p�U�T33pSPUF���(��O����$�	��U����������n�v��  �M��ir��E�,�T�;(|J���������K��ܜ~nZ$����ծ�?����<o'녹���OV���Y��fOܙ�v�j�*�a{ׄ���\��X�=�i�����%��0@��|iGB�G��[�ꌱw���1xh֔�i�l��1H�:��X��n���Q�]�,	_�\)�#Z6�p��ݵ�]��S-�4�����=$��`Q#�Es�J��M׮]��Pm�	</!��H9pԧ�7O4,&��y�����vPM;�0�X	ȴ���H�*���nN�N��i\4��C(��vY�K� a]i�дnTr$�6��KC6���A2�:��t�l�]i�Ջ��	4���$�+��i�iE���K�/y����`il#��ʅUOMN\ޞ)g�6���:��<���a��$��B?�=�Ĭ6��y�dW�	�^�ƨ�y��:��}��.�>&��X�@p��xB&�eo%�z��:�o��r�*�ڴ��3A�4T����F�D��"X��g��Y�Vס =��XW�7���<�]e����������7�GO�C��:` X�>^	�j�z>Ѩ���O�_�[(�C��f'$&Z�t�ة���O��@�ơ��TE٫�V]�`)Mf����K�����o�_��}���(&-N��t5��pTh�A�����l�]Tӏq�y�Ɇu�B�s-q�*�J�R	��;僔�"`�����-S�R�^��vFB`��c�bw�Qs�yv4]�l���>�Q��ʲ��w��G$��^z�۾��{B�_�7֔�r=H/-J�g9~ ��.��D�<o�<*�$�S+�����YT~mv��ɐ�;t�ù����_)a���L�v@ףZB�v *�����3��Le�D����'���7r�6�oܥhv��I�����ו�/(�(Y��qYnH��d�Q���������?�G-N,S&�Cq��y���>`���P��	|���ѣ|�K��c�vc��\�8��BT��B��n^�4�(m�Y�|81��߅?�?c����$���kҫ_�hw�>Z=�'?�Pݐ����N�>�d��W� �L���ZMb�\�'U�փlA)D>�JVM%�.c��A�g��/B3���i���o
+��se:-��_���`��Ǆ��8K=]�(�j���b���N�:]l��Ĥ_�f����'���I(�A!4�"����4��f.)
+njs�ٚ3�׵Fm%��z0�΅� ����buя���QH�U�*��I�j�����{��6GX`�qM��|�ռ��q��̻U���Z�	_����c����d�	��^(~�m����|�Ж��A���3s�a���#Eg���h��ff|���G��c�Kz1:3:샪z}q�]�RH�S
+�F�5���ӻ���y�ۖ�!N�����b`OMl��v��"�,�d8���J����I���Jϭ���(W��f�~[��9ݝ�]�;gɉ��#L�������(F�|�y���`~V�L<4��$�Q����o�'V�ֆ�):N�w�M�`spX$��]��"��K��N���r��&��+۱?�U�Fc�\��?�v�Q�y.��dɧB���ՑI� ��8��@k��#0L���jb�5N�g*����4?�Sx��%Cd�E�J��(�Ź����U��P1s�S�ׯ�~Yy�S�L��v�J�Om�6��n�$�*�vk��1Q�}�7�sC�WԦ4�G���5k��R�]���Tޏ@�(&r皵��U&tm}l!,^c"�sO+�z-2dtB��;�D+�~�ii��P9w��.�@_�"�Hn]�����#�l3����sE�S�cq#o���	�҂d���P2��1���u�wӍَZj[X�I�|cܙ�~ѱ��xWa9�4���j�L�3b�;�3�ȃ6��~x58�~L���s��BߡE�y�["���;5El�p�{9�y�e���g�J1uG�Yd �Tx��:���
+�/%��"�i˂3�뺩I�w��@�W��b��R!�+�ɭ:~E���+�3���/�;���.ifi��2��T�=�xP\WhfGE�"[�W�y���Z?Ȅ+��V>�ؼ+Z-/ͩ)P�fT�� zZ�`N�#M��I�8Y�P�&���cP��(�4KZ?���T��[!ۺ�L�Ap	����5[����%��N��(�T�̦x|ԙ���*�	z~��q�����j��&1�E�����g���	s��T&g�Ԋ8��.s7:�l(�\��T�ƫ�M���DFb�8,���K�_w�Y'�8n�<�/�Q���*��y��bz���.���Ӌ���I;�SWE\��>jK�4k��7�a��*s����Ӎ�V��Y/�4b̟F��1�7j���6e�ܮs�53�q��+8g�I�f�MJ*!�a�W�{��6��j\�E���bw�|�����v�+�R�@�r�����>D>��8�%�d^/3��:j�f�j�H������^��@k�;��#�TQug�S#x%��q�*L��]+f�U5M��@��6�ia����?��;p�ڼ�*�{��E�\Y���ׅ���$�E��]-��/6W ���� 3j����׻^��B/��0?�&�C���aMw����ك0��ߞ�e��47T "�8+ߥ]5P�S��i�8��Ղv�?���P���NF�g���	�o��ڱ�e<b��Mυ��7����C>�0���"��	��ӑ��j��.q���:�{FgϽ0��U�".� �Z�ނ�Ξ�/�3��уn�CXH���.���d�{;2�GYgk��N�J9�_�Lp�5 �b�:��vC�cM��3<��ň�R9����͜��R7@�e�?��υ��K+�$1�$�>I	���N:�Qɡ�x�N���#rQ��/��s7����2H�p{��t��D3��Ṿ���K{\�i�7��Ws���|��+S1��W�x�,���z�T��.\TQ3n]�I3�u�y%絷����ʓF��<Tݪ*�U���i�ಣ6�-dc֟��:7WIE)d�wO(wH���d�GE���da %�i�V�;�#�#����vAF=7l��̬�D4p"*�E���2�<��Ps���Y��#zF�f�f�.��|\
+�	�����r����3���:�S�tN��.��W2/�)lPy�+5����\J!��N�X�{b-��{���9�J}����w?�Y;���\�B:7�� GM�H�Ĵ��j7ٚհ����k7�vM/✕+���Hszd���4��X���~C�D_|LY�y�I�N���3��}�Ԋ���&�Q�3.�}��;�F 
+�ݰ{��hV�5r�o+9W$_ S����AL#Bh#s�P��LÊ�"����� UaX���(e���.
+e�!���r,���h��,o����b/��BY��:3q�D��w�+����ߖTl�:3� 5P�D�C�>@���+�4ת]!d����g�b�`)���RM������6�+vυ]Uz^�YP���f��Pjd��r‸~�E��'�].��c��4��R���pf���/Ai��L3�u�;<��S����!M�����+�bޭ�_-��^����QY����	�|��������W#�L��H\�H�_�]�c^Ĉ�w�N*f��V/�^f/�H��ay�;.}I�޼SO
+�W2�	��� ?�j����4��\׳�V8[iK��`}�S�3��qb�_
+���팔��VȂ'ިwpx��r'O�k��܄)_����Ω����s��/(�Tv�+��4��44j*vq����ĸ��_W��t2�_�ώ�
+	��3P� ~��/ɨ������!�CJ��c�>��  4�����o�>F�+0����x�6�.w��G���o��GB�t���3��K�`	�S���[�A
+N�KWy�^��WL$>���ȣm�N�b������0�f�G�:�����1BE(b��@	��[�w����i$���3�=c-��.@ }���=8��T�"�rVU�N��	"�AJ�NcU���y/)L䎁��2���'fP���dgq6��$������kUB���o_��ϊ�;����%��0�\DPO�I7T;�my�����`��|�U�4n�f<ɇ)�٠����{�ѹ��)�^;���`�J��|�my}�{�Pi��;��f�<��h�efFA=	���	��G�~�ʧ)�ط�;��5c�\~4�K90�	49���*��A�������:�����YQ�[�Q#�t�2���Zۋ(N$�x�m�Y�����m\�=0<<]�B�q�!�_��%f�;�֤l���F)D�Wrd���JT�ص��	b)���{�S}&����4Yy_�J&�δ̕�%�y��Hu`�?
+�|����5�i=��7G�萠��ˠ3�A�ӶΜ:7va����κ�|��i�i윛�x��S?�p�R@�fâM��C���[z�X�_ށ�����CP�Ṕ��P�7$w�/C�ݮ�¨{��c�Q�bl�I �9�C��b�xA��	1����C`���-EDݣ��7 V��e6��yW]�
+��2%�I�ƎV/?Ψ�p�ʹ�{m�g�ӛ%�)�Y�ˠ��Al�k%��\H6�\�Q�'*���,��z�L�0�随JF K���<�ި7��vmV8:���7�X�p�$&�&�e�bn��U<X1ڝ%A`�p��u�_�§����y�T ��ƀGf)8�F�ڱ�LB+al����"&{�<&@��HN#�WJ)��T(}�)�t:v@��*�%֕5v���{�'��}�Xe,N�hV�+M3$;���c?��T]�:�{���U��xٰ3x���@�xԝnv�����-��W��K���y�z����'ڻ�#r�&�o��p��^p/�b�}�D��k�� �7�xx\����Ǵܥ|3t4k��֤H��"�����[A�|���?w�˅M�?������/zg����K�t�8rJ
+�}i����?̟�*����{�ٕJ���(B�%g.e����B.U���ԏ=1��s+½��M/�q�s8uv����ά�:�ؒ|��S_��fb���ړ]M3�r{E� mc�{���!�<Mi)�����Ao��X���(�t�Q'j��9}�%���M�|�iO�aW�����#�&�� KMZ�C*!�K�~ɚx�9���?y�xV(��-0.��k��8'�ԡ˸�J�-B�,Y�݀1>Հ/�;�z$�����[eؿ�	_(,��������lr� }��:-��6L�|��� K�1�^PsD�)KQ���Fnf����6�FNG?�.s����<m$
+)h�dzF�ՃA��W�>��}��Wz6"E�-��0AV3����I?u+�b�/����7���PN�AG�:�ql}�ME�����DC�t�e��9���u�q"gBH�� k���y|�����TSʙ��5�����'�?�[���(?�@	���U*-V�a��h�J�����˼Ӂ��3d4<�jpV��x���ȧ��bf�� 	���yQ�g�� ���I��������*���������o��/��ֆ��7��'��G�����/?�:ڙfk�?y�q�Ľ��������B$|+z�#Gx�כ����2��h��|T[iR��m�Hp�+��ӷ��ɼw���yx����_���?H�"s��׵�ҏ'����C��?��PŽ��{������^�؅����w�6���'x~����\m~����?�/rx�v�h���?s�`�/Ѯ������]���'���pZP�Я��W��z��I�ޯ�<���M��z�����Wa�_?wG7�9�������Rp73�;��۝���_������6<ɪ�����I��\k�i=����۸{�����>����Odż��i,�~/PXw�����k�4_��y,���'λ;ͣq��z�̿�*��;y_��h	^ωع�W��(�N�T�I>�s�º�����o�r�~�� ]l���~mV�'va�p3���}r�$~���kE�#����në�އ���=����n^��wÌ!�����An�D����8�X�6��r:��6|��A��*�O`5��5��?iˬj6^o��Z	.�l}��
+F�-,�������u��	R��ۇ��?��y);���h�� �͟H7��Kl���K��^(`�O$^t�����y)�OĢFO�#�II�Xgם�DGu�PݢB�����?�>7;���x�˪y�ޡ�^���";Uh2v�����@.�J�¸o6ڍU؃-�n�(�a+�sf5�'G��ාb�-!h�V�#�`�j5tf���)�U�w_%>c�>�����y��"z��c��E{���� ����ݰ��>z~t���e�-���N�o^�z�0i�|�ؿ�-����$��F���6��]?hZZØ��+�e�sŋ�_�x����{xbH�����X����1m�� ����m\���!��h��'�Bř�T��K"�a#��qD����eMx�a���^���Q��wQ� �՘?��m�{aE}���jUT��X���H�c8����i�KQ�(�>����T�����;���C�������4����ڛP����Kx���/������x�G�� #�Ʉ�4  Yu�2r,�X���3'�;����?\=a������ȋ0��P���V���UH-�d�!s|`��"��2�f��z��p���w��}0nw���F��F:��h������qHn�A�ɒ���{I��p��s}�޼>�_ߡc��t󍣟É�>�ي�uvpS�D�H�B^j�a��f"���+A%����
+���W"�g�P5L�B��1��d�A���;y%Lv?8l���	-��'W�{1{�o���_j~I�{�>�=��k�	��-t�?yMש֝���V���z+��SD ���E���ls(�il�QJ.��)����*P�4���N��AH�=4%�Tp����[h^'��G����5�eM�ݜ�3���]p&��)6 {sXz��Sr��EX��
+g����������-�?���F����Cq���6��ν����wè�כG$K�!̪^g�[T�J��]����prU��~����?�,ʎ���)�`�nLҢ�Gt���z�Ǐ�o�Մ�gƭԁ	8vQ�J�,x�g~-��$@��ȻTl���Y
+RĤ�ayF(x;��J��%<�bC�u��5 ����}��G����
+ �jl�W�=�ð����+�=O����x57�a�#\K�|c�Iz�U�o�*c������-�C� Ϧr�������]ǆ��a�h �vL�l�P>87H	�^�H��cטr38�k���_�"~��1D]+�}쓱�|�}�oz��_�����.�_?%I� ����$k��/ ���p��#�E��\mvě�">��6��p�\�!&�?9z��p���%8�/���ǻ�i@c�G��~|D��S����t�%���%�͐�q>z��߼��G����-�U;xJ�m��$Kk�;��F+��;�Dp�4�-��p\�k�U���<R���S�fZ��k�,��`�ѵ�� ��������-D���\<�d�#�Un�A�*����7�3@F �~�~[v҂z��o�c�e8���ʿ6_4�m���A)]���t�9�$LQ�fia�� փ�uh2��)4Z�*���>������(�<!p��'((����U��W�L�$�%fz`곒y�^��,��uÓi@��pS��$z'�ss�L�&�{Ae`d��n
+�ѹcA�p��Sb��k_#�@�]�/�l���,���]�Hg~9@M7]�b}�;f/$7= ��8�����Q��R<ū8߬�y�����㑳R�]��@yy�ݐg�M28�?Jp����m�@�uc����͂�_h,м��	�sʩG�"�ޤ�lN�Dh��,p!8��0��m�/?��ϰf�3BM�MLA}X�`�>I/ @m������n�#4�|L������3��:�p�>X���E�9��-݇�	��iq�Y`�T���x<�A�;�u�g!j��`Yɾ���'����AUu�D+���>���3��K��|�O,D����Z��@)D�U4����/����*Eir)r� 
+�Ѷ2\�;(<"���lz'�zC�`c>%���E��iP����3�@0>y��;���f1�Pd��R5h��m���mx��w���&�F����\r��a?h��p�n��O}>�\2�2����9�,��9�uL�9XY$�z��ߚ�{��@%�D����U�$�w���q�����<1�e'Y|��&��ć��[�xba2��| X*�-�3keLfs�ļʂ�YfO 
+�b�>�@�Jۣ�b�1|p����%Mo/,Z�Z
+��:�Gn� }�=�g�B��%��Dzd�����آ#cY�B� ^�0G#?�'�h� ��)�v�-j�&:t)pM$q�B>MY�	6�@�k��p
+��䝸)i�Fۯ?�!Eж	B�# HDk?����ao�Ⱥ�~��`�B1�-���.�U#���'e7��~���&�l#љ@�g~��0�J4 Z���s��l��VV�0.4Ak4| *�_���?F�ԇk?f�3J�&�zt+@@rl�5g��r�֙�R�3��]2}�J��fj�򈒋��z�<|�4QJ����qδ4�5�p���(�4\xR#���жZ���?��DC>���\A5e$���I��c�ݫ'�t� �i*(M ��I��H�����l�t]0�b�_�AŐe�7�	��̓wq�K<��S�JX,���9�N���y��^�ӗJ����3>�G�W��Q��&!=Qr��l3���"�t�����J�ݽ,����Zg��F��d�j�%'_F��p����Mń�'c8W�/x;f�|I����������k�	zZi:b�ޠߧ��Cx՝B)���1��L�oD��1j���%^�4uΫ�&�%���r��<��k9��F=0d�k���bS �9��1��9zD��#��Ř'��O{{�LG�kj%��6z�G�}�-�')E��$)9:�65̀�~% �^"W��Ʒ�����tmdH�?@I��(+��A]!��C�j,�O��4no��WӿH��+���ws8ʜZ���n��Y��iq���b�aA���������%n΅z9�QxcF4��5�T�Q��Ű扗ͣ&���»��"�]��(Ϣ����]6�Q�	p��v<�ִ�E>=PA�}fY�>�Ѽ�P��E��t��Yhy�~�"�|���+��yӊ)���`���O�|8|y�h�c��#�-h�`�E�V�6A"r1�!��4m�+}�8/߶/�[�;�>6����<�j�����a��ر����B��+�[�1�ma���p��0�{|>7�N����e�y����&�G�	-)w��i\��"T�UW��#G��������`�p�	���+�T���%9�`��s9�Cx�lS~i�%eV#ِ��Y��?b��CdY{��|'h�	G�Ր���bF		T�`�.�G9�'��
+�[72�m�S�)�:�rg'>h[���
+�&g
+�Kg��Kվ*va�n
+";���7���}��D��v��g�GuCRTߠ�ӻ����>��@>�0�:a�/p����O���E��m��p۶�ܻ�|Iq�v8���kʶ�^��W`�'��Y3�͒1�$�'�.)�g��j�3da*�-�E'j��<�v��E�@-��>۪u�<�ݛ�~u�#�(�t�?A����!��zdG�@�[� n_��$vȅ�<1]�`�"xx2y�$����'�d9�GRN�}ǜ{��Й����N�V�c��V���0�����#�u��m?ͤ%/�ƿH`$g����:σY�Q�䗋ax�#ΐR  ��l_�k��k�|���$� ��;����۸V�����6ѯ�蘹�@��pǺ���p3�$H2	�((z�y��><�_!����^N؃��C��ڊ��x�K�N~�ȭ@�\�����<S�$�y��>�����4�A���C��um��2����2�;~'ّ�c}��]��ob2��	�a�5��,�e��C�~a��D�4Q-�m��럟�P��=Dj>��Ǯ�8r��rWg^B��x���D7��FIt��p^j����(Z=d[()��v�(^��L�7�O�1�4+Z��m�z��ڤ�(��(��o��ij�(m!�Uް���eC�7���0�AR ��.��Xu-������>�������Pi�#!A�u!H/m�:�X+�qw1�͎�w��;م�K�	� <��!qup�M&,�e���������4���_�ڟ�*=H��`6rLQ���/���|��~�z��L�U�l����+̬./+pG�m�����(���^�/!��#ץ�ܘ�`~2vG���Q4�R�ѪT�2w^���~٫SȪ��
+b�����f�Y�"C��1h_�>p�����dj@���&r��\@�K���p�9�8��ՠ�4��S����E���m�A�,��Y+Yg�iUz~��er�*^�w�;`3���]?f���n����K�����o�M!�5M�6���"<��E�tтINJq�����h�������-u� �6o�{�M*�Z"��}�?�뽯9J!㔨�� ��s��Д���7ܵF�A;���t�I�������),�]
+���r���7=)���Q�G������X���or��H�$�%�s�]�.��=����qL�?��P� �"��-^����d!O�o��ɿ�������Rt��Ij�Ԃ@{Q/��?H�\f��ƌ>ݲ��tڈ%� +��a�9&�|��V�&�?S�xa���n�ܙ�"}�+�Gc��Ţ5ǐ��ڷ,�N�}��wو��i:��E<,���M�3b��*����Nd�l7ĿȲN(�w��a��]�'E��Ð�-xj�ВY#�{���R�'�P-�rb�\P}�\e�=���,i�H/I6W}�m�z����"u��#�
+?>���Tm']�!S(^����&oqNF!��%.�����ݚ�V��x��%��q�����&DL�6�}�G���$�x���[����sF���/z���g��&X�J����2f H'��7Y��:�BEg��a�tK�3�K��H���\1�ׅ���v(/�P' |�=�ao����O���U�j�����-$�>��e���m)_������3��ޏ���ݥ+EM�oкx���s@n�[G܁��ص�5'�h�Y��-mq��;E�A�����t���o����xkM�̌�d������5�!,����tJ�y��X�A|��8����n�-�����6�}A�f����u��06 l�M�Gm�;���X���O���-Iה�^���ۜgv�����;�z�Y�/�Qk_ͅTN~���B��8(SNj���ڂb���jS܂���/�go�4g��4��	�h��5C>a&�2��G�056�m����&��)�G+}p|~���]x#���[�-v2� ۷�7��j�7[`13�5 �\��E�oA	�g��g0x��F��!�XU�8�&{�1���H*�vq��ワq�������36�/�s��n�vX#�����TB�=k�ז;X#e@�� ���0D�-%�h�l;�M�M5�e����I�є�9
+8_H� �'+����s��%��~�US�ѷ�yf�b5`���Ԉ�ss����m��,��]^��.�	Й�6 �!�M�����T�z+��ʲqY@-|G��r���#HN�Ӽ�Ђ�v�� ����?;r.�in"��
+��
+�n+�9�m����R��p;�,/?�R&��|��)��;+S�P�'S1K�G�w&:�L-�������]�wE��%�95���s �����o�|/|�xwX���Z�F<&�c$#�S:{@M��+���6	y��p�9�(o1>�~b;���1m\��=�`0Jx$��
+�( U��9��m��\;�%�*�����T=Z�e%r���'��;^b34���-���}��
+�ƽ
+�� h�]�Ǫӱ��$}rBPIգ%�` }�����曔^�>s[m��j]�a��U�tC*8�I�KAJYky�[S�X�V(d�����(i�TU�.CO8��[˷�<�۟R�]�h������\�:�P)$B�v0O��6��ܰ�l냣�$�5Sf/�Pl~KV�9&י6��	�����~a�&e�L[�|��ۘ�B%��!��I쮜�a��mr�)H=?u��O����y��4��||�Y��7�Z1�H�� ��#d�C�LĨͧZbfbF��sʨB
+�A4<P<ntf�����53:&�����#8���1��l��^ji&�Q�6؂�f�j�H�C��^SO���:* t+>�I�`�ۈ��g�BanEf�yDX��� R%zT��VJL����7�D��O��<�p6����A9��vNӼ�mt4�.��-s�gc.���#�̓�)+KBs�s��E�e�Mj�0���f��\ӵ���r�ko�zBfZl��$���E���+�4;�TLuHU32�t߅ߑ+,��͊��v�-��W�W�T~�!{J���啎ۓdg�������&�3�-<��R�b���g���װ���8�2�\!�	���cswO��8������6T:�����1�=miYn]�CJ��!����)Mj܉~�H�bIC)�[=^H�K�Y�5R�\�+������.�����=�ؒ��+�g��+��zxC�I��-}B�Q-����H��\^�%��\/�pb�c)�~�#٨�U���h��WՁ�ۛK�(�)_���^��F��[ȃ�fu�3A�����.��?hp��y���e�Mó�"�f�lCxt#x4ղ���$.o��s�-�36B���ש.�;6�ᶱ�o\�8J�����)���I���ᏹ�5��P��睛?(:������Y��_@�S@\R�v���{��Ls� �ok������0���}?)���*��r���C�	��"r��o�dt�y�F��7F�������.*�I~e�ۦ�#�������G���M�f҂��,�PG\ruѪ��=�.ü+}�R��W𹟐�^	}K��H�GD�	cq�Jί�zI����H?OO)�t�lU���*D�֔���q��.�Z[�Hd�(+�q5��r���� 7�9�mEa1����F�|�r���*���a��L��&fA�p�SM̞ymty��X��3�ѩŶJ��AU��Ͳ��D�$�":#�������Yx1���1�� =��邞G<��먻T� ��?EH�O�E��\����z[X9��S��+� �m�K�]M�=�e�?���H��`����� ���X����7��W�VNV�(�ý�/����jT�s���י3厸I�j@g+,�I�L5��K�Y)��"�\���b���;[=pn-����L�}�PK7����Ծ\�L��ÕQQ	��R�r��	�KÉƍu�8R�����ƶt+-�¤Y&WRJ�����f �cN;N�;j/-;{"�u����"Y�Pa#��������O����������h, �ҏf��GN��S� S���2��I��/R$���q�H���̴���m䎮�{�d��M&�&}��x�gp���x�٫]!|�4����=��V����j������R����n�z����s�J�ک3u�y\�hX�	?��J-sj�/^(�x{r�������WA���U%����˴���L1���'Km�]�wS���7��^)�R"�H[K'�&G��96�kp��O(q�f2G�f&�� @3�ڊ�����j��bn�铍T�]����:q��c87 ���2�[ђJR�4���A�1>#�e 4�w,q������Y��뫠�:g6��q��X�E:�6F�R\�}ɞ�֓��VLĔ�L�y�F��[��As�b�ұ:��NIh�i���3��߰v�:6��l��F�`��׫8Z{g��@և�r�|�N�š�01F�����v�R���9߆�'��D�%��2�6�	����4�Q�=�ϭ��d�+γ��v����q��N��I�[����vN~��/�P&g��/���f��n����'�G)ќ�dd�ÍX�9��Bu։�8�xt���Gx@)��VF��&���U�d�x���M[�`g���ߤ�k2�{5,I`�f��8����̌��1ڴ��B�g�ʼ�-�
+M.�xi�I�0�}/�BI�����|����F���d~�@k���^e�μ_�-���ҕI�/y=��L���I�(�:�=�`�K���N��]�-4z��q_��Q�*��>?�6\:�N6Y'ʿR�(ϮEu���>i�\����;ăb�K��l����~%*�ߐq����s�l�9W��I'Ƀ4=2õ��isst��{;ɝg���n���Y��[R�w�n+�EU���ϰ5s�Wx�x؝�K�d��f��Cڮ<�kF���oS�Cŭ]���O�q�4J}���D�ZE�톥�+�m�C�H~tk��o��6�wN>�����(RZB�S�z�%�:��D�6$3����8��<3��lD����z^Z�F���eK& ��m��t(Ĳ�C���P98���H��l��"ɟ&�H2S�ޘ��<Wwe�>�G�rګ}�>'��ɲ�h����y���u��J��C��A?17�4f��D܌՛K�+�"ѐ`|�%r��`�يf�Y!K�&���5	;-;И��8�ʭY(;k8�~���h����Q��&�B���Ta���Î���5�;ȿ�3�/m���
+��Q�����Y�eM�w	����3���s��%ouռ�p�YD��$����u2�������F�?��>pe�?^�Ы�Js�:|Jf�};�����5P�Ñߡ�۱�V9X�=�M��o��6T�y�2~���A�P_�\1?�Y������z��L]�Ӻ�~r���B�^��h��jh�<$�
+��hn�ଉ��X"9���z�p�_���7L����*�}���O}F&':��U<��x��J��T�a欦��{[������ҁ|Zz�!y�M�p��w��Ub	�c�����F�9�/��ϣ��)]���2N!���~�5/�d<"�N.��̋ʦ�E�e��i��.vT�q�V4�@�����?=���&��
+a2�ܡ8��l�WZ��t6Ѥ��W~I�|b(� ih�.��Û}F���\��wD
+�p��{�_
+q>��z�%օ�N��6D��As����&��.���؏W��B���R�IrX�#�T.�ߑ�
+�WK�
+���ޡ%y!�b��y{Fv����1'�*��'�<<殇�V-=Мps��֡�	����l[^���l��i��Wyo�4����_QL��kkt=�%ѣ0_��.�B��Wz%z�-��e\4��>�<��˼Of��^��J��m_�$��F4��ls���BY)�P���VJ�!�(c���*±�'?a0䑜��J�`q�u-���F�\�Y��/	l�5�1�������,�A����x��N8�Bs�dP�x���1J��]�8қS�ǌB�P�e��_��)N���ȫ���Q���~M�t�������1�d:_�l��>�k�A����="���nGE^��(��au�"ϐ�k�rEt)g�K���i��aK�o�|d�FhW�(�M���5I|v���8*d�3=�<�Ŷ�)�0��N�ʸ��Y8�X���cc��`c�Q�[�ey%�y)��6j���]A��l�g68ƀ+����"��)���9�u����q�+��S��W���[r��x|��6�b�B�׫����3-ɸ���8�bj+]�`�9SE9������G?�"�I���$���:rZ2K)w#�J<Lo���+���������Ko��L<��R���h�� ��ق\���R�o4���hcs����J��M�U��l�i�I��#�ע\<�u�T�*!�I�<?��j4������0���*n�@Nn��yx����Vn�y��}�K�%�ŧt8����^�Ò�A�����׷�
+ �h�;��OE9�~r���>��/ ��5�`@`�HX��r��/�f��U�E�(�'��&\�Hf�{���ڲ�di<�@��E�a���������{��{tJ·�<��xg�&����t����R C��G4!����5�2�h� �lx�S�ߤ�q�e!�]<��/�Ւ�l��仚g�v�S2�Y�?AŁ1ܸ=�]�-��]6����3��@3������H,�I������$��f��?�yҙ�"���-��9M�4/�/R6M�Wɋ�a���Bm����y�Ƞ�-C`�>�8ܕ�m]
+D{����Qҭz}ٻ ��G�V��4jAL������T�U=m��2N�6.�=6X���c��k�bMr���)�zt�2��������0"��5�T�R�
+�h�����5�l���n�@Л�����>{��y��*5a�\yPV+�5.3�W�ɹ�rFm�C+R�*��w�e��Y����W�����$VoܠO8�b����X�H�8v��(��d�d+;��pM���(�b>�fΉ���z!pjJaa��/��WI�_�ǆW�XǐZѐ����h�=��̼�C�Qd35t�GN��� /V]����JQ���䅷 &��>�et��2D��#�he6t���E H�Tz�(����#���W�����貱\��	�����'�k^�Z3�yѝ�c%�k�_#�:b[w>]���r���Y��]��Ss��🔐��@�?���8�i�*7�5M\�I�g<Y�|m�w欤<�a[xM���{M���X�nK�qF��%�s��:Ѻ�X`<���e�u|Ͽ����K|�N#�,� >�=YU�D�ݾ���-�C���}�Js>&~�����)U��������/�)c��T��S�?�6��#��!^.og�;"~���H�D��!.��O�d���*�3�9��8Y��l�^�7����in�CY�z*;��]�����E?�1�W�Y�U��C�$��=���%�
+|F���̱�!�W�{�#X�iRkx�p_>xC�{2E��<4�pM�;��1EZzՕi���?ʦ(�@���.�6����Fz�+[8 ����pZ�qI��X�q]���2�D<�K��A�lnj��H97��+d��_��PS�1&!f+�� �hz�n��"o���,�|���,�[����7��9��bғ�[�PW��`'��R%Ls{�%$k�.UD�J����8i��XEh-���z�m��v��~*��m��F��B-��ƇY%�xj�^��<��fF�fX�g�fN�H��T1��O ��ZV�R�.�Oz���cs��yaV1��τ������D@8��43�*Q���f��V[��TW�J��R�1�9R+v\nږ��H�8����Ȇ����z���"������ ������B[�K!��D�Db<���R��u=0��l��f �kzU��re.����y\�n;9�lq�$ )��+������:��A�)ɗGe��)��pЦ`C;�#�!I�[��@X�^O�"�
+?��%�R��P�Z �Y�ؽ��N|���ٍ�Nd|�����+8����}9�!�u"�!�z\�^|Bq��a�<���߇��t�} _K�����D���)�e�-�-H=Q�0m��)�o*7�������}�tJe����ޢ�)���V��g��A'�tw�j��m�K=0Y��٘*�L0���*"(x��fs�Y}�y*��uU��l�֭�ps�d�����x�~&�ˆ�F�6���Z	���g��ܯ�EUG�7Z�a�o
+5T�
+��'މ����J���<��j�Ԇ?���ex+-��*��;��n�Zm�^���Z����p��Z���Mڏms���z����/(���L���R̉����g8{�2�w��1�
+~m�NY~6iY����;ZMYḵ�ff]1 o%E ���/Z�|��_g�T.�t�d�1�a�g7������D�aOX���vֵkנtS{�WMH5����q}��M��H`>(�i���n��#vj+H�zP/w�/�l���Ӌ1b�s�<�P�#�����S
+��iLB�f�����	��b~y;���pJ�ݒ�$�+����'e�?<�h3�
+!�]�q��2��k
+HS��-�?ȹx��,��H#]�P,������!7�l��/zd��8#8�#�&(���0x(�4+�?��Շ�v�ߗ��&�c�"�]Q�%)L��z�d��0*L�-o���x����cĶ��hQ�&���Բ,�P�P�m�]F�*M�ɌP��L~Ğ����&��2��:�U���c����e6)~Wlo�7��8>�����2���U�n`V�%3���wP.)��L�N�qV. DW�TؐJ奆٬wȒA�VXr^�ˢe��`�~ɯح���Q�qU��a��8T+��_>�Ҡc,������6���6�:]�cU��ގ�h��]�B�yKo�����(�`���4;��0(̈$J(���X�������o�����]��	��0)��<?ɡ�Z��6$%���R;�z�7;�φ���&~-�ٴi�n�J�ۙ/�m���ژ4�oP�`��4:���J2lWYs���~�Jc���m�r�a���
+��
+�|`�Ny�v��f��J�?7ٓb/��]gW�;.�tт��н!����|m�dZ�O���sx��7]&G=K���;�j��{=&�:�v�5YgG3�ַ>=�!��y���6.��A@��3�M���5P
+ ��V�G�;�T8Ll���Ȟ��� ��j�~�2i:�e�̿�������q��3��ͻs��_�;N�e	#35_ǡ�0GB�O�W�a�ڧ����N]]��dA7���^��;w���>�O	�Q\��(�.2�n��54R���2B�*{���7�'?�ߓj<�����I5=�I��$wKI|O�$Y*ƶ�BV���z��a��x>�N�}��w��i� 9�΀�I���Vga,V�gMS�jS��)���&�%�e�e���Ek���E�,���9�'����g����t�����':r/
+�tQ�2��c��"K�x�P"<�S����^(r>�	��eL�A␖�f�ӕ�)-+�jrS���I/�o�f�݉Iw���]��5�ݸ���J3�ƽ��]��(U�V䳣� d�5��:t��n����ٚ@�Km�{��K8»z���J"BG8���Qg"�W��� �pDt7T3��Bo?���W�Fܲ�l��4N��I\����vr�_vE*���Kb�.J7�ӡ�N�e�ᤸO��"�S�e�.���sy� q�,�	q4W���M�hϧl�R��4��L쟬gX[� ص��y����.��������%H1�֡��^�K�����ߥ��ɰ=��v���^���MV��[8��}0?�K˰B�ͦ-�a��}�-����8�x���%�"���S�`�#���W�"�V��i��ȸb\X��@9���=�q�{�N�"!���谛�����ҕ��$q:����XOF2� y�):NVn�M�`op�&��]?U���R�����1�D�����yS2�7)n$'�?�VPڢ�~α�<k�<��=[��
+n��n]�}����Z�!d
+Bv�"sۚs[
+�{���1.��@���\`�i�O�5�^.[�"�k�f�C�lZ� 9gT4}A7	 ������Ziy��`-�J����T;���h�c���>%_�T����V�W`bXm�6�-����Z�Zy��a�N��$7Zߗ.�1�BG���J��2�L���P�lIk�@��OK�+����@J���*Bo��bMèJ������r��?:u�੖�T�N�;�6�[P�|7ݘ����G�[W�PJ� ���Q}Cwq4d�,�#[�cr\l��Nm.�@Ә�$�c�0I��H�9d�W���W�
+ͣȻ���X��}��^�+��U���f�� �絷�߈>j	�:t���2���G����i h�ճ�5�$*0���[�=�#�tb����Q��Vjy�%�8�T�@��%Q��ħ��)b�Ù�ze�]_�ɐ��RU��(�D�u��wR���S�^��9Q�h����}�xw?F�~�>�.v��ߴ�˞��!ɬ+��zvO�@' a�J?���0�|�@�*���Km��A.�m�J-�{���{��^���?*���]�jy�М�O0�V�R
+!�!���Y����J��>O
+I�G!��yv,�G]�HBK�py����ɳ����]�|t��P�+�QN9,己RPQy��槮4[֛��f��j(�q�<*+�O����E�K�� E��fM���i���]X��y�L&��2a&1�r�;ځ����ӳ�Eoi�E���Ae��n���qC0���ɯ�bs���:��M��"�}&���UU8Q{�m��{����A�� �+-�U��j��!hK}Ƨ��e��sh�S��^���ۦ��̈́;$��
+���O�t��&9�bV��v[j��E��[�c���@P�����r���'f'Q��2�v�E!Er��Ϫ�Qa�㳥�~�S^�!Wr���O7fX��T�GG�Q�>�ڟo��M�7�C�E͌!�!�ĉj�;!wāe��eIm#$�f�^���Z���<QV!lcՖ8�c��j�1t�D�����XQ��Ԅ��a��$`s�hk�����ы�f��t�(W7�?�-�hAfd���D�8m>L���-@�֮�V�'1&�]n) |���B?�pYg�O,��a����Th�B�u�K���<F���2<��X�G}�ɢ��-4p'� �|�R�P>�����&�}��؍D��,����<�b+ 7	����^8s��#"�7�S�.U8���栅�!�\}��>ԙ������i�X�RnEtxǽ,��d�7�R�Q(�v>��������0t��+{�.�Y; O�\�B2,����Xhz�$H�iKn^��'YG��v���"ڸRk̏4�G���N��uZ���6=�G�����$�.�f��i*��1p,#�I��v���ҍ̶ H,
+��~}x�Gj����$����,���h��tG�T`�j�����.�'dL`��3BY�f�w�W�:�%!��aL�n'!T�e�I����ظ=��fp��L7Zg*}��/�N��5�s��,l�)��}�Ԙ�6�����H���8�����Ps�Q��-F6�JH�?$��gw�15��o�U������ L�V�x�IY�(���"!���eG�Ψ���.�:�/��C3A�M����.��n^�Q����i�|<�ǡC���g��"�h�\��-S��yE���K|3c<�y�9 ��� � Ӿ�d (��z7}�(�������%�Kf�|;y	kX���Q���hn�*���6�$�_X��3=e*�z��x��-z�C+
+ɴ�p/�L)�|2޻�w#5�|E��	*�.��𵌻S�44 �ũ�B�24o��ƅ�V�`��J��7���$A�J��A#W��*�����>T�Z�h][�l�q�G����	G#ăܼ@���3X|�Op���E՝���YLY�j&8u���W��W���y��y�Aweg/� J�KU���>U�BS
+�������É����s��0-A��Uܸ��	���^��;�4��eX��ff6<� .�p0@�[�P�c�"E�s��0��ܜ�5�G��XTv- �7J��br���q�(��u���2Jm��S�!�T�u�A>V�^P$���j`?���x`���ye0�&�˗�R~iT�oGNݚ3W�ҽP+TbZ(�C��j��6��o�ნvmV��zF�j\���_�ۚ�A�zy[��{�%��ҩ�ؠ�I���̅"ݷ+z�	1?ƅ#�<n����ݟo��2��4㔊��E�WG���1e�>s��؅�����>8��~�����sn��O]���Ϳ���0�7��2���׶!B<����+�=+�����s�1��� w_1�l���1�9�v���tF�;]�P� �K�c�l-�����N@���v?H����w�X��訽�B�.%�K�p�{�@O��=����QY}]A����@�Au�d����(�j������r`R�ŀ�_¯� Z_�1�\V�e"��G���|���Ѐi��4�xp߹b�����i��A,ܦ �#ų%tǵV�,�tPM�o����-��"��ÕG$�1�+��^S�� �oK�ja������p��^��pC���n��Tm(���h�|�������X���됙����e�J�!��3�����M=���-�~��t���/̷P��)�p����B��H�$�>��M/�O��ǣ,=����p�u��'9��Y��3T�����G�k[�JG.@�0Cx<�y�=|���<���Cr7�9�k��W�6jD�N@[&�F^k{�đO@@�b*���-�ս{�祋�[�?.:ĳ��R(Q����Q�*��ț*��ߍ�W:n���I{��4{�h�&ʋǟ�]K��|>j#�-/~U]�$��I?��>;O���T'��NF�vx�����QY!l��=Q��9�����«��U�+D�3�q;�uv�Y@0<AuGݥ�� W�S��i�h�v=�.]Y���$N��9]/����04�����T�I+M���`�6շx'���1gf���g�����V�uob�����}��^�ԯ�_��W�vտU���b�0o�X��%|6��$���퉳D�ٱ�/U@�x��͛�s�O!y�6�X�?�Xy��Ł ��:�`Bx	��.'7lr��N�V�]U
+?d\8p8²�[G]�>3���(0U��~��z�c�x�Ju7�]����/Ly���I�r�t�ް둲6R��ڿ�����������
+Ud*8�i��Ţ��|DB%4W	|D���A;$����dԩ���a���ӧ� � Sp2M\�]̿Z^�*x#���U�ҫ���(�P�̓%X�G(�9v^}r���|J��h��\�;ځ]��F���)q��y�F�b��'Me�48�����h�I�I�hԝnv�ە���j^i\n�r_�B4�����iVR��0놤�݄�N�K>��,��){���P=?�b���JN������sz���g�X"�&�N��u���Z\�E5adI�.6U^�lj���ϟ�Z����K@�(~J��� �T:R���\`6[��g������ѷ䆄{�\s�*3�s�9���'	�{�ԩ}�ٱ�*�����g�L�����6��OcD�4#@62ѩ%�E�A0�|I�+GC:����:�Ae�	v�ʻ@E+�c�hS;C(�2	+�&G3Mγ�=�\!#)���k�����|�AvD|rY _9�������JHYn� |-��m���H&�#׉X�[���,h��w!KC.wjem2����9?��0%�6�`Jl &�l9�'�X�`<��'���.��Tȕ�`�SSH<�r��n�@��D̒\�D�Zk�	�K9��#Q��2�*EE4��K0־|�^T3��BQ{��*�:OR8&#0�(��qB��(Q���?�\��7N��Ee#���R5��Z��#k�������|G�]�@�iv;R '}o����p����a��c�KeࡅTXa�`�x_Ӌ��¸̲W)%��7=H����0{mH������@0F����f�Ʋr����'\3.E�s0:އ�j�ڃ�����>���)���&�Y��x�Z��.��8�Z�:j�����i�:E�J�j�ްɒm�*�K.h'�L��ܬWt�N�q�Zk>�Dx�51���j�3]%ʪb��Ŭ��
+,�ע������ߞ�z���ǌPe��d ��{�2�m4��tZ2�L��a�@�E����zJ]�M�[/��~�q��8���	b��oG(���F�4�;\�ǃ�7>�hw���MF3�3#e4""H4��P=�3���lu�Q�9Z]�wp`�i��N��}'ձ<%4��4ࠧ�Bb���;j6�$�"��}V`�X�H�r����U˙�����^}���(Z�}$��4h8�̏��զ�H��=���t�DP��@�?��B�~q��N���tŨƼR�:]Qz�S]R��{��d�1��-tB-N�~g+��Ǵ��� �j��3�5�~!�e�..�2��p{n#Xuk.'��u�s�zk574f������4�\�C�]w�'�k=�kԐ����Au�(�o�Q;P�������c*�|�24��ÕwLo�բKv�2����ۼQ����s5K���S�Dڋ���Vs�L�F3*nA���s��suۚsSAn�!�,ڥQJ�"����El#��.�)��H�
+�������3Ƒ�6	53(ݹ�>Sh����>�ۄ�+�3�f���[��E�+M�lW��Xԥ��ǳ��A
+�r�������9�y�j%�3�U* ��A�ۿ����rCWgN�9C�iH�<�j�b}:`&%�nu�+�Z���m69_[͙��5�X�sW嫪����
+<ٕU�pb�}�H�s:5Mu�>]�3�e����A��;�R\�7����kz���R�\_u�i��hDS|������ПH�?��DPh�5-��͙�g^��I��s��A�!��kQT-j�%Pyi��;otl�s��G�ͫJ �Do���^O�B��KMҶ�6�H��{"o����7E뻳����#���c8�cZM�o�e���6�"̢i-�7f�3�mN3���d�d{�tVQ���=�J}Y)�j$|S�oF�T_�-4��p���F�C������e�nNX�Tט�w!���N����2������Ȁ����q�:�uJrP�UPi~�7-aLܨ�4�����b�o^�d��{�l�T�E/Q��/�YRF��ة�oԦ�׀�1lՇ��
+����^ףL!��P?�;?u%�EB-�ݍ�>�fk���f�=�芟A�h�ey�՜S&��!s�t>�� G�&��>��!|\M.�� c��6��f��H��L���
+�B��0�@�K
+�ˤ\w+8L,�qᰤ�Ŧ�T�i�n�I�m�eC���
+dT�)i�fLO�b�F�5�2�Pip[M����b0Cp�rX����.8���}��GA�^��w%�+�;1��]ˆ��ϥ��U�&M�(�A%wк	o�u��)r��}�9�H��\�A/�H`Y�e.�B-�9� ����$�?�ַ���|���ȓ)6 ��}���mk=0n!;��s��j�_t�b.��ʦ�JJDy�.�����Cgs�zZQ���>�c�;��H�q��Jw�k��%	$��hS���X`7�8�ə���q,J{�����R�I;w�AYk���G:K&ؽjL��m��Y%�KT^�S5︸��c�>��A\��k#���oX� {%I�����g!�~73�yϨ�ы�dt%���`�g(��f"��^U�,�����@bu��-)J��W��v�.gg�O�x�Y/��*|T^�}������o�l��0-�"ԑ�Ir��n�6��֯��Yr�`�>d�)rE��l.E���}�j��WD�;|��V[zrU��+�#*�б��'�>����SQ�߫���7/���.4
+�B!��aQ�Lv�5��==+wx�LFzR2H2��2��,=���'7Xa^ �{S�q>xF�5�U�&G����rF]��L�$s�SW�M��i\5泡n�#ӑ��ⷄ@�%���<�㙢t=�@>�I�d�.� ���νdR�7�J+���|%xD����[j }�+�l�T�M%�<��D{f1 j��r�f��M������SA�S}[.~_�cT�dOuR��딦E'��˫.�Xz�_/p����"�@�'.��_���m[�NE8d\|� k^k�� �A�� 5�XY�*�b���s&%�Mr�t1Ǩw5������[�ďF�s��/,=w�i���09�,&i���P�^�IX����9ЇX?���6������e���� f	��hn��j0q��~���X���I�XM�I^�KL���GRԓ+��t���|m_�	+�\�b��5�Է�k�zM�b��)�\s�Z�˵���{�f�1l4b�(��&�FÄj}��4L:U��Uux"�	.i�2�]ɼO�
+�H��ʡ�&;��Q��a��l"O��Lr��0���Tp����^�����*��*��*�찔����dJ_J�R����+�����G\�Q2��RCC�b	a����O�`5	�D����C*=�b�>�@�?ڣ^f3�O��tr�%���H�3��J{׏���ظ�����a��Ӟӽ2�3T�Th���������M�	���٦]�)YM�A	��l*����o�O��J����h�E`��t� �G�B��H�z�<p���䅷 �0�Ǥ��[e��Â�$*�#�M�`J���_���q���g�k����!_�tS�"4�^� �מ���>h�����v���t��h���8��3�||`|]k<Aτ&��5��,靵.�<���Js>�����MSvK��m��u�{MY��XDwK����K��6oa+�ۀ�'݆��s�A%V�%
+�9���Q�Cg0*%é��8</��'�5���h�=/s�0�o[�ȡ���P�J�b&X��H��0�"`�)��z�oZ8cm���K%��ih��0�3���*_K!��2t8C�K�5(��w\��@��2�;sXmĤl����B�ˣ�i�^eK�}��W�t��sQs�-��� <�̀�(x�d���C8R�����_��Ƒp�#�oj����J�,��$�]JU��~� �:���gE�%YP-�P�2�4�^(`l����g�v�@J[�r'?��g�S9Uk]Fڻ�W�nL���o>g�f_#�ES��E�Aq�����fg���Ag���~T4>5
+Ɩ��qб\���`�5�2
+����<�4#c�]��'�OΫ؅%U��AM���t:vt�̬��"�	�v^�����|��T�j��7�O��@����}+���v�3���1��7�Nm�p����� RuN�!�hp.���%Hb+9_����>���r/�C_q�Q��mhXiJy���D��Ty^��0�N���1_Y���`K�f�dP��8��d�ceS#p���YRJ|lu{U��2�v"t���)��+��&��?�g�3ʈoZ�u=�~;�x�i���X��g�]Z|�X��|�|����u���+��c�E��>醠i��xN�ȕN=;���\I�@|��gl�)/�f��l4�n����]Qc?�-wv��'�-|�o:�Up��3xE���t/����;�"��;5�ɥ��W�oDW�|9�Y;�K����f��ǐ�h�e�ٜ���g<���uUdM�Z����H�-s�&1+��~��".5�O�z2���\��2X�@�V.@��N *�Yf���j�j]��f���Y��0?�����ϗ<~*���=! Ȍ�W�W*�Q���o�ƞM[ei�y����" )�e$E��L+�iE��u#3_h������D���7�l)��vii���/�Yz�:S�~�U(����l
+����w�Ҭ�B�������q���\�����]+"�[�n�/y�4|vp�$�B��i&A�Uo	�V�LJk��ʇ�����rg~�m\��Z����Dh&����]��V�&�
+��`���n�p���8�>�rWw�5�Li����5dMf���ڮ^t��H�S0��W��iWZ���Ѩ ��6���E*��5��IBH=
+�J.G���-u��5(5�g���I���Q}�� ź`>.Nj���n�L�=5V!�tvI���*b�.��ݨ�u��3�gj������)!	!Q�<�O,��C�p ��گ�{�O�٨�ڶb��5'�;���^^��q<����@���C�m����(R �O�;��I�Q�d}8�(k�/����1yƻX�߮��V�lN��p��dэ^�%&��g`fu�n�P�A���o����R�2��c�H�v�����k�2sW�j䔑AH�@��<��iR8���DN����F�䭖\��={��wP�u��J*��W��ms��B�t�7�p���:+�`b��&|�P�_�E}.��G%�yo&o�����m��n���+�˺,�Xj?jb���-[�k��� n`MW�s�`GTu����ݟ�������~n�?8�&EE����8q��L#�;t�ˠ�H�k�Ku���s���>z�4��<y~��(��Qۭ��. OK��;<v�M��k��z�*-���3i� �8�~�87��4���e��,������.��P#X)ߤ�����`�mh�H��Kzf��2;�*���ťQ����c���G/S��/�3}?Y����K	��7��.Ü4L�t>�5j�ώf�o�s��IA�p�m9v�T��|�`B4��)Xz��{��Sᜭ�,�P�d�塂�&C��P���O����g&�'U�U��Ą��T�v3�	zE �J.mψPKIo����p��uUW����H���i���
+��H��e�o�3��0��i7v�̅�}0�8#FE�)��d�ɧ:���߻����j�2�m�Z���j���N�ơ�|Y`��@ A���ݘ�����&(�0���J��
+�0;D�m�fJ���u���tR�:Ek�%�E�f#�]�̮��)�����}�E��3��jαd�>������=���{�>잨��8,���3`w���Z���?x���]�#�P�"�\�����Uږ�����3�7�*GR�MK#��w'&ݩ������_oK�
+g��׫�*�$�.��'s�&����^��b�q!�Ňo6[uh`���2/`+�lS���v�����Jڇ�C�m�ހ>�)%��%��D�7T3]C@��=3/c���t��z7�}�W$z�^�\��)�����ڵ��U�_������a)(!���ӶGϘ� y�)B��RVd'�+x~�%tu=���Q�~|ݏ��ӧNe2��R��t�T"p)l���#6��k2��4���M�B�:�o�/�}%|[�a��Hԕ�"�E�[#"î�#r��Ϗo�H�{�z𮸌s���s{��D��4���K|/��p�E��vG��`E/ϐ��X�n��U?kF�)7�@�|�)~٢ ���D�+�Yu@b�.,2��#�lm1s�ԓ�v��`2qn.q*D�Ȇ2%�|���\"����F�o�#F�4��ֺ{��r�4�?Ř��+[:�,�g�����K�q��՞�o��ݟ{�%�&`�=��M��6���LC�N=��F!~	�����	��C6]Dy��R��E�i������,�eT���Z1ԍ���}�x"g�U�C( �{eo!/_)
+��G]�N��Q�Qơ����>�U{0��������\1]���k&/��?Kl`�2p��@��S�'������E�"��\R{�OL̏��jV�5�S��)'	������SH���sEd�ꨪE�X�;�)lT��Q[��U�ִA��,ǡHY.1>�����82/�����z�_Т�V���m}d�Od�.di/��3}|N)1�AGDJ�:	����fG�2���x��h'�Xl�뱭�۝�;����+���ƯJ6��ѓ�J5b�L��	orɅa�{�*���<ܧ�z)�xw��,E�	�c�r$Y��S���#�,E��#:���@ߕa�HfUw�s�k�'��J-!�^F���� v�p�HP n>lx���r���O�b��ҹ�Ҵ*�:�̟�!��&�36e��l"̋G+Q�:�t�S�b�ʈ���ꇬ*Z�&���+��k�$+6��AR)��0��1;�gE�9�"�U�1%�	�XcKQ���%�?�0{����r��S1k�\r�œbO\K��ڞ��;���K���<ῼKO�\C�g��y��m2�u�Xፄt@o/�o�p�ua�V	��3�<�)�~��Y���qP*�Z?��񭉱�%+a��*��2����_6���Y��h��b�GФ&�AsU�ڝ��,�0e��n�[�^և��`��Y���_Z|
+���S|@�L��m���η�MԆ}�h�~���l�d�t�������Uqɳjz���Y�S}�
+�ru�B��mK�����c��K{_iT�0o�QI������Dݲ�b�CM�\^Ņ�7�J��p#���d�GX���k?�fl�ځi%��&�^!�.����U�'=���q���e��gՃ���K'���J[���z�[hc�?x4����}8�9����E<���u�(�р��uꪕ����2���BB���7K�̸�8�e���6�8�s�o|�>��_��b;z�7m|�6A���E7�\�,1��N:�R@P�.k�n��	Yp�w�����   ����mo\ו&����|��4��n����LD�Ԥd����(�ɂ�UL�H&�Hl:����VZ��G�đ-�@Gz(`~��_2{������T�I>�XU�e��볞�=���a�_�����k%>8����l��i��aBt���e:�D��S,4渿u��k��_�6�,MQ��s��g����h�lXU��XomAt�&�N�t��!�l�z �hˍq��2@�ddu�v�ω|vG"��m�ld����1�H���Y҂t��C���8*LJ�1Cm��l���彌��_>�o1��_S: ���䨘�{�8�9���!�Yb��G�vb�ӥR��2���_�	�NF�b���/bߛ�4<�%�7���n��R z�v���G�k�x�1뽸��v�ym��9����=bA{��PWB���sW��5N*�ܴ�eo&A\�-Y� �y�����sEF,K4ͼ�C�g���ANn�\�P��.c�$	Zg�l!!BV�϶h˲��`�!���	�Ψ�r0/'�W'@��t@�!*��7���U��#m'$7�7���3�%��OH��C��Y�j�6���j��v�u�@�� tb��7[}�q��P�O;쓅�	�sn�{���l�:�F��:����h~�$
+�ToW��R	I��I�:�S*�
+m�Tc�#���.�(%����۩�!��Z�Cz}xڧ��3�9>�G�0��2����Fx񪾭�>��?���j�D�q[�V�N{��7f6nѸH�U�������k�K}7�����\@��v�����9{O�Y�4�P�E���� K]���ꉠs�r��j��&�;��Fd��������O*l�?�� �;��-%���z�HA#�X�C�?�C��TP����������Y`��*�&;S��~�����­�
+� ��g� :b�� ��+��G������8�ϼ��Sk�]��T��t�nP��SFeߌg(RgVT�ẓ���6RL���%X��w�&<U	1Rr�S���Ewm�]�`���+)d� �s�1�%��*Qѿ�ˠ�|#J������̆�����)!v�C��.~�cEN*Le�tN����3O}�Q��'V�y�ҝ.������,fQ(CB�|�Ж���q�]�:�^�U��NS��i��2*WC瑾@�v=�����#��8TI�C({����Mg��Nx�&�Ct�Oz��=�=xgʪ�U,��u��S��`�����t���I)�`����CO������O�z�ܙ�KW/_r�ϻ�]:��p�-_]�v�굥sRܛ��FN����V�&�)�ED���`�e�j�(1��7���ޫ����7�� ���%{�>�8����}R�,@�E�&g�t��9J�dB켒B����7%i@��iY�(����!Wzl>S�C����v�h���4��e&ݼ�VEZ�8"���`�+�x���W���a�3ѻ=y�d��[��=H[hKD��!݂�ڸ��S��Td�	��Z�0��p���[M���>�d�є&=�P8,#s2)Q7��c�$D�����
+��,�*d��({<�;�Jg)ܩ)v쟈������.tP�O*����� Q�����""jRn�H�S���-G(2�8W���S�i��}S�|\���2)��W���܈���2L�nu�L#��ИK��O��\������Q�b�ʹf]�'��n&�3�mm�̦ͬ�O�n����9�Q���F������N*(��*��.)FC���I������Ii���1�
+����S��'�s�z>4O̪�ʥ���zT�Ç��Y��ܞ�F�5��B8Se�Jw�0+���|DY� �� .Oy0&�_�;Ĥ�����0��;í���嚸F�o�nx�[%��Ԧ4�.��z��l�sV�� �i5�(x�P-5%�q�>�w��q��o����up���)i
+�D�תM#2b���z�@a>����C8�����6��TLK�oq�ohGNQ~��3a<�/�����V 1b~����s�q�~.��p�ӛL�����wB�����z��^�
+�)X��Z}۽�a���DIS�9|�K�7ՎɁ	;fÆ�9��}��'N7�K���(�Y`% e`�!˝6r�U
+U��a�-1H�>t��]�: �E��4�<��:�P9��<�5h�x�w��PvE��7'�!ʅ[6��7�W�yK��}E˭?w�`�W��c;,7�JW����f�T-��A11�. H`��V��5M�Im�%��L�j�I��E�/ٚk�$U��܉s�Mj
+�>/-iJ��/$�^B(h�A�#$�.}����
+��+.&��W�v:=o�������'S�qA�1���v�&��+`j)�e��फ़�݀6��EN�`&ڋ2���W<�b���C���P�sYB�=�}���2"x X���:'��Z�ԗT�4(K	��ī�H����l{QMQRs�!�r�X�TS���㕃Ҍ�׉���PS��T�y���K�c*Ui�
+�].TM3	��TC�SwJ2�i�dKD�#�b��0�"U�ҫ�k<Qi�\42f�9��[|�����K�R\�|pq �2o��M�!��!�%��=㚲ma����օKG�����骺�k�Z����I�*p��B��g��Z`E=������� >�p�Gp�q&�	�dIL��;���p
+�W��3�C�J�
+s��BD�>Wɛ�eC��/ ��	���*O�t	���O�:w�	��_'h��F���  _-���7�k��Y���~Z��@��Aw��A�9�s�926٪=�H�a�M�v��h#�����~r(.��:��\+�σ?�%κ�c PY߬���|�N	H/�X4ؼ[�7�,Ɖ�+{�rj\qy�aC��Ppj$E9���
+���ݞ��ZQ�|W.8�7���ω�I���.ɈND�A�Ėk/z���"�8%�Ro�I�8��.M�U�����re���gl	C7��3"g�Օ�ɴL�M�;Ml4���А���uS@��p�ܒ����~�K�qԆ�4�aL8}������Y��(�逢�*uSS ��<���
+���\�y� Ӹ㴮������W�PK���0�n��&�]���q����.I�� N;�/�z�cAu��Of�-	)P��Ǹ8�\<�i�3�M�G���VO5�;��q�K	���l�4$<̧��)�i��O�+-{f�܇>���Ȏ%�%�֠�[����{c�n��0Y�܁��	i�����)n1�;h>�66���<p���7�����d�I��l1�F��P���c���R���m;!�"Ύ���(ÛAa��j���vBw��e"�n�w��t6����r�!�&ڏF_F_[=x���$r��d�/�c�B�=;�o��~G�zV&٣���q�$M@MG��̯B6���COq�L^2 �1E26GDD��έjB�LGT��߾�G�t��[�210��щym�b�:���.�ɬ���U�~����&g&{ �쯜�KL�KġB�ֵ*_�R���|:����DBY|2+�&�U��5s�c ����s%b�3P3�A���2F��/5AV�����c�h\�<P"o+�]
+[ ӌ�)��"����ۅ���r*�@r�슌�7?7��iŏ�+@�a�MF�]Q�;v��E��,���Y0\�:��D�3 �@yf��2�ă��&�z��~�.��Bx&^�a٩�ǤbL�dY�R&��;-2�E�]�Q��Ȑai�W���rr���J��J1���2�vt�[����$GG�o	n�iT[Y�����s\ٯ�rHT����2��mqU��p����f�/�������4�"�IBR��Q��#T
+Q�&v37�gE�R�o 8��VyKJ&o~2���QRuh�Z�jȜ[�������C����T{�	�5�?5M��#�񔥃�=�٦dX~�؋GF��i�%�ݪ�+��/E)e���w����'nʬu�Tq�]����f�/nJĚ/��zp��ǽ�w�L'ĥ�I�z�Y���,}=�����ʤZ	5B>5���$HY�-� $���r���dV�
+�.9pQbr� �_�-�aK��bs�[V)��a��f�W��ԨV5�6��k>����¶�f��R�we�O	�<�:�2\�u�3I��k&��Ӗ��
+Ee�J�2i�߳�育,9X"��&�p���:�=�k�f�Y�����d>���t:���H��-zLi=ʅ	��<��6���� %�E�m��N��p��At [�#�KAEW�2M#���-�ND��8�*v��b���[��P8r�s?��0��c����Ϸ7��U����.zC���xU2��ס(Pdh	��`���@k!��95�XL�܎���2�;o�>��G�z1���2�>
+�?7�6��\����Ms�Q�E���e+]`)&�.8�l�dV�\=�����#�o�x¯��.��9h���x��vŧ�="ð6�oJ);ԯ�� KQҠ��N�p�0��;����#*������tA-D��UԪs��9���٤��{U'�Qу��'u?���IF���:;�Z[�g��	C�X?��hd��bChn�C���!����4Տ:�b�Mm[�ր���U��~+L%�a��ȅg'�v;X�W'��A���H�:�n=LV����o��:h^�����>��<#�����6qz��]�crعHH9U��hJ~��|l�u�"4Y[�	�z�R1�~�h��8v�xdi���*ֱ����Gɛ�+�}��3�Y��G�p�PB�f�Q�I���I�$�v�^���v�_��t4��d`Q�x+��[k���N⡑2C�I�ؾ��E#%9��`1v"OL������2J��o�7r@C�c�:z�����g6R*(������;f�\^�gRԙ�e����n����VF���,rU~����.x�[���m�]�M�~od�%�饑�9ԺQ��v�iI�6�(F]E{M��K��=s|�]�	�Ⱦs�\��K}��e�#P`�J�
+�}����]�W�VT��$�4咊cf�@F�i�&�`�d(HfB�q2��;�⭩��M��
+hb���`S��U%_����2�W4q��/	%�9MJ5;�^�CF�H��"���fd���9�n2�L6"M�����D�oks�$٤(0��Ӊ�(��*k��/�P����;��kqf���Ā����I!u��N���78Fј�5��-i�U�	�U2�I^�6��p�i(F�^�T��d�%���At�^��7��"�c?�2�0����O:dU��bD���5`����N�03��тsS����f�!�����kǟ"�բ�4OA�}��G]��9�%��_�劺RG=՞����SZJ�$�V'�i�S��$l��^�1Np�(�B�|�f����ʤ��N
+?d�k+:(��O[�T?��+�zJw�F�uL�2!�J���~|)�@��!�ݖp�O�\�쇞(J۠{���f{��R�_�����J@��y�{��$���M�2�L���{�~��<bR<���q���
+���St2����]����u6ɳ�J	$� ܷ��W��)��b�F"+���F���`G�>P|x�-�#�΁�\@�+8:E����,æ?N�u ? +�ցz{)|�����2��J�?	a��Ѹ���ő
+{����2fD�}*����S�A����O��s��YB��J�+��i񓮖�f����ol�(_ &���,x�>�<Xo�XB$%Ԋ�e�#�:�-��Z:sY���<���l��R��:fT��J�&*����奟C�{MG��⟗s��J�,�a�dUF��88~�w�!0B|$�:���z!�~-.�,��^�C&��pR���K��}.�}B<�	���D�=�P<��&E�5�+�D�a�m�t^��\��v�>
+K�"�Z��-��LB�qI1�
+��i�k�cW�j��9��g(^��������L��@,rëw��H0�>�¿��]�"��
+����5�����Q�o9M�m�+��v��u
+�Nlw�,�(��/m�����&�P���!���Y�A jq���2���3��2�`_Yn&MЬ\Om'i���}��;��܊�c��z��].���jӜ�K�'��x�I�9����&�O�����k��0�h,$ӎ�x	��#����eނm0������j֜��O�"kd�������z��yc�δ+o#V�ÁA�Ǔ�q�a`W80��[��G[ D� R:σ'�Ѝºn��v
+S�zM�!ӡ~&I��Һ��=,1Ї2K9ھ�4�ʦ ��i�k����tz�m6x�C�y�L�ra3��~�dOg��{=����������g9��Y-�"�py���6k�^��D����Յ���>-�^�I$�^5�<�J�@��#��|6�ݕ��O3��F��F�5g�Òa�E������d~����g�IZ~h�A�|�ꭞ|V<�}�7�b���������a�c�mÀ{�$�%Ȱ{�,;�;O��1A.�g�C%mU����X2�+��%4���u�*V����.ل���lѯ�U��!vb�����V*��`��<�Nh��3�)W���MrѤd�ARpq�E�4�a��n]N�sw��e7��8�G����~�a��&W��~r�#�Axb�8<�p�ǡ�,�͠B��k5Z�T��g%�aލ4�Q�� �t�������"z,�,�%�1z�0M-�V6(�h��%\�K��c�B��LU-�n�+�~�Y���j�YR�����)��i�Sw�/9�:<it�g�l�;�޷�<`��	��~k�����:��� �B1�7�yT'8�E�Jk0�5�鞛eydJ�t�!q_#MTM���VnCJ��Ԟ2c�����AQݹ_�;7[]+������!���bC�dwV��|̔�������W8��ŔC ���\�G�0���#�� h�p�(���([�P�>K�Ͷ�O~��L:���-�t;���G���N�\������?�:�o��˭�E��#���81��J�B��(��p=�MbR�x]�k�&��$Y#����]��b(S�W!_Z��(-"'7^֦M�R%���O�@Vc��C.>o&�S
+�q�bp��j*���x�����al���e�F���|Sz�&�:�L�w��}��Iu�ZN�5F���@���Eh:�8��磽�Z'P̱�uĸZ>��;D^�OեRH���+"�|Do�'�8^\	�G�D��Q�V�ʵ�s $����=1�S�Q/�[�aj�_4��,'�[�	���՘��D(�_Iֵ^�lT��;�V�3Z2�q���+nC�����_�7
+Q� �^S�Y_r��[��[_S�dH�fa,�لF.���93��%�4.�5F�	��dU�üf��#4{�������ATv�{p�m��;��SS�S�F�]7�͂XѡU��V���{����p%[�s)]6CWb�oʝnA<ZŪo���Q��)n��ųS�K�P� K!z\N��SN�`�P�R{m��8�,74U��pb	�ķ�������
+���+޳���7��Xr�\\�ބ���b����~@S�cf"|���kcdeJNp\�1|f��+/�+0�)��G&k�nvZH��M9_��.2��7ʸ��N����������k�����2���#��9�Ī�Xlu�gT���_e�s5�O��Q�i)���w��M_k���Ԭt����
+t�B�������ޟ{������Y�o�F4t����D	�j����� �pvՆ)�'7; �B?lX�a.����I:���xcpv8�㌸�*4���I�q���8��.m��<���Q@��6[忓� 	&�D(��1��x! ��-a�B{�p�����'8F؋<�3A�o��n�����������,�e�2Ҁ��a�W�7),�s �eI���d�afwdb�g&�?�<{����wNa]��DQ�ݦ���9�JR��_F)|�����kg���sKW'$�J�2�r�]:���,ƽ��L���Ñg'�!G��qV#�g��@�c�.�,�R������>u�qϧ��+���e�jGDG�0ϲB�����q=�'��3	g�$y+�tTP�1�|�����&����'�� ���u��g�f�3Y.#$�����?�I�<�. Fz���^�>v�3)���J(xB�����i����׏���7z��^������*:3�aR%�ʹ��2��,_[kk4�4�,�g��@���"�m�Z>�PO���e��yǭ_�h?��d�-���@²�1	C�ً�j�E�h2��y�t�)����&�|��<G�uu����v)8��^*~=�j�����b����`���wҪw��,/%3�z�Es�9�c�v{{�]�(Zxe�?�85Dd����xv ������Js��Fy�����y`;`5��N�?���m7f�W�(�������6�v���VuC��B��]x�}v��<~����.���O�w>z��O\�솧X9�A��^���4ݕn�(̽�4�f�E}�SqWr��������z.���|�A�}-�fL���>�œ�M�09��BxJ�C�a�6ƻ����!u[?5~u'�L�����,Kn���Q:gJԏ��b�-�ശZ�B%�)ԭCr-�$79�(m"z�Wxg�5�Q�RVV����T9!��A�f�<��>�p\z��9v�-Ŋd����/�V���$<��!��=�!���Ѵ�`/�G@�u�I��7� ���ubE��)^�Woؓ�(����XVbC �5�V8�Gu�������Q��\e8�������;V� eY z@/2P[#��_�k��C����X�ؽI{�+�ͯ(t/2	(����HBh=,��߭u�#QxPc�E���JO��Ώ���Wk��B5����~�B�FS�������̀�m��I����,��֦�� iV#)��LB�G���4��q-��j_0"[EBs�V����ϖ��m��F�z#L�p�Pֆ����`B��ӿ(�$�����a�>R>d�bjP�*��;GK�_]�58�����w�3��
+߈8�H%.�������!&�Ȳ���6Ȼ�"�UMh�n���'�#h�\>s�Jd�Іǜ�65��WѼk����)Mٱ���b�E֓2�bOf�pS��L��z�vs2�5�.���59�=��;�Jd��Q7Iw�a*{�1c/��c+��y�drC+!�U���1��KǑ�4[2)�Ȥ�	:�e��#@�<�䛗/=!Z�O�(��sd[�~�m���6���+�9�����i��>c׃��x4D_F�p�:����^|l; �`c_om�\�&�����:����G�o�������s��f��z')�S��h�n�9����;��M�<��	z�u !��cA%a �7�����M����<�xM��۲�&�����"G���|("���gJZ�]��FM[qe�fB[n0pC�QG,�r�p�׀�L��ΑA�d�a�TΒ'���mbZz�*�))�F�P5��_�ʅ�4J%���#8Т�<\0m�w����"��(~;_63��NG`}�_��-M�I�J[��Ɨ�Z�� ��3��@E���ϒF(�C����g�R#F�pV���G�jD����a�ڔ+NO^"��i�a�МfSH�h)� ����R�ԥ����6���̝� ��G:�_��Ca.�n���y�
+���%��'CZilWH��K�͢�8>uVch����4�0��{#�Z��Z�nk��2V6��`�PR
+�]�Py����گ�J��ڒ�a�'�H�,P�������d�Rh��c�}����
+���X+2�%�6��;k~9I���r��[�İӋOc�8I�+���!���'�B&� o`�G_���� kr��T�H�@>SÚ._JC��:[�Ս��."������:mb˵��/d�����.#I���WՔ���TߴkG�Gt��z8ƀ���{;�iXC�'t�'G�X����ܰFdm;��huz��Zcu���v�h?�87u�*=�R�@��C����TM{�D� ���F��D��9�&-���!��Cz}xڧbo������	~)d<�K�� ���:�]�#A2VO��jPi�E�N{�;3�h�!��j��=�L��������" l�v\����ث<�[�or�^���M��)o�Ѱ����$���T�а�A^w0�WJ$ɾ�n�K��mt��ʕ!���$fr���P�� !d�'_��$��Bx�ܕ%m����J�L��&pC�1�5j�]k��q�M{G�N[pm8�l��/�!�x�}j��EN9.���؞L�P$Q?�˫c�zlmE��tU��kc��
+Yg�m�9�)`zy)`C�G��+R��Db��{���q3���uF��M�	���Y;+]��>��1��@^�a���Ϊ��h�f	�r�Nә���U���_������M� �&�=
+�x��]ʎj^��:�s[zyXI�t
+2�b�V'�*M�+�b���n
+���/0B�x;�CX���bʩ#�������4v�5�e���8X�l7 ��[�*$�Bh�z�s�g^^�5����&�:f�3�r��S�4�n�?i�L����kQa��H�p+�SUu�p�o�S�P	��Z�
+����wlХb�t%��T�.AL��neC]2_��ˠ�z#.��y��T.C҆�>s٤ޮ��'ƣ��Տ�Ы��q%\G�>����b~����f��Q��Y�@f]��T���D��q(	�R/��y�j��>B�D�pчA�,����8���CYhp�b~�{�͔n����p�@y��u�=�~mw|$5lu93���������p�0QS"�����b���JG���<@��t��U&$*�W��^"�e�A������E��ۿ��M�4Z��a���0��7N�@���Ξ;sqai����K��yw��Kgÿ.��K��\��tN��S�)����B#.��LH*�QZo��ʸ�@�p0vƋJ��p03 �"ɯ5��?��|��~=.������m�A9(@������8��Ўj CLI��W�K��}��|(ʪ&Ŷ"2j}��A��Ɋ�Vsx�����v}�dW�{'�L~��ד����՗��qP{[�ӼKP��N}���+熭R��$���cN��}�!)��aȩ�%��۝�c@����b�C������C��y��Ћx���� �R ��x �,o[B"a�h�@~R�'E�Ew<�u�>�(I�I��q���e"1A�Zq�bE\9�^��L)hłg�"W�j8���{&��'R���ر�Ȁ���f� J��
+LMk���`HY@�7oO^(����{��O'���
+��sXIC�D�\3W��Y�<+y��2|�d&���!
+��`' =]lB�m� ���?j�'أ�V�}0��  p�tر�)@ 4���@��X�%����/p�ǘ�r�GV��`�ߔ�)��돳lI� &O*Tne��&M��9��/V����6���h9�=qq��/Y��S�QD^�p���ˤ��_�.#��G0eY+mi=��pFDH͔Oゆ\������Q�k�ʹf]���Nn&���%x�̦ͬ�O��nM/3��sH�����d�*�n8�@[��H���Ms��׿ϖ%8F��r�����*l�>&X���<����χn�Y�[�t�x_�j������b���'�g��eMM��T���]$5����,�8�̞�`L*;|E�{p�F���.��.(Z�2�ص�Tߟ�0�8�7dk��s&�B8p���#�1�%� ��[��Fg���c�O'^����Ӡ���xdu  ��߈<ϻ�4�笂~C���s�'}?Mpg|e���0�G�O�88ZJ�:G)�lޔ���'��zݷ�G軸����������"B�>�����<���t=�%��-����0���dx�0��\�=���a8�=p&�H���� :^��%�zq�1Z�<���Ih��]3���v����&;Y}�G�d�	D}��{?��N�����&z<�;�N��E�6�q��Z�9�se��Z���?"/
+�=��h�%��_��K��Q�E�-��r�e���f����S:�l��q�-�O_��_��Qz�|�"RT�҇y0i�l=0]�`#�6�$�N��4���J5��ln'@ұ�u��F�L�G��6�!�s$4焞b�Ut×l9ͬ�ϢVG��9���4���i6���P^��Ąk���!ۥ��O`�{+�{_1ngw��#�\�iΈ~��a?���@��!�}Bu�ߘ��� ����x�S|���$yM�R`�|:$0YeR"��&W�8�C��fQF�{ư"ۃS1<S�
+*�	�Gff�N����@*����U�Ce]=���p+�T)��_5�أ����-<xx表SRBGC5e�b&��B���Y�p����P(�������\p%(m	���96M�=%��Z�
+���&�SQ��DYT28~��K����8u���J�P���!ʃN���ib!N�)�j�^ ?s��\[������!��7�:�"�bG��̥���S��dV���]�0�h�ɸ�_�G�|IBq��n����d�-�]1o_*-���t��<��|�\*�Y;� �� �����:�����]^X�U�VC��nxD�vjҌ���ޱnf��{�z�]�o��<��ܵ�	C_U\xVǒ0��	L2�6��fb���Y�~Y�{jƴ�f����gw�#y)Γ �w��:bEA�>4�W@�wٛgvO̩^����Nq+2Fi�ϩO�e��/�z�c���.5qZ<v�$~��{ޤAk�P)���%���҅�jt�����TcjE,���!�#g��V�.��tC�A�H4	���b�f1���*Y�@��$!�H�!�ݡL���T۩�`�����n��}�%�qQ��g�-�Ї	�ge6&:nP����}$�)�p��������p�b�v8�HGI�Εb �	�dZMb^dĳ����MI��
+��34��� �o���s��}����u�
+X��올�S~�}�`�o%ƒ����N�;xKnXB(r���%�Scz�2�R����ۥf�E�#�peſ������-8/Ʈ�w���-��Id��qL�B?Ό��Y�)��:&��V��v��[)Rs^�>� U��|hhR�Et�[g�\< 
+�����X���-0G�"�U��s���Ql砿e����k�,�
+��!˴0(Znf�0N��	��~\'d���>r}r��}#��5@]��;t�)��:Vb�P��a8?�v�i�d�����R����;�1�^�R`��iG�w�.��B�F�򕿢pMf�t�*���.}Fc�c�4�&=�?]�!�nGg���������9��ۺǮ��#21����+�҈�Ê�H�k�Lcsִ��lF�&�?c�#�����U��C�)�B���9�h�=�;�Uf��LK��̅~�����%���`�KP�����Cc�fn��I��u��W�G����M�|����~�.FQ����JM�#?Io�4Lt��&R_EtZ�H=�=�M�z�;[�B���^-�h�o��&Oɕ��&�1�@�N��;��f��7����������FX�ͤ�+�y�v�-�k���#�[��H]�����ܡ��V���bk�[�p���6H�l���A��T=v��d.�w4]�-8��<_� ϧS ﰃ�"8m��1�v��t�� ��Q-�����y#���_�(�����U_��B�.��*�wD�]�[�[^�@�S��ڛ�^D�L���d�luz�1��^���U���7�B�uP=]�;��/����m�~�H�R8��	��J6�b�IW׮Qpk��G&t6�b�3�C'� �fEtsŐ���.�N������`�=6F��`��"Ɉ$�&�󤊘��G���FM�E
+���i\@2��3�� ��QN�_�M�J�,�y=�F������Y����������ϰ�b��������F2��Q���_��/���ǔ[���fn�r:���#o7�%�K�N]8ڗ��p/w�p�zE<�n��S���1_�7	��s�~UiT��c`��Wo�ʽ��QҊ��S�I�|)q�~��� s��9�"���=�8ߵ�~�C��~�bL�޼���s 1Ңa h_�h{\��i��$9�ƶZ[ڥ�Q��s�Ad���|v���s;�4�����]~�k�ă�Q�?�y��h��[�^�^�,�F�7O�u�9a��P����l0�p}���)]d�9�[%{�S?<���b�u�[Qv d4��\��Q�|�/��>��|c"�}1��M��|�Kzщ���zt��%)�	�=o�w>@(b�H��	,;Sh)�_�a�{��_�I�D~lw0+&��^�V��_Xl���������I�"bgP���Ms�����˷�#����D��8!���bv>j���n�C�"����E�fgխ�a�J�|G�N�1v�NN5G�*v?ٶ�FI���c#�+rL�ɯ-[ɔ����������y�A���|Ó�Z+���@Ѐ�!�Sp�1���ؑg�r�kc`�Z���怆��^;�y�z�Y���P�3��������\� t%fD��h��ol��e#2�V����� W��|"z:?��e�&+�F`ģ�X+��Zk��\a��.��b�~�.�+ϗ��b����'�;�"���N��#��k���K=�um�U���9�:A��:~�$�<��\�x���x�^��E#�;P�Ǒ���d���k�/?'�n�=�.� [��頻�G��J޴�<С��@d���������.�ҟ8&V_��o(��6���Ύ�s�q�E�x�����E	�$����Y0�na���4�!�9�H��/4�����ˈ�����Q��&�q,�\�Q9��q�Rq~L��A���\��myX�ES;&���j�[RB&3�qY�u'�#��W�q1H�*D��s��
+�]a<�Nv��2�������ժ$mZN�S����7\��J`&����b^�$�dR>Ъ6�5�
+��M	�[ȳ�5�@���`}f����&�#r�N/��lJb����� b;��qY����`�V���U#��7`�V mIe�-����Y��e	g'���a,Q[��
+��Rx<%k6a�C�������F�?�< ���:����Y�ϣ������	�L���'ߥ�^7p<�A�$'_E|�o���!����F���3O��t2�J�����y|v�}>L`(;9��]�^����6�Mwu�Y"���.KV�.��ₘ8��B���s{�m�%�ؘ7��>��:K5l��j�)Zp�������G�o
+>�� �C��.Nn֭�є�lCg���hu�]DT��0�|��������a��8�i�ֿ��$�\E4m[���f�q�]փ�E�slKF�ݱ��E�������m3@`f,a�Q�xNm��󖂐J�]9R�z!�SVN�����:�Q�H���f&�qꪾ���>����AT�S�&>P�g]�̀NM���������Q�"j�pP}A��K:���!½�>,:?�=�d��@�N!��F��nԵ�E��m
+.��;F9�x8��<g��~Ř5��`��J��`_����;���g�*�����3�~u&�b�dԪ�¥x������m^T(���)^�h�˃�V�My\��.��]i��I'���A�(�we�ߋ1�8��+�d�f�qa�9�B�7�t��.,@��xe�jG:�0�w�� V�vI�5[W�E����;��+�_� �T;)�F=aJ�?*i� *W���y��89QQ��Q�Ȫ/�ƶOt݁zm����f&��o�fk+yp۩D-R��(l����� l�7e�7�<;�Nħ�.���+�x���N�H@?W���P+uQE��I|[�߲�>x��U�m֚�xm��"�:Ž�pʴp��A͙=� �1$r�A�t͏�ۅ��&�%h�G�N��~�v�,�q)���c����l(ב�NJD��(����G�<�Yl��;٧�*$���y�����7�"���9�l0���+�J��Gp�ɭhyd]�9���Q��N�d�qlj�~�TͰmT�qVdk&z�fH(-�]��51�,��M��H+�S�����uhU�����(9�2�:�S:ד}��K[���cfiN�b���}H_���Z�_E-I �d/������hNm�T#������֠�E)�(vE�xdo�=5xU	D�ڢ~*�Y��¥&�����5�{&c�D3g�LG�I�/@��isR�$`-ϙ��dw�MUZ�T�5;�c���*�c�@H5џ���s������'2z�a�WJt�lPEãbH7���=��<��s���‰��\��z�ʒ�.���������x���s��eKx��_<z�_b�MW�A��*CA�d( e�K�u���������%�|	>-F�x�����٩a�yl֖��Y�,�R��򯜀`�DZ4bS|$�M������#5.֭��1zĆ�T���l4Uף�p_ƕ��G�}�s��A8Q5�� [��tO���o������$�I��/#�j��kt?w�\v3�+���M���5TǓ^,/4Y8�'3��Gf�$����;
+3#r��ڧ$���V�|V�t8�����0V�p.}hՍM������xt��O�y�0�����ϟ��?c8Hy%@��=�W|DB����:\K�9�gb��5�P�&bc;�$N�f�>�+�~�Y��q$ѯz���������h0�5�^��4�Q�H6Uj3�"���Ra����-�G��V� ��K�c~n��)�h%��Z�Q\�v۲�K~�M9���ܳ��l���_$� �l�
+Ů�em���;��q�f�++������8�*��Z	�&2��e�}E
+�֭J��$�5���G-���:�)�@�F�$�
+y~������ܺ�������J�M���RSf����9�E����16+�su�?�X�Z�7��,���R�fV��>}���R~!~F���nغ	=�
+�NFM�� :���:�F��E���ǁ���!*��.i�,)!����qO &��*'
+r�EMf,�[=�C�� 'k�E�����&ܙ�()��o�;�U~�nPN��<��I�0�eE3c �q���86&�����w�rvyJ��C��`�@	v��)��1F����D3ya���߇?*a�>͝x *[:���} �I�)�#YV&>�&x��wk����k��u��@Z��<��%�Q���U~!%븠��M��Az�P�� �&���rޑV.T@��Gũ@z�#�%��;0u'����d���m�)�VR.�/:g�����o�*Su����~6���vi�n޲�is?�:�^�oͤXQ[��A֡������G���W���lN圖Z$(�H+�"�g/b��$�a�D�Zr�G�-˺�A�7�[∊#�(��>}ݻ�x��Hb�Nv�������xv�w�*K�=�a��S������
+R���e�VZ`7�X����-2�#��u7;-�ݦ��!�Ξ�|�� �'{�P|L����4�[O��1��9ug|,�nHrx%�UE~��e���z�F�{��_Q�L��v�y�w�Ͻ����S��c�y������0]H�>ZS���ϯ��|PvƁ�CHXx���ab�����ic���TZ4ܣ���ۄK�i+ ��ɢH�x�M����b��Q�j��gT�4K���R�H�?�-�rԊ���o���49������m�s�&�����6��Z��X��f�sps�g2}�(?�[Nz�yo�/$�@��"� H	�B߼p�ҹ��eQ�uܪ���u�-]����.�ޒ�f�gtG���f*qC���U  X0v�Z�2�U�NE+@�d�m*��[J�{��y/�h����t����gi�-����| �s��T�$�7���"4P3�Xw?3i�#sP�������K׮,|��ÂhY��{���j1،j��L��s���5��� ]7� �ڽ��?0y�����{�GSj7�C\W��;˒0.�#ep�nZ����7���\B�b��f��D��3�ϣW�2�Q�5�{�!N�_�?�Z�}���im�Ɓ��e����6�{��:���%���<"e�z;�k�C��� M�"\�(Ƽ.����]F�ܭz)z��ᭊ6��;D��D�c5XIc?����/=5�f�2i���+��h<��)�Lf֥������pQw�w�����@��v��7�2,��"�Ә�4{=qfRa�|F��Ñ��%��=�I�.O�'v��8�y�w�����Y�Rھ�t�я�i\(�]�G{��-�w5��EX�X�HE��朏5���9w}��2�K�8�-�k�B�3��gP��˽�0gHbkO�����=���۠FBB�ʲ���Eʚ�:S��u�׋�cޕ���-�d�9Ő'ð��4�A5��� �Q���`ow���\�p��Ƅ��#7dd�[�Q�0�{�r�I���b���f����,�a;
+�շ�J�@�������د�O��YV���Q8�s��8�� R�X������ۑb6�f�G}&��B1��BAu/Y:�J�=Ps��$ꖭ�(A%��d�}�?�J��*�՚B�ѕa��^�=���F9G����OԜ��Z����l���x�5Q����~�D4k7�TĚm��%���C�|�|N��B,����t�u(��"Kۓو��j?p�@VAKY�ԯN�	�q��wi��h�U͒Dو�.����,�`V3_!F+��J
+�N_Z�����
+O�8l��u�#Q@��AQ��K�-����q��ӹty_�%_E�,���O���%���%tB��m=��6[�rL��L�\��Ԏ��.����b8jmn�P�R��1*5@]�">��H��X^Q��nv�OI�&^���2ɒ�TI�B"vK�Xfy:�8[���99��ŝ��@2v�鬚[���s$O���O>`aZEt�j_����y�.�<� A�m��u�ŤtHn�7�p�H8��(�c������}:P��T���v�yS�3���%88'�2���)�7�X��uz�(J�s;���v�A����h��a�=ُŦ́D��KE�q�_rk0Z fv���߱��J��G��)>��'E m���h��T�n4�סGu�f�Q�����pL葑;?��D"Gѓ�N�һ��c�.���-y��jM��j�������*8*�%D.�S�߸+�ן4��
+����(�6�2?=�Q�SR�w8 Q˚!�g�d�
+��m��/o�t��m��q����yyi�����ƃ�p���,�=ȓ�k�_�9��#��Ս��]�1���Bo�� �3¸>s���Ga���֟n��0 K
+f�Pke�؆V����|.3ů�Y���xn`��?'!X/Q����u ��C�U(<Ą����'�XY�3�Q��d�sq�"Q���t�uP��%�Ǩ�g|��λ*�ԨjM;��9�B�"�	`�N�F�h���54]�LS�z��=�1o���*��Yn�jCט��Է��� �ZB�x��?l
+��|��YV�Ap��B�k�9}.�H/��+0�,L���";@�,���hC<2^�)�a��� ]@��@P`�&�M��kMW��Kq�ٲJq̈T%�]f�&K/ˤ�I�� �z)nZ^'�ό�t
+3/(G�2%��&M]�i�Ј�2J"�i�+NL�����g���D1q��[��J��)��l��t�#3D!d�� Љ��~9n]����G���ap�^ș�ƽ�:���z��鶶}|`ONh(�*��{�^�F���6��	� �1ck���c�V�>2S���7`|�ϸ����qzr{.�2r�<��!��o7�#C~���n(��Ȟ[�=�1�Z�Bh	nsr �����,o�ȄA���*��)��*J5���~�Y�#�l�'������"��HB�!��D�b�3ج�'#�e��v��#��z˳2�ib�3��c:I���|5>��e�552�p��oa��@�ÕҐ���TF��h��e3�z���F���A?�d���͠�.��p�sn�3�{�f����D�-����r>����b��:�^2�� &+>��΀���y����tp:����S�wx�+�Mu��x_\�c�S܁�;�._j~�D�$���:�0���g�*�MTYJ��=���V7�����.lt��uy)��BL���M��S��F��^��xʟ3�,͖�`'��e��%�L
+���x���kGчps����p����Z���S1�S8�
+dv��sn�_ym;Lc�huz��Zcu<����(�2E$��/�U��UFM���ڛD茿��%v%W��ɟ�?�p��-�D��t1a��pzŤ8��W+\k��J�y��ߠ:l�����=΅�>I���N�r��`#/��uP
+[gM3%�@�/�q)�;��i��վ�İTw��܌��^	e\��7�6R�����7&� ��s�h��!���W3 ����zRMgܡ)�8,V����v<��2����'�Z��;����84��@�'��Lc�_`���&ؙ���	��T�@�$(6���a965����y3X�l7 z�'>��F�XW��8	ϼ���!A%Q�:t�.�K�K�ki����p�kl1�7!��K��%��K��WJf��o5��K:�2���m�%���abp�"�|�P�t�D����T��>�������L7Ӻ�ِ�X�׈�ܕ�����!ʹ�1���S�ҦgwI�+_<N�����1S������h���\Y�~�#q
+P�}(�2�tC)�.D|�ӦTPm��)9���^��3���<����^~�]�ئ����_��i���_#�G-�=)'J���_
+d��!��4@>ÖĜ'���'�R��
+B�/w���1>(_����Y'�0&��8��g�y-�D�I�]>|qM��ټ39M��(��O��Q����qY��/)l���;���@U(	b� h�E�<B�g�T��IQ.$�;-�� ��'��b��ZM�H�J�<#���П�0��`��Hq�	ػ� t� e0X#�ٟ#���e��\�^t��}a2�u��\����dYJ�V���4�xjXK$�-G%ɫ�$|)����k�W"���*�}q��HN�s����&��o��[W�J��9������Å
+�J��,d���YlB^b��_���?j�7h��V�}0�� �U�t��)/����H| ��#p��p�	����5�%�����9�q��|!N���h�����~9�Y�B��\a���LJ/�c�K���@4���8p�Wkw\u"y_lm9�\:�AQ�"�
+�0��4�Q)%���G�gv���tI��E��;S����J��^;Jn��(6F6�� 
+A��4ǿ��=�o@�}rU��J�7��
+�:���`�G�3��[].�h���
+���`�@��M��q��
+�:0ߑŕų[�����u��3'w��DE=��3��.^��.�w�/_�t6�k�[��t���kK�l<M!Bm�̤��/z�rjˣ�����a+���~f�U�2k��LW���d�}�����o���y7ӚuY�F�%H7����9�fVfSE-yQ7��	s�Y�M2�>�݂��*�n����Dߗ4�7R��g����~�T��OZ�<����g�#*(�7a�v���fU5ʫ�+����)>�[�%�Y��7����R�~�������O�2B:�(���G6wk��_(��vƯQe�ږ�|��b	H*��>�J�~���*��Ep�G�p�.���9(��2BܵpN�?�a�x�oH/j�0�L�5D�X��^�[�1�o� (�A���a�?%����}��I�^��4i�:Ṕ�&�[�PN�������p�~!;f���Ĭ����P�lBQ픕��ᆏ-핱u�1N�SY�?�[lCW��NQ���ҜI5�=�t_P�<�a�4�C����sY\�<$3�����2B� FW0�Z��� ��|��lG�H�2%�jDЀp�e\wcB���-��}��ذ��q�o)M�wh�U�9�Ѥ=J��qP��S�k���� 0��k��icEfP�e�ͻd<ߜ��9i��sU���%[�DgK��Ð�sNk$�6��e��q ��#�S௱�<��B��[#�Q�x���R�\Y0�Tҩ�z̹�Zq�Ogs*�T���M� U��Vs�SI��*5b(�-�Q���;:$��ս�Kn��Ee1��������%;<������t�;���Ê֐���� G�}��Z��nZP�M��b�����YjB��~*�5�t���9gT �8�%��=Ɯ���(��r�\�;y�����W�啦z������z�N���@�	.v 4C�W�ŉic�5�*k��].O1X&)u����V|����"&��q���:UX��=����1�Ta��6�sb>���'��+ƌq��ҭXм[ȃ����nlф0J�x�Rٷ���\aL�X�n}��a�\nO�l�$�5g�#���",P)�O%����5����c�G6琍���r~'�*��-:���Q�fi��,��Ă�r���!��5*?C��5�����3���|����p\G����� ���Vo}��t3���o���˝57���.�R����?��{�4��{�?�O��~�%����k��&C`��׵�hG���{���_�?�{��_���{����z�_�o�"\�.\{� zx'��3�?��{E�_�W�+��7��b�;ࣥ��:Z������|ro�������?�����b����k^kC��E���4ǃ�>Fy�&�C��?�x��f�9����{]��G�ߛs3�A����b�.�xŇٝ��5������"����!���q���b�����8�\��TU�h��<��1������yo<������V���{���q���!��/�{�Q�=�:���ӧ�G6��4t9��my�����o�   �� ��_�

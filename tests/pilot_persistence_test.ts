@@ -1,3 +1,4 @@
+import { hedera_anchors as dbHederaAnchors } from "../src/db/schema";
 import { db } from '../src/db/index.ts';
 import { RecordService } from '../src/services/recordService.ts';
 import { FarmerService } from '../src/services/farmerService.ts';
@@ -86,10 +87,10 @@ async function runPersistenceVerification() {
   // 4. CarbonEventService Persistence
   console.log("\n[4/8] Verifying CarbonEventService Persistence in PostgreSQL...");
   const carbonEvent = await CarbonEventService.addCarbonEvent({
-    event_type: "BIOMASS_VALORIZATION",
+    record_id: `rec_${testId}`, event_type: "BIOMASS_VALORIZATION",
     quantity_kg: 500,
     amount_tco2e: 0.75,
-    record_id: `rec_${testId}`,
+
     village: "Khamanon",
     district: "Ludhiana",
     state: "Punjab",
@@ -164,15 +165,13 @@ async function runPersistenceVerification() {
   // 8. HederaAnchorProvider Persistence
   console.log("\n[8/8] Verifying HederaAnchorProvider Persistence in PostgreSQL...");
   const anchor = await HederaAnchorProvider.submitAnchor({
-    record_id: `rec_${testId}`,
-    action: "MRV_VERIFIED",
-    data: { weight_kg: 500, ccc_amount_kg: 750 },
-    actor: `user_${testId}`,
-  });
-  if (!anchor || !anchor.payloadDigest) {
+
+    eventType: "MRV_VERIFIED", recordId: `rec_${testId}`
+  }, "0.0.123456");
+  if (!anchor || !anchor.integrityHash) {
     throw new Error("FAILED: Hedera anchor not persisted in PostgreSQL");
   }
-  const anchors = await HederaAnchorProvider.getRecentAnchors(5);
+  const anchors = await db.select().from(dbHederaAnchors).limit(5);
   if (!anchors || anchors.length === 0) {
     throw new Error("FAILED: Hedera anchors query from PostgreSQL failed");
   }

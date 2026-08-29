@@ -160,14 +160,14 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
       console.error(err);
       const net = wbForm.grossKg - wbForm.tareKg;
       setGeneratedSlip({
-        slipNo: `WB-SLIP-${Math.floor(100000 + Math.random() * 900000)}`,
+        slipNo: 'NOT_AVAILABLE',
         vehicleNo: wbForm.vehicleNo,
         facilityName: wbForm.facilityName,
         grossWeightKg: wbForm.grossKg,
         tareWeightKg: wbForm.tareKg,
         netWeightKg: net,
         timestamp: new Date().toISOString(),
-        integrityHash: `0x${Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+        integrityHash: 'NOT_AVAILABLE',
         verifiedBy: 'Electronic Weighbridge SCADA Interface'
       });
     }

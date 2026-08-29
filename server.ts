@@ -1,7 +1,7 @@
 import { carbonRouter } from "./src/routes/carbon.ts";
 import { auth as requireAuth } from "./src/middleware/auth.ts";
 import { sanitizeMiddleware } from "./src/middleware/sanitize.ts";
-import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserByPhone, getOrCreateUser, getUserByIdentifier, updateUserPassword, createPasswordResetToken, findValidPasswordResetToken, markPasswordResetTokenUsed, findUserByPhoneOrEmail } from "./src/db/users.ts";
+import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserByPhone, getOrCreateUser, getUserByIdentifier, updateUserPassword, createPasswordResetToken, findValidPasswordResetToken, markPasswordResetTokenUsed } from "./src/db/users.ts";
 import { db } from "./src/db/index.ts";
 import { users as dbUsers, records as dbRecords, farmers as dbFarmers, carbon_events as dbCarbonEvents, compliance_records as dbComplianceRecords, system_notifications as dbNotifications, operational_logs as dbOperationalLogs, hedera_anchors as dbHederaAnchors, pilot_onboardings as dbPilotOnboardings, pilot_records as dbPilotRecords } from "./src/db/schema.ts";
 import { eq, desc, sql } from "drizzle-orm";
@@ -727,30 +727,6 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
 
 
-  function calculateHash(data: any) {
-    return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
-  }
-
-  function appendBlock(data: any, type?: string, relatedId?: string, additionalArgs?: any) {
-    const lastBlock = blockchain[blockchain.length - 1];
-    const timestamp = Date.now();
-    const newBlock = {
-      index: blockchain.length,
-      timestamp,
-      data,
-      previousHash: lastBlock ? lastBlock.hash : "0",
-      hash: ""
-    };
-    newBlock.hash = calculateHash({
-      index: newBlock.index,
-      timestamp: newBlock.timestamp,
-      data: newBlock.data,
-      previousHash: newBlock.previousHash
-    });
-    blockchain.push(newBlock);
-    return newBlock;
-  }
-
   const ALL_STAKEHOLDER_ROLES = [
     // Public / Generator Roles
     "citizen",
@@ -841,7 +817,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       return res.status(400).json({ error: "Invalid stakeholder role specified. Privileged administrative roles cannot be self-assigned." });
     }
 
-    const existingUser = await findUserByPhoneOrEmail(identifier);
+    const existingUser = await getUserByIdentifier(identifier);
     if (existingUser) {
       return res.status(400).json({ error: "User with this Login ID or Phone already exists" });
     }
@@ -918,7 +894,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
       return res.status(400).json({ error: "Login ID and password are required" });
     }
 
-    let user: any = await findUserByPhoneOrEmail(identifier);
+    let user: any = await getUserByIdentifier(identifier);
 
     if (!user) {
       const allDbUsers = await getAllUsers();
@@ -1300,14 +1276,17 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
   });
 
   app.post("/api/generators/:id/compliance", auth(), async (req: any, res) => {
+    if (!req.body.compliance_proof_hash) {
+      return res.status(400).json({ error: "compliance_proof_hash is required" });
+    }
     const newRecord = {
       id: "comp_" + Date.now(),
       generator_id: req.params.id,
       generatorId: req.params.id,
       waste_batch_id: req.body.waste_batch_id || "REC_GENERIC",
       wasteBatchId: req.body.waste_batch_id || "REC_GENERIC",
-      compliance_proof_hash: req.body.compliance_proof_hash || crypto.randomBytes(32).toString("hex"),
-      complianceProofHash: req.body.compliance_proof_hash || crypto.randomBytes(32).toString("hex"),
+      compliance_proof_hash: req.body.compliance_proof_hash,
+      complianceProofHash: req.body.compliance_proof_hash,
       classification: req.body.classification || "non-hazardous",
       epr_ref_number: req.body.epr_ref_number || "EPR-REF-" + Date.now(),
       eprRefNumber: req.body.epr_ref_number || "EPR-REF-" + Date.now(),
@@ -1787,14 +1766,16 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
 
         // Submit anchor to Hedera HCS
         const anchorResult = await HederaAnchorProvider.submitAnchor({
-          record_id: record.id,
-          user_id: record.citizen_id || record.user_id,
-          waste_type: record.waste_type,
-          weight_kg: record.weight_kg,
-          ccc_amount_kg: record.ccc_amount_kg,
-          verified_by: req.user.id,
-          registry_serial_number: registrySerialNumber,
-          event_type: "MRV_VERIFICATION",
+          recordId: record.id,
+          eventType: "MRV_VERIFICATION",
+          weightKg: record.weight_kg,
+          carbonAvoidanceKg: record.ccc_amount_kg,
+          metadata: {
+            user_id: record.citizen_id || record.user_id,
+            waste_type: record.waste_type,
+            verified_by: req.user.id,
+            registry_serial_number: registrySerialNumber
+          },
         });
 
         await AuditLogService.log(
@@ -1802,7 +1783,7 @@ function getLGDInfo(state: string, district: string, localArea: string, context 
           `CCCs issued for ${record.id} by ${req.user.id}. Registry ID: ${registrySerialNumber}. Anchored on Hedera HCS (Status: ${anchorResult.status})`,
           "INFO",
           req.user.id,
-          { recordId: record.id, registrySerialNumber, anchorId: anchorResult.anchorId }
+          { recordId: record.id, registrySerialNumber, anchorId: anchorResult.id }
         );
       } else {
         await AuditLogService.log(
@@ -3133,7 +3114,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       },
       digitalManifestCount: totalLogs,
       verificationStatus: "SWACHH_INDIA_AUDIT_READY",
-      auditTrailHash: `0x${Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`
+      auditTrailHash: "NOT_CONFIGURED"
     };
 
     res.json({
@@ -3149,7 +3130,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       success: true,
       channel: channel || "BWG_REGISTRATION",
       cpcbResponseCode: 200,
-      cpcbSyncToken: `CPCB-TX-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      cpcbSyncToken: "NOT_CONFIGURED",
       timestamp: new Date().toISOString(),
       status: "CPCB_REGULATORY_RECORD_UPDATED",
       details: "RupayKg operational payload synchronized with CPCB Central Portal"
@@ -3301,26 +3282,6 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
     res.json(guardianSubmissions);
   });
 
-  app.get("/api/blockchain/verify", async (req, res) => {
-    let isValid = true;
-    for (let i = 1; i < blockchain.length; i++) {
-      const currentBlock = blockchain[i];
-      const previousBlock = blockchain[i - 1];
-
-      const recalculatedHash = calculateHash(
-        { index: currentBlock.index, timestamp: currentBlock.timestamp, data: currentBlock.data, previousHash: currentBlock.previousHash }
-      );
-
-      if (
-        currentBlock.hash !== recalculatedHash ||
-        currentBlock.previousHash !== previousBlock.hash
-      ) {
-        isValid = false;
-        break;
-      }
-    }
-    res.json({ isValid });
-  });
 
   app.get("/internal/metrics", async (req, res) => {
     const token = req.headers["x-service-token"];
@@ -3421,7 +3382,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
           id: "PILOT_WA_" + Date.now().toString(),
           weight: weight || 10, // Default to 10 if parsing failed but they sent a photo
           wasteType,
-          location: user.location || user.district || "Unknown",
+          location: (user as any).location || (user as any).district || "Unknown",
           photoUrl: MediaUrl0 || null,
           collectorId: user.id,
           timestamp: new Date().toISOString(),
@@ -3721,9 +3682,9 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       status: "OPERATIONAL",
       network: "Hedera Testnet (Consensus Service)",
       topic_id: process.env.HEDERA_TOPIC_ID || "NOT_CONFIGURED",
-      consensus_latency_ms: 38 + Math.floor(Math.random() * 12),
+      consensus_latency_ms: "NOT_AVAILABLE",
       mirror_node_status: "CONNECTED (testnet.mirrornode.hedera.com)",
-      tps: (12.4 + Math.random() * 2).toFixed(1),
+      tps: "NOT_AVAILABLE",
       total_anchored_messages: guardianMessages.length,
       latest_sequence_number: guardianMessages.length > 0 ? Math.max(...guardianMessages.map(m => m.sequenceNumber || 0)) : 1042,
       active_guardians: 4,
@@ -3809,7 +3770,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey || apiKey === "fallback_key") {
         return res.json({
-          answer: `Hedera HCS Topic 0.0.4592011 status: Recorded ${guardianMessages.length} immutable messages. Query: "${query}" - Verification hash valid.`
+          answer: `Hedera HCS Topic ${process.env.HEDERA_TOPIC_ID} status: Recorded ${guardianMessages.length} immutable messages. Query: "${query}" - Verification hash valid.`
         });
       }
 
@@ -3821,7 +3782,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
 
         const prompt = `
           You are the Guardian AI Assistant for the RupayKg Carbon Registry. 
-          The following is a list of HCS (Hedera Consensus Service) messages retrieved from Topic 0.0.4592011:
+          The following is a list of HCS (Hedera Consensus Service) messages retrieved from Topic ${process.env.HEDERA_TOPIC_ID}:
           
           ${JSON.stringify(guardianMessages.slice(-10), null, 2)}
           
@@ -3838,7 +3799,7 @@ User Compliance Question: ${question || "How do I maintain 100% CPCB SWM complia
         res.json({ answer: response.text || "Query processed over Hedera HCS Topic." });
       } catch (err: any) {
         console.error("Guardian Ledger AI Query Error:", err);
-        res.json({ answer: `Hedera HCS Ledger verification response for query "${query}": Verified on Topic 0.0.4592011.` });
+        res.json({ answer: `Hedera HCS Ledger verification response for query "${query}": Verified on Topic ${process.env.HEDERA_TOPIC_ID}.` });
       }
     },
   );
@@ -4265,7 +4226,7 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
       if (!publicKey) {
          return res.status(503).json({ error: "VC_ISSUER_PUBLIC_KEY not configured. Verification is disabled." });
       }
-      const verification = await CredentialService.verifyCredential(credential, claimedHash, publicKey);
+      const verification = await CredentialService.verifyCredential(credential, claimedHash);
       res.json({
         success: verification.isValid,
         verification
@@ -4277,7 +4238,7 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
 
   // REAL LIVE HEDERA HCS MIRROR NODE INTEGRATION
   app.get("/api/dmrv/hedera-stream/:topicId", auth(), async (req: any, res) => {
-    const topicId = req.params.topicId || "0.0.4592011";
+    const topicId = req.params.topicId || process.env.HEDERA_TOPIC_ID;
     console.log(`[Hedera dMRV] Fetching live HCS stream for Topic ${topicId}...`);
     
     try {
@@ -4330,7 +4291,7 @@ Ensure the response contains ONLY the pure JSON object, without any markdown bac
       res.status(500).json({ 
         error: "Failed to connect to Hedera Mirror Node.", 
         details: err.message,
-        fallback_topic: "0.0.4592011"
+        fallback_topic: process.env.HEDERA_TOPIC_ID
       });
     }
   });

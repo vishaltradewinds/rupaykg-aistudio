@@ -727,7 +727,7 @@ export const enterpriseMrvService = {
       uncertaintyResult: 5.0, // 5%
       executedAt: new Date().toISOString(),
       engineVersion: 'RupayEngine_v3.0.0',
-      calculationHash: `sha256_calc_${hashStringHex(`${runId}:${meth.methodologyId}:${netReductions}`)}`
+      calculationHash: `sha256_calc_${hashStringHex(`${generateId("CALC_RUN")}:${meth.methodologyId}:${netReductions}`)}`
     };
 
     enterpriseStore.calculationRuns.push(calculationRun);

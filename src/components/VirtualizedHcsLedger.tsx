@@ -52,7 +52,7 @@ export const VirtualizedHcsLedger: React.FC<VirtualizedHcsLedgerProps> = ({
   onSyncLedger,
   isSyncing = false,
   newlySyncedIds = [],
-  topicId = '0.0.4592011',
+  topicId = import.meta.env.VITE_HEDERA_TOPIC_ID || '',
   variant = 'console',
   title = 'HCS Live Terminal Stream',
   searchPlaceholder = 'Filter sequence, hash, or payload...',

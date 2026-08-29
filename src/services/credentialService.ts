@@ -475,4 +475,3 @@ export class CredentialService {
     }
   }
 }
-export const VCService = CredentialService;

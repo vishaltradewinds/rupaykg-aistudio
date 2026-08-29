@@ -186,7 +186,7 @@ export default function GroundRealityHub({
     setTimeout(() => {
       setIsProcessingPayout(false);
       setPayoutReceipt({
-        receiptId: `UPI-RK-${Math.floor(100000 + Math.random() * 900000)}`,
+        receiptId: 'NOT_AVAILABLE',
         collector: collectorName,
         upi: collectorUpi,
         material: selectedMaterial,
@@ -215,7 +215,7 @@ export default function GroundRealityHub({
         totalInvoice: totalVal,
         ewayBill: `EWB-88192${Math.floor(1000 + Math.random() * 9000)}`,
         eprCertificate: isUrban ? `EPR-CPCB-2026-${Math.floor(10000 + Math.random() * 90000)}` : `SATAT-CBG-2026-${Math.floor(10000 + Math.random() * 90000)}`,
-        hederaHash: `0.0.4819201@${Math.floor(100000 + Math.random() * 900000)}`,
+        hederaHash: 'NOT_AVAILABLE',
         timestamp: new Date().toLocaleString(),
         status: 'DISPATCHED_IN_TRANSIT'
       });

@@ -55,7 +55,7 @@ async function process1Writer() {
     event_type: "BIOMASS_VALORIZATION",
     quantity_kg: 720,
     amount_tco2e: 1.08,
-    record_id: recordId,
+    recordId: recordId,
     village: "Khamanon",
     district: "Ludhiana",
     state: "Punjab",
@@ -89,11 +89,9 @@ async function process1Writer() {
   );
 
   const anchor = await HederaAnchorProvider.submitAnchor({
-    record_id: recordId,
-    action: "SURVIVAL_BLOCK",
-    data: { weight_kg: 720, ccc_amount_kg: 1080 },
-    actor: userId,
-  });
+    recordId: recordId,
+    eventType: "SURVIVAL_BLOCK"
+  }, "0.0.123456", userId);
 
   const manifest = {
     userId,
@@ -103,8 +101,8 @@ async function process1Writer() {
     complianceId: compliance.id,
     pilotId: pilot.id,
     auditLogId: auditLog.id,
-    anchorId: anchor.anchorId,
-    anchorHash: anchor.payloadDigest
+    anchorId: anchor.id,
+    anchorHash: anchor.integrityHash
   };
 
   fs.writeFileSync('./tests/.survival_manifest.json', JSON.stringify(manifest, null, 2));

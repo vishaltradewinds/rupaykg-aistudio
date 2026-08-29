@@ -747,7 +747,7 @@ export default function App() {
   const [greenBonds, setGreenBonds] = useState<any[]>([]);
   const [dmrvSensors, setDmrvSensors] = useState<any[]>([]);
   const [selectedProjectForDmrv, setSelectedProjectForDmrv] = useState<any>(null);
-  const [customTopicId, setCustomTopicId] = useState<string>('0.0.4592011');
+  const [customTopicId, setCustomTopicId] = useState<string>(import.meta.env.VITE_HEDERA_TOPIC_ID || '');
   const [hcsMessages, setHcsMessages] = useState<any[]>([]);
   const [liveClimateTelemetry, setLiveClimateTelemetry] = useState<any>(null);
   const [isFetchingClimate, setIsFetchingClimate] = useState<boolean>(false);
@@ -5619,7 +5619,7 @@ export default function App() {
                                       </button>
                                       <div className="flex items-center gap-1 text-[8px] text-amber-500/80 font-mono">
                                         <Globe size={8} />
-                                        HCS ANCHORED: {record.hcs_topic_id || '0.0.4592011'}
+                                        HCS ANCHORED: {record.hcs_topic_id || import.meta.env.VITE_HEDERA_TOPIC_ID || ''}
                                       </div>
                                     </div>
                                   )}
@@ -6574,7 +6574,7 @@ export default function App() {
                       </div>
                       <div className="flex justify-between text-white/80">
                         <span className="text-white/40">{t('Hedera HCS Topic')}</span>
-                        <span className="text-cyan-400 text-xs">{selectedGpsPhoto.hcs_topic_id || '0.0.4592011'}</span>
+                        <span className="text-cyan-400 text-xs">{selectedGpsPhoto.hcs_topic_id || import.meta.env.VITE_HEDERA_TOPIC_ID || ''}</span>
                       </div>
                     </div>
                   </div>

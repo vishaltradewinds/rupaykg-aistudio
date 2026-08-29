@@ -734,9 +734,9 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
             {
               title: 'Section I: Hedera Consensus Service (HCS) Ledger Consensus',
               items: [
-                { label: 'Hedera Topic ID', value: `0.0.${Math.floor(1000000 + Math.random() * 9000000)}` },
-                { label: 'Consensus Message Sequence No.', value: `#${Math.floor(10000 + Math.random() * 90000)}` },
-                { label: 'Cryptographic HCS Transaction Hash', value: `0x${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` }
+                { label: 'Hedera Topic ID', value: import.meta.env.VITE_HEDERA_TOPIC_ID || 'NOT_CONFIGURED' },
+                { label: 'Consensus Message Sequence No.', value: 'NOT_AVAILABLE' },
+                { label: 'Cryptographic HCS Transaction Hash', value: 'NOT_AVAILABLE' }
               ]
             },
             {
@@ -788,7 +788,7 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
               title: 'Section II: Direct Wallet Rewards & Payout Receipts',
               items: [
                 { label: 'Total Green Wallet Disbursed', value: `₹${baseEarnings.toLocaleString()}` },
-                { label: 'UPI / Bank Transaction ID', value: `UPI-${Math.floor(100000000000 + Math.random() * 900000000000)}` },
+                { label: 'UPI / Bank Transaction ID', value: 'NOT_AVAILABLE' },
                 { label: 'Green Loyalty Reward Points', value: `${Math.round(baseEarnings * 2)} Points` }
               ]
             }
@@ -846,7 +846,7 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
         complianceStatus: {
           overallGrade: 'A+ (COMPLIANT)',
           cpcbSyncReady: true,
-          hederaGuardianHcsHash: `0x${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+          hederaGuardianHcsHash: 'NOT_AVAILABLE',
           verificationConfidenceScore: 98.6,
           auditorSignatureSeal: 'RUPAYKG-OFFICIAL-DIGITAL-SEAL-VERIFIED'
         },

@@ -1,3 +1,6 @@
+import { db } from "../src/db/index.ts";
+process.env.HEDERA_TOPIC_ID = "0.0.123456";
+import { hedera_anchors as dbHederaAnchors } from "../src/db/schema";
 import { RecordService } from '../src/services/recordService.ts';
 import { FarmerService } from '../src/services/farmerService.ts';
 import { CarbonEventService } from '../src/services/carbonEventService.ts';
@@ -59,8 +62,8 @@ async function process2Reader() {
   results.push({ service: "AuditLogService", id: manifest.auditLogId, before: "PERSISTED (P1)", after: "FETCHED (P2)", result: "PASS" });
 
   // 8. HederaAnchorProvider
-  const anchors = await HederaAnchorProvider.getRecentAnchors(50);
-  const anchor = anchors.find((a: any) => a.id === manifest.anchorId || a.payloadDigest === manifest.anchorHash);
+  const anchors = await db.select().from(dbHederaAnchors);
+    const anchor = anchors.find((a: any) => a.id === manifest.anchorId || a.payloadHash === manifest.anchorHash);
   if (!anchor) throw new Error("HederaAnchorProvider failed survival");
   results.push({ service: "HederaAnchorProvider", id: manifest.anchorId, before: "PERSISTED (P1)", after: "FETCHED (P2)", result: "PASS" });
 

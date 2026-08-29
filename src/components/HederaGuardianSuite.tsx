@@ -48,7 +48,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
   const [healthData, setHealthData] = useState<any>({
     status: 'OPERATIONAL',
     network: 'Hedera Testnet (Consensus Service)',
-    topic_id: '0.0.4592011',
+    topic_id: import.meta.env.VITE_HEDERA_TOPIC_ID || '',
     consensus_latency_ms: 38,
     mirror_node_status: 'CONNECTED (testnet.mirrornode.hedera.com)',
     tps: '12.8',
@@ -326,7 +326,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
     {
       id: 'node-5',
       title: '5. HCS Consensus Anchoring',
-      subtitle: syncedBannerInfo ? `${syncedBannerInfo.count} Fresh Tx Synced (Seq #${syncedBannerInfo.newSeqs.join(', #')})` : 'Hedera Topic 0.0.4592011',
+      subtitle: syncedBannerInfo ? `${syncedBannerInfo.count} Fresh Tx Synced (Seq #${syncedBannerInfo.newSeqs.join(', #')})` : `Hedera Topic ${import.meta.env.VITE_HEDERA_TOPIC_ID}`,
       status: newlySyncedIds.length > 0 ? 'LIVE SYNCED' : 'ANCHORED',
       latency: isSyncingLedger ? 'Syncing...' : '12ms',
       icon: Radio,
@@ -851,7 +851,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
               </div>
               <h4 className="text-xl font-bold text-white">Automated Ledger Hash-Link & Chain Integrity Audit</h4>
               <p className="text-xs text-white/60 max-w-2xl leading-relaxed">
-                Fetches recent HCS topic sequences for Topic <span className="text-cyan-400 font-mono font-bold">0.0.4592011</span>, recalculates SHA-384 consensus running hashes, verifies Ed25519 signatures, checks sequence continuity, and validates timestamp monotonicity across the Hedera ledger.
+                Fetches recent HCS topic sequences for Topic <span className="text-cyan-400 font-mono font-bold">{import.meta.env.VITE_HEDERA_TOPIC_ID}</span>, recalculates SHA-384 consensus running hashes, verifies Ed25519 signatures, checks sequence continuity, and validates timestamp monotonicity across the Hedera ledger.
               </p>
             </div>
 
@@ -948,7 +948,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                       )}
                     </h4>
                     <p className="text-xs text-white/50 font-mono mt-1">
-                      Topic ID: <span className="text-cyan-400 font-bold">0.0.4592011</span> | Audit Cert: {auditResult.audit_id}
+                      Topic ID: <span className="text-cyan-400 font-bold">{import.meta.env.VITE_HEDERA_TOPIC_ID}</span> | Audit Cert: {auditResult.audit_id}
                     </p>
                   </div>
                 </div>
