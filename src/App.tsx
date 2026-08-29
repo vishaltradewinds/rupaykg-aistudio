@@ -3464,7 +3464,20 @@ export default function App() {
           </button>
         </div>
 
+        <div className="mx-1 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2" role="status" aria-label="LGD verification status">
+  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+    <ShieldAlert size={13} />
+    LGD: Local Index
+  </div>
+  <p className="mt-0.5 text-[9px] leading-4 text-white/40">
+    Not Government Verified. Use official LGD data for regulatory submissions.
+  </p>
+</div>
+
         <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
+          <div className="px-2 pt-1 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">
+            Workspace
+          </div>
           {/* Core Operating System Engines */}
           <button 
             onClick={() => setView('dashboard')}
@@ -3523,6 +3536,10 @@ export default function App() {
             <span className="hidden md:block font-bold text-amber-300">Platform Working Manual</span>
           </button>
 
+          <div className="px-2 pt-2 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">
+            Field Operations
+          </div>
+
           {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
             <button 
               onClick={() => setView('upload')}
@@ -3544,6 +3561,10 @@ export default function App() {
               <span className="hidden md:block font-medium">{t('Task Board')}</span>
             </button>
           )}
+
+          <div className="px-2 pt-2 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">
+            Administration
+          </div>
 
           {/* Grouped Platform Options & Utilities Menu */}
           <div className="mt-4 pt-3 border-t border-white/10 space-y-1">
