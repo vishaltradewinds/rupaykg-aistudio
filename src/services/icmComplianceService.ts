@@ -1,5 +1,11 @@
 // ========================================================
-// INDIAN CARBON MARKET (ICM) COMPLIANCE SERVICE
+// INDIAN CARBON MARKET (ICM) / CCTS COMPLIANCE SERVICE
+// Source of truth: BEE approved methodologies under the
+// CCTS Offset Mechanism (current published catalogue).
+//
+// IMPORTANT: RupayKg does not issue CCCs. BEE/ICM is the
+// authoritative issuance layer; ACVAs independently validate/
+// verify where required by the applicable CCTS process.
 // ========================================================
 
 export interface ICMComplianceRule {
@@ -8,111 +14,88 @@ export interface ICMComplianceRule {
   name: string;
   description: string;
   applicableWasteTypes?: string[];
+  operatingContexts?: Array<"urban" | "rural" | "both">;
 }
 
 export const ICM_CCTS_SECTORS = [
-  "Waste Management",
-  "Biomass/Agriculture",
-  "Energy Efficiency",
-  "Renewable Energy"
+  "Energy",
+  "Industries",
+  "Waste Handling and Disposal",
+  "Agriculture",
+  "Forestry"
 ] as const;
 
 export type ICM_CCTS_Sector = typeof ICM_CCTS_SECTORS[number];
 
 export const ICM_METHODOLOGIES: Record<ICM_CCTS_Sector, ICMComplianceRule[]> = {
-  "Waste Management": [
+  Energy: [
     {
-      sector: "Waste Management",
-      methodologyId: "ICM-WM-001",
-      name: "Composting & Landfill Diversion",
-      description: "Avoidance of methane emissions through aerobic composting of organic waste and diversion from landfills.",
-      applicableWasteTypes: ["Municipal Organic Waste", "Food & Kitchen Waste", "Garden & Leaf Litter", "Livestock Manure"]
+      sector: "Energy",
+      methodologyId: "BM EN01.001",
+      name: "Grid-connected electricity generation from renewable sources",
+      description: "BEE-approved CCTS Offset Mechanism methodology for grid-connected renewable electricity generation.",
+      operatingContexts: ["both"]
     },
     {
-      sector: "Waste Management",
-      methodologyId: "ICM-WM-002",
-      name: "Organic Waste Biomethanation",
-      description: "Methane recovery and utilization from anaerobic digestion of organic solid waste.",
-      applicableWasteTypes: ["Municipal Organic Waste", "Food & Kitchen Waste", "Livestock Manure"]
-    },
-    {
-      sector: "Waste Management",
-      methodologyId: "ICM-WM-003",
-      name: "Refuse-Derived Fuel (RDF) Production",
-      description: "Production and thermal utilization of RDF from non-recyclable dry waste, displacing fossil fuels.",
-      applicableWasteTypes: ["Plastic Waste", "Multi-Layered Plastic", "Mixed Municipal Dry Waste", "Textile Waste", "Paper Waste"]
-    },
-    {
-      sector: "Waste Management",
-      methodologyId: "ICM-WM-004",
-      name: "Waste-to-Energy (WTE) Incineration",
-      description: "Controlled combustion of municipal solid waste for clean grid electricity generation.",
-      applicableWasteTypes: ["Mixed Municipal Dry Waste"]
+      sector: "Energy",
+      methodologyId: "BM EN01.002",
+      name: "Hydrogen production from electrolysis of water",
+      description: "BEE-approved CCTS Offset Mechanism methodology for hydrogen production from water electrolysis.",
+      operatingContexts: ["both"]
     }
   ],
-  "Biomass/Agriculture": [
+  Industries: [
     {
-      sector: "Biomass/Agriculture",
-      methodologyId: "ICM-AG-001",
-      name: "Crop Residue Management",
-      description: "Avoided open field burning of agricultural residues through aggregation and supply chain transformation.",
-      applicableWasteTypes: ["Crop Residue / Paddy Straw", "Biomass Aggregation", "Coconut Shells / Husk"]
+      sector: "Industries",
+      methodologyId: "BM IN02.001",
+      name: "Energy efficiency and fuel switching measures for industrial facilities",
+      description: "BEE-approved CCTS Offset Mechanism methodology covering eligible industrial energy-efficiency and fuel-switching measures.",
+      operatingContexts: ["both"]
     },
     {
-      sector: "Biomass/Agriculture",
-      methodologyId: "ICM-AG-002",
-      name: "Biochar Production",
-      description: "Pyrolysis of agricultural wastes for long-term carbon sequestration in soil.",
-      applicableWasteTypes: ["Crop Residue / Paddy Straw", "Biomass Aggregation", "Wood & Forestry Biomass"]
-    },
-    {
-      sector: "Biomass/Agriculture",
-      methodologyId: "ICM-AG-003",
-      name: "Biomass Thermal Applications",
-      description: "Substitution of coal/fossil fuels with agricultural residue pellets/briquettes in industrial boilers.",
-      applicableWasteTypes: ["Crop Residue / Paddy Straw", "Biomass Aggregation", "Coconut Shells / Husk"]
-    },
-    {
-      sector: "Biomass/Agriculture",
-      methodologyId: "ICM-AG-004",
-      name: "Gobar / Community Biogas Systems",
-      description: "Small-to-medium scale biomethanation of livestock manure for cooking fuel or decentralized power.",
-      applicableWasteTypes: ["Livestock Manure"]
+      sector: "Industries",
+      methodologyId: "BM IN02.002",
+      name: "Hydrogen production using methane extracted from biogas",
+      description: "BEE-approved CCTS Offset Mechanism methodology for eligible hydrogen production using methane extracted from biogas.",
+      applicableWasteTypes: ["Biogas", "Livestock Manure", "Organic Waste"],
+      operatingContexts: ["both"]
     }
   ],
-  "Energy Efficiency": [
+  "Waste Handling and Disposal": [
     {
-      sector: "Energy Efficiency",
-      methodologyId: "ICM-EE-001",
-      name: "Waste Heat Recovery System (WHRS)",
-      description: "Capture of waste heat in industrial processes (composting/biomethanation plants) for mechanical/electrical power.",
+      sector: "Waste Handling and Disposal",
+      methodologyId: "BM WA03.001",
+      name: "Landfill methane recovery",
+      description: "BEE-approved methodology for eligible methane recovery from solid waste disposal sites.",
+      applicableWasteTypes: ["Municipal Solid Waste", "Biodegradable Waste", "Industrial Solid Waste"],
+      operatingContexts: ["urban", "both"]
     },
     {
-      sector: "Energy Efficiency",
-      methodologyId: "ICM-EE-002",
-      name: "Efficient Water & Waste Pumping",
-      description: "Energy efficiency upgrades in municipal wastewater and water supply pumping systems.",
-    },
-    {
-      sector: "Energy Efficiency",
-      methodologyId: "ICM-EE-003",
-      name: "Smart Municipal Street Lighting",
-      description: "Deployment of smart LED lighting and automated control rails in urban wards.",
+      sector: "Waste Handling and Disposal",
+      methodologyId: "BM WA03.002",
+      name: "Flaring or use of landfill gas",
+      description: "BEE-approved methodology for eligible capture, flaring and/or use of landfill gas for energy or other qualifying service displacement.",
+      applicableWasteTypes: ["Municipal Solid Waste", "Biodegradable Waste", "Industrial Solid Waste"],
+      operatingContexts: ["urban", "both"]
     }
   ],
-  "Renewable Energy": [
+  Agriculture: [
     {
-      sector: "Renewable Energy",
-      methodologyId: "ICM-RE-001",
-      name: "Decentralized Solar PV Systems",
-      description: "Solar PV installations at Material Recovery Facilities (MRFs) and village resource centers.",
-    },
+      sector: "Agriculture",
+      methodologyId: "BM AG04.001",
+      name: "Methane recovery from livestock and manure management at households and small farms",
+      description: "BEE-approved CCTS Offset Mechanism methodology for eligible methane recovery from livestock and manure management at households and small farms.",
+      applicableWasteTypes: ["Livestock Manure", "Animal Waste", "Biogas"],
+      operatingContexts: ["rural", "both"]
+    }
+  ],
+  Forestry: [
     {
-      sector: "Renewable Energy",
-      methodologyId: "ICM-RE-002",
-      name: "Biomass-based CHP Cogeneration",
-      description: "Combined Heat and Power (CHP) plants using waste agricultural residues.",
-      applicableWasteTypes: ["Crop Residue / Paddy Straw", "Biomass Aggregation"]
+      sector: "Forestry",
+      methodologyId: "BM FR05.001",
+      name: "Afforestation and reforestation of degraded mangrove habitats",
+      description: "BEE-approved CCTS Offset Mechanism methodology for eligible afforestation/reforestation of degraded mangrove habitats.",
+      operatingContexts: ["both"]
     }
   ]
 };
@@ -124,99 +107,82 @@ export interface ICMValidationResult {
     isSectorValid: boolean;
     isMethodologyValid: boolean;
     isAcvaValid: boolean;
+    isContextValid?: boolean;
     suggestedMethodology?: string;
   };
 }
 
+/**
+ * BEE's published ACVA register is authoritative. This registry contains
+ * the currently published CCTS offset-sector accreditation relevant to
+ * RupayKg's methodology routing. It must be refreshed when BEE updates it.
+ */
+export const CCTS_ACVAS = [
+  { id: "ACVA001", name: "VKU Certification Private Limited", sectors: ["Energy", "Industries", "Waste Handling and Disposal", "Agriculture", "Forestry"] },
+  { id: "ACVA002", name: "Bureau Veritas India (Pvt.) Ltd", sectors: ["Energy", "Industries", "Waste Handling and Disposal", "Agriculture", "Forestry", "Transport", "Fugitive Emission"] },
+  { id: "ACVA003", name: "TUV India Private Limited", sectors: ["Industries", "Agriculture", "Transport"] },
+  { id: "ACVA004", name: "Earthood Services Limited", sectors: ["Energy", "Industries", "Waste Handling and Disposal", "Agriculture", "Forestry"] },
+  { id: "ACVA006", name: "KBS Certification Services Limited", sectors: ["Energy", "Industries", "Waste Handling and Disposal", "Agriculture", "Forestry", "Transport", "Fugitive Emission"] }
+] as const;
+
 export class ICMComplianceService {
-  /**
-   * Validates a carbon record against BEE (Bureau of Energy Efficiency) / ICM compliance standards.
-   */
+  static getMethodology(sector: string, methodologyId: string): ICMComplianceRule | undefined {
+    if (!ICM_CCTS_SECTORS.includes(sector as ICM_CCTS_Sector)) return undefined;
+    return ICM_METHODOLOGIES[sector as ICM_CCTS_Sector].find(m => m.methodologyId === methodologyId);
+  }
+
+  static isAcvaAccreditedForSector(acvaId: string, sector: string): boolean {
+    const acva = CCTS_ACVAS.find(a => a.id.toUpperCase() === acvaId?.toUpperCase());
+    return !!acva && acva.sectors.includes(sector as never);
+  }
+
   static validate(
     sector: string,
     methodologyId: string,
     acvaId: string,
-    wasteType?: string
+    wasteType?: string,
+    context?: "urban" | "rural"
   ): ICMValidationResult {
-    // 1. Validate Sector
     const isSectorValid = ICM_CCTS_SECTORS.includes(sector as ICM_CCTS_Sector);
     if (!isSectorValid) {
-      return {
-        isValid: false,
-        error: `Invalid CCTS Sector: '${sector}'. Supported sectors are: ${ICM_CCTS_SECTORS.join(", ")}.`,
-        details: { isSectorValid: false, isMethodologyValid: false, isAcvaValid: true }
-      };
+      return { isValid: false, error: `Invalid CCTS sector '${sector}'.`, details: { isSectorValid: false, isMethodologyValid: false, isAcvaValid: false } };
     }
 
-    // 2. Validate Methodology under this Sector
-    const methodologies = ICM_METHODOLOGIES[sector as ICM_CCTS_Sector] || [];
-    const methodologyRule = methodologies.find(m => m.methodologyId === methodologyId);
-    
+    const methodologyRule = this.getMethodology(sector, methodologyId);
     if (!methodologyRule) {
-      const validIds = methodologies.map(m => m.methodologyId).join(", ");
-      return {
-        isValid: false,
-        error: `Invalid Methodology ID '${methodologyId}' for Sector '${sector}'. Valid Methodology IDs for this sector are: ${validIds}.`,
-        details: { isSectorValid: true, isMethodologyValid: false, isAcvaValid: true }
-      };
+      return { isValid: false, error: `Methodology '${methodologyId}' is not in the current BEE-approved CCTS catalogue for '${sector}'.`, details: { isSectorValid: true, isMethodologyValid: false, isAcvaValid: false } };
     }
 
-    // 3. Optional validation: Warn or fail if waste type is incompatible with methodology
-    if (wasteType && methodologyRule.applicableWasteTypes) {
-      const isWasteTypeApplicable = methodologyRule.applicableWasteTypes.includes(wasteType);
-      if (!isWasteTypeApplicable) {
-        // We log a warning or adjust validation, but under strict standards we can warn or require matching.
-        // Let's make it a recommendation in details.
-        console.warn(`Waste type '${wasteType}' is not typical for Methodology '${methodologyId}'.`);
-      }
+    const isContextValid = !context || methodologyRule.operatingContexts?.includes("both") || methodologyRule.operatingContexts?.includes(context);
+    if (!isContextValid) {
+      return { isValid: false, error: `Methodology '${methodologyId}' is not routed for the '${context}' operating context by RupayKg.`, details: { isSectorValid: true, isMethodologyValid: true, isAcvaValid: false, isContextValid: false } };
     }
 
-    // 4. Validate ACVA (Accredited Carbon Verification Agency) ID
-    // Standard format matches ACVA-BEE-XXX where XXX is a 3-4 digit registration number, or general ACVA-XXX format
-    const acvaRegex = /^ACVA-(BEE-)?[A-Z0-9]{3,8}$/i;
-    const isAcvaValid = !!acvaId && acvaRegex.test(acvaId);
+    if (wasteType && methodologyRule.applicableWasteTypes && !methodologyRule.applicableWasteTypes.includes(wasteType)) {
+      return { isValid: false, error: `Activity/waste type '${wasteType}' is not listed for methodology '${methodologyId}'. ACVA/BEE eligibility must not be inferred.`, details: { isSectorValid: true, isMethodologyValid: true, isAcvaValid: false, isContextValid: true } };
+    }
+
+    const isAcvaValid = this.isAcvaAccreditedForSector(acvaId, sector);
     if (!isAcvaValid) {
-      return {
-        isValid: false,
-        error: `Invalid ACVA ID format: '${acvaId}'. Must start with ACVA- or ACVA-BEE- followed by 3-8 alphanumeric characters (e.g. ACVA-BEE-001).`,
-        details: { isSectorValid: true, isMethodologyValid: true, isAcvaValid: false }
-      };
+      return { isValid: false, error: `ACVA '${acvaId}' is not present in RupayKg's current BEE-published sector accreditation registry for '${sector}'.`, details: { isSectorValid: true, isMethodologyValid: true, isAcvaValid: false, isContextValid: true } };
     }
 
-    return {
-      isValid: true,
-      details: {
-        isSectorValid: true,
-        isMethodologyValid: true,
-        isAcvaValid: true
-      }
-    };
+    return { isValid: true, details: { isSectorValid: true, isMethodologyValid: true, isAcvaValid: true, isContextValid: true } };
   }
 
-  /**
-   * Helper to suggest a methodology based on waste type and operating context.
-   */
-  static suggestMethodology(wasteType: string, context: "urban" | "rural" | string): { sector: string; methodologyId: string } {
+  static suggestMethodology(wasteType: string, context: "urban" | "rural" | string): { sector: string; methodologyId: string; status: "methodology_match" | "mrV_only" } {
     const cleanContext = context?.toLowerCase();
-    
-    // Organics / Agri Wastes
-    if (["Municipal Organic Waste", "Food & Kitchen Waste", "Garden & Leaf Litter", "Livestock Manure"].includes(wasteType)) {
-      if (cleanContext === "rural") {
-        return { sector: "Biomass/Agriculture", methodologyId: "ICM-AG-004" }; // Gobar / Community Biogas
-      }
-      return { sector: "Waste Management", methodologyId: "ICM-WM-001" }; // Composting
+
+    // Only suggest a BEE CCTS methodology where the current published catalogue
+    // gives RupayKg a defensible routing. Everything else stays MRV-only.
+    if (cleanContext === "urban" && ["Landfill Gas", "Municipal Solid Waste", "Biodegradable Waste"].includes(wasteType)) {
+      return { sector: "Waste Handling and Disposal", methodologyId: "BM WA03.002", status: "methodology_match" };
     }
 
-    if (["Crop Residue / Paddy Straw", "Biomass Aggregation", "Coconut Shells / Husk", "Wood & Forestry Biomass"].includes(wasteType)) {
-      return { sector: "Biomass/Agriculture", methodologyId: "ICM-AG-001" }; // Crop Residue Management
+    if (cleanContext === "rural" && ["Livestock Manure", "Animal Waste", "Biogas"].includes(wasteType)) {
+      return { sector: "Agriculture", methodologyId: "BM AG04.001", status: "methodology_match" };
     }
 
-    // Dry Recyclables/RDF fuel sources
-    if (["Plastic Waste", "Multi-Layered Plastic", "Mixed Municipal Dry Waste", "Textile Waste", "Paper Waste"].includes(wasteType)) {
-      return { sector: "Waste Management", methodologyId: "ICM-WM-003" }; // RDF Production
-    }
-
-    // Fallback
-    return { sector: "Waste Management", methodologyId: "ICM-WM-001" };
+    return { sector: "", methodologyId: "", status: "mrV_only" };
   }
 }
