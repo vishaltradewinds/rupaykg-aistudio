@@ -1,0 +1,56 @@
+name: One-time LGD sync compatibility fix
+
+on:
+  push:
+    paths:
+      - ".github/lgd-sync-trigger"
+
+permissions:
+  contents: write
+
+jobs:
+  fix-lgd-sync:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Make LGD server lookup synchronous
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('server.ts')
+          text = p.read_text()
+          old = '''    const districts = getLgdDistricts(stateRecord.state_name);
+    return districts.then((districtRows) => {
+      const districtRecord = districtRows.find((row) => row.district_name === district);'''
+          new = '''    const districtRows = getLgdDistricts(stateRecord.state_name);
+    const districtRecord = districtRows.find((row) => row.district_name === district);'''
+          if old not in text:
+              raise SystemExit('Expected async LGD block start not found')
+          text = text.replace(old, new, 1)
+          old_end = '''      };
+    });
+  }
+
+app.set("trust proxy", 1);'''
+          new_end = '''    };
+  }
+
+app.set("trust proxy", 1);'''
+          if old_end not in text:
+              raise SystemExit('Expected async LGD block end not found')
+          text = text.replace(old_end, new_end, 1)
+          p.write_text(text)
+          PY
+      - name: Remove one-time trigger and workflow
+        run: rm -f .github/lgd-sync-trigger .github/workflows/lgd-sync-fix.yml
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server.ts .github/lgd-sync-trigger .github/workflows/lgd-sync-fix.yml
+          git commit -m "fix: keep LGD server lookup synchronous"
+          git push
