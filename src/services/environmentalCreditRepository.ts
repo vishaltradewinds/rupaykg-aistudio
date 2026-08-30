@@ -1,6 +1,5 @@
 import { createPool } from '../db/index.ts';
 import crypto from 'crypto';
-import { getAuthoritativeRegistryAdapter } from './authoritativeCreditRegistry.ts';
 export type CreditType='CCC'|'GREEN_CREDIT';
 export type Registry='BEE_ICM'|'GCP_ICFRE';
 const pool=createPool();
@@ -8,6 +7,12 @@ const expectedRegistry:Record<CreditType,Registry>={CCC:'BEE_ICM',GREEN_CREDIT:'
 function assertPositive(n:number){if(!Number.isFinite(n)||n<=0)throw new Error('Quantity must be a positive finite number');}
 function assertIssuerBoundary(t:CreditType,r:Registry){if(expectedRegistry[t]!==r)throw new Error(`Invalid authoritative issuer boundary for ${t}`);}
 function assertKey(k:string){if(!k?.trim()||k.length>200)throw new Error('A valid idempotency key is required');}
+
+export async function getCustodyPosition(positionId:string){
+ const r=await pool.query('SELECT * FROM environmental_credit_positions WHERE id=$1',[positionId]);
+ if(!r.rows[0])throw new Error('Depository position not found');
+ return r.rows[0];
+}
 
 export async function createCustodyPosition(input:{creditType:CreditType;registry:Registry;registryAccountId:string;authoritativeCreditReference:string;holderEntityId:string;quantity:number;tradabilityStatus:'TRADABLE'|'NON_TRADABLE';authoritativeVerifiedAt:string;actorUid:string;idempotencyKey:string}){
  assertPositive(input.quantity);assertIssuerBoundary(input.creditType,input.registry);assertKey(input.idempotencyKey);
