@@ -9,6 +9,29 @@ on:
 jobs:
   combined-regression:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rupaykg
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d rupaykg"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/rupaykg
+      SQL_HOST: 127.0.0.1
+      SQL_USER: postgres
+      SQL_PASSWORD: postgres
+      SQL_DB_NAME: rupaykg
+      SQL_PORT: 5432
+      DB_SSL: "false"
+      NODE_ENV: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,6 +44,8 @@ jobs:
         run: npm ci
       - name: Typecheck
         run: npm run lint
+      - name: Apply database migrations
+        run: npm run db:migrate
       - name: Full existing regression
         run: npm test
       - name: Explicit combined CCTS + GCP lifecycle gate
