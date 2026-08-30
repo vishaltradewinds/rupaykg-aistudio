@@ -20,6 +20,7 @@ export interface GreenCreditMethodology {
   administrator: "ICFRE";
   authority: "MoEFCC";
   activity: string;
+  creditRule: string;
   tradable: false;
   transferable: false;
   eligibility: string[];
@@ -46,6 +47,7 @@ export const GREEN_CREDIT_METHODOLOGIES: GreenCreditMethodology[] = [
     administrator: "ICFRE",
     authority: "MoEFCC",
     activity: "Eco-restoration of eligible degraded forest land under the GCP modalities, including plantation and site-specific restoration activities under an approved DPR.",
+    creditRule: "Authoritative GCP issuance only; RupayKg records the issued quantity and custody status and does not calculate, mint, or expose Green Credits as tradable marketplace inventory.",
     tradable: false,
     transferable: false,
     eligibility: [
