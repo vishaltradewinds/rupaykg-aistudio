@@ -3,7 +3,7 @@ name: RupayKg Production Audit
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, recovery/gcp-ccts-checkpoint-20260830]
 
 permissions:
   contents: write
