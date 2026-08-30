@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { auth } from '../middleware/auth.ts';
 import { listAvailablePositions, reservePosition, releaseReservation, retireCredits, confirmAuthoritativeTransfer } from '../services/environmentalCreditRepository.ts';
+import { assertLifecycleGate, assertCreditIssuerBoundary, type LifecycleGateInput, type LifecycleStage } from '../services/environmentalCreditLifecycle.ts';
 
 export const environmentalCreditsRouter = Router();
 environmentalCreditsRouter.use(auth());
@@ -16,6 +17,25 @@ environmentalCreditsRouter.get('/available', async (req: any, res) => {
     const type = req.query.creditType === 'CCC' || req.query.creditType === 'GREEN_CREDIT' ? req.query.creditType : undefined;
     res.json(await listAvailablePositions(type));
   } catch { res.status(503).json({ error: 'Environmental credit depository unavailable' }); }
+});
+
+environmentalCreditsRouter.get('/lifecycle/order', (_req, res) => {
+  res.json({
+    lifecycle: ['MRV','METHODOLOGY','ACVA_VERIFICATION','AUTHORITATIVE_ISSUANCE','CUSTODY','MARKETPLACE','BUYER_ELIGIBILITY','AUTHORITATIVE_TRANSFER','RECONCILIATION','SETTLEMENT','RETIREMENT'],
+    issuerBoundaries: { CCC: 'BEE_ICM', GREEN_CREDIT: 'GCP_ICFRE' },
+    rupayKgRole: 'DEPOSITORY_AND_MARKETPLACE_AFTER_AUTHORITATIVE_ISSUANCE'
+  });
+});
+
+environmentalCreditsRouter.post('/lifecycle/gate', async (req: any, res) => {
+  try {
+    const input = req.body as LifecycleGateInput;
+    assertLifecycleGate(input, String(req.body?.target) as LifecycleStage);
+    if (req.body?.issuer) assertCreditIssuerBoundary(input.creditType, req.body.issuer);
+    res.json({ allowed: true, stage: req.body.target });
+  } catch (e: any) {
+    res.status(409).json({ allowed: false, error: e.message });
+  }
 });
 
 // Client-originated custody is prohibited. Only a server-side authoritative registry adapter may call the repository.
@@ -43,7 +63,6 @@ environmentalCreditsRouter.post('/:positionId/retire', async (req: any, res) => 
   } catch (e: any) { res.status(400).json({ error: e.message }); }
 });
 
-// Completion requires a transfer reference produced by the authoritative registry adapter.
 environmentalCreditsRouter.post('/:positionId/transfer/confirm', async (req: any, res) => {
   try {
     const body = req.body || {};
