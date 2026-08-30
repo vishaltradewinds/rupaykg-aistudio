@@ -45,7 +45,7 @@
     "firebase-admin": "^14.2.0",
     "helmet": "^8.1.0",
     "i18next": "^25.8.13",
-    "jsonwebtoken": "^9.0.0",
+    "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.546.0",
