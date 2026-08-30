@@ -1,4 +1,5 @@
 import { carbonRouter } from "./src/routes/carbon.ts";
+import { environmentalCreditsRouter } from "./src/routes/environmentalCredits.ts";
 import { auth as requireAuth } from "./src/middleware/auth.ts";
 import { sanitizeMiddleware } from "./src/middleware/sanitize.ts";
 import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserByPhone, getOrCreateUser, getUserByIdentifier, updateUserPassword, createPasswordResetToken, findValidPasswordResetToken, markPasswordResetTokenUsed } from "./src/db/users.ts";
@@ -5203,6 +5204,8 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   app.use("/api/v1/carbon", auth(), carbonRouter);
+  app.use("/api/v1/carbon/depository", environmentalCreditsRouter);
+
 
   // Global Express error handler for API exceptions
   app.use((err: any, req: any, res: any, next: any) => {
