@@ -11,6 +11,24 @@ permissions:
 jobs:
   migrate-and-verify:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rupaykg
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d rupaykg"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rupaykg
+      NODE_ENV: test
+      DB_SSL: 'false'
     steps:
       - name: Checkout cleanup branch
         uses: actions/checkout@v4
@@ -23,6 +41,19 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      - name: Verify PostgreSQL readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..30}; do
+            if pg_isready -h 127.0.0.1 -p 5432 -U postgres -d rupaykg; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo 'PostgreSQL did not become ready'
+          exit 1
 
       - name: Apply surgical EnterpriseSuite patch
         shell: bash
