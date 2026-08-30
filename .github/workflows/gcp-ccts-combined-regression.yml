@@ -21,11 +21,7 @@ jobs:
         run: npm ci
       - name: Typecheck
         run: npm run lint
-      - name: Core regression
+      - name: Full existing regression
         run: npm test
-      - name: GCP commercial integration adversarial suite
-        run: npm run test:gcp:commercial:integration
-      - name: CCTS adversarial E2E
-        run: npm run test:environmental:e2e
-      - name: GCP authority adversarial E2E
-        run: npm run test:gcp:environmental:e2e
+      - name: Explicit combined CCTS + GCP lifecycle gate
+        run: npx tsx tests/gcp_ccts_combined_regression_test.ts
