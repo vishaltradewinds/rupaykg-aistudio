@@ -3,7 +3,6 @@ import crypto from 'crypto';
 
 export type CreditType = 'CCC' | 'GREEN_CREDIT';
 export type Registry = 'BEE_ICM' | 'GCP_ICFRE';
-
 const pool = createPool();
 
 function assertPositive(n: number) {
@@ -19,7 +18,7 @@ export async function createCustodyPosition(input: {
   assertPositive(input.quantity);
   if (!input.registryAccountId || !input.authoritativeCreditReference || !input.holderEntityId) throw new Error('Authoritative registry account, credit reference and holder are required');
   if (input.tradabilityStatus !== 'TRADABLE') throw new Error('Credit is not confirmed tradable');
-
+  if (!input.idempotencyKey?.trim()) throw new Error('Idempotency key is required');
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -38,8 +37,9 @@ export async function createCustodyPosition(input: {
   } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }
 }
 
-export async function reservePosition(positionId: string, quantity: number, actorUid: string, idempotencyKey: string) {
+export async function reservePosition(positionId: string, quantity: number, actorUid: string, idempotencyKey: string, principalUid: string, role?: string) {
   assertPositive(quantity);
+  if (!idempotencyKey?.trim()) throw new Error('Idempotency key is required');
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -48,6 +48,7 @@ export async function reservePosition(positionId: string, quantity: number, acto
     const p = await client.query('SELECT * FROM environmental_credit_positions WHERE id = $1 FOR UPDATE', [positionId]);
     if (!p.rows[0]) throw new Error('Depository position not found');
     const row = p.rows[0];
+    if (row.holder_entity_id !== principalUid && !['super_admin','regulator'].includes(role || '')) throw new Error('Only the authoritative holder may reserve this position');
     if (row.status !== 'HELD' && row.status !== 'RESERVED') throw new Error('Position is not available for sale');
     if (row.tradability_status !== 'TRADABLE') throw new Error('Authoritative tradability is not confirmed');
     if (quantity > Number(row.available_quantity)) throw new Error('Insufficient available depository inventory');
