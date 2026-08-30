@@ -16,46 +16,58 @@ export type OperatingContext = "urban" | "rural";
 export interface GreenCreditMethodology {
   id: string;
   name: string;
-  status: "notified";
+  status: "operational";
   administrator: "ICFRE";
   authority: "MoEFCC";
   activity: string;
-  creditRule: string;
+  tradable: false;
+  transferable: false;
   eligibility: string[];
   evidence: string[];
   officialPortal: string;
 }
 
 /**
- * Currently notified GCP methodology implemented by the platform router.
- * The 22-Feb-2024 notification is the source of truth; draft methodology
- * proposals must not be treated as production eligibility rules.
+ * Current operational GCP pathway reflected by the official GCP portal.
+ * The 2025 revised modalities cover eco-restoration of degraded forest land.
+ * Other GCP sectors may exist in the programme framework but are not treated
+ * as production issuance pathways until the Administrator operationalises them.
+ *
+ * IMPORTANT: current GCP FAQ states that Green Credits issued for tree
+ * plantation are non-tradable and non-transferable except between a holding
+ * company and its subsidiary companies. RupayKg therefore may custody and
+ * reconcile such credits, but must not expose them as marketplace inventory.
  */
 export const GREEN_CREDIT_METHODOLOGIES: GreenCreditMethodology[] = [
   {
-    id: "GCP-TREE-PLANTATION-2024",
-    name: "Green Credit for Tree Plantation",
-    status: "notified",
+    id: "GCP-ECO-RESTORATION-2025",
+    name: "Eco-Restoration of Degraded Forest Land under the Green Credit Programme",
+    status: "operational",
     administrator: "ICFRE",
     authority: "MoEFCC",
-    activity: "Tree plantation on eligible degraded land parcels identified by State/UT Forest Departments under the GCP process.",
-    creditRule: "One Green Credit per tree grown, subject to the notified methodology's minimum density and Forest Department completion certification.",
+    activity: "Eco-restoration of eligible degraded forest land under the GCP modalities, including plantation and site-specific restoration activities under an approved DPR.",
+    tradable: false,
+    transferable: false,
     eligibility: [
-      "Land parcel must be identified through the GCP process by the Forest Department.",
-      "Land parcel must be free from encumbrances.",
-      "Notified methodology requires a land parcel size of at least 5 hectares.",
-      "Plantation must follow the applicable management/working plan and notified methodology."
+      "Eligible degraded forest land must be under the control and management of the State/UT Forest Department and uploaded to the GCP Portal.",
+      "Protected areas such as Wildlife Sanctuaries, National Parks and Tiger Reserves are not eligible under the current FAQ.",
+      "Each eligible land parcel must be a compact area of at least 5 hectares and free from encumbrances.",
+      "Project activity follows an approved Detailed Project Report and the applicable State Forest Department process.",
+      "GCA bears the applicable restoration, verification and maintenance costs."
     ],
     evidence: [
-      "GCP application/project reference",
-      "Assigned land parcel and GIS coordinates",
-      "Forest Department land identification",
-      "Plantation proposal and payment/demand-note records where applicable",
-      "Plantation completion report/certificate",
-      "Tree count and density evidence",
-      "Monitoring/verification records"
+      "GCP project/application reference",
+      "GCP land-parcel reference and KML/GIS boundary",
+      "DNO/SNO land verification and approval records",
+      "Detailed Project Report (DPR)",
+      "State Forest Department / GCP MoU",
+      "Six-monthly progress reports",
+      "Geotagged photographs and restoration evidence",
+      "Canopy density, survival/growth and site-condition monitoring",
+      "Administrator verification report",
+      "Authoritative GCP issuance reference"
     ],
-    officialPortal: "https://moefcc-gcp.in/"
+    officialPortal: "https://www.moefcc-gcp.in/"
   }
 ];
 
@@ -68,6 +80,8 @@ export interface EnvironmentalRoutingResult {
   authority?: string;
   issuer?: string;
   nextStep: string;
+  tradable?: boolean;
+  transferable?: boolean;
 }
 
 export interface EnvironmentalActivityInput {
@@ -80,7 +94,6 @@ export interface EnvironmentalActivityInput {
 
 export class EnvironmentalCreditService {
   static route(activity: EnvironmentalActivityInput): EnvironmentalRoutingResult {
-    // Explicitly selected CCTS methodology: validate against current BEE catalogue.
     if (activity.methodologyId) {
       const methodology = Object.values(ICM_METHODOLOGIES)
         .flat()
@@ -104,25 +117,27 @@ export class EnvironmentalCreditService {
         methodologyId: methodology.methodologyId,
         authority: "BEE / Indian Carbon Market",
         issuer: "BEE",
-        nextStep: "Complete methodology-specific project documentation and monitoring, obtain applicable ACVA validation/verification, then follow the BEE/ICM issuance process."
+        nextStep: "Complete methodology-specific project documentation and monitoring, obtain applicable ACVA validation/verification, then follow the BEE/ICM issuance process.",
+        tradable: true,
+        transferable: true
       };
     }
 
-    // GCP tree plantation: do not infer eligibility from a tree count alone.
-    if (activity.greenCreditMethodologyId === "GCP-TREE-PLANTATION-2024") {
+    if (activity.greenCreditMethodologyId === "GCP-ECO-RESTORATION-2025" || activity.greenCreditMethodologyId === "GCP-TREE-PLANTATION-2024") {
       return {
         pathway: "GREEN_CREDIT",
         eligible: true,
         status: "needs_project_review",
-        reason: "Routed to the notified GCP tree-plantation methodology; final eligibility depends on the GCP/Forest Department land assignment and notified requirements.",
-        methodologyId: "GCP-TREE-PLANTATION-2024",
+        reason: "Routed to the currently operational GCP eco-restoration pathway. RupayKg records evidence and custody status only; it does not issue the Green Credit.",
+        methodologyId: "GCP-ECO-RESTORATION-2025",
         authority: "MoEFCC",
         issuer: "ICFRE / Green Credit Programme process",
-        nextStep: "Use the official GCP process for land assignment, proposal, payment, plantation completion and verification/issuance. RupayKg records evidence and status only."
+        nextStep: "Complete the official GCP land, DPR, Forest Department, restoration, monitoring and verification process. After authoritative issuance, custody may be recorded, but the current GCP FAQ does not permit marketplace trading of these Green Credits.",
+        tradable: false,
+        transferable: false
       };
     }
 
-    // Safe automatic routing for the two strongest RupayKg pathways.
     const suggestion = ICMComplianceService.suggestMethodology(activity.wasteType || activity.activityType, activity.context);
     if (suggestion.status === "methodology_match") {
       return {
@@ -133,7 +148,9 @@ export class EnvironmentalCreditService {
         methodologyId: suggestion.methodologyId,
         authority: "BEE / Indian Carbon Market",
         issuer: "BEE",
-        nextStep: "Open a CCTS project eligibility review and collect the methodology-specific evidence before ACVA engagement."
+        nextStep: "Open a CCTS project eligibility review and collect the methodology-specific evidence before ACVA engagement.",
+        tradable: true,
+        transferable: true
       };
     }
 
@@ -141,7 +158,7 @@ export class EnvironmentalCreditService {
       pathway: "MRV_ONLY",
       eligible: false,
       status: "mrv_only",
-      reason: "No currently configured government credit methodology can be defensibly assigned from the supplied activity data.",
+      reason: "No currently operational government credit methodology can be defensibly assigned from the supplied activity data.",
       nextStep: "Continue evidence capture and MRV; do not label the activity as a CCC or Green Credit generating activity."
     };
   }
