@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { auth } from '../middleware/auth.ts';
 import { listAvailablePositions, reservePosition } from '../services/environmentalCreditRepository.ts';
 
 export const environmentalCreditsRouter = Router();
