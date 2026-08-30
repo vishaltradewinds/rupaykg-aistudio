@@ -1,0 +1,31 @@
+name: RupayKg GCP + CCTS Full Regression
+
+on:
+  push:
+    branches:
+      - recovery/gcp-ccts-checkpoint-20260830
+  workflow_dispatch:
+
+jobs:
+  full-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run lint
+      - name: GCP commercial integration adversarial suite
+        run: npm run test:gcp:commercial:integration
+      - name: CCTS adversarial E2E
+        run: npm run test:environmental:e2e
+      - name: GCP authority adversarial E2E
+        run: npm run test:gcp:environmental:e2e
+      - name: Combined environmental routing regression
+        run: npm run test:environmental
