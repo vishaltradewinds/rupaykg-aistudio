@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { auth } from '../middleware/auth.ts';
-import { listAvailablePositions, reservePosition, releaseReservation, retireCredits, confirmAuthoritativeTransfer } from '../services/environmentalCreditRepository.ts';
+import { listAvailablePositions, reservePosition, releaseReservation, retireCredits } from '../services/environmentalCreditRepository.ts';
 import { assertLifecycleGate, assertCreditIssuerBoundary, type LifecycleGateInput, type LifecycleStage } from '../services/environmentalCreditLifecycle.ts';
 
 export const environmentalCreditsRouter = Router();
@@ -63,18 +63,9 @@ environmentalCreditsRouter.post('/:positionId/retire', async (req: any, res) => 
   } catch (e: any) { res.status(400).json({ error: e.message }); }
 });
 
-environmentalCreditsRouter.post('/:positionId/transfer/confirm', async (req: any, res) => {
-  try {
-    const body = req.body || {};
-    if (body.authoritativeTransferConfirmed !== true) return res.status(503).json({ error: 'AUTHORITATIVE_TRANSFER_REQUIRED', message: 'Authoritative registry transfer confirmation is required.' });
-    res.json(await confirmAuthoritativeTransfer({
-      positionId: req.params.positionId,
-      quantity: Number(body.quantity),
-      actorUid: req.user.uid,
-      idempotencyKey: requireIdempotencyKey(req),
-      buyerEntityId: String(body.buyerEntityId || ''),
-      authoritativeTransactionReference: String(body.authoritativeTransactionReference || ''),
-      buyerEligibilityVerified: body.buyerEligibilityVerified === true,
-    }));
-  } catch (e: any) { res.status(400).json({ error: e.message }); }
-});
+// Public callers cannot attest to an authoritative transfer or buyer eligibility.
+// The authoritative registry adapter must perform those checks server-side and call the repository directly.
+environmentalCreditsRouter.post('/:positionId/transfer/confirm', async (_req: any, res) => res.status(503).json({
+  error: 'AUTHORITATIVE_TRANSFER_ADAPTER_REQUIRED',
+  message: 'Transfer confirmation is restricted to the server-side authoritative registry adapter; client-supplied transfer or eligibility flags are never trusted.'
+}));
