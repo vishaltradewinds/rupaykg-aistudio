@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { auth } from '../middleware/auth.ts';
-import { listAvailablePositions, reservePosition, releaseReservation } from '../services/environmentalCreditRepository.ts';
+import { getCustodyPosition, listAvailablePositions, reservePosition, releaseReservation } from '../services/environmentalCreditRepository.ts';
+import { GcpCommercialIntegration } from '../services/gcpCommercialIntegration.ts';
 import { assertLifecycleGate, assertCreditIssuerBoundary, type LifecycleGateInput, type LifecycleStage } from '../services/environmentalCreditLifecycle.ts';
 
 export const environmentalCreditsRouter = Router();
@@ -10,6 +11,10 @@ function requireIdempotencyKey(req: any): string {
   const key = String(req.get('Idempotency-Key') || req.body?.idempotencyKey || '').trim();
   if (!key || key.length > 200) throw new Error('A valid Idempotency-Key is required');
   return key;
+}
+
+async function getPositionOr404(positionId: string) {
+  try { return await getCustodyPosition(positionId); } catch { return null; }
 }
 
 environmentalCreditsRouter.get('/available', async (req: any, res) => {
@@ -33,9 +38,7 @@ environmentalCreditsRouter.post('/lifecycle/gate', async (req: any, res) => {
     assertLifecycleGate(input, String(req.body?.target) as LifecycleStage);
     if (req.body?.issuer) assertCreditIssuerBoundary(input.creditType, req.body.issuer);
     res.json({ allowed: true, stage: req.body.target });
-  } catch (e: any) {
-    res.status(409).json({ allowed: false, error: e.message });
-  }
+  } catch (e: any) { res.status(409).json({ allowed: false, error: e.message }); }
 });
 
 // Client-originated custody is prohibited. Only a server-side authoritative registry adapter may call the repository.
@@ -44,29 +47,86 @@ environmentalCreditsRouter.post('/custody', async (_req: any, res) => res.status
   message: 'Custody recording requires independent authoritative BEE/ICM or GCP/ICFRE verification.'
 }));
 
+// GCP marketplace listing is stateful and therefore uses the commercial integration ledger.
+environmentalCreditsRouter.post('/:positionId/list', async (req: any, res) => {
+  try {
+    const position = await getPositionOr404(req.params.positionId);
+    if (!position) return res.status(404).json({ error: 'Depository position not found' });
+    if (position.authoritative_registry === 'GCP_ICFRE') {
+      const result = await new GcpCommercialIntegration().list({ positionId: req.params.positionId, actorUid: req.user.uid, idempotencyKey: requireIdempotencyKey(req) });
+      return res.json(result);
+    }
+    res.status(409).json({ error: 'GCP_LISTING_ROUTE_REQUIRES_GCP_POSITION' });
+  } catch (e: any) { res.status(503).json({ error: e.message }); }
+});
+
 environmentalCreditsRouter.post('/:positionId/reserve', async (req: any, res) => {
   try {
-    const result = await reservePosition(req.params.positionId, Number(req.body?.quantity), req.user.uid, requireIdempotencyKey(req), req.user.uid, req.user?.role);
-    res.json(result);
-  } catch (e: any) { res.status(400).json({ error: e.message }); }
+    const position = await getPositionOr404(req.params.positionId);
+    if (!position) return res.status(404).json({ error: 'Depository position not found' });
+    const key = requireIdempotencyKey(req);
+    if (position.authoritative_registry === 'GCP_ICFRE') {
+      return res.json(await new GcpCommercialIntegration().reserve({
+        positionId: req.params.positionId, quantity: Number(req.body?.quantity), actorUid: req.user.uid,
+        idempotencyKey: key, principalUid: req.user.uid, role: req.user?.role,
+      }));
+    }
+    return res.json(await reservePosition(req.params.positionId, Number(req.body?.quantity), req.user.uid, key, req.user.uid, req.user?.role));
+  } catch (e: any) { return res.status(400).json({ error: e.message }); }
 });
 
 environmentalCreditsRouter.post('/:positionId/release', async (req: any, res) => {
-  try {
-    res.json(await releaseReservation(req.params.positionId, Number(req.body?.quantity), req.user.uid, requireIdempotencyKey(req)));
-  } catch (e: any) { res.status(400).json({ error: e.message }); }
+  try { res.json(await releaseReservation(req.params.positionId, Number(req.body?.quantity), req.user.uid, requireIdempotencyKey(req))); }
+  catch (e: any) { res.status(400).json({ error: e.message }); }
 });
 
-// Public callers cannot attest to authoritative retirement. The programme adapter must
-// confirm retirement first and then invoke the repository service server-side.
-environmentalCreditsRouter.post('/:positionId/retire', async (_req: any, res) => res.status(503).json({
-  error: 'AUTHORITATIVE_RETIREMENT_ADAPTER_REQUIRED',
-  message: 'Retirement requires authoritative registry confirmation; client-supplied retirement evidence is never trusted.'
-}));
+// All irreversible GCP operations are routed to the server-side authoritative integration.
+environmentalCreditsRouter.post('/:positionId/transfer/confirm', async (req: any, res) => {
+  try {
+    const position = await getPositionOr404(req.params.positionId);
+    if (!position) return res.status(404).json({ error: 'Depository position not found' });
+    if (position.authoritative_registry !== 'GCP_ICFRE') return res.status(409).json({ error: 'GCP_TRANSFER_ROUTE_REQUIRES_GCP_POSITION' });
+    const result = await new GcpCommercialIntegration().transfer({
+      positionId: req.params.positionId, quantity: Number(req.body?.quantity), actorUid: req.user.uid,
+      idempotencyKey: requireIdempotencyKey(req), buyerEntityId: String(req.body?.buyerEntityId || ''),
+    });
+    return res.json(result);
+  } catch (e: any) { return res.status(503).json({ error: e.message }); }
+});
 
-// Public callers cannot attest to an authoritative transfer or buyer eligibility.
-// The authoritative registry adapter must perform those checks server-side and call the repository directly.
-environmentalCreditsRouter.post('/:positionId/transfer/confirm', async (_req: any, res) => res.status(503).json({
-  error: 'AUTHORITATIVE_TRANSFER_ADAPTER_REQUIRED',
-  message: 'Transfer confirmation is restricted to the server-side authoritative registry adapter; client-supplied transfer or eligibility flags are never trusted.'
-}));
+environmentalCreditsRouter.post('/:positionId/reconcile', async (req: any, res) => {
+  try {
+    const position = await getPositionOr404(req.params.positionId);
+    if (!position) return res.status(404).json({ error: 'Depository position not found' });
+    if (position.authoritative_registry !== 'GCP_ICFRE') return res.status(409).json({ error: 'GCP_RECONCILIATION_ROUTE_REQUIRES_GCP_POSITION' });
+    return res.json(await new GcpCommercialIntegration().reconcile({
+      positionId: req.params.positionId, creditReference: position.authoritative_credit_reference,
+      buyerEntityId: String(req.body?.buyerEntityId || ''), expectedQuantity: Number(req.body?.expectedQuantity),
+    }));
+  } catch (e: any) { return res.status(503).json({ error: e.message }); }
+});
+
+environmentalCreditsRouter.post('/:positionId/settle', async (req: any, res) => {
+  try {
+    const position = await getPositionOr404(req.params.positionId);
+    if (!position) return res.status(404).json({ error: 'Depository position not found' });
+    if (position.authoritative_registry !== 'GCP_ICFRE') return res.status(409).json({ error: 'GCP_SETTLEMENT_ROUTE_REQUIRES_GCP_POSITION' });
+    return res.json(await new GcpCommercialIntegration().settleAndRecord({
+      positionId: req.params.positionId, actorUid: req.user.uid, idempotencyKey: requireIdempotencyKey(req),
+      reservationActive: Boolean(req.body?.reservationActive), authoritativeTransferConfirmed: Boolean(req.body?.authoritativeTransferConfirmed),
+      reconciled: Boolean(req.body?.reconciled), tradeValue: Number(req.body?.tradeValue), currency: String(req.body?.currency || ''),
+    }));
+  } catch (e: any) { return res.status(503).json({ error: e.message }); }
+});
+
+environmentalCreditsRouter.post('/:positionId/retire', async (req: any, res) => {
+  try {
+    const position = await getPositionOr404(req.params.positionId);
+    if (!position) return res.status(404).json({ error: 'Depository position not found' });
+    if (position.authoritative_registry !== 'GCP_ICFRE') return res.status(409).json({ error: 'GCP_RETIREMENT_ROUTE_REQUIRES_GCP_POSITION' });
+    return res.json(await new GcpCommercialIntegration().retire({
+      positionId: req.params.positionId, quantity: Number(req.body?.quantity), actorUid: req.user.uid,
+      idempotencyKey: requireIdempotencyKey(req), reason: String(req.body?.reason || ''),
+    }));
+  } catch (e: any) { return res.status(503).json({ error: e.message }); }
+});
