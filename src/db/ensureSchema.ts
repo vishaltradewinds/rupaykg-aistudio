@@ -11,7 +11,8 @@ export async function ensureDatabaseSchema(pool: Pool): Promise<void> {
       'users', 'records', 'farmers', 'carbon_events', 'compliance_records',
       'system_notifications', 'operational_logs', 'pilot_onboardings', 'pilot_records',
       'pilot_issues', 'waste_manifests', 'weighbridge_records', 'cqe_methodologies',
-      'hedera_anchors', 'environmental_credit_positions', 'environmental_credit_transactions'
+      'hedera_anchors', 'environmental_credit_positions', 'environmental_credit_transactions',
+      'gcp_commercial_lifecycle_events'
     ];
 
     const result = await pool.query(
