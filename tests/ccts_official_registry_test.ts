@@ -6,14 +6,17 @@ import {
   assertCctsVerificationEligibility,
 } from "../src/services/cctsOfficialRegistry.ts";
 
-assert.equal(BEE_CCTS_APPROVED_METHODOLOGIES.length, 8);
+// BEE's currently published Offset Mechanism catalogue contains 12 approved
+// methodologies. Draft/proposed methodologies must remain non-eligible.
+assert.equal(BEE_CCTS_APPROVED_METHODOLOGIES.length, 12);
 assert.equal(isBEEApprovedCctsMethodology("BM WA03.001"), true);
-assert.equal(isBEEApprovedCctsMethodology("BM WA03.003"), false);
-assert.equal(isBEEApprovedCctsMethodology("BM AG04.002"), false);
-assert.equal(isBEEApprovedCctsMethodology("BM FR05.002"), false);
+assert.equal(isBEEApprovedCctsMethodology("BM WA03.003"), true);
+assert.equal(isBEEApprovedCctsMethodology("BM AG04.002"), true);
+assert.equal(isBEEApprovedCctsMethodology("BM FR05.002"), true);
+assert.equal(isBEEApprovedCctsMethodology("BM UNKNOWN.999"), false);
 
 assert.equal(
-  isAcvaEligibleForMethodology("BM WA03.001", ["Energy", "Industries", "Waste handling and disposal"]),
+  isAcvaEligibleForMethodology("BM WA03.001", ["Energy", "Industries", "Waste Handling and Disposal"]),
   true
 );
 assert.equal(
@@ -31,8 +34,8 @@ assert.doesNotThrow(() =>
 assert.throws(
   () =>
     assertCctsVerificationEligibility({
-      methodologyCode: "BM WA03.003",
-      acvaOffsetSectors: ["Waste handling and disposal"],
+      methodologyCode: "BM UNKNOWN.999",
+      acvaOffsetSectors: ["Energy"],
     }),
   /CCTS_METHODOLOGY_NOT_APPROVED/
 );
