@@ -5,7 +5,7 @@ import {
   CPCBRenewalCalendarItem,
   CPCBBwgLogEntry,
   CPCBSwmIntegrationStatus
-} from '../types';
+} from '../types.ts';
 
 export class CpcbService {
   private logEntries: CPCBBwgLogEntry[] = [

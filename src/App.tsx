@@ -3441,157 +3441,158 @@ export default function App() {
         </div>
       )}
       {/* Sidebar Navigation */}
-      <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-white/5 border-r border-white/10 flex flex-col p-4 z-50">
+      <nav className="fixed left-0 top-0 bottom-0 w-20 md:w-64 bg-[#0D0E12]/95 backdrop-blur-md border-r border-white/10 flex flex-col p-3 md:p-4 z-50">
         <BrandIdentity isLiveConnected={isLiveConnected} variant="sidebar" />
 
-        {/* Operating Context Toggle in Sidebar */}
-        <div className="my-3 p-1 bg-white/5 border border-white/10 rounded-xl flex items-center">
-          <button 
-            onClick={() => setOperatingContext('urban')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${operatingContext === 'urban' ? 'bg-emerald-500 text-black shadow-lg font-extrabold' : 'text-white/50 hover:text-white'}`}
-            title="Switch to Urban Operating Context (Municipalities, Wards, MSW)"
-          >
-            <Building2 size={13} />
-            <span className="hidden md:inline">URBAN</span>
-          </button>
-          <button 
-            onClick={() => setOperatingContext('rural')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${operatingContext === 'rural' ? 'bg-emerald-500 text-black shadow-lg font-extrabold' : 'text-white/50 hover:text-white'}`}
-            title="Switch to Rural Operating Context (Panchayats, Villages, Biomass)"
-          >
-            <Sprout size={13} />
-            <span className="hidden md:inline">RURAL</span>
-          </button>
+        {/* Operating Context Badge (Synchronized with Header Mode Selector) */}
+        <div className="my-2.5 px-3 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between shadow-inner">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${operatingContext === 'urban' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-pulse'}`} />
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 hidden md:inline">
+              {operatingContext === 'urban' ? 'Urban Governance' : 'Rural Governance'}
+            </span>
+          </div>
+          <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-wider hidden md:inline ${operatingContext === 'urban' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
+            {operatingContext === 'urban' ? 'ULB / MSW' : 'GP / FPO'}
+          </span>
         </div>
 
-        <div className="mx-1 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2" role="status" aria-label="LGD verification status">
-  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-amber-300">
-    <ShieldAlert size={13} />
-    LGD: Local Index
-  </div>
-  <p className="mt-0.5 text-[9px] leading-4 text-white/40">
-    Not Government Verified. Use official LGD data for regulatory submissions.
-  </p>
-</div>
-
-        <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
-          <div className="px-2 pt-1 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">
-            Workspace
+        {/* LGD Status Pill */}
+        <div className="mx-1 rounded-lg border border-amber-500/20 bg-amber-500/5 px-2.5 py-1.5 mb-2 hidden md:block" role="status" aria-label="LGD verification status">
+          <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-amber-300">
+            <ShieldAlert size={12} />
+            <span>LGD: Local Index</span>
           </div>
-          {/* Core Operating System Engines */}
+          <p className="mt-0.5 text-[8px] leading-3 text-white/40">
+            Official LGD codes for regulatory compliance.
+          </p>
+        </div>
+
+        <div className="flex-1 flex flex-col gap-1 overflow-y-auto pr-1 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
+          {/* SECTION 1: Core Workspaces */}
+          <div className="px-2 pt-1 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-emerald-400/80 hidden md:block">
+            Core Workspaces
+          </div>
+
           <button 
             onClick={() => setView('dashboard')}
             aria-label={t('Go to Dashboard')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'dashboard' ? 'bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30 shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <LayoutDashboard size={20} className={view === 'dashboard' ? 'text-emerald-400' : ''} />
-            <span className="hidden md:block font-medium">{t('Dashboard')}</span>
+            <LayoutDashboard size={18} className={view === 'dashboard' ? 'text-emerald-400 shrink-0' : 'shrink-0'} />
+            <span className="hidden md:block text-sm font-medium">{t('Dashboard')}</span>
           </button>
 
           <button 
             onClick={() => setView('ccts_carbon_os')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ccts_carbon_os' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'ccts_carbon_os' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <Globe size={20} className="text-emerald-400 shrink-0" />
-            <span className="hidden md:block font-bold text-emerald-300">CCTS Carbon OS</span>
+            <Globe size={18} className="text-emerald-400 shrink-0" />
+            <span className="hidden md:block text-sm font-bold text-emerald-300">CCTS Carbon OS</span>
           </button>
 
           <button 
             onClick={() => setView('enterprise_suite')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'enterprise_suite' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <ShieldCheck size={20} className="text-emerald-400 shrink-0" />
-            <span className="hidden md:block font-bold text-emerald-400">{t('Enterprise OS & CPCB Hub')}</span>
+            <ShieldCheck size={18} className="text-emerald-400 shrink-0" />
+            <span className="hidden md:block text-sm font-bold text-emerald-400">{t('Enterprise OS & CPCB Hub')}</span>
           </button>
 
           <button 
             onClick={() => setView('reports')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'reports' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'reports' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <FileText size={20} className={view === 'reports' ? 'text-purple-400 shrink-0' : 'shrink-0'} />
-            <span className="hidden md:block font-bold text-purple-300">Compliance & Reports</span>
+            <FileText size={18} className={view === 'reports' ? 'text-purple-400 shrink-0' : 'shrink-0'} />
+            <span className="hidden md:block text-sm font-bold text-purple-300">Compliance & Reports</span>
           </button>
+
+          {/* SECTION 2: Field & Ground Reality */}
+          <div className="px-2 pt-2.5 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-amber-400/80 hidden md:block">
+            Field & Ground Hub
+          </div>
 
           <button 
             onClick={() => setView('ground_reality')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'ground_reality' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'ground_reality' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <Users size={20} className={view === 'ground_reality' ? 'text-amber-400 shrink-0' : 'shrink-0'} />
-            <span className="hidden md:block font-bold text-amber-300">Ground Reality & Safai Hub</span>
+            <Users size={18} className={view === 'ground_reality' ? 'text-amber-400 shrink-0' : 'shrink-0'} />
+            <span className="hidden md:block text-sm font-bold text-amber-300">Ground Reality & Safai</span>
           </button>
 
           <button 
             onClick={() => setView('stakeholder_registration')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'stakeholder_registration' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'stakeholder_registration' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <UserPlus size={20} className={view === 'stakeholder_registration' ? 'text-emerald-400 shrink-0' : 'text-emerald-400/70 shrink-0'} />
-            <span className="hidden md:block font-bold text-emerald-300">Stakeholder Onboarding</span>
+            <UserPlus size={18} className={view === 'stakeholder_registration' ? 'text-emerald-400 shrink-0' : 'text-emerald-400/70 shrink-0'} />
+            <span className="hidden md:block text-sm font-bold text-emerald-300">Stakeholder Onboarding</span>
           </button>
 
           <button 
             onClick={() => setView('platform_manual')}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'platform_manual' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'platform_manual' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
           >
-            <BookOpen size={20} className={view === 'platform_manual' ? 'text-amber-400 shrink-0' : 'text-amber-400/70 shrink-0'} />
-            <span className="hidden md:block font-bold text-amber-300">Platform Working Manual</span>
+            <BookOpen size={18} className={view === 'platform_manual' ? 'text-amber-400 shrink-0' : 'text-amber-400/70 shrink-0'} />
+            <span className="hidden md:block text-sm font-bold text-amber-300">Platform Manual</span>
           </button>
 
-          <div className="px-2 pt-2 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">
-            Field Operations
-          </div>
+          {/* SECTION 3: Operations Actions (Role-Specific) */}
+          {(user?.role === 'citizen' || user?.role === 'fpo' || user?.role === 'aggregator' || user?.role === 'processor' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
+            <>
+              <div className="px-2 pt-2.5 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-cyan-400/80 hidden md:block">
+                Operations
+              </div>
 
-          {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
-            <button 
-              onClick={() => setView('upload')}
-              aria-label={t('Upload Waste Data')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'upload' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
-            >
-              <PlusCircle size={20} className="shrink-0" />
-              <span className="hidden md:block font-medium">{t('Upload Waste')}</span>
-            </button>
+              {(user?.role === 'citizen' || user?.role === 'fpo' || ['industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'industry', 'commercial', 'institution', 'municipality'].includes(user?.role || '')) && (
+                <button 
+                  onClick={() => setView('upload')}
+                  aria-label={t('Upload Waste Data')}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'upload' ? 'bg-cyan-500/15 text-cyan-400 font-bold border border-cyan-500/30' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                >
+                  <PlusCircle size={18} className="shrink-0" />
+                  <span className="hidden md:block text-sm font-medium">{t('Upload Waste')}</span>
+                </button>
+              )}
+
+              {(user?.role === 'aggregator' || user?.role === 'processor') && (
+                <button 
+                  onClick={() => setView('tasks')}
+                  aria-label={t('View Task Board')}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all ${view === 'tasks' ? 'bg-cyan-500/15 text-cyan-400 font-bold border border-cyan-500/30' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                >
+                  <ClipboardList size={18} className="shrink-0" />
+                  <span className="hidden md:block text-sm font-medium">{t('Task Board')}</span>
+                </button>
+              )}
+            </>
           )}
 
-          {(user?.role === 'aggregator' || user?.role === 'processor') && (
-            <button 
-              onClick={() => setView('tasks')}
-              aria-label={t('View Task Board')}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${view === 'tasks' ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
-            >
-              <ClipboardList size={20} className="shrink-0" />
-              <span className="hidden md:block font-medium">{t('Task Board')}</span>
-            </button>
-          )}
-
-          <div className="px-2 pt-2 pb-0.5 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/30">
-            Administration
-          </div>
-
-          {/* Grouped Platform Options & Utilities Menu */}
-          <div className="mt-4 pt-3 border-t border-white/10 space-y-1">
+          {/* SECTION 4: Governance & Settings (Collapsible) */}
+          <div className="mt-2 pt-2 border-t border-white/10 space-y-1">
             <button 
               onClick={() => setShowPlatformOptions(!showPlatformOptions)}
-              className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-xs font-semibold uppercase tracking-wider ${
+              className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${
                 ['history', 'admin', 'settings', 'genesis'].includes(view) 
                   ? 'bg-white/10 text-emerald-400 border border-white/10' 
                   : 'text-white/50 hover:text-white hover:bg-white/5'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Settings size={18} className="shrink-0 text-emerald-400/80" />
-                <span className="hidden md:block text-left">{t('Platform Options')}</span>
+                <Settings size={16} className="shrink-0 text-emerald-400/80" />
+                <span className="hidden md:block text-left">{t('Governance & Admin')}</span>
               </div>
               <ChevronRight size={14} className={`hidden md:block transition-transform duration-200 ${showPlatformOptions || ['history', 'admin', 'settings', 'genesis'].includes(view) ? 'rotate-90' : ''}`} />
             </button>
 
             {(showPlatformOptions || ['history', 'admin', 'settings', 'genesis'].includes(view)) && (
-              <div className="pl-2 space-y-1 mt-1 border-l border-emerald-500/20 ml-3">
+              <div className="pl-2 space-y-1 mt-1 border-l border-emerald-500/20 ml-2.5">
                 {['super_admin', 'state_admin', 'municipal_admin', 'regulator', 'aggregator', 'processor', 'csr_partner', 'epr_partner', 'ccc_buyer', 'fpo', 'industry', 'industry_generator', 'commercial_generator', 'institution_generator', 'municipal_generator', 'commercial', 'institution', 'municipality', 'citizen'].includes(user?.role || '') && (
                   <button 
                     onClick={() => setView('history')}
                     aria-label={t('View History')}
-                    className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'history' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                    className={`w-full flex items-center gap-2.5 p-2 rounded-lg text-xs transition-all ${view === 'history' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
                   >
-                    <History size={16} className="shrink-0" />
+                    <History size={15} className="shrink-0" />
                     <span className="hidden md:block">{t('Transaction Ledger')}</span>
                   </button>
                 )}
@@ -3602,26 +3603,26 @@ export default function App() {
                       setView('admin');
                       setAdminSubView('users');
                     }}
-                    className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'admin' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                    className={`w-full flex items-center gap-2.5 p-2 rounded-lg text-xs transition-all ${view === 'admin' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
                   >
-                    <Shield size={16} className="shrink-0" />
+                    <Shield size={15} className="shrink-0" />
                     <span className="hidden md:block">{t('Admin Controls')}</span>
                   </button>
                 )}
 
                 <button 
                   onClick={() => setView('settings')}
-                  className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'settings' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                  className={`w-full flex items-center gap-2.5 p-2 rounded-lg text-xs transition-all ${view === 'settings' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
                 >
-                  <User size={16} className="shrink-0" />
+                  <User size={15} className="shrink-0" />
                   <span className="hidden md:block">{t('Account Settings')}</span>
                 </button>
 
                 <button 
                   onClick={() => setView('genesis')}
-                  className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg text-xs transition-all ${view === 'genesis' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                  className={`w-full flex items-center gap-2.5 p-2 rounded-lg text-xs transition-all ${view === 'genesis' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
                 >
-                  <Book size={16} className="shrink-0" />
+                  <Book size={15} className="shrink-0" />
                   <span className="hidden md:block">{t('Foundational Doctrine')}</span>
                 </button>
               </div>

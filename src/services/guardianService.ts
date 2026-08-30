@@ -1,5 +1,5 @@
-import { randomBytesHex, hashStringHex } from "../utils/cryptoUtils";
-import { safeParseJson } from "../utils/safeJson";
+import { randomBytesHex, hashStringHex } from "../utils/cryptoUtils.ts";
+import { safeParseJson } from "../utils/safeJson.ts";
 
 // ========================================================
 // HEDERA GUARDIAN ORCHESTRATION SERVICE

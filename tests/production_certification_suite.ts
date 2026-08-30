@@ -2,6 +2,7 @@ import { db } from '../src/db/index';
 import { cqe_methodologies } from '../src/db/schema';
 import { HederaAnchorProvider } from '../src/services/hederaAnchor';
 import { CredentialService } from '../src/services/credentialService';
+import crypto from 'crypto';
 
 interface TestRecord {
   testId: string;
@@ -127,6 +128,12 @@ async function runProductionCertification() {
 
   // 2. W3C Verifiable Credentials Test & Tamper Resistance
   try {
+    if (!process.env.VC_ISSUER_PRIVATE_KEY) {
+      const keyPair = crypto.generateKeyPairSync('ed25519');
+      process.env.VC_ISSUER_PRIVATE_KEY = keyPair.privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
+      process.env.VC_ISSUER_PUBLIC_KEY = keyPair.publicKey.export({ type: 'spki', format: 'pem' }) as string;
+    }
+
     const subject = {
       id: 'did:rupaykg:mrf:facility-001',
       claims: {

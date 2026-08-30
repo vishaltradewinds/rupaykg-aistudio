@@ -1,8 +1,8 @@
-import { MethodologyIR, MRVEvent, EvidenceRecord, Policy } from '../types';
-import { GuardianService } from './guardianService';
-import { CredentialService } from './credentialService';
-import { HederaAnchorProvider } from './hederaAnchor';
-import { hashStringHex } from '../utils/cryptoUtils';
+import { MethodologyIR, MRVEvent, EvidenceRecord, Policy } from '../types.ts';
+import { GuardianService } from './guardianService.ts';
+import { CredentialService } from './credentialService.ts';
+import { HederaAnchorProvider } from './hederaAnchor.ts';
+import { hashStringHex } from '../utils/cryptoUtils.ts';
 
 /**
  * ========================================================

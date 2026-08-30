@@ -1,4 +1,4 @@
-import { ai } from "../lib/gemini";
+import { ai } from "../lib/gemini.ts";
 
 // ========================================================
 // HEDERA GUARDIAN AI TOOLKIT

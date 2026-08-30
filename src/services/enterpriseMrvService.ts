@@ -29,10 +29,10 @@ import {
   TrustMode,
   CCTSReadinessStatus,
   EvidenceType
-} from '../types';
+} from '../types.ts';
 
 import { GoogleGenAI } from '@google/genai';
-import { hashStringHex } from '../utils/cryptoUtils';
+import { hashStringHex } from '../utils/cryptoUtils.ts';
 
 // Simple helper to generate IDs
 const generateId = (prefix: string) => `${prefix}_${Math.random().toString(36).substr(2, 9)}`;

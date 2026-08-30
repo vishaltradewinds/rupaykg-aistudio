@@ -22,6 +22,11 @@ export async function ensureDatabaseSchema(pool: Pool): Promise<void> {
       'weighbridge_records',
       'cqe_methodologies',
       'hedera_anchors',
+      'credit_custody',
+      'credit_custody_events',
+      'credit_market_listings',
+      'credit_reservations',
+      'credit_settlements',
     ];
 
     const result = await pool.query(

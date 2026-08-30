@@ -882,7 +882,7 @@ export class CQEEvidenceVault {
   }
 }
 
-import { WaterfallDoctrineRegistry } from './waterfallDoctrine';
+import { WaterfallDoctrineRegistry } from './waterfallDoctrine.ts';
 
 // ----------------------------------------------------------------------------
 // LAYER 12: MARKET PRICING & REVENUE WATERFALL ENGINE (DOCTRINAL STANDARD)

@@ -3,7 +3,7 @@
  * Redirects all AI calls through the server to protect API keys.
  */
 
-import { safeFetch, safeParseJson } from "../utils/safeJson";
+import { safeFetch, safeParseJson } from "../utils/safeJson.ts";
 
 export const ai = {
   models: {

@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { INDIAN_STATES } from "../constants";
+import { INDIAN_STATES } from "../constants.ts";
 import fs from "fs";
 
 export interface LgdStateRecord {

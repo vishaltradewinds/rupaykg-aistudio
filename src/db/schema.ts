@@ -882,4 +882,109 @@ export const hedera_anchors = pgTable('hedera_anchors', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// =========================================================================
+// RUPAYKG ENTERPRISE 3.0: ENVIRONMENTAL CREDIT DEPOSITORY & CUSTODY LEDGER
+// =========================================================================
+
+export const credit_custody = pgTable('credit_custody', {
+  id: text('id').primaryKey(),
+  creditType: text('credit_type').notNull(), // 'CCC' | 'GREEN_CREDIT'
+  authoritativeRegistry: text('authoritative_registry').notNull(), // 'BEE_ICM' | 'GCP_ICFRE' | 'CCTS_REGISTRY'
+  registryAccountId: text('registry_account_id').notNull(),
+  authoritativeCreditReference: text('authoritative_credit_reference').notNull().unique(),
+  holderEntityId: text('holder_entity_id').references(() => legal_entities.id),
+  holderUserId: text('holder_user_id'),
+  issuedQuantity: doublePrecision('issued_quantity').notNull(),
+  availableQuantity: doublePrecision('available_quantity').notNull().default(0),
+  reservedQuantity: doublePrecision('reserved_quantity').notNull().default(0),
+  transferredQuantity: doublePrecision('transferred_quantity').notNull().default(0),
+  retiredQuantity: doublePrecision('retired_quantity').notNull().default(0),
+  status: text('status').notNull().default('HELD'), // 'HELD' | 'AVAILABLE_FOR_SALE' | 'RESERVED' | 'TRANSFERRED' | 'RETIRED' | 'CANCELLED'
+  tradabilityStatus: text('tradability_status').notNull().default('TRADABLE'), // 'TRADABLE' | 'NON_TRADABLE' | 'RESTRICTED' | 'LOCKED'
+  methodologyCode: text('methodology_code'),
+  vintage: text('vintage'),
+  issuanceDate: timestamp('issuance_date'),
+  authoritativeVerificationTimestamp: timestamp('authoritative_verification_timestamp'),
+  acvaVerifierId: text('acva_verifier_id'),
+  originProjectId: text('origin_project_id').references(() => carbon_projects.id),
+  originFacilityId: text('origin_facility_id').references(() => facilities.id),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const credit_custody_events = pgTable('credit_custody_events', {
+  id: text('id').primaryKey(),
+  custodyId: text('custody_id').references(() => credit_custody.id).notNull(),
+  eventType: text('event_type').notNull(), // 'INITIAL_CUSTODY' | 'LISTED_FOR_SALE' | 'DELISTED' | 'RESERVED' | 'RESERVATION_RELEASED' | 'TRANSFERRED' | 'RETIRED' | 'RECONCILED' | 'CANCELLED'
+  quantity: doublePrecision('quantity').notNull(),
+  previousAvailable: doublePrecision('previous_available').notNull(),
+  newAvailable: doublePrecision('new_available').notNull(),
+  previousReserved: doublePrecision('previous_reserved').notNull(),
+  newReserved: doublePrecision('new_reserved').notNull(),
+  previousTransferred: doublePrecision('previous_transferred').notNull(),
+  newTransferred: doublePrecision('new_transferred').notNull(),
+  previousRetired: doublePrecision('previous_retired').notNull(),
+  newRetired: doublePrecision('new_retired').notNull(),
+  fromEntityId: text('from_entity_id'),
+  toEntityId: text('to_entity_id'),
+  orderId: text('order_id'),
+  idempotencyKey: text('idempotency_key').unique(),
+  performedBy: text('performed_by').notNull(),
+  authoritativeRegistryRef: text('authoritative_registry_ref'),
+  hederaAnchorId: text('hedera_anchor_id'),
+  notes: text('notes'),
+  metadata: jsonb('metadata'),
+  timestamp: timestamp('timestamp').defaultNow(),
+});
+
+export const credit_market_listings = pgTable('credit_market_listings', {
+  id: text('id').primaryKey(),
+  custodyId: text('custody_id').references(() => credit_custody.id).notNull(),
+  sellerEntityId: text('seller_entity_id').notNull(),
+  sellerUserId: text('seller_user_id').notNull(),
+  creditType: text('credit_type').notNull(),
+  listedQuantity: doublePrecision('listed_quantity').notNull(),
+  availableQuantity: doublePrecision('available_quantity').notNull(),
+  pricePerUnitInr: doublePrecision('price_per_unit_inr').notNull(),
+  status: text('status').notNull().default('ACTIVE'), // 'ACTIVE' | 'PARTIALLY_FILLED' | 'COMPLETED' | 'CANCELLED'
+  waterfallBreakdown: jsonb('waterfall_breakdown'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const credit_reservations = pgTable('credit_reservations', {
+  id: text('id').primaryKey(),
+  listingId: text('listing_id').references(() => credit_market_listings.id).notNull(),
+  custodyId: text('custody_id').references(() => credit_custody.id).notNull(),
+  buyerEntityId: text('buyer_entity_id').notNull(),
+  buyerUserId: text('buyer_user_id').notNull(),
+  reservedQuantity: doublePrecision('reserved_quantity').notNull(),
+  pricePerUnitInr: doublePrecision('price_per_unit_inr').notNull(),
+  totalAmountInr: doublePrecision('total_amount_inr').notNull(),
+  status: text('status').notNull().default('PENDING'), // 'PENDING' | 'EXECUTED' | 'EXPIRED' | 'CANCELLED'
+  expiresAt: timestamp('expires_at').notNull(),
+  idempotencyKey: text('idempotency_key').unique(),
+  waterfallManifest: jsonb('waterfall_manifest'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const credit_settlements = pgTable('credit_settlements', {
+  id: text('id').primaryKey(),
+  reservationId: text('reservation_id').references(() => credit_reservations.id).notNull(),
+  custodyId: text('custody_id').references(() => credit_custody.id).notNull(),
+  listingId: text('listing_id').references(() => credit_market_listings.id).notNull(),
+  buyerEntityId: text('buyer_entity_id').notNull(),
+  sellerEntityId: text('seller_entity_id').notNull(),
+  transferredQuantity: doublePrecision('transferred_quantity').notNull(),
+  totalSettlementInr: doublePrecision('total_settlement_inr').notNull(),
+  waterfallSettlement: jsonb('waterfall_settlement').notNull(),
+  authoritativeTransferRef: text('authoritative_transfer_ref'),
+  hederaEvidenceAnchorId: text('hedera_evidence_anchor_id'),
+  status: text('status').notNull().default('COMPLETED'), // 'COMPLETED' | 'FAILED'
+  settledAt: timestamp('settled_at').defaultNow(),
+});
+
+
 

@@ -1,5 +1,5 @@
-import { MRVEvent, EvidenceRecord, CCTSReadinessAssessment, CCTSReadinessStatus } from '../types';
-import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils';
+import { MRVEvent, EvidenceRecord, CCTSReadinessAssessment, CCTSReadinessStatus } from '../types.ts';
+import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils.ts';
 
 export interface RegistryProjectSubmission {
   submissionId: string;

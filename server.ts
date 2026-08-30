@@ -5,7 +5,7 @@ import { registerStakeholderUser, getUser, getAllUsers, getUserByEmail, getUserB
 import { db } from "./src/db/index.ts";
 import { users as dbUsers, records as dbRecords, farmers as dbFarmers, carbon_events as dbCarbonEvents, compliance_records as dbComplianceRecords, system_notifications as dbNotifications, operational_logs as dbOperationalLogs, hedera_anchors as dbHederaAnchors, pilot_onboardings as dbPilotOnboardings, pilot_records as dbPilotRecords } from "./src/db/schema.ts";
 import { eq, desc, sql } from "drizzle-orm";
-import { SWMComplianceService } from "./src/services/swmComplianceEngine";
+import { SWMComplianceService } from "./src/services/swmComplianceEngine.ts";
 import express from "express";
 
 import { RecordService } from './src/services/recordService.ts';
@@ -28,18 +28,19 @@ import pino from "pino";
 import rateLimit from "express-rate-limit";
 import { GoogleGenAI } from "@google/genai";
 
-import { WASTE_TYPES as INITIAL_WASTE_TYPES, INDIAN_STATES } from "./src/constants";
-import { SatelliteVerificationService } from "./src/services/satelliteService";
-import { CCCRegistryService } from "./src/services/cccRegistryService";
-import { generateCarbonEvent, cqe, BEE_APPROVED_METHODOLOGIES, CarbonQuantificationEngine, CQEMethodologyRegistry } from "./src/services/carbonEngine";
+import { WASTE_TYPES as INITIAL_WASTE_TYPES, INDIAN_STATES } from "./src/constants.ts";
+import { SatelliteVerificationService } from "./src/services/satelliteService.ts";
+import { CCCRegistryService } from "./src/services/cccRegistryService.ts";
+import { generateCarbonEvent, cqe, BEE_APPROVED_METHODOLOGIES, CarbonQuantificationEngine, CQEMethodologyRegistry } from "./src/services/carbonEngine.ts";
 import { CqeMethodologyDbService } from "./src/db/cqeMethodologies.ts";
 import { HederaAnchorProvider } from "./src/services/hederaAnchor.ts";
 import { CredentialService } from "./src/services/credentialService.ts";
-import { GuardianService } from "./src/services/guardianService";
-import { ICMComplianceService, ICM_METHODOLOGIES, ICM_CCTS_SECTORS } from "./src/services/icmComplianceService";
+import { GuardianService } from "./src/services/guardianService.ts";
+import { ICMComplianceService, ICM_METHODOLOGIES, ICM_CCTS_SECTORS } from "./src/services/icmComplianceService.ts";
+import { depositoryRouter } from "./src/routes/depository.ts";
 
-import { checkFraud } from "./src/services/fraudEngine";
-import { AIBiomassVerificationService } from "./src/services/aiBiomassService";
+import { checkFraud } from "./src/services/fraudEngine.ts";
+import { AIBiomassVerificationService } from "./src/services/aiBiomassService.ts";
 import {
   initLgdDatabase,
   getLgdStates,
@@ -48,7 +49,7 @@ import {
   getLgdLocalBodies,
   getLgdSyncStatus,
   syncLgdDatabase
-} from "./src/services/lgdDb";
+} from "./src/services/lgdDb.ts";
 
 let dynamicWasteTypes = [...INITIAL_WASTE_TYPES];
 let paymentConfig = {
@@ -5203,6 +5204,7 @@ All waste tracking, CPCB SWM rules, LGD boundary verifications, and carbon offse
   });
 
   app.use("/api/v1/carbon", auth(), carbonRouter);
+  app.use("/api/v1/depository", auth(), depositoryRouter);
 
   // Global Express error handler for API exceptions
   app.use((err: any, req: any, res: any, next: any) => {

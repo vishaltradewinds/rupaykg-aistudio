@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { db } from '../db/index';
-import { hedera_anchors } from '../db/schema';
+import { db } from '../db/index.ts';
+import { hedera_anchors } from '../db/schema.ts';
 import { eq, and } from 'drizzle-orm';
 
 export type HederaAnchorState =

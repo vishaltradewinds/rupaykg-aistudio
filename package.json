@@ -15,6 +15,7 @@
     "test:p0": "tsx tests/p0_regression_suite.ts",
     "test:p1": "tsx tests/p1_regression_suite.ts",
     "test:p2": "tsx tests/p2_comprehensive_security_suite.ts",
+    "test:depository": "tsx tests/environmental_credit_depository_suite.ts",
     "test:cert": "tsx tests/production_certification_suite.ts",
     "start": "node dist/server.cjs"
   },

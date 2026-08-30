@@ -7,7 +7,7 @@
  * BEE CCTS Scheme 2023, Solid Waste Management Rules 2016, and NITI Aayog PPP Concession Norms.
  */
 
-import { CQEWaterfallBreakdown, PricingType } from '../types';
+import { CQEWaterfallBreakdown, PricingType } from '../types.ts';
 
 export interface DoctrinalTierDefinition {
   tierNumber: number;
