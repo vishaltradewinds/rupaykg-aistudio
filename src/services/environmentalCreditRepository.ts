@@ -4,9 +4,13 @@ import crypto from 'crypto';
 export type CreditType = 'CCC' | 'GREEN_CREDIT';
 export type Registry = 'BEE_ICM' | 'GCP_ICFRE';
 const pool = createPool();
+const expectedRegistry: Record<CreditType, Registry> = { CCC: 'BEE_ICM', GREEN_CREDIT: 'GCP_ICFRE' };
 
 function assertPositive(n: number) {
   if (!Number.isFinite(n) || n <= 0) throw new Error('Quantity must be a positive finite number');
+}
+function assertIssuerBoundary(creditType: CreditType, registry: Registry) {
+  if (expectedRegistry[creditType] !== registry) throw new Error(`Invalid authoritative issuer boundary for ${creditType}`);
 }
 
 export async function createCustodyPosition(input: {
@@ -16,9 +20,11 @@ export async function createCustodyPosition(input: {
   idempotencyKey: string;
 }) {
   assertPositive(input.quantity);
+  assertIssuerBoundary(input.creditType, input.registry);
   if (!input.registryAccountId || !input.authoritativeCreditReference || !input.holderEntityId) throw new Error('Authoritative registry account, credit reference and holder are required');
   if (input.tradabilityStatus !== 'TRADABLE') throw new Error('Credit is not confirmed tradable');
   if (!input.idempotencyKey?.trim()) throw new Error('Idempotency key is required');
+  if (!input.authoritativeVerifiedAt || Number.isNaN(Date.parse(input.authoritativeVerifiedAt))) throw new Error('Authoritative verification timestamp is required');
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
