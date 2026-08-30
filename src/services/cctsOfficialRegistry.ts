@@ -13,12 +13,16 @@
 export const BEE_CCTS_APPROVED_METHODOLOGIES = [
   { code: "BM EN01.001", sector: "Energy", title: "Grid-connected electricity generation from renewable sources" },
   { code: "BM EN01.002", sector: "Energy", title: "Hydrogen production from electrolysis of water" },
+  { code: "BM EN01.003", sector: "Energy", title: "Electricity and Heat Generation from Biomass" },
   { code: "BM IN02.001", sector: "Industries", title: "Energy efficiency and fuel switching measures for industrial facilities" },
   { code: "BM IN02.002", sector: "Industries", title: "Hydrogen production using methane extracted from biogas" },
-  { code: "BM WA03.001", sector: "Waste handling and disposal", title: "Landfill methane recovery" },
-  { code: "BM WA03.002", sector: "Waste handling and disposal", title: "Flaring or use of landfill gas" },
+  { code: "BM WA03.001", sector: "Waste Handling and Disposal", title: "Landfill methane recovery" },
+  { code: "BM WA03.002", sector: "Waste Handling and Disposal", title: "Flaring or use of landfill gas" },
+  { code: "BM WA03.003", sector: "Waste Handling and Disposal", title: "Production of Compressed Bio-gas (CBG)" },
   { code: "BM AG04.001", sector: "Agriculture", title: "Methane recovery from livestock and manure management at households and small farms" },
-  { code: "BM FR05.001", sector: "Forestry", title: "Afforestation and reforestation of degraded mangrove habitats" }
+  { code: "BM AG04.002", sector: "Agriculture", title: "Emission reduction through improved management practices in rice cultivation" },
+  { code: "BM FR05.001", sector: "Forestry", title: "Afforestation and reforestation of degraded mangrove habitats" },
+  { code: "BM FR05.002", sector: "Forestry", title: "Afforestation and reforestation of lands except wetlands" }
 ] as const;
 
 export type CctsApprovedMethodologyCode =
@@ -28,18 +32,10 @@ export const BEE_CCTS_APPROVED_METHODOLOGY_CODES = new Set<string>(
   BEE_CCTS_APPROVED_METHODOLOGIES.map((methodology) => methodology.code)
 );
 
-/**
- * Returns true only for a methodology currently published by BEE as approved.
- */
 export function isBEEApprovedCctsMethodology(code: string): code is CctsApprovedMethodologyCode {
   return BEE_CCTS_APPROVED_METHODOLOGY_CODES.has(code);
 }
 
-/**
- * ACVA eligibility is sector-based. RupayKg must not infer eligibility from
- * an ACVA being registered alone; the selected methodology's sector must be
- * covered by the ACVA's current Offset Mechanism accreditation.
- */
 export function isAcvaEligibleForMethodology(
   methodologyCode: string,
   accreditedOffsetSectors: readonly string[]
@@ -55,10 +51,6 @@ export function isAcvaEligibleForMethodology(
   );
 }
 
-/**
- * A production workflow may only enter CCTS verification when both gates
- * pass: approved methodology + ACVA accreditation for its sector.
- */
 export function assertCctsVerificationEligibility(input: {
   methodologyCode: string;
   acvaOffsetSectors: readonly string[];
