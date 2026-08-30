@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Ensure declared runtime dependencies are complete
+        run: npm install zod --save
+
       - name: Wire environmental depository into canonical server
         run: |
           python - <<'PY'
@@ -61,12 +64,10 @@ jobs:
           npm run build
 
       - name: Commit wiring and remove temporary workflow
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           rm -f .github/workflows/finish-environmental-lifecycle.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server.ts tests/environmental_credit_route_mount_test.ts .github/workflows/finish-environmental-lifecycle.yml
+          git add server.ts tests/environmental_credit_route_mount_test.ts package.json package-lock.json .github/workflows/finish-environmental-lifecycle.yml
           git commit -m "feat: wire environmental credit depository into production API"
           git push
