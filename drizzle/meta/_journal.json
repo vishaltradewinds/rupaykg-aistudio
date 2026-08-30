@@ -15,6 +15,13 @@
       "when": 1788080000000,
       "tag": "0001_gcp_commercial_lifecycle_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788091200000,
+      "tag": "0002_environmental_credit_custody",
+      "breakpoints": true
     }
   ]
 }
