@@ -31,6 +31,12 @@ export interface LifecycleGateInput {
   retired: boolean;
 }
 
+const STAGE_ORDER: LifecycleStage[] = [
+  'MRV', 'METHODOLOGY', 'ACVA_VERIFICATION', 'AUTHORITATIVE_ISSUANCE', 'CUSTODY',
+  'MARKETPLACE', 'BUYER_ELIGIBILITY', 'AUTHORITATIVE_TRANSFER', 'RECONCILIATION',
+  'SETTLEMENT', 'RETIREMENT',
+];
+
 export function assertLifecycleGate(input: LifecycleGateInput, target: LifecycleStage): void {
   if (!['CCC', 'GREEN_CREDIT'].includes(input.creditType)) throw new Error('Unsupported environmental credit type');
   if (!['URBAN', 'RURAL'].includes(input.urbanOrRural)) throw new Error('Operating context must be URBAN or RURAL');
@@ -45,13 +51,17 @@ export function assertLifecycleGate(input: LifecycleGateInput, target: Lifecycle
     CUSTODY: input.authoritativeIssued && input.authoritativeHolderConfirmed,
     MARKETPLACE: input.authoritativeIssued && input.authoritativeHolderConfirmed && input.tradable,
     BUYER_ELIGIBILITY: input.authoritativeIssued && input.authoritativeHolderConfirmed && input.tradable && input.buyerEligible,
-    AUTHORITATIVE_TRANSFER: input.buyerEligible && input.authoritativeTransferConfirmed,
+    AUTHORITATIVE_TRANSFER: input.authoritativeIssued && input.authoritativeHolderConfirmed && input.tradable && input.buyerEligible && input.authoritativeTransferConfirmed,
     RECONCILIATION: input.authoritativeTransferConfirmed && input.reconciled,
     SETTLEMENT: input.reconciled && input.settled,
     RETIREMENT: input.reconciled && input.settled && input.retired,
   };
 
-  if (!checks[target]) throw new Error(`Lifecycle gate not satisfied: ${target}`);
+  const targetIndex = STAGE_ORDER.indexOf(target);
+  for (let i = 0; i <= targetIndex; i += 1) {
+    const stage = STAGE_ORDER[i];
+    if (!checks[stage]) throw new Error(`Lifecycle gate not satisfied: ${stage}`);
+  }
 }
 
 export function assertCreditIssuerBoundary(creditType: CreditType, issuer: 'BEE_ICM' | 'GCP_ICFRE'): void {
