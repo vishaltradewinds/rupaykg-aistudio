@@ -50,3 +50,5 @@ jobs:
         run: npm test
       - name: Explicit combined CCTS + GCP lifecycle gate
         run: npx tsx tests/gcp_ccts_combined_regression_test.ts
+      - name: GCP sandbox contract E2E gate
+        run: npm run test:gcp:sandbox:e2e
