@@ -59,7 +59,14 @@ environmentalCreditsRouter.post('/:positionId/release', async (req: any, res) =>
 
 environmentalCreditsRouter.post('/:positionId/retire', async (req: any, res) => {
   try {
-    res.json(await retireCredits(req.params.positionId, Number(req.body?.quantity), req.user.uid, requireIdempotencyKey(req), String(req.body?.reason || '')));
+    res.json(await retireCredits(
+      req.params.positionId,
+      Number(req.body?.quantity),
+      req.user.uid,
+      requireIdempotencyKey(req),
+      String(req.body?.reason || ''),
+      String(req.body?.authoritativeRetirementReference || '')
+    ));
   } catch (e: any) { res.status(400).json({ error: e.message }); }
 });
 
