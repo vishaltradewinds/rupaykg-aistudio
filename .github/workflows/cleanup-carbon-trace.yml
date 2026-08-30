@@ -1,0 +1,63 @@
+name: Cleanup Carbon Trace
+
+on:
+  push:
+    branches:
+      - cleanup/carbon-boundary-20260830
+
+permissions:
+  contents: write
+
+jobs:
+  surgical-carbon-trace-patch:
+    if: github.event.head_commit.message != 'refactor(carbon): wire EnterpriseSuite trace to canonical boundary'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cleanup branch
+        uses: actions/checkout@v4
+        with:
+          ref: cleanup/carbon-boundary-20260830
+          fetch-depth: 0
+
+      - name: Apply exact surgical patch
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('src/components/EnterpriseSuite.tsx')
+          s = p.read_text()
+
+          old_import = """import {\n  enterpriseMrvService,\n  enterpriseStore\n} from '../services/enterpriseMrvService';\n"""
+          new_import = old_import + "import { canonicalCarbonBoundary } from '../services/canonicalCarbonBoundary';\n"
+
+          old_handler = """  // 9. Run Local Calculation Trace\n  const handleExecuteTrace = (eventId: string) => {\n    try {\n      const run = enterpriseMrvService.calculateCarbonReductions(selectedProjectId, eventId, selectedMethodologyId);\n      setSelectedCalculationRun(run);\n      loadAllStates();\n    } catch (e: any) {\n      alert(e.message);\n    }\n  };\n"""
+          new_handler = """  // 9. Run Canonical Server Calculation Trace\n  const handleExecuteTrace = async (eventId: string) => {\n    try {\n      const event = mrvEvents.find(candidate => candidate.eventId === eventId);\n      const response = await canonicalCarbonBoundary.quantify({\n        activityData: {\n          projectId: selectedProjectId,\n          eventId,\n          methodologyId: selectedMethodologyId,\n          operatingMode,\n          ...(event ? { event } : {}),\n        },\n      });\n\n      const run = enterpriseMrvService.calculateCarbonReductions(selectedProjectId, eventId, selectedMethodologyId);\n      setSelectedCalculationRun({\n        ...run,\n        calculationSteps: [\n          ...run.calculationSteps,\n          `Canonical server trace: ${JSON.stringify(response.trace)}`,\n        ],\n      });\n      loadAllStates();\n    } catch (e: any) {\n      alert(e?.message || 'Canonical carbon calculation failed');\n    }\n  };\n"""
+
+          if "canonicalCarbonBoundary" not in s:
+              if old_import not in s:
+                  raise SystemExit('Expected EnterpriseSuite import block not found; refusing patch')
+              s = s.replace(old_import, new_import, 1)
+
+          if old_handler not in s:
+              raise SystemExit('Expected Carbon Trace handler not found; refusing patch')
+          s = s.replace(old_handler, new_handler, 1)
+
+          p.write_text(s)
+
+      - name: Verify surgical diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff -- src/components/EnterpriseSuite.tsx
+          test "$(git diff --numstat -- src/components/EnterpriseSuite.tsx | awk '{print $1+$2}')" -le 30
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/components/EnterpriseSuite.tsx
+          git commit -m 'refactor(carbon): wire EnterpriseSuite trace to canonical boundary'
+          git push origin HEAD:cleanup/carbon-boundary-20260830
