@@ -1,9 +1,9 @@
 /**
  * RupayKg Enterprise 3.0 — Environmental Credit Depository Policy
  *
- * Policy boundary: RupayKg does not issue CCCs or Green Credits. It may
- * custody/list them only after authoritative registry evidence establishes
- * RupayKg as the holder and the credit as tradable.
+ * RupayKg never issues environmental credits. It records custody only after
+ * authoritative programme evidence proves holder, reference, quantity and
+ * tradability. Hedera/local hashes are provenance only.
  */
 export type CreditType = 'CCC' | 'GREEN_CREDIT';
 export type Registry = 'BEE_ICM' | 'GCP_ICFRE';
@@ -19,6 +19,17 @@ export interface RegistryHoldingProof {
   verifiedAt: string;
 }
 
+const EXPECTED_REGISTRY: Record<CreditType, Registry> = {
+  CCC: 'BEE_ICM',
+  GREEN_CREDIT: 'GCP_ICFRE',
+};
+
+export function assertIssuerBoundary(creditType: CreditType, registry: Registry): void {
+  if (EXPECTED_REGISTRY[creditType] !== registry) {
+    throw new Error(`Invalid authoritative issuer boundary for ${creditType}`);
+  }
+}
+
 export interface CustodyPosition {
   positionId: string;
   proof: RegistryHoldingProof;
@@ -30,11 +41,13 @@ export interface CustodyPosition {
 }
 
 export function acceptAuthoritativeHolding(proof: RegistryHoldingProof): CustodyPosition {
+  assertIssuerBoundary(proof.creditType, proof.registry);
   if (!proof.registryAccountId || !proof.creditReference || !proof.holderEntityId) {
     throw new Error('Authoritative registry account, credit reference and holder are required');
   }
-  if (proof.quantity <= 0) throw new Error('Credit quantity must be positive');
+  if (!Number.isFinite(proof.quantity) || proof.quantity <= 0) throw new Error('Credit quantity must be positive');
   if (!proof.tradable) throw new Error('Credit is not confirmed tradable');
+  if (!proof.verifiedAt || Number.isNaN(Date.parse(proof.verifiedAt))) throw new Error('Authoritative verification timestamp is required');
 
   return {
     positionId: `${proof.registry}:${proof.creditReference}`,
@@ -48,23 +61,14 @@ export function acceptAuthoritativeHolding(proof: RegistryHoldingProof): Custody
 }
 
 export function reserveForSale(position: CustodyPosition, quantity: number): CustodyPosition {
-  if (position.status !== 'HELD' && position.status !== 'RESERVED') {
-    throw new Error('Only held credits may be reserved');
-  }
-  if (quantity <= 0 || quantity > position.availableQuantity) {
-    throw new Error('Insufficient available depository inventory');
-  }
-  return {
-    ...position,
-    status: 'RESERVED',
-    availableQuantity: position.availableQuantity - quantity,
-    reservedQuantity: position.reservedQuantity + quantity,
-  };
+  if (position.status !== 'HELD' && position.status !== 'RESERVED') throw new Error('Only held credits may be reserved');
+  if (!Number.isFinite(quantity) || quantity <= 0 || quantity > position.availableQuantity) throw new Error('Insufficient available depository inventory');
+  return { ...position, status: 'RESERVED', availableQuantity: position.availableQuantity - quantity, reservedQuantity: position.reservedQuantity + quantity };
 }
 
-/** Sale proceeds only. This is deliberately separate from credit ownership. */
+/** Sale proceeds only. This is the platform's contractual/commercial waterfall, not a statutory claim. */
 export function calculateExistingWaterfall(grossProceedsInr: number) {
-  if (grossProceedsInr <= 0) throw new Error('Gross proceeds must be positive');
+  if (!Number.isFinite(grossProceedsInr) || grossProceedsInr <= 0) throw new Error('Gross proceeds must be positive');
   const allocation = {
     paymentRails: grossProceedsInr * 0.01,
     registryCompliance: grossProceedsInr * 0.015,
