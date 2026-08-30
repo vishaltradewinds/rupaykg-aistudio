@@ -13,9 +13,36 @@ function requireIdempotencyKey(req: any): string {
 }
 
 environmentalCreditsRouter.get('/available', async (req: any, res) => {
-  try { res.json(await listAvailablePositions(req.query?.creditType)); }
-  catch (e: any) { res.status(400).json({ error: e.message }); }
+  try {
+    const type = req.query.creditType === 'CCC' || req.query.creditType === 'GREEN_CREDIT' ? req.query.creditType : undefined;
+    res.json(await listAvailablePositions(type));
+  } catch { res.status(503).json({ error: 'Environmental credit depository unavailable' }); }
 });
+
+environmentalCreditsRouter.get('/lifecycle/order', (_req, res) => {
+  res.json({
+    lifecycle: ['MRV','METHODOLOGY','ACVA_VERIFICATION','AUTHORITATIVE_ISSUANCE','CUSTODY','MARKETPLACE','BUYER_ELIGIBILITY','AUTHORITATIVE_TRANSFER','RECONCILIATION','SETTLEMENT','RETIREMENT'],
+    issuerBoundaries: { CCC: 'BEE_ICM', GREEN_CREDIT: 'GCP_ICFRE' },
+    rupayKgRole: 'DEPOSITORY_AND_MARKETPLACE_AFTER_AUTHORITATIVE_ISSUANCE'
+  });
+});
+
+environmentalCreditsRouter.post('/lifecycle/gate', async (req: any, res) => {
+  try {
+    const input = req.body as LifecycleGateInput;
+    assertLifecycleGate(input, String(req.body?.target) as LifecycleStage);
+    if (req.body?.issuer) assertCreditIssuerBoundary(input.creditType, req.body.issuer);
+    res.json({ allowed: true, stage: req.body.target });
+  } catch (e: any) {
+    res.status(409).json({ allowed: false, error: e.message });
+  }
+});
+
+// Client-originated custody is prohibited. Only a server-side authoritative registry adapter may call the repository.
+environmentalCreditsRouter.post('/custody', async (_req: any, res) => res.status(503).json({
+  error: 'AUTHORITATIVE_REGISTRY_REQUIRED',
+  message: 'Custody recording requires independent authoritative BEE/ICM or GCP/ICFRE verification.'
+}));
 
 environmentalCreditsRouter.post('/:positionId/reserve', async (req: any, res) => {
   try {
@@ -30,11 +57,11 @@ environmentalCreditsRouter.post('/:positionId/release', async (req: any, res) =>
   } catch (e: any) { res.status(400).json({ error: e.message }); }
 });
 
-// Public callers cannot attest to authoritative retirement. Retirement must be
-// initiated by the server-side programme adapter after authoritative confirmation.
+// Public callers cannot attest to authoritative retirement. The programme adapter must
+// confirm retirement first and then invoke the repository service server-side.
 environmentalCreditsRouter.post('/:positionId/retire', async (_req: any, res) => res.status(503).json({
   error: 'AUTHORITATIVE_RETIREMENT_ADAPTER_REQUIRED',
-  message: 'Retirement is restricted to the server-side authoritative registry adapter; client-supplied retirement evidence is never trusted.'
+  message: 'Retirement requires authoritative registry confirmation; client-supplied retirement evidence is never trusted.'
 }));
 
 // Public callers cannot attest to an authoritative transfer or buyer eligibility.
