@@ -40,6 +40,6 @@ expectReject("zero-quantity", { ...valid, quantity: 0 });
 expectReject("invalid-timestamp", { ...valid, issuedAt: "not-a-date" });
 
 // A GCP issuance must remain distinguishable from a CCTS/ICM issuance.
-if (custody.source === "BEE_ICM") throw new Error("GCP_CCTS_AUTHORITY_COLLISION");
+if (custody.source !== "GCP_ICFRE") throw new Error("GCP_CCTS_AUTHORITY_COLLISION");
 
 console.log("GCP END-TO-END AUTHORITY/CUSTODY ADVERSARIAL TEST: PASSED");
