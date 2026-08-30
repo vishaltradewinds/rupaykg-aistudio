@@ -70,10 +70,11 @@ export async function recordGcpCommercialTransition(event: LifecycleEvent): Prom
       `INSERT INTO gcp_commercial_lifecycle_events
        (id, position_id, sequence_no, from_state, state, event_type, actor_uid,
         idempotency_key, authoritative_reference, quantity, metadata, previous_hash, event_hash)
-       VALUES (gen_random_uuid(), $1,
-         COALESCE((SELECT MAX(sequence_no)+1 FROM gcp_commercial_lifecycle_events WHERE position_id=$1), 1),
-         $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+       VALUES ($1, $2,
+         COALESCE((SELECT MAX(sequence_no)+1 FROM gcp_commercial_lifecycle_events WHERE position_id=$2), 1),
+         $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
+        crypto.randomUUID(),
         event.positionId,
         fromState ?? null,
         event.toState,
