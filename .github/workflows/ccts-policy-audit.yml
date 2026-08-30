@@ -1,0 +1,25 @@
+name: RupayKg CCTS Policy Audit
+
+on:
+  push:
+    branches: [main, feat/environmental-credit-depository]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ccts-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify current BEE CCTS methodology and ACVA gates
+        run: npx tsx tests/ccts_official_registry_test.ts
