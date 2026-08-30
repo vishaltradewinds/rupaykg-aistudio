@@ -1,5 +1,5 @@
-import { MRVEvent, EvidenceRecord, CCTSReadinessAssessment, CCTSReadinessStatus } from '../types';
-import { randomBytesHex, hashStringHex } from '../utils/cryptoUtils';
+import { CCTSReadinessAssessment, CCTSReadinessStatus } from '../types';
+import { randomBytesHex } from '../utils/cryptoUtils';
 
 export interface RegistryProjectSubmission {
   submissionId: string;
@@ -16,11 +16,9 @@ export interface RegistryProjectSubmission {
 }
 
 /**
- * ========================================================
- * REGISTRY GATEWAY ADAPTER (Enterprise 3.0 Module)
- * ========================================================
- * Standardizes communication with global and domestic carbon registries.
- * Enables automatic CCTS schema serialization and payload submission checks.
+ * Registry gateway boundary. This legacy UI adapter is sandbox-only and
+ * cannot assert that BEE/ICM received a submission or issued certificates.
+ * Authoritative issuance must come from the configured registry adapter.
  */
 export class RegistryGatewayAdapter {
   private static SUBMISSIONS_KEY = 'rupaykg_registry_submissions';
@@ -29,9 +27,7 @@ export class RegistryGatewayAdapter {
     try {
       const data = localStorage.getItem(this.SUBMISSIONS_KEY);
       if (data) return JSON.parse(data);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
     return this.seedInitialSubmissions();
   }
 
@@ -43,26 +39,16 @@ export class RegistryGatewayAdapter {
 
   static getProjectSubmissions(projectId?: string): RegistryProjectSubmission[] {
     const list = this.getSubmissions();
-    if (projectId) return list.filter(s => s.projectId === projectId);
-    return list;
+    return projectId ? list.filter(s => s.projectId === projectId) : list;
   }
 
-  /**
-   * Evaluates the CCTS compliance-readiness profile of a project and submits it to CCTS
-   * if compliance criteria are satisfied.
-   */
-  static submitToCCTS(
-    assessment: CCTSReadinessAssessment,
-    totalCredits: number
-  ): RegistryProjectSubmission {
+  static submitToCCTS(assessment: CCTSReadinessAssessment, totalCredits: number): RegistryProjectSubmission {
     const list = this.getSubmissions();
-
     const isReady = assessment?.status === CCTSReadinessStatus.READY || assessment?.status === CCTSReadinessStatus.CONDITIONALLY_READY;
     const status = isReady ? 'UNDER_REVIEW' : 'REJECTED';
-    const notes = isReady 
-      ? 'Payload successfully received by National Bureau of Energy Efficiency (BEE) Gateway. Entered verification queue.' 
-      : 'Submission blocked: Project does not meet CCTS compliance criteria. Clear open verification findings first.';
-
+    const notes = isReady
+      ? 'Sandbox payload prepared locally. No BEE/ICM submission, verification or issuance is asserted.'
+      : 'Submission blocked: project does not meet local CCTS readiness criteria.';
     const newSubmission: RegistryProjectSubmission = {
       submissionId: `SUB_CCTS_${randomBytesHex(3).toUpperCase()}`,
       projectId: assessment.projectId,
@@ -73,30 +59,15 @@ export class RegistryGatewayAdapter {
       totalCreditsRequested: totalCredits,
       creditsIssued: 0,
       isSandbox: true,
-      notes
+      notes,
     };
-
     list.unshift(newSubmission);
     localStorage.setItem(this.SUBMISSIONS_KEY, JSON.stringify(list));
     return newSubmission;
   }
 
-  /**
-   * Triggers issuance of carbon certificates on the registry if verification is fully clear.
-   */
-  static approveAndIssueCredits(submissionId: string): RegistryProjectSubmission {
-    const list = this.getSubmissions();
-    const sub = list.find(s => s.submissionId === submissionId);
-    if (!sub) throw new Error('Submission not found');
-
-    if (sub.status === 'UNDER_REVIEW') {
-      sub.status = 'ISSUED';
-      sub.creditsIssued = sub.totalCreditsRequested;
-      sub.transactionHash = `0xbee_ccts_${hashStringHex(`${sub.submissionId}:${sub.projectId}:${sub.totalCreditsRequested}`).substring(0, 24)}`;
-      sub.notes = 'Official CCTS Compliance Credits minted successfully inside National carbon depository.';
-    }
-
-    localStorage.setItem(this.SUBMISSIONS_KEY, JSON.stringify(list));
-    return sub;
+  /** Authoritative issuance cannot be performed by a local/sandbox adapter. */
+  static approveAndIssueCredits(_submissionId: string): never {
+    throw new Error('AUTHORITATIVE_REGISTRY_REQUIRED');
   }
 }
