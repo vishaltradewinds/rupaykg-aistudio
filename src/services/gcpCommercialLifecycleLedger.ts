@@ -25,8 +25,17 @@ export type GcpCommercialLifecycleAuditEvent = LifecycleEvent & {
 
 function hashEvent(input: string): string { return crypto.createHash('sha256').update(input).digest('hex'); }
 
+/** Canonical JSON is required because PostgreSQL jsonb does not guarantee object-key order on readback. */
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, canonicalize(item)]));
+  }
+  return value;
+}
+
 function expectedEventHash(event: Pick<GcpCommercialLifecycleAuditEvent, 'positionId' | 'fromState' | 'toState' | 'eventType' | 'actorUid' | 'authoritativeReference' | 'quantity' | 'metadata' | 'previousHash'>): string {
-  const payload = JSON.stringify({
+  const payload = JSON.stringify(canonicalize({
     positionId: event.positionId,
     fromState: event.fromState ?? null,
     toState: event.toState,
@@ -35,7 +44,7 @@ function expectedEventHash(event: Pick<GcpCommercialLifecycleAuditEvent, 'positi
     authoritativeReference: event.authoritativeReference ?? null,
     quantity: event.quantity ?? null,
     metadata: event.metadata ?? {},
-  });
+  }));
   return hashEvent(`${event.previousHash}|${payload}`);
 }
 
