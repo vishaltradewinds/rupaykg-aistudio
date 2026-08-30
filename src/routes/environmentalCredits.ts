@@ -47,17 +47,14 @@ environmentalCreditsRouter.post('/custody', async (_req: any, res) => res.status
   message: 'Custody recording requires independent authoritative BEE/ICM or GCP/ICFRE verification.'
 }));
 
-// GCP marketplace listing is stateful and therefore uses the commercial integration ledger.
+// GCP marketplace listing is stateful and uses the commercial integration ledger.
 environmentalCreditsRouter.post('/:positionId/list', async (req: any, res) => {
   try {
     const position = await getPositionOr404(req.params.positionId);
     if (!position) return res.status(404).json({ error: 'Depository position not found' });
-    if (position.authoritative_registry === 'GCP_ICFRE') {
-      const result = await new GcpCommercialIntegration().list({ positionId: req.params.positionId, actorUid: req.user.uid, idempotencyKey: requireIdempotencyKey(req) });
-      return res.json(result);
-    }
-    res.status(409).json({ error: 'GCP_LISTING_ROUTE_REQUIRES_GCP_POSITION' });
-  } catch (e: any) { res.status(503).json({ error: e.message }); }
+    if (position.authoritative_registry !== 'GCP_ICFRE') return res.status(409).json({ error: 'GCP_LISTING_ROUTE_REQUIRES_GCP_POSITION' });
+    return res.json(await new GcpCommercialIntegration().list({ positionId: req.params.positionId, actorUid: req.user.uid, idempotencyKey: requireIdempotencyKey(req) }));
+  } catch (e: any) { return res.status(503).json({ error: e.message }); }
 });
 
 environmentalCreditsRouter.post('/:positionId/reserve', async (req: any, res) => {
@@ -76,8 +73,8 @@ environmentalCreditsRouter.post('/:positionId/reserve', async (req: any, res) =>
 });
 
 environmentalCreditsRouter.post('/:positionId/release', async (req: any, res) => {
-  try { res.json(await releaseReservation(req.params.positionId, Number(req.body?.quantity), req.user.uid, requireIdempotencyKey(req))); }
-  catch (e: any) { res.status(400).json({ error: e.message }); }
+  try { return res.json(await releaseReservation(req.params.positionId, Number(req.body?.quantity), req.user.uid, requireIdempotencyKey(req))); }
+  catch (e: any) { return res.status(400).json({ error: e.message }); }
 });
 
 // All irreversible GCP operations are routed to the server-side authoritative integration.
@@ -86,11 +83,10 @@ environmentalCreditsRouter.post('/:positionId/transfer/confirm', async (req: any
     const position = await getPositionOr404(req.params.positionId);
     if (!position) return res.status(404).json({ error: 'Depository position not found' });
     if (position.authoritative_registry !== 'GCP_ICFRE') return res.status(409).json({ error: 'GCP_TRANSFER_ROUTE_REQUIRES_GCP_POSITION' });
-    const result = await new GcpCommercialIntegration().transfer({
+    return res.json(await new GcpCommercialIntegration().transfer({
       positionId: req.params.positionId, quantity: Number(req.body?.quantity), actorUid: req.user.uid,
       idempotencyKey: requireIdempotencyKey(req), buyerEntityId: String(req.body?.buyerEntityId || ''),
-    });
-    return res.json(result);
+    }));
   } catch (e: any) { return res.status(503).json({ error: e.message }); }
 });
 
@@ -111,10 +107,12 @@ environmentalCreditsRouter.post('/:positionId/settle', async (req: any, res) => 
     const position = await getPositionOr404(req.params.positionId);
     if (!position) return res.status(404).json({ error: 'Depository position not found' });
     if (position.authoritative_registry !== 'GCP_ICFRE') return res.status(409).json({ error: 'GCP_SETTLEMENT_ROUTE_REQUIRES_GCP_POSITION' });
+    // Settlement eligibility is derived from the persisted lifecycle state inside settleAndRecord;
+    // client-supplied reservation/transfer/reconciliation flags are intentionally ignored.
     return res.json(await new GcpCommercialIntegration().settleAndRecord({
       positionId: req.params.positionId, actorUid: req.user.uid, idempotencyKey: requireIdempotencyKey(req),
-      reservationActive: Boolean(req.body?.reservationActive), authoritativeTransferConfirmed: Boolean(req.body?.authoritativeTransferConfirmed),
-      reconciled: Boolean(req.body?.reconciled), tradeValue: Number(req.body?.tradeValue), currency: String(req.body?.currency || ''),
+      reservationActive: true, authoritativeTransferConfirmed: true, reconciled: true,
+      tradeValue: Number(req.body?.tradeValue), currency: String(req.body?.currency || ''),
     }));
   } catch (e: any) { return res.status(503).json({ error: e.message }); }
 });
