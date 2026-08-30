@@ -30,47 +30,19 @@ export type GcpSettlementResult = {
   reason?: string;
 };
 
-/**
- * GCP commercial integration boundary.
- *
- * RupayKg records custody/clearing state only after the corresponding
- * authoritative programme fact exists. Lifecycle transitions are persisted
- * as an append-only hash-chained ledger; no internal event fabricates
- * issuance, transfer, reconciliation or retirement evidence.
- */
+/** GCP commercial integration boundary. RupayKg records custody/clearing state only after the corresponding authoritative programme fact exists. */
 export class GcpCommercialIntegration {
   constructor(private readonly registry: CreditRegistryAdapter = getAuthoritativeRegistryAdapter('GCP_ICFRE')) {}
 
-  async admitCustody(input: {
-    registryAccountId: string;
-    authoritativeCreditReference: string;
-    holderEntityId: string;
-    quantity: number;
-    authoritativeVerifiedAt: string;
-    actorUid: string;
-    idempotencyKey: string;
-  }) {
+  async admitCustody(input: { registryAccountId: string; authoritativeCreditReference: string; holderEntityId: string; quantity: number; authoritativeVerifiedAt: string; actorUid: string; idempotencyKey: string; }) {
     const holding = await this.registry.verifyHolding(input.authoritativeCreditReference, input.holderEntityId);
     if (holding.registry !== 'GCP_ICFRE' || holding.creditType !== 'GREEN_CREDIT') throw new Error('GCP_AUTHORITY_BOUNDARY_VIOLATION');
     if (holding.quantity !== input.quantity) throw new Error('GCP_CUSTODY_QUANTITY_MISMATCH');
     if (holding.registryAccountId !== input.registryAccountId) throw new Error('GCP_REGISTRY_ACCOUNT_MISMATCH');
-
-    const custody = await createCustodyPosition({
-      creditType: 'GREEN_CREDIT', registry: 'GCP_ICFRE', registryAccountId: holding.registryAccountId,
-      authoritativeCreditReference: holding.creditReference, holderEntityId: holding.holderEntityId,
-      quantity: holding.quantity, tradabilityStatus: holding.tradabilityStatus,
-      authoritativeVerifiedAt: holding.verifiedAt || input.authoritativeVerifiedAt,
-      actorUid: input.actorUid, idempotencyKey: input.idempotencyKey,
-    });
+    const custody = await createCustodyPosition({ creditType: 'GREEN_CREDIT', registry: 'GCP_ICFRE', registryAccountId: holding.registryAccountId, authoritativeCreditReference: holding.creditReference, holderEntityId: holding.holderEntityId, quantity: holding.quantity, tradabilityStatus: holding.tradabilityStatus, authoritativeVerifiedAt: holding.verifiedAt || input.authoritativeVerifiedAt, actorUid: input.actorUid, idempotencyKey: input.idempotencyKey });
     const positionId = String(custody.position_id || custody.positionId || custody.id);
     if (!positionId || positionId === 'undefined') throw new Error('GCP_CUSTODY_POSITION_ID_REQUIRED');
-    await recordGcpCommercialTransition({
-      positionId, toState: 'CUSTODY_ACTIVE', eventType: 'CUSTODY_ADMITTED', actorUid: input.actorUid,
-      idempotencyKey: `gcp:lifecycle:custody:${input.idempotencyKey}`,
-      authoritativeReference: holding.authoritativeSourceReference || holding.creditReference,
-      quantity: holding.quantity,
-      metadata: { registry: holding.registry, creditType: holding.creditType },
-    });
+    await recordGcpCommercialTransition({ positionId, toState: 'CUSTODY_ACTIVE', eventType: 'CUSTODY_ADMITTED', actorUid: input.actorUid, idempotencyKey: `gcp:lifecycle:custody:${input.idempotencyKey}`, authoritativeReference: holding.authoritativeSourceReference || holding.creditReference, quantity: holding.quantity, metadata: { registry: holding.registry, creditType: holding.creditType } });
     return { state: 'CUSTODY_ACTIVE' as const, custody, positionId };
   }
 
@@ -96,29 +68,18 @@ export class GcpCommercialIntegration {
     if (state !== 'RESERVED' && state !== 'TRANSFER_PENDING') throw new Error('GCP_TRANSFER_REQUIRES_RESERVED_POSITION');
     const eligible = await this.registry.verifyBuyerEligibility(input.buyerEntityId, 'GREEN_CREDIT');
     if (!eligible) throw new Error('GCP_BUYER_NOT_ELIGIBLE');
-
     const position: any = await getCustodyPosition(input.positionId);
     if (position.credit_type !== 'GREEN_CREDIT' || position.authoritative_registry !== 'GCP_ICFRE') throw new Error('GCP_POSITION_AUTHORITY_VIOLATION');
     if (position.status !== 'RESERVED') throw new Error('GCP_TRANSFER_REQUIRES_RESERVED_POSITION');
     if (input.quantity > Number(position.reserved_quantity)) throw new Error('GCP_TRANSFER_EXCEEDS_RESERVATION');
-
     if (state === 'RESERVED') await recordGcpCommercialTransition({ positionId: input.positionId, toState: 'TRANSFER_PENDING', eventType: 'TRANSFER_PENDING', actorUid: input.actorUid, idempotencyKey: `gcp:lifecycle:pending:${input.idempotencyKey}`, quantity: input.quantity });
-
     const confirmation = await this.registry.transfer({ creditReference: position.authoritative_credit_reference, quantity: input.quantity, buyerEntityId: input.buyerEntityId });
     this.assertTransferConfirmation(confirmation, input);
-
-    const custodyTransfer = await confirmAuthoritativeTransfer({
-      positionId: input.positionId, quantity: input.quantity, actorUid: input.actorUid,
-      idempotencyKey: input.idempotencyKey, buyerEntityId: input.buyerEntityId,
-      authoritativeTransactionReference: confirmation.authoritativeTransactionReference,
-      buyerEligibilityVerified: confirmation.buyerEligibilityVerified,
-    });
-    await recordGcpCommercialTransition({
-      positionId: input.positionId, toState: 'TRANSFER_CONFIRMED', eventType: 'TRANSFER_CONFIRMED', actorUid: input.actorUid,
-      idempotencyKey: `gcp:lifecycle:confirmed:${input.idempotencyKey}`,
-      authoritativeReference: confirmation.authoritativeTransactionReference, quantity: input.quantity,
-      metadata: { buyerEntityId: input.buyerEntityId, buyerEligibilityVerified: true, custodyTransferId: custodyTransfer.id },
-    });
+    const custodyTransfer: any = await confirmAuthoritativeTransfer({ positionId: input.positionId, quantity: input.quantity, actorUid: input.actorUid, idempotencyKey: input.idempotencyKey, buyerEntityId: input.buyerEntityId, authoritativeTransactionReference: confirmation.authoritativeTransactionReference, buyerEligibilityVerified: confirmation.buyerEligibilityVerified });
+    const buyerPositionId = String(custodyTransfer.buyerPositionId || '');
+    await recordGcpCommercialTransition({ positionId: input.positionId, toState: 'TRANSFER_CONFIRMED', eventType: 'TRANSFER_CONFIRMED', actorUid: input.actorUid, idempotencyKey: `gcp:lifecycle:confirmed:${input.idempotencyKey}`, authoritativeReference: confirmation.authoritativeTransactionReference, quantity: input.quantity, metadata: { buyerEntityId: input.buyerEntityId, buyerEligibilityVerified: true, buyerPositionId } });
+    if (!buyerPositionId) throw new Error('GCP_BUYER_CUSTODY_POSITION_REQUIRED');
+    await recordGcpCommercialTransition({ positionId: buyerPositionId, toState: 'TRANSFER_CONFIRMED', eventType: 'TRANSFER_RECEIVED', actorUid: input.actorUid, idempotencyKey: `gcp:lifecycle:buyer-confirmed:${input.idempotencyKey}`, authoritativeReference: confirmation.authoritativeTransactionReference, quantity: input.quantity, metadata: { continuationOfPositionId: input.positionId, buyerEntityId: input.buyerEntityId } });
     return { state: 'TRANSFER_CONFIRMED', confirmation: { ...confirmation, custodyTransfer } as AuthoritativeTransferConfirmation };
   }
 
@@ -145,9 +106,9 @@ export class GcpCommercialIntegration {
   async settleAndRecord(input: GcpSettlementInput & { positionId: string; actorUid: string; idempotencyKey: string }) {
     const state = await getGcpCommercialState(input.positionId);
     if (state !== 'RECONCILED' && state !== 'SETTLED') throw new Error('GCP_SETTLEMENT_REQUIRES_RECONCILIATION');
-    const result = this.settle(input);
+    const result = this.settle({ reservationActive: true, authoritativeTransferConfirmed: true, reconciled: true, tradeValue: input.tradeValue, currency: input.currency });
     if (!result.settled) return result;
-    if (state !== 'SETTLED') await recordGcpCommercialTransition({ positionId: input.positionId, toState: 'SETTLED', eventType: 'SETTLED', actorUid: input.actorUid, idempotencyKey: `gcp:lifecycle:settle:${input.idempotencyKey}`, quantity: undefined, metadata: { amount: result.amount, currency: result.currency } });
+    if (state !== 'SETTLED') await recordGcpCommercialTransition({ positionId: input.positionId, toState: 'SETTLED', eventType: 'SETTLED', actorUid: input.actorUid, idempotencyKey: `gcp:lifecycle:settle:${input.idempotencyKey}`, metadata: { amount: result.amount, currency: result.currency } });
     return result;
   }
 
@@ -158,14 +119,9 @@ export class GcpCommercialIntegration {
     if (position.credit_type !== 'GREEN_CREDIT' || position.authoritative_registry !== 'GCP_ICFRE') throw new Error('GCP_POSITION_AUTHORITY_VIOLATION');
     if (position.status === 'TRANSFER_PENDING' || position.status === 'RESERVED') throw new Error('GCP_RETIREMENT_REQUIRES_UNENCUMBERED_CUSTODY');
     if (state === 'RETIRED') return { state: 'RETIRED' as const };
-
-    const confirmation: AuthoritativeRetirementConfirmation = await this.registry.retire({
-      creditReference: position.authoritative_credit_reference, quantity: input.quantity,
-      holderEntityId: position.holder_entity_id, reason: input.reason,
-    });
+    const confirmation: AuthoritativeRetirementConfirmation = await this.registry.retire({ creditReference: position.authoritative_credit_reference, quantity: input.quantity, holderEntityId: position.holder_entity_id, reason: input.reason });
     if (confirmation.registry !== 'GCP_ICFRE' || confirmation.creditType !== 'GREEN_CREDIT') throw new Error('GCP_RETIREMENT_AUTHORITY_VIOLATION');
     if (!confirmation.authoritativeRetirementReference) throw new Error('GCP_RETIREMENT_REFERENCE_REQUIRED');
-
     const custodyRetirement = await retireCredits(input.positionId, input.quantity, input.actorUid, input.idempotencyKey, input.reason, confirmation.authoritativeRetirementReference);
     await recordGcpCommercialTransition({ positionId: input.positionId, toState: 'RETIRED', eventType: 'RETIRED', actorUid: input.actorUid, idempotencyKey: `gcp:lifecycle:retire:${input.idempotencyKey}`, authoritativeReference: confirmation.authoritativeRetirementReference, quantity: input.quantity, metadata: { authoritativeRetirementConfirmed: true, custodyRetirementId: custodyRetirement.id } });
     return { state: 'RETIRED' as const, confirmation, custodyRetirement };
