@@ -1,0 +1,46 @@
+name: Cleanup Safe Step
+
+on:
+  push:
+    branches:
+      - cleanup/service-consolidation-20260830
+
+permissions:
+  contents: write
+
+jobs:
+  remove-dead-server-imports:
+    if: github.event.head_commit.message != 'chore(cleanup): remove dead server imports'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cleanup branch
+        uses: actions/checkout@v4
+        with:
+          ref: cleanup/service-consolidation-20260830
+          fetch-depth: 0
+
+      - name: Remove verified dead imports only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('server.ts')
+          s = p.read_text()
+          old = s
+          s = s.replace('import { CCCRegistryService } from "./src/services/cccRegistryService";\n', '')
+          s = s.replace('import { HederaAnchorProvider } from "./src/services/hederaAnchor.ts";\n', '')
+          if s == old:
+              raise SystemExit('Expected dead imports were not found; refusing to modify server.ts')
+          p.write_text(s)
+          PY
+
+      - name: Commit and push isolated cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add server.ts
+          git commit -m 'chore(cleanup): remove dead server imports'
+          git push origin HEAD:cleanup/service-consolidation-20260830
