@@ -1,0 +1,72 @@
+name: Finish Environmental Credit Lifecycle
+
+on:
+  push:
+    branches: [feat/environmental-credit-depository]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wire-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wire environmental depository into canonical server
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('server.ts')
+          s = p.read_text()
+          import_line = 'import { environmentalCreditsRouter } from "./src/routes/environmentalCredits.ts";\n'
+          if import_line not in s:
+              needle = 'import { carbonRouter } from "./src/routes/carbon.ts";\n'
+              if needle not in s:
+                  raise SystemExit('carbonRouter import not found')
+              s = s.replace(needle, needle + import_line, 1)
+          mount = '  app.use("/api/v1/carbon/depository", environmentalCreditsRouter);\n\n'
+          marker = '  app.use("/api/v1/carbon", auth(), carbonRouter);\n'
+          if mount not in s:
+              if marker not in s:
+                  raise SystemExit('canonical carbon router mount not found')
+              s = s.replace(marker, marker + mount, 1)
+          p.write_text(s)
+          PY
+
+      - name: Add production route smoke test
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tests/environmental_credit_route_mount_test.ts')
+          p.write_text('''import { strict as assert } from "node:assert";\nimport { readFileSync } from "node:fs";\n\nconst server = readFileSync("server.ts", "utf8");\nassert.match(server, /environmentalCreditsRouter/);\nassert.match(server, /app\\.use\\("\\/api\\/v1\\/carbon\\/depository", environmentalCreditsRouter\\)/);\nconsole.log("Environmental credit route mount test: PASS");\n''')
+          PY
+          npx tsx tests/environmental_credit_route_mount_test.ts
+          npx tsx tests/environmental_credit_lifecycle_gate.ts
+
+      - name: Typecheck and build
+        run: |
+          npm run lint
+          npm run build
+
+      - name: Commit wiring and remove temporary workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rm -f .github/workflows/finish-environmental-lifecycle.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server.ts tests/environmental_credit_route_mount_test.ts .github/workflows/finish-environmental-lifecycle.yml
+          git commit -m "feat: wire environmental credit depository into production API"
+          git push
