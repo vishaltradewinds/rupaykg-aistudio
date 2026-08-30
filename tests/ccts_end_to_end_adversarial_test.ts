@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 
 import {
   assertAuthoritativeCctsIssuance,
-  buildCctsCustodyAdmission,
   type CctsAuthoritativeIssuance,
 } from "../src/services/cctsAuthoritativeIssuanceGate";
 import {
@@ -89,8 +88,8 @@ const oversell = evaluateCctsReservation({
 assert.equal(oversell.accepted, false);
 assert.equal(oversell.reason, "INSUFFICIENT_AVAILABLE_QUANTITY");
 
-const inactiveReservation = evaluateCctsReservation({
-  custodyStatus: "CUSTODY_ACTIVE" as "CUSTODY_ACTIVE",
+const invalidReservation = evaluateCctsReservation({
+  custodyStatus: "CUSTODY_ACTIVE",
   availableQuantity: 100,
   requestedQuantity: 1,
   sellerId: "",
@@ -98,7 +97,8 @@ const inactiveReservation = evaluateCctsReservation({
   listingId: "listing-001",
   reservationId: "reservation-003",
 });
-assert.equal(inactiveReservation.accepted, false);
+assert.equal(invalidReservation.accepted, false);
+assert.equal(invalidReservation.reason, "RESERVATION_IDENTIFIERS_REQUIRED");
 
 // 5. Settlement is impossible before authoritative transfer reconciliation.
 const preTransferSettlement = evaluateCctsSettlement({
@@ -182,13 +182,29 @@ const overRetirement = admitCctsRetirement({
 });
 assert.equal(overRetirement.accepted, false);
 
-// 8. End-to-end conservation check for the simulated custody lifecycle.
-const issued = 100;
-const transferred = 60;
-const retired = 60;
-const available = 0;
-const reserved = 0;
-assert.equal(issued, available + reserved + transferred + retired);
+// 8. Conservation is checked per custody position, not by double-counting a
+// quantity that moved from seller to buyer and was later retired.
+// Seller after a 60-unit transfer: 40 remaining in seller custody.
+const sellerIssued = 100;
+const sellerAvailable = 40;
+const sellerReserved = 0;
+const sellerTransferred = 60;
+const sellerRetired = 0;
+assert.equal(
+  sellerIssued,
+  sellerAvailable + sellerReserved + sellerTransferred + sellerRetired,
+);
+
+// Buyer received 60 and then retired all 60: its custody position is exhausted.
+const buyerIssued = 60;
+const buyerAvailable = 0;
+const buyerReserved = 0;
+const buyerTransferred = 0;
+const buyerRetired = 60;
+assert.equal(
+  buyerIssued,
+  buyerAvailable + buyerReserved + buyerTransferred + buyerRetired,
+);
 
 // 9. A Green Credit-style issuer must never cross the CCC BEE/ICM boundary.
 expectRejected(
