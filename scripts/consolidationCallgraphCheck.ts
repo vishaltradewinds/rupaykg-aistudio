@@ -12,7 +12,7 @@ const forbiddenImportPatterns = [
   /from\s+['"][^'"]*services\/creditDepositoryService[^'"]*['"]/, 
 ];
 
-const quarantinedLegacyFiles = [
+const retiredFiles = [
   'src/services/legacy/cccRegistryService.ts',
   'src/services/legacy/creditDepositoryService.ts',
   'src/services/legacy/registryGatewayAdapter.ts',
@@ -39,15 +39,9 @@ for (const file of walk(sourceRoot)) {
   }
 }
 
-for (const relative of quarantinedLegacyFiles) {
-  const file = path.join(repoRoot, relative);
-  if (!fs.existsSync(file)) {
-    violations.push(`${relative}: quarantine marker file missing`);
-    continue;
-  }
-  const content = fs.readFileSync(file, 'utf8');
-  if (!/QUARANTINED|LEGACY \/ SANDBOX REGISTRY GATEWAY/i.test(content)) {
-    violations.push(`${relative}: missing explicit quarantine marker`);
+for (const relative of retiredFiles) {
+  if (fs.existsSync(path.join(repoRoot, relative))) {
+    violations.push(`${relative}: retired legacy file still present`);
   }
 }
 
@@ -69,6 +63,6 @@ if (violations.length) {
 }
 
 console.log('CONSOLIDATION CALL-GRAPH CHECK PASSED');
-console.log('- No production imports of quarantined/retired services detected.');
+console.log('- No production imports of retired services detected.');
+console.log('- Retired legacy registry/MRV files are absent.');
 console.log('- EnterpriseSuite routes to canonical CCTSCarbonOS.');
-console.log('- Quarantine markers are present on retained legacy files.');
