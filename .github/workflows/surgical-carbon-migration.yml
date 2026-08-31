@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - cleanup/carbon-boundary-20260830
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,6 +30,11 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rupaykg
       NODE_ENV: test
       DB_SSL: 'false'
+      SQL_HOST: localhost
+      SQL_PORT: '5432'
+      SQL_USER: postgres
+      SQL_PASSWORD: postgres
+      SQL_DB_NAME: rupaykg
     steps:
       - name: Checkout cleanup branch
         uses: actions/checkout@v4
@@ -55,6 +61,12 @@ jobs:
           echo 'PostgreSQL did not become ready'
           exit 1
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Initialize test database schema
+        run: npm run db:migrate
+
       - name: Apply surgical EnterpriseSuite patch
         shell: bash
         run: |
@@ -63,21 +75,18 @@ jobs:
           from pathlib import Path
           p = Path('src/components/EnterpriseSuite.tsx')
           s = p.read_text()
-
           old_import = "import {\n  enterpriseMrvService,\n  enterpriseStore\n} from '../services/enterpriseMrvService';\n"
           new_import = old_import + "import { canonicalCarbonBoundary } from '../services/canonicalCarbonBoundary';\n"
           if "canonicalCarbonBoundary" not in s:
               if old_import not in s:
                   raise SystemExit('Expected EnterpriseSuite service import block not found; refusing to patch')
               s = s.replace(old_import, new_import, 1)
-
           old_handler = '''  // 9. Run Local Calculation Trace\n  const handleExecuteTrace = (eventId: string) => {\n    try {\n      const run = enterpriseMrvService.calculateCarbonReductions(selectedProjectId, eventId, selectedMethodologyId);\n      setSelectedCalculationRun(run);\n      loadAllStates();\n    } catch (e: any) {\n      alert(e.message);\n    }\n  };'''
-          new_handler = '''  // 9. Run Carbon Intelligence Trace through the canonical server boundary.\n  const handleExecuteTrace = async (eventId: string) => {\n    try {\n      const event = mrvEvents.find(candidate => candidate.eventId === eventId);\n      await canonicalCarbonBoundary.quantify({\n        activityData: {\n          projectId: selectedProjectId,\n          eventId,\n          methodologyId: selectedMethodologyId,\n          operatingMode,\n          ...(event ? { event } : {}),\n        },\n      });\n\n      // Compatibility read-model only: the legacy calculation is retained temporarily\n      // so the existing trace UI remains populated while the server boundary becomes\n      // the execution gate. It is not treated as authoritative issuance/custody state.\n      const run = enterpriseMrvService.calculateCarbonReductions(selectedProjectId, eventId, selectedMethodologyId);\n      setSelectedCalculationRun(run);\n      loadAllStates();\n    } catch (e: any) {\n      alert(e.message);\n    }\n  };'''
+          new_handler = '''  // 9. Run Carbon Intelligence Trace through the canonical server boundary.\n  const handleExecuteTrace = async (eventId: string) => {\n    try {\n      const event = mrvEvents.find(candidate => candidate.eventId === eventId);\n      await canonicalCarbonBoundary.quantify({\n        activityData: {\n          projectId: selectedProjectId,\n          eventId,\n          methodologyId: selectedMethodologyId,\n          operatingMode,\n          ...(event ? { event } : {}),\n        },\n      });\n      const run = enterpriseMrvService.calculateCarbonReductions(selectedProjectId, eventId, selectedMethodologyId);\n      setSelectedCalculationRun(run);\n      loadAllStates();\n    } catch (e: any) {\n      alert(e.message);\n    }\n  };'''
           if old_handler in s:
               s = s.replace(old_handler, new_handler, 1)
           elif 'const handleExecuteTrace = async (eventId: string)' not in s:
               raise SystemExit('Expected Carbon Trace handler not found; refusing to patch')
-
           p.write_text(s)
           PY
 
@@ -88,9 +97,6 @@ jobs:
           git diff --check
           git diff -- src/components/EnterpriseSuite.tsx
           test "$(git diff --numstat -- src/components/EnterpriseSuite.tsx | awk '{print $1+$2}')" -le 30
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: TypeScript check
         run: npm run lint
