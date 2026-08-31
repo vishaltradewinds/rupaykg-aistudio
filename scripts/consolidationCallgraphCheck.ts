@@ -10,12 +10,19 @@ const forbiddenImportPatterns = [
   /from\s+['"][^'"]*services\/registryGatewayAdapter[^'"]*['"]/, 
   /from\s+['"][^'"]*services\/cccRegistryService[^'"]*['"]/, 
   /from\s+['"][^'"]*services\/creditDepositoryService[^'"]*['"]/, 
+  /from\s+['"]better-sqlite3['"]/, 
+];
+
+const forbiddenPersistencePatterns = [
+  /better-sqlite3/,
+  /new\s+Database\s*\(/,
 ];
 
 const retiredFiles = [
   'src/services/legacy/cccRegistryService.ts',
   'src/services/legacy/creditDepositoryService.ts',
   'src/services/legacy/registryGatewayAdapter.ts',
+  'lgd_directory.db',
 ];
 
 function walk(dir: string): string[] {
@@ -35,14 +42,25 @@ for (const file of walk(sourceRoot)) {
   const relative = path.relative(repoRoot, file).replaceAll(path.sep, '/');
   const content = fs.readFileSync(file, 'utf8');
   for (const pattern of forbiddenImportPatterns) {
-    if (pattern.test(content)) violations.push(`${relative}: forbidden legacy import`);
+    if (pattern.test(content)) violations.push(`${relative}: forbidden legacy/integration import`);
+  }
+  for (const pattern of forbiddenPersistencePatterns) {
+    if (pattern.test(content)) violations.push(`${relative}: duplicate local persistence implementation detected`);
   }
 }
 
 for (const relative of retiredFiles) {
   if (fs.existsSync(path.join(repoRoot, relative))) {
-    violations.push(`${relative}: retired legacy file still present`);
+    violations.push(`${relative}: retired legacy/local persistence artifact still present`);
   }
+}
+
+const packageJsonPath = path.join(repoRoot, 'package.json');
+if (fs.existsSync(packageJsonPath)) {
+  const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  const dependencies = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+  if (dependencies['better-sqlite3']) violations.push('package.json: better-sqlite3 dependency remains');
+  if (dependencies['@google/generative-ai']) violations.push('package.json: retired duplicate Gemini SDK remains');
 }
 
 const enterpriseSuite = path.join(sourceRoot, 'components', 'EnterpriseSuite.tsx');
@@ -65,4 +83,6 @@ if (violations.length) {
 console.log('CONSOLIDATION CALL-GRAPH CHECK PASSED');
 console.log('- No production imports of retired services detected.');
 console.log('- Retired legacy registry/MRV files are absent.');
+console.log('- PostgreSQL is the sole application persistence database.');
+console.log('- No SQLite runtime or retired duplicate Gemini SDK remains.');
 console.log('- EnterpriseSuite routes to canonical CCTSCarbonOS.');
