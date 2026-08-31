@@ -9,6 +9,10 @@ interface User {
   state: string;
 }
 
+interface WalletResponse {
+  wallet_balance: number;
+}
+
 interface AppState {
   user: User | null;
   token: string | null;
@@ -40,7 +44,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   fetchWallet: async () => {
     try {
-      const res = await apiClient.get('/citizen/wallet');
+      const res = await apiClient.get<WalletResponse>('/citizen/wallet');
       set({ walletBalance: res.data.wallet_balance });
     } catch (err) {
       console.error("Wallet fetch error:", err);
@@ -50,7 +54,7 @@ export const useStore = create<AppState>((set, get) => ({
   fetchRecords: async () => {
     set({ isLoading: true });
     try {
-      const res = await apiClient.get('/history');
+      const res = await apiClient.get<Record<string, unknown>[]>('/history');
       set({ records: res.data });
     } catch (err) {
       console.error("Records fetch error:", err);
