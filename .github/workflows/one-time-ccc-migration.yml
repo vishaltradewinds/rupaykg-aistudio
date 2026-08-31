@@ -40,7 +40,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server.ts src/services/cccRegistryService.ts .github/workflows/one-time-ccc-migration.yml
-          git rm .github/workflows/one-time-ccc-migration.yml
+          git add -A
           git commit -m "chore: migrate MRV off CCC registry shim"
           git push
