@@ -32,16 +32,24 @@ export class BmWa03003Engine {
     fraction("methaneFraction", input.methaneFraction);
     fraction("methaneRecoveryEfficiency", input.methaneRecoveryEfficiency);
     fraction("projectEnergyEfficiency", input.projectEnergyEfficiency);
-    nonNegative("methaneEnergyMjsPerNm3", input.methaneEnergyM jPerNm3);
+    nonNegative("methaneEnergyMjPerNm3", input.methaneEnergyMjPerNm3);
     nonNegative("projectEmissionsTco2e", input.projectEmissionsTco2e ?? 0);
     nonNegative("baselineEmissionsTco2e", input.baselineEmissionsTco2e ?? 0);
+
     const recoveredMethaneNm3 = input.biogasNm3 * input.methaneFraction * input.methaneRecoveryEfficiency;
-    const methaneEnergyMj = recoveredMethaneNm3 * input.methaneEnergyM jPerNm3;
+    const methaneEnergyMj = recoveredMethaneNm3 * input.methaneEnergyMjPerNm3;
     const usefulEnergyMj = methaneEnergyMj * input.projectEnergyEfficiency;
     const baseline = input.baselineEmissionsTco2e ?? 0;
     const project = input.projectEmissionsTco2e ?? 0;
     const emissionReductionsTco2e = baseline - project;
     const canonical = JSON.stringify({ input, recoveredMethaneNm3, methaneEnergyMj, usefulEnergyMj, emissionReductionsTco2e });
-    return { recoveredMethaneNm3, methaneEnergyMj, usefulEnergyMj, emissionReductionsTco2e, calculationHash: crypto.createHash("sha256").update(canonical).digest("hex") };
+
+    return {
+      recoveredMethaneNm3,
+      methaneEnergyMj,
+      usefulEnergyMj,
+      emissionReductionsTco2e,
+      calculationHash: crypto.createHash("sha256").update(canonical).digest("hex")
+    };
   }
 }
