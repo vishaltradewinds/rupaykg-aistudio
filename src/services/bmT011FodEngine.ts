@@ -47,17 +47,23 @@ function assertPositive(name: string, value: number): void {
   }
 }
 
+function assertNonNegative(name: string, value: number): void {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`BM-T-011: ${name} must be non-negative.`);
+  }
+}
+
 /**
- * Canonical multi-year first-order-decay calculation boundary for BM-T-011.
+ * Canonical yearly BM-T-011 first-order-decay calculation boundary.
  *
- * Each historical waste cohort contributes independently using:
- * W_x * DOC_x * exp(-k_x * (y-x)) * (1-exp(-k_x))
+ * BEE Equation (1):
+ * φ_y × (1-f_y) × GWP_CH4 × (1-OX) × 16/12 × F × DOCf × MCF ×
+ * Σ_x Σ_j [W_j,x × DOC_j × exp(-k_j(y-x)) × (1-exp(-k_j))]
  *
- * Methane conversion applies φ_y, DOCf, MCF, methane carbon fraction (16/12),
- * and methane capture adjustment (1-f_y). Baseline CO2e then applies GWP and
- * oxidation adjustment. Optional φ_y/f_y default only to neutral mathematical
- * values (1/0) for backward-compatible callers; the resolved values are included
- * in the calculation hash.
+ * φ_y is a model-correction factor, not a generic fraction; it may be > 1.
+ * f_y is the methane capture fraction and remains constrained to [0,1].
+ * Defaults are neutral mathematical values only; production callers should
+ * supply the BEE-selected φ_y/f_y values for the applicable project.
  */
 export class BmT011FodEngine {
   public static calculate(
@@ -82,7 +88,7 @@ export class BmT011FodEngine {
 
     const modelCorrectionFactor = parameters.modelCorrectionFactor ?? 1;
     const methaneCaptureFraction = parameters.methaneCaptureFraction ?? 0;
-    assertFraction("modelCorrectionFactor", modelCorrectionFactor);
+    assertNonNegative("modelCorrectionFactor", modelCorrectionFactor);
     assertFraction("methaneCaptureFraction", methaneCaptureFraction);
 
     const trace: BmT011CohortTrace[] = [];
@@ -95,9 +101,7 @@ export class BmT011FodEngine {
       if (cohort.year < parameters.startYear || cohort.year > parameters.assessmentYear) {
         throw new Error(`BM-T-011: cohort year ${cohort.year} is outside the assessment window.`);
       }
-      if (!Number.isFinite(cohort.wasteTonnes) || cohort.wasteTonnes < 0) {
-        throw new Error("BM-T-011: wasteTonnes must be non-negative.");
-      }
+      assertNonNegative("wasteTonnes", cohort.wasteTonnes);
       assertFraction("docFraction", cohort.docFraction);
       assertPositive("decayRatePerYear", cohort.decayRatePerYear);
 
@@ -105,8 +109,8 @@ export class BmT011FodEngine {
       const decayedFraction = Math.exp(-cohort.decayRatePerYear * ageYears) *
         (1 - Math.exp(-cohort.decayRatePerYear));
       const methaneForCohort = cohort.wasteTonnes * cohort.docFraction * decayedFraction *
-        modelCorrectionFactor * parameters.docf * parameters.mcf *
-        (16 / 12) * parameters.methaneFraction * (1 - methaneCaptureFraction);
+        parameters.docf * parameters.mcf * parameters.methaneFraction *
+        modelCorrectionFactor * (1 - methaneCaptureFraction);
 
       methaneGeneratedT += methaneForCohort;
       trace.push({
@@ -117,7 +121,8 @@ export class BmT011FodEngine {
       });
     }
 
-    const baselineEmissionsTco2e = methaneGeneratedT * parameters.gwpCh4 *
+    const methaneCarbonMassT = methaneGeneratedT * (16 / 12);
+    const baselineEmissionsTco2e = methaneCarbonMassT * parameters.gwpCh4 *
       (1 - parameters.oxidationFactor);
 
     const canonicalInput = JSON.stringify({
@@ -129,6 +134,7 @@ export class BmT011FodEngine {
       },
       trace,
       methaneGeneratedT: Number(methaneGeneratedT.toFixed(12)),
+      methaneCarbonMassT: Number(methaneCarbonMassT.toFixed(12)),
       baselineEmissionsTco2e: Number(baselineEmissionsTco2e.toFixed(12))
     });
 
