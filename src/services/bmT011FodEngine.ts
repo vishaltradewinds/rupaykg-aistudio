@@ -15,6 +15,10 @@ export interface BmT011Parameters {
   methaneFraction: number;
   gwpCh4: number;
   oxidationFactor: number;
+  /** BM-T-011 model correction factor φ_y. */
+  modelCorrectionFactor?: number;
+  /** BM-T-011 methane capture fraction f_y. */
+  methaneCaptureFraction?: number;
 }
 
 export interface BmT011CohortTrace {
@@ -49,10 +53,11 @@ function assertPositive(name: string, value: number): void {
  * Each historical waste cohort contributes independently using:
  * W_x * DOC_x * exp(-k_x * (y-x)) * (1-exp(-k_x))
  *
- * Methane conversion then applies DOCf, MCF and methane carbon fraction (16/12),
- * followed by GWP and oxidation adjustment for baseline CO2e.
- *
- * No defaults are supplied: monitored/methodology inputs must be explicit.
+ * Methane conversion applies φ_y, DOCf, MCF, methane carbon fraction (16/12),
+ * and methane capture adjustment (1-f_y). Baseline CO2e then applies GWP and
+ * oxidation adjustment. Optional φ_y/f_y default only to neutral mathematical
+ * values (1/0) for backward-compatible callers; the resolved values are included
+ * in the calculation hash.
  */
 export class BmT011FodEngine {
   public static calculate(
@@ -75,6 +80,11 @@ export class BmT011FodEngine {
     assertFraction("oxidationFactor", parameters.oxidationFactor);
     assertPositive("gwpCh4", parameters.gwpCh4);
 
+    const modelCorrectionFactor = parameters.modelCorrectionFactor ?? 1;
+    const methaneCaptureFraction = parameters.methaneCaptureFraction ?? 0;
+    assertFraction("modelCorrectionFactor", modelCorrectionFactor);
+    assertFraction("methaneCaptureFraction", methaneCaptureFraction);
+
     const trace: BmT011CohortTrace[] = [];
     let methaneGeneratedT = 0;
 
@@ -95,7 +105,8 @@ export class BmT011FodEngine {
       const decayedFraction = Math.exp(-cohort.decayRatePerYear * ageYears) *
         (1 - Math.exp(-cohort.decayRatePerYear));
       const methaneForCohort = cohort.wasteTonnes * cohort.docFraction * decayedFraction *
-        parameters.docf * parameters.mcf * (16 / 12) * parameters.methaneFraction;
+        modelCorrectionFactor * parameters.docf * parameters.mcf *
+        (16 / 12) * parameters.methaneFraction * (1 - methaneCaptureFraction);
 
       methaneGeneratedT += methaneForCohort;
       trace.push({
@@ -111,7 +122,11 @@ export class BmT011FodEngine {
 
     const canonicalInput = JSON.stringify({
       cohorts,
-      parameters,
+      parameters: {
+        ...parameters,
+        modelCorrectionFactor,
+        methaneCaptureFraction
+      },
       trace,
       methaneGeneratedT: Number(methaneGeneratedT.toFixed(12)),
       baselineEmissionsTco2e: Number(baselineEmissionsTco2e.toFixed(12))
