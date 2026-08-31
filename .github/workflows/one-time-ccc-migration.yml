@@ -1,6 +1,5 @@
 name: One-time CCC call-site migration
 
-# Temporary migration workflow; self-removes after successful execution.
 on:
   push:
     branches: [main]
@@ -10,13 +9,13 @@ permissions:
 
 jobs:
   migrate:
-    if: ${{ !startsWith(github.event.head_commit.message, 'chore: migrate MRV off CCC registry shim') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Migrate MRV call-site and remove compatibility shim
         shell: bash
         run: |
+          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
           server = Path('server.ts')
@@ -35,11 +34,9 @@ jobs:
           rm src/services/cccRegistryService.ts
           ! grep -q 'CCCRegistryService' server.ts
           ! grep -q 'cccRegistryService' server.ts
-      - name: Commit migration and remove one-time workflow
-        shell: bash
-        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/one-time-ccc-migration.yml
           git add -A
           git commit -m "chore: migrate MRV off CCC registry shim"
           git push
