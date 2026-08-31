@@ -46,6 +46,7 @@ import {
   enterpriseMrvService,
   enterpriseStore
 } from '../services/enterpriseMrvService';
+import { canonicalCarbonBoundary } from '../services/canonicalCarbonBoundary';
 import { GuardianPolicyAdapter } from '../services/guardianPolicyAdapter';
 import { RegistryGatewayAdapter } from '../services/registryGatewayAdapter';
 import SwmCompliancePlatform from './SwmCompliancePlatform';
@@ -297,9 +298,19 @@ export default function EnterpriseSuite({ user, onBackToDashboard }: EnterpriseS
     loadAllStates();
   };
 
-  // 9. Run Local Calculation Trace
-  const handleExecuteTrace = (eventId: string) => {
+  // 9. Run Carbon Intelligence Trace through the canonical server boundary.
+  const handleExecuteTrace = async (eventId: string) => {
     try {
+      const event = mrvEvents.find(candidate => candidate.eventId === eventId);
+      await canonicalCarbonBoundary.quantify({
+        activityData: {
+          projectId: selectedProjectId,
+          eventId,
+          methodologyId: selectedMethodologyId,
+          operatingMode,
+          ...(event ? { event } : {}),
+        },
+      });
       const run = enterpriseMrvService.calculateCarbonReductions(selectedProjectId, eventId, selectedMethodologyId);
       setSelectedCalculationRun(run);
       loadAllStates();
