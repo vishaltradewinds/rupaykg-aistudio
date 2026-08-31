@@ -43,7 +43,7 @@
     "firebase-admin": "^14.2.0",
     "helmet": "^8.1.0",
     "i18next": "^25.8.13",
-    "jsonwebtoken": "^9.0.10",
+    "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.546.0",
@@ -74,6 +74,7 @@
     "@types/pg": "^8.20.0",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
+    "drizzle-kit": "^0.31.10",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "vite-plugin-pwa": "^1.2.0"
