@@ -1,0 +1,45 @@
+name: One-time CCC call-site migration
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore: migrate MRV off CCC registry shim') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Migrate MRV call-site and remove compatibility shim
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          server = Path('server.ts')
+          text = server.read_text()
+          old_import = 'import { CCCRegistryService } from "./src/services/cccRegistryService.ts";\n'
+          if old_import not in text:
+              raise SystemExit('Expected CCCRegistryService import not found')
+          text = text.replace(old_import, '', 1)
+          old_call = '''        // Register with External CCC Registry\n        const registrySerialNumber =\n          await CCCRegistryService.registerVerifiedActivity(\n            record,\n            req.user.id,\n          );\n'''
+          new_call = '''        // MRV verification does not issue CCCs. Preserve only an already-authoritative\n        // registry reference supplied by the statutory registry; never fabricate one.\n        const registrySerialNumber =\n          typeof record.registry_serial_number === 'string'\n            ? record.registry_serial_number\n            : '';\n'''
+          if old_call not in text:
+              raise SystemExit('Expected CCCRegistryService MRV call-site not found')
+          server.write_text(text.replace(old_call, new_call, 1))
+          PY
+          test -f src/services/cccRegistryService.ts
+          rm src/services/cccRegistryService.ts
+          ! grep -q 'CCCRegistryService' server.ts
+          ! grep -q 'cccRegistryService' server.ts
+      - name: Commit migration and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server.ts src/services/cccRegistryService.ts .github/workflows/one-time-ccc-migration.yml
+          git rm .github/workflows/one-time-ccc-migration.yml
+          git commit -m "chore: migrate MRV off CCC registry shim"
+          git push
