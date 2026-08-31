@@ -28,6 +28,27 @@ const in02 = runWave1Methodology(context, {
 }, "BM-IN02.002");
 assert.equal(in02.methodologyId, "BM-IN02.002");
 
+const wa001 = runWave1Methodology(context, {
+  cohorts: [{ year: 2025, wasteTonnes: 1000, docFraction: 0.5, decayRatePerYear: 0.1 }],
+  fodParameters: {
+    assessmentYear: 2026,
+    startYear: 2025,
+    docf: 0.5,
+    mcf: 0.4,
+    methaneFraction: 0.5,
+    gwpCh4: 29.8,
+    oxidationFactor: 0.1
+  },
+  baselineMethaneFlaredT: 0,
+  oxidationTopLayer: 0.1,
+  gwpCh4: 29.8,
+  baselineElectricityTco2: 10,
+  projectElectricityTco2: 2
+}, "BM-WA03.001");
+assert.equal(wa001.methodologyId, "BM-WA03.001");
+assert.ok(wa001.result.projectMethaneT > 0);
+assert.equal(wa001.result.projectTotalTco2e, 2);
+
 const wa = runWave1Methodology(context, {
   biogasNm3: 100,
   methaneFraction: 0.5,
