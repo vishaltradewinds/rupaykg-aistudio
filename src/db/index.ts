@@ -27,9 +27,7 @@ export const createPool = () => {
 
       if (process.env.SQL_PORT) {
         const portNum = parseInt(process.env.SQL_PORT, 10);
-        if (!isNaN(portNum)) {
-          config.port = portNum;
-        }
+        if (!isNaN(portNum)) config.port = portNum;
       }
     }
 
@@ -41,16 +39,11 @@ export const createPool = () => {
       if (process.env.DB_CA_CERT) {
         let caContent = process.env.DB_CA_CERT;
         try {
-          if (fs.existsSync(caContent)) {
-            caContent = fs.readFileSync(caContent, 'utf8');
-          }
-        } catch (e) {
-          // If not a valid file path, use as raw PEM certificate string
+          if (fs.existsSync(caContent)) caContent = fs.readFileSync(caContent, 'utf8');
+        } catch {
+          // If not a valid file path, use as raw PEM certificate string.
         }
-        config.ssl = {
-          ca: caContent,
-          rejectUnauthorized: true,
-        };
+        config.ssl = { ca: caContent, rejectUnauthorized: true };
       } else if (process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false') {
         config.ssl = { rejectUnauthorized: false };
       } else {
@@ -64,9 +57,9 @@ export const createPool = () => {
       console.error('Unexpected error on idle SQL pool client:', err);
     });
 
-    // Auto-create missing tables in PostgreSQL
+    // Runtime performs read-only schema verification. DDL is deployment-owned.
     ensureDatabaseSchema(global._postgresPool).catch(err => {
-      console.warn('Non-blocking schema initialization note:', err.message);
+      console.warn('Non-blocking schema verification note:', err.message);
     });
   }
   return global._postgresPool;
@@ -74,5 +67,3 @@ export const createPool = () => {
 
 const pool = createPool();
 export const db = drizzle(pool, { schema });
-
-
