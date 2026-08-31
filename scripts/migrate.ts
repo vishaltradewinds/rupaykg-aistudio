@@ -1,5 +1,3 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 import * as dotenv from "dotenv";
 import * as path from "path";
@@ -35,7 +33,6 @@ async function runMigrations() {
   try {
     console.log(`Connected to database: ${database} on ${host} as ${user}`);
 
-    // Ensure drizzle schema and __drizzle_migrations exist
     await client.query(`CREATE SCHEMA IF NOT EXISTS drizzle;`);
     await client.query(`
       CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
@@ -45,7 +42,6 @@ async function runMigrations() {
       );
     `);
 
-    // Read journal
     const journalPath = path.resolve("./drizzle/meta/_journal.json");
     if (!fs.existsSync(journalPath)) {
       throw new Error(`Migration journal not found at ${journalPath}`);
@@ -68,8 +64,6 @@ async function runMigrations() {
       }
 
       console.log(`[APPLYING] ${entry.tag}...`);
-      
-      // Execute migration SQL inside transaction
       await client.query("BEGIN;");
       try {
         const statements = sqlContent.split("--> statement-breakpoint");
@@ -82,10 +76,9 @@ async function runMigrations() {
             await client.query(`RELEASE SAVEPOINT sp_${i};`);
           } catch (stmtErr: any) {
             await client.query(`ROLLBACK TO SAVEPOINT sp_${i};`);
-            // If table already exists or constraint already exists during baseline, handle safely
             if (
-              stmtErr.code === "42P07" || 
-              stmtErr.code === "42710" || 
+              stmtErr.code === "42P07" ||
+              stmtErr.code === "42710" ||
               stmtErr.code === "42701" ||
               stmtErr.code === "42P16"
             ) {
@@ -96,7 +89,6 @@ async function runMigrations() {
           }
         }
 
-        // Record in __drizzle_migrations
         await client.query(
           `INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2);`,
           [hash, entry.when]
