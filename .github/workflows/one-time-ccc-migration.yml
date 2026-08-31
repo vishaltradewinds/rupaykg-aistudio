@@ -1,5 +1,6 @@
 name: One-time CCC call-site migration
 
+# Temporary migration workflow; self-removes after successful execution.
 on:
   push:
     branches: [main]
