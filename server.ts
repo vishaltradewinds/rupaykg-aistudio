@@ -30,7 +30,6 @@ import { GoogleGenAI } from "@google/genai";
 
 import { WASTE_TYPES as INITIAL_WASTE_TYPES, INDIAN_STATES } from "./src/constants.ts";
 import { SatelliteVerificationService } from "./src/services/satelliteService.ts";
-import { CCCRegistryService } from "./src/services/cccRegistryService.ts";
 import { generateCarbonEvent, cqe, BEE_APPROVED_METHODOLOGIES, CarbonQuantificationEngine, CQEMethodologyRegistry } from "./src/services/carbonEngine.ts";
 import { CqeMethodologyDbService } from "./src/db/cqeMethodologies.ts";
 import { HederaAnchorProvider } from "./src/services/hederaAnchor.ts";
@@ -1708,12 +1707,12 @@ app.set("trust proxy", 1);
       };
 
       if (status === "verified") {
-        // Register with External CCC Registry
+        // MRV verification does not issue CCCs. Preserve only an already-authoritative
+        // registry reference supplied by the statutory registry; never fabricate one.
         const registrySerialNumber =
-          await CCCRegistryService.registerVerifiedActivity(
-            record,
-            req.user.id,
-          );
+          typeof record.registry_serial_number === 'string'
+            ? record.registry_serial_number
+            : '';
         const lgdInfo = getLGDInfo(record.state || req.user.state, record.district || req.user.district, record.village, record.context);
         
         updatePayload.registry_serial_number = registrySerialNumber;
