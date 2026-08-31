@@ -1,6 +1,4 @@
-import Database from "better-sqlite3";
 import { INDIAN_STATES } from "../constants.ts";
-import fs from "fs";
 
 export interface LgdStateRecord {
   state_name: string;
@@ -25,177 +23,157 @@ export interface LgdLocalBodyRecord {
   is_lgd_verified?: boolean;
 }
 
-let db: Database.Database | null = null;
+/**
+ * Local LGD reference index — NOT an authoritative Government LGD database.
+ *
+ * This boundary is intentionally in-memory. PostgreSQL is the only application
+ * persistence database. No SQLite file, local database writes, or synthetic
+ * Government identifiers are persisted by this module.
+ *
+ * Numeric *_lgd_code fields are retained only for compatibility with the
+ * existing frontend contract and are explicitly marked is_lgd_verified=false.
+ */
+let initialized = false;
 let lastSyncedTime = "Never";
 let lastSyncStatus = "Idle";
 
-function assertDb(): Database.Database {
-  if (!db) throw new Error("LGD database not initialized");
-  return db;
+function ensureInitialized() {
+  if (!initialized) initLgdDatabase();
 }
 
-/**
- * Initializes the local LGD index from the application's static domain dataset.
- * IMPORTANT: this dataset is NOT treated as authoritative Government LGD data.
- * No AI, hash, random, or fallback generator is permitted to manufacture LGD codes.
- */
-export function initLgdDatabase() {
-  try {
-    db = new Database("lgd_directory.db");
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS lgd_states (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        state_name TEXT UNIQUE,
-        state_lgd_code INTEGER
-      );
-      CREATE TABLE IF NOT EXISTS lgd_districts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        district_name TEXT,
-        district_lgd_code INTEGER,
-        state_name TEXT,
-        UNIQUE(district_name, state_name)
-      );
-      CREATE TABLE IF NOT EXISTS lgd_local_bodies (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        local_body_name TEXT,
-        local_body_lgd_code INTEGER,
-        local_body_type TEXT,
-        subdistrict_name TEXT,
-        district_name TEXT,
-        state_name TEXT,
-        UNIQUE(local_body_name, local_body_type, subdistrict_name, district_name, state_name)
-      );
-      CREATE TABLE IF NOT EXISTS lgd_sync_tracker (
-        key TEXT PRIMARY KEY,
-        value TEXT
-      );
-    `);
-
-    const count = db.prepare("SELECT COUNT(*) as count FROM lgd_states").get() as { count: number };
-    if (count.count === 0) {
-      seedLgdDatabase();
-      lastSyncedTime = new Date().toISOString();
-      lastSyncStatus = "Loaded local index";
-    } else {
-      lastSyncStatus = "Loaded local index";
-      lastSyncedTime = new Date().toISOString();
-    }
-  } catch (error) {
-    console.error("Failed to initialize LGD database:", error);
-    try { db?.close(); } catch {}
-    db = null;
-    if (fs.existsSync("lgd_directory.db")) {
-      try { fs.unlinkSync("lgd_directory.db"); } catch {}
-    }
-    lastSyncStatus = "Failed";
-    throw error;
-  }
+function buildStates(): LgdStateRecord[] {
+  return Object.keys(INDIAN_STATES)
+    .sort()
+    .map((state, index) => ({
+      state_name: state,
+      state_lgd_code: index + 1,
+      is_lgd_verified: false,
+    }));
 }
 
-function seedLgdDatabase() {
-  const database = assertDb();
-  const insertState = database.prepare("INSERT OR IGNORE INTO lgd_states (state_name, state_lgd_code) VALUES (?, ?)");
-  const insertDistrict = database.prepare("INSERT OR IGNORE INTO lgd_districts (district_name, district_lgd_code, state_name) VALUES (?, ?, ?)");
-  const insertLocalBody = database.prepare(`INSERT OR IGNORE INTO lgd_local_bodies
-    (local_body_name, local_body_lgd_code, local_body_type, subdistrict_name, district_name, state_name)
-    VALUES (?, ?, ?, ?, ?, ?)`);
+function buildDistricts(state: string): LgdDistrictRecord[] {
+  const districts = INDIAN_STATES[state] || {};
+  const stateRecord = buildStates().find((row) => row.state_name === state);
+  const stateCode = stateRecord?.state_lgd_code || 0;
 
-  database.transaction(() => {
-    Object.keys(INDIAN_STATES).sort().forEach((state, stateIdx) => {
-      // These numeric identifiers originate from the local application dataset.
-      // They MUST NOT be represented as official Government LGD codes.
-      const stateCode = stateIdx + 1;
-      insertState.run(state, stateCode);
-      const districts = INDIAN_STATES[state] || {};
-      Object.keys(districts).sort().forEach((district, districtIdx) => {
-        const districtCode = stateCode * 1000 + districtIdx + 1;
-        insertDistrict.run(district, districtCode, state);
-        const data = districts[district];
-        const urban = (data.Urban || []).slice().sort();
-        const rural = (data.Rural || []).slice().sort();
-        urban.forEach((area, idx) => {
-          insertLocalBody.run(area, districtCode * 1000 + idx + 1, "Ward", `${district} Tehsil (Urban)`, district, state);
-        });
-        rural.forEach((area, idx) => {
-          insertLocalBody.run(area, districtCode * 1000 + 500 + idx + 1, "Gram Panchayat", `${district} Block (Rural)`, district, state);
-        });
-      });
+  return Object.keys(districts)
+    .sort()
+    .map((district, index) => ({
+      district_name: district,
+      district_lgd_code: stateCode * 1000 + index + 1,
+      state_name: state,
+      is_lgd_verified: false,
+    }));
+}
+
+function buildLocalBodies(state: string, district: string): LgdLocalBodyRecord[] {
+  const data = INDIAN_STATES[state]?.[district];
+  if (!data) return [];
+
+  const districtRecord = buildDistricts(state).find((row) => row.district_name === district);
+  const districtCode = districtRecord?.district_lgd_code || 0;
+  const rows: LgdLocalBodyRecord[] = [];
+
+  (data.Urban || []).slice().sort().forEach((area, index) => {
+    rows.push({
+      local_body_name: area,
+      local_body_lgd_code: districtCode * 1000 + index + 1,
+      local_body_type: "Ward",
+      subdistrict_name: `${district} Tehsil (Urban)`,
+      district_name: district,
+      state_name: state,
+      is_lgd_verified: false,
     });
-  })();
+  });
+
+  (data.Rural || []).slice().sort().forEach((area, index) => {
+    rows.push({
+      local_body_name: area,
+      local_body_lgd_code: districtCode * 1000 + 500 + index + 1,
+      local_body_type: "Gram Panchayat",
+      subdistrict_name: `${district} Block (Rural)`,
+      district_name: district,
+      state_name: state,
+      is_lgd_verified: false,
+    });
+  });
+
+  return rows;
 }
 
-/** Returns the locally indexed states. These records are not authoritative LGD verification. */
+/** Initializes the immutable local reference index. */
+export function initLgdDatabase() {
+  initialized = true;
+  lastSyncedTime = new Date().toISOString();
+  lastSyncStatus = "Loaded in-memory local index";
+}
+
+/** Returns locally indexed states. These records are not authoritative LGD verification. */
 export function getLgdStates(): LgdStateRecord[] {
-  if (!db) return [];
-  return (db.prepare("SELECT state_name, state_lgd_code FROM lgd_states ORDER BY state_name").all() as LgdStateRecord[])
-    .map(row => ({ ...row, is_lgd_verified: false }));
+  ensureInitialized();
+  return buildStates();
 }
 
-/**
- * Returns only locally indexed districts. No AI expansion or fabricated LGD codes.
- * The returned array is also a synchronous thenable for compatibility with the
- * legacy server call site; awaiting it still yields the same array.
- */
-export function getLgdDistricts(state: string): LgdDistrictRecord[] & { then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T } {
-  if (!db) return [] as LgdDistrictRecord[] & { then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T };
-  const rows = (db.prepare(`SELECT district_name, district_lgd_code, state_name FROM lgd_districts WHERE state_name = ? ORDER BY district_name`).all(state) as LgdDistrictRecord[])
-    .map(row => ({ ...row, is_lgd_verified: false }));
+/** Returns locally indexed districts. Codes are compatibility identifiers, not official LGD codes. */
+export function getLgdDistricts(state: string): LgdDistrictRecord[] & {
+  then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T;
+} {
+  ensureInitialized();
+  const rows = buildDistricts(state) as LgdDistrictRecord[] & {
+    then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T;
+  };
   Object.defineProperty(rows, "then", {
     enumerable: false,
     value: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => onfulfilled(rows),
   });
-  return rows as LgdDistrictRecord[] & { then: <T>(onfulfilled: (value: LgdDistrictRecord[]) => T) => T };
+  return rows;
 }
 
-/** Returns locally indexed subdistrict names. Codes are local index identifiers, not official LGD codes. */
+/** Returns locally indexed subdistrict names. */
 export async function getLgdSubdistricts(state: string, district: string) {
-  if (!db) return [];
-  const rows = db.prepare(`SELECT DISTINCT subdistrict_name FROM lgd_local_bodies WHERE state_name = ? AND district_name = ? ORDER BY subdistrict_name`).all(state, district) as Array<{ subdistrict_name: string }>;
-  return rows.map((row, idx) => ({
-    subdistrict_name: row.subdistrict_name,
-    subdistrict_lgd_code: idx + 1,
+  ensureInitialized();
+  const rows = buildLocalBodies(state, district);
+  return [...new Set(rows.map((row) => row.subdistrict_name))].sort().map((name, index) => ({
+    subdistrict_name: name,
+    subdistrict_lgd_code: index + 1,
     district_name: district,
     state_name: state,
     is_lgd_verified: false,
   }));
 }
 
+/** Returns locally indexed local bodies; none are Government-LGD verified. */
 export function getLgdLocalBodies(state: string, district: string, subdistrict: string): LgdLocalBodyRecord[] {
-  if (!db) return [];
-  return (db.prepare(`SELECT local_body_name, local_body_lgd_code, local_body_type, subdistrict_name, district_name, state_name
-    FROM lgd_local_bodies WHERE state_name = ? AND district_name = ? AND subdistrict_name = ? ORDER BY local_body_name`)
-    .all(state, district, subdistrict) as LgdLocalBodyRecord[])
-    .map(row => ({ ...row, is_lgd_verified: false }));
+  ensureInitialized();
+  return buildLocalBodies(state, district).filter((row) => row.subdistrict_name === subdistrict);
 }
 
 export function getLgdSyncStatus() {
-  if (!db) return { lastSynced: "Never", status: "Idle", statesCount: 0, districtsCount: 0, totalLocalBodiesCount: 0 };
-  try {
-    const statesCount = db.prepare("SELECT COUNT(*) as count FROM lgd_states").get() as { count: number };
-    const districtsCount = db.prepare("SELECT COUNT(*) as count FROM lgd_districts").get() as { count: number };
-    const localBodiesCount = db.prepare("SELECT COUNT(*) as count FROM lgd_local_bodies").get() as { count: number };
-    return {
-      lastSynced: lastSyncedTime,
-      status: lastSyncStatus,
-      statesCount: statesCount.count,
-      districtsCount: districtsCount.count,
-      totalLocalBodiesCount: localBodiesCount.count,
-    };
-  } catch {
-    return { lastSynced: lastSyncedTime, status: "Failed", statesCount: 0, districtsCount: 0, totalLocalBodiesCount: 0 };
+  ensureInitialized();
+  let statesCount = 0;
+  let districtsCount = 0;
+  let totalLocalBodiesCount = 0;
+
+  for (const state of Object.keys(INDIAN_STATES)) {
+    statesCount += 1;
+    const districts = Object.keys(INDIAN_STATES[state] || {});
+    districtsCount += districts.length;
+    for (const district of districts) totalLocalBodiesCount += buildLocalBodies(state, district).length;
   }
+
+  return {
+    lastSynced: lastSyncedTime,
+    status: lastSyncStatus,
+    statesCount,
+    districtsCount,
+    totalLocalBodiesCount,
+  };
 }
 
-/** Reloads the local application index. This is not an official Government LGD synchronization. */
+/** Reloads the immutable in-memory application index; no persistence is performed. */
 export async function syncLgdDatabase() {
-  const database = assertDb();
-  lastSyncStatus = "Syncing local index";
-  database.prepare("DELETE FROM lgd_local_bodies").run();
-  database.prepare("DELETE FROM lgd_districts").run();
-  database.prepare("DELETE FROM lgd_states").run();
-  database.prepare("DELETE FROM lgd_sync_tracker").run();
-  seedLgdDatabase();
+  initialized = true;
   lastSyncedTime = new Date().toISOString();
-  lastSyncStatus = "Loaded local index";
+  lastSyncStatus = "Reloaded in-memory local index";
   return getLgdSyncStatus();
 }
