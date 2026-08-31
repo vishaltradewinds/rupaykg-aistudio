@@ -10,17 +10,22 @@ This register defines the evidence gate required before BM-T-011 can be classifi
    - https://beeindia.gov.in/sites/default/files/BM-T-011_V1.pdf
 2. BEE Offset Mechanism methodology/tool index.
    - https://beeindia.gov.in/view_content.php?lang=1&lid=571
-3. BEE landfill methane recovery methodology **BM WA03.001**.
-   - The methodology explicitly states that BM-T-011 is used to determine `BE_CH4,SWDS,y`, that `f = 0.0` is used where captured/destructed LFG is accounted for in the methodology, and that `x` begins with the first year the SWDS receives waste.
+3. BEE landfill methane recovery methodology **BM WA03.001**, Version 1.0, publication date 27 March 2025.
+   - The methodology explicitly requires BM-T-011 for `BE_CH4,SWDS,y`.
+   - It explicitly specifies **`f = 0.0`** in this use case because captured/destructed LFG is already accounted for in the methodology.
+   - It explicitly defines `x` as beginning with the first year the SWDS receives waste and continuing through year `y`.
+   - It gives a default oxidation factor `OX = 0.1` for the applicable baseline calculation.
+   - It specifies `GWP_CH4 = 29.8 tCO2e/tCH4` from IPCC AR6, subject to future updates with later IPCC assessments.
 
 ## Evidence status
 
 - Official BM-T-011 source located: **YES**
 - Official approval/index status verified: **YES**
+- Official BM WA03.001 cross-reference to BM-T-011 verified: **YES**
 - Historical FOD equation implemented: **YES**
 - `phi_y` correction-factor boundary implemented: **YES**
 - `f_y` capture-factor boundary implemented: **YES**
-- Authoritative BEE numerical worked/reference case located in the public sources reviewed: **NO**
+- BEE-published numerical worked/reference case containing the complete BM-T-011 input/output chain located in the public sources reviewed: **NO**
 - End-to-end numerical equivalence proven: **NO**
 
 ## Required reference fixture
