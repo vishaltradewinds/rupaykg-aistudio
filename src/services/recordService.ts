@@ -44,6 +44,7 @@ export class RecordService {
       blockchain_hash: meta.blockchain_hash || null,
       hcs_transaction_id: meta.hcs_transaction_id || meta.blockchain_hash || null,
       batch_id: meta.batch_id || null,
+      registry_serial_number: meta.registry_serial_number || null,
       timestamp: r.timestamp ? new Date(r.timestamp).toISOString() : new Date().toISOString(),
     };
 
@@ -68,6 +69,7 @@ export class RecordService {
       geo_long: record.geo_long || null,
       blockchain_hash: record.blockchain_hash || null,
       batch_id: record.batch_id || null,
+      registry_serial_number: record.registry_serial_number || null,
     };
 
     const mapped = {
@@ -132,6 +134,7 @@ export class RecordService {
       ...(updates.geo_lat !== undefined && { geo_lat: updates.geo_lat }),
       ...(updates.geo_long !== undefined && { geo_long: updates.geo_long }),
       ...(updates.blockchain_hash !== undefined && { blockchain_hash: updates.blockchain_hash }),
+      ...(updates.registry_serial_number !== undefined && { registry_serial_number: updates.registry_serial_number }),
       ...(updates.evidence_urls !== undefined && { urls: updates.evidence_urls }),
     };
     updatePayload.evidenceUrls = newMeta;
@@ -155,5 +158,3 @@ export class RecordService {
     return rows.map(r => this.formatRecord(r));
   }
 }
-
-
