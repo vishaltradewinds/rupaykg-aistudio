@@ -4,7 +4,6 @@ import { BmT011FodEngine, BmT011Parameters, BmT011WasteCohort } from "./bmT011Fo
 export interface BmWa03002Inputs {
   cohorts: readonly BmT011WasteCohort[];
   fodParameters: Omit<BmT011Parameters, "methaneCaptureFraction"> & { methaneCaptureFraction?: number };
-  projectMethaneT: number;
   baselineMethaneFlaredT: number;
   oxidationTopLayer: number;
   gwpCh4: number;
@@ -18,6 +17,7 @@ export interface BmWa03002Inputs {
 }
 
 export interface BmWa03002Result {
+  projectMethaneT: number;
   baselineMethaneTco2e: number;
   baselineTotalTco2e: number;
   projectTotalTco2e: number;
@@ -36,15 +36,15 @@ function nonNegative(name: string, value: number): void {
 
 /**
  * Canonical WA03.002 adapter.
+ * The methane quantity is derived from the canonical BM-T-011 FOD result;
+ * callers cannot inject a second, unrelated project-methane value.
  * BEE Equation (1): BEy = BECH4,y + BEEC,y + BEHG,y + BENG,y.
  * BEE Equation (2): BECH4,y = ((1-OXtop_layer)*FCH4,PJ,y - FCH4,BL,y)*GWPCH4.
  * BEE Equation (26): ERy = BEy - PEy.
- * BM-T-011 supplies BECH4,SWDS,y for the ex-ante FCH4,PJ,y pathway.
  */
 export class BmWa03002Engine {
   public static calculate(input: BmWa03002Inputs): BmWa03002Result {
     fraction("oxidationTopLayer", input.oxidationTopLayer);
-    nonNegative("projectMethaneT", input.projectMethaneT);
     nonNegative("baselineMethaneFlaredT", input.baselineMethaneFlaredT);
     nonNegative("gwpCh4", input.gwpCh4);
 
@@ -53,8 +53,9 @@ export class BmWa03002Engine {
       methaneCaptureFraction: 0
     };
     const fod = BmT011FodEngine.calculate(input.cohorts, fodParameters);
+    const projectMethaneT = fod.methaneGeneratedT;
 
-    const baselineMethaneTco2e = ((1 - input.oxidationTopLayer) * input.projectMethaneT - input.baselineMethaneFlaredT) * input.gwpCh4;
+    const baselineMethaneTco2e = ((1 - input.oxidationTopLayer) * projectMethaneT - input.baselineMethaneFlaredT) * input.gwpCh4;
     const baselineTotalTco2e = baselineMethaneTco2e +
       (input.baselineElectricityTco2 ?? 0) +
       (input.baselineHeatTco2 ?? 0) +
@@ -66,8 +67,9 @@ export class BmWa03002Engine {
       (input.projectPipelineTco2 ?? 0);
     const emissionReductionsTco2e = baselineTotalTco2e - projectTotalTco2e;
 
-    const canonical = JSON.stringify({ input, fodHash: fod.calculationHash, baselineMethaneTco2e, baselineTotalTco2e, projectTotalTco2e, emissionReductionsTco2e });
+    const canonical = JSON.stringify({ input, fodHash: fod.calculationHash, projectMethaneT, baselineMethaneTco2e, baselineTotalTco2e, projectTotalTco2e, emissionReductionsTco2e });
     return {
+      projectMethaneT: Number(projectMethaneT.toFixed(12)),
       baselineMethaneTco2e: Number(baselineMethaneTco2e.toFixed(12)),
       baselineTotalTco2e: Number(baselineTotalTco2e.toFixed(12)),
       projectTotalTco2e: Number(projectTotalTco2e.toFixed(12)),
