@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
 
+# Fresh production-audit checkpoint for the admin authentication hardening.
 jobs:
   audit:
     runs-on: ubuntu-latest
