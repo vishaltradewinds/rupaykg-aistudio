@@ -76,14 +76,14 @@ jobs:
       - name: Pre-seed database admin for authentication smoke test
         run: |
           set -euo pipefail
-          export CI_ADMIN_PASSWORD="$(openssl rand -hex 24)"
-          npx tsx scripts/ciSeedAdmin.ts
+          CI_ADMIN_PASSWORD="$(openssl rand -hex 24)"
           echo "CI_ADMIN_PASSWORD=${CI_ADMIN_PASSWORD}" >> "$GITHUB_ENV"
-          unset CI_ADMIN_PASSWORD
+          export CI_ADMIN_PASSWORD
+          npx tsx scripts/ciSeedAdmin.ts
       - name: Admin authentication smoke test
         run: |
           set -euo pipefail
-          unset ADMIN_PASSWORD
+          export ADMIN_PASSWORD="${CI_ADMIN_PASSWORD}"
           export NODE_ENV=test
           node dist/server.cjs > /tmp/rupaykg-server.log 2>&1 &
           SERVER_PID=$!
@@ -112,7 +112,7 @@ jobs:
             console.error('ADMIN AUTH SMOKE TEST FAILED:', response);
             process.exit(1);
           }
-          console.log('ADMIN AUTH SMOKE TEST PASSED: pre-seeded database admin -> admin_1 / super_admin');
+          console.log('ADMIN AUTH SMOKE TEST PASSED: database admin -> admin_1 / super_admin');
           NODE
       - name: Domain and persistence tests
         run: npm test
