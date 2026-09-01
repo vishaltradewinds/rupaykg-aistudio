@@ -66,7 +66,18 @@ assert.throws(
     ...baseParameters,
     modelCorrectionFactor: -0.01
   }),
-  /modelCorrectionFactor must be a fraction/
+  /modelCorrectionFactor must be non-negative/
+);
+
+// A model correction factor is a multiplicative correction term and may
+// legitimately exceed 1; only negative/non-finite values are invalid.
+const amplified = BmT011FodEngine.calculate(baseCohorts, {
+  ...baseParameters,
+  modelCorrectionFactor: 1.25
+});
+assert.equal(
+  Number(amplified.methaneGeneratedT.toFixed(10)),
+  Number((result.methaneGeneratedT * 1.25).toFixed(10))
 );
 
 console.log("BM-T-011 multi-year FOD engine test passed");
