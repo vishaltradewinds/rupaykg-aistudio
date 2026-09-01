@@ -497,7 +497,10 @@ app.set("trust proxy", 1);
     }
   }
 
-  const rawAdminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const rawAdminPassword = process.env.ADMIN_PASSWORD;
+if (!rawAdminPassword || rawAdminPassword.length < 16) {
+  throw new Error("ADMIN_PASSWORD must be configured with at least 16 characters; insecure/default admin credentials are prohibited.");
+}
   const adminHashedPassword = bcrypt.hashSync(rawAdminPassword, 10);
   const users: any[] = [
     {
@@ -892,22 +895,6 @@ app.set("trust proxy", 1);
       }
     }
 
-    if (!user) {
-      if (identifier === "admin") {
-        user = users.find((u) => u.id === "admin_1" || u.uid === "admin_1" || u.email === "admin@rupaykg.org");
-      }
-      if (!user) {
-        user = users.find(
-          (u) =>
-            u.phone === identifier ||
-            u.loginId === identifier ||
-            u.email === identifier ||
-            u.username === identifier ||
-            u.uid === identifier ||
-            u.id?.toString() === identifier
-        );
-      }
-    }
 
     if (!user) return res.status(401).json({ error: "Invalid Login ID or Password" });
 
