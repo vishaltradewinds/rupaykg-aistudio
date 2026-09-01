@@ -1,7 +1,6 @@
 import { db } from './index.ts';
 import { users, password_reset_tokens } from './schema.ts';
 import { eq, and, gt } from 'drizzle-orm';
-import bcrypt from 'bcryptjs';
 
 export async function getUser(uid: string) {
   const found = await db.select().from(users).where(eq(users.uid, uid));
@@ -33,37 +32,14 @@ export async function getUserByPhone(phone: string) {
 
 export async function getUserByIdentifier(identifier: string) {
   const all = await getAllUsers();
-  if (identifier === 'admin') {
-    const adminUser = all.find((u) => u.uid === 'admin_1' || u.email === 'admin@rupaykg.org' || (u as any).loginId === 'admin');
-    if (adminUser) return adminUser;
-
-    // Production-safe bootstrap recovery: if the authoritative database is
-    // reachable but the initial admin seed raced database readiness, create the
-    // single canonical admin record from the required ADMIN_PASSWORD secret.
-    // Never fall back to a hard-coded/default credential.
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (adminPassword && adminPassword.length >= 16) {
-      const passwordHash = await bcrypt.hash(adminPassword, 10);
-      return await registerStakeholderUser({
-        uid: 'admin_1',
-        email: 'admin@rupaykg.org',
-        name: 'System Administrator',
-        role: 'super_admin',
-        passwordHash,
-        phone: '9999999999',
-        state: 'Delhi',
-        district: 'Delhi',
-        organization_name: 'RupayKg Central Directorate',
-      });
-    }
-  }
   return all.find(
     (u) =>
       u.phone === identifier ||
       u.email === identifier ||
       u.uid === identifier ||
       (u as any).loginId === identifier ||
-      u.id?.toString() === identifier
+      u.id?.toString() === identifier ||
+      (identifier === 'admin' && (u.uid === 'admin_1' || u.email === 'admin@rupaykg.org'))
   ) || null;
 }
 
@@ -196,6 +172,9 @@ export async function updateUserRole(uid: string, role: string) {
 export async function incrementPasswordResetTokenAttempts(id: number) {
   const rows = await db.select().from(password_reset_tokens).where(eq(password_reset_tokens.id, id));
   if (rows[0]) {
+    await db.update(users)
+      .set({})
+      .where(eq(users.uid, rows[0].identifier));
     await db.update(password_reset_tokens)
       .set({ attempts: (rows[0].attempts || 0) + 1 })
       .where(eq(password_reset_tokens.id, id));
