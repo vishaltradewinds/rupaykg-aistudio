@@ -46,6 +46,9 @@ const wa001 = runWave1Methodology(context, {
   projectElectricityTco2: 2
 }, "BM-WA03.001");
 assert.equal(wa001.methodologyId, "BM-WA03.001");
+if (wa001.methodologyId !== "BM-WA03.001") {
+  throw new Error("Wave 1 dispatcher returned the wrong methodology for the WA03.001 fixture.");
+}
 assert.ok(wa001.result.projectMethaneT > 0);
 assert.equal(wa001.result.projectTotalTco2e, 2);
 
@@ -61,9 +64,13 @@ const wa = runWave1Methodology(context, {
 assert.equal(wa.methodologyId, "BM-WA03.003");
 
 assert.throws(() => runWave1Methodology({ ...context, evidence: [] }, {
-  manureQuantityT: 1, volatileSolidsKgPerT: 1, methanePotentialM3PerKgVs: 1,
-  methaneRecoveryEfficiency: 1, methaneDensityTPerM3: 0.001,
-  baselineEmissionsTco2e: 1, projectEmissionsTco2e: 0
+  manureQuantityT: 1,
+  volatileSolidsKgPerT: 1,
+  methanePotentialM3PerKgVs: 1,
+  methaneRecoveryEfficiency: 1,
+  methaneDensityTPerM3: 0.001,
+  baselineEmissionsTco2e: 1,
+  projectEmissionsTco2e: 0
 }, "BM-AG04.001"), /evidence/);
 
 console.log("Wave 1 canonical dispatcher test passed");
