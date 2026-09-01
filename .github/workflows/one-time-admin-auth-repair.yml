@@ -34,16 +34,11 @@ jobs:
             raise SystemExit('Expected admin password fallback was not found; refusing an ambiguous edit.')
           text = text.replace(old, new, 1)
 
-          # Login must be PostgreSQL-authoritative. Remove the legacy in-memory
-          # fallback that could authenticate against a process-local seed.
-          pattern = re.compile(
-              r'''\n    if \(!user\) \{\n      if \(identifier === "admin"\) \{\n        user = users\.find\(\(u\) => u\.id === "admin_1" \|\| u\.uid === "admin_1" \|\| u\.email === "admin@rupaykg\.org"\);\n      \}\n      if \(!user\) \{\n        user = users\.find\(\n          \(u\) =>\n            u\.phone === identifier \|\|\n            u\.email === identifier \|\|\n            u\.uid === identifier \|\|\n            u\.id\?\.toString\(\) === identifier\n        \);\n      \}\n    \}\n''',
-              re.MULTILINE,
-          )
-          text2, count = pattern.subn('\n', text, count=1)
+          # Remove the complete legacy process-local login fallback.
+          pattern = re.compile(r'''\n    if \(!user\) \{\n      if \(identifier === "admin"\) \{\n        user = users\.find\(\(u\) => u\.id === "admin_1" \|\| u\.uid === "admin_1" \|\| u\.email === "admin@rupaykg\.org"\);\n      \}\n      if \(!user\) \{\n        user = users\.find\(\n          \(u\) =>\n            u\.phone === identifier \|\|\n            u\.loginId === identifier \|\|\n            u\.email === identifier \|\|\n            u\.username === identifier \|\|\n            u\.uid === identifier \|\|\n            u\.id\?\.toString\(\) === identifier\n        \);\n      \}\n    \}\n''', re.MULTILINE)
+          text, count = pattern.subn('\n', text, count=1)
           if count != 1:
             raise SystemExit(f'Expected legacy in-memory login fallback not found; refusing ambiguous edit (matches={count}).')
-          text = text2
 
           path.write_text(text)
 
