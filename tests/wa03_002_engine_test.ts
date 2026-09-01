@@ -31,9 +31,9 @@ const result = BmWa03002Engine.calculate({
 assert.equal(result.projectMethaneT > 0, true);
 const expectedMethane = ((1 - 0.1) * result.projectMethaneT - 10) * 29.8;
 assert.equal(Number(result.baselineMethaneTco2e.toFixed(10)), Number(expectedMethane.toFixed(10)));
-assert.equal(result.baselineTotalTco2e, result.baselineMethaneTco2e + 20 + 30 + 40);
+assert.ok(Math.abs(result.baselineTotalTco2e - (result.baselineMethaneTco2e + 20 + 30 + 40)) <= 1e-10);
 assert.equal(result.projectTotalTco2e, 11);
-assert.equal(result.emissionReductionsTco2e, result.baselineTotalTco2e - 11);
+assert.ok(Math.abs(result.emissionReductionsTco2e - (result.baselineTotalTco2e - 11)) <= 1e-10);
 assert.equal(result.fodTraceHash.length, 64);
 assert.equal(result.calculationHash.length, 64);
 

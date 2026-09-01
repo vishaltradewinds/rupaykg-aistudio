@@ -28,6 +28,30 @@ const in02 = runWave1Methodology(context, {
 }, "BM-IN02.002");
 assert.equal(in02.methodologyId, "BM-IN02.002");
 
+const wa001 = runWave1Methodology(context, {
+  cohorts: [{ year: 2025, wasteTonnes: 1000, docFraction: 0.5, decayRatePerYear: 0.1 }],
+  fodParameters: {
+    assessmentYear: 2026,
+    startYear: 2025,
+    docf: 0.5,
+    mcf: 0.4,
+    methaneFraction: 0.5,
+    gwpCh4: 29.8,
+    oxidationFactor: 0.1
+  },
+  baselineMethaneFlaredT: 0,
+  oxidationTopLayer: 0.1,
+  gwpCh4: 29.8,
+  baselineElectricityTco2: 10,
+  projectElectricityTco2: 2
+}, "BM-WA03.001");
+assert.equal(wa001.methodologyId, "BM-WA03.001");
+if (wa001.methodologyId !== "BM-WA03.001") {
+  throw new Error("Wave 1 dispatcher returned the wrong methodology for the WA03.001 fixture.");
+}
+assert.ok(wa001.result.projectMethaneT > 0);
+assert.equal(wa001.result.projectTotalTco2e, 2);
+
 const wa = runWave1Methodology(context, {
   biogasNm3: 100,
   methaneFraction: 0.5,
@@ -40,9 +64,13 @@ const wa = runWave1Methodology(context, {
 assert.equal(wa.methodologyId, "BM-WA03.003");
 
 assert.throws(() => runWave1Methodology({ ...context, evidence: [] }, {
-  manureQuantityT: 1, volatileSolidsKgPerT: 1, methanePotentialM3PerKgVs: 1,
-  methaneRecoveryEfficiency: 1, methaneDensityTPerM3: 0.001,
-  baselineEmissionsTco2e: 1, projectEmissionsTco2e: 0
+  manureQuantityT: 1,
+  volatileSolidsKgPerT: 1,
+  methanePotentialM3PerKgVs: 1,
+  methaneRecoveryEfficiency: 1,
+  methaneDensityTPerM3: 0.001,
+  baselineEmissionsTco2e: 1,
+  projectEmissionsTco2e: 0
 }, "BM-AG04.001"), /evidence/);
 
 console.log("Wave 1 canonical dispatcher test passed");
