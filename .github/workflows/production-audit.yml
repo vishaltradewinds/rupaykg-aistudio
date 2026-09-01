@@ -2,6 +2,7 @@ name: RupayKg Production Audit
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     branches: [main]
 
