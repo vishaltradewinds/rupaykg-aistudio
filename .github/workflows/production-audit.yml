@@ -73,10 +73,17 @@ jobs:
           openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out private.pem
           openssl rsa -pubout -in private.pem -out public.pem
           chmod 600 private.pem public.pem
+      - name: Pre-seed database admin for authentication smoke test
+        run: |
+          set -euo pipefail
+          CI_ADMIN_PASSWORD="$(openssl rand -hex 24)"
+          echo "CI_ADMIN_PASSWORD=${CI_ADMIN_PASSWORD}" >> "$GITHUB_ENV"
+          export CI_ADMIN_PASSWORD
+          npx tsx scripts/ciSeedAdmin.ts
       - name: Admin authentication smoke test
         run: |
           set -euo pipefail
-          export ADMIN_PASSWORD="$(openssl rand -hex 24)"
+          export ADMIN_PASSWORD="${CI_ADMIN_PASSWORD}"
           export NODE_ENV=test
           node dist/server.cjs > /tmp/rupaykg-server.log 2>&1 &
           SERVER_PID=$!
@@ -95,7 +102,7 @@ jobs:
 
           curl -fsS -X POST http://127.0.0.1:3000/api/login \
             -H 'Content-Type: application/json' \
-            --data "{\"loginId\":\"admin\",\"password\":\"${ADMIN_PASSWORD}\"}" \
+            --data "{\"loginId\":\"admin\",\"password\":\"${CI_ADMIN_PASSWORD}\"}" \
             >/tmp/admin-login.json
 
           node - <<'NODE'
@@ -105,7 +112,7 @@ jobs:
             console.error('ADMIN AUTH SMOKE TEST FAILED:', response);
             process.exit(1);
           }
-          console.log('ADMIN AUTH SMOKE TEST PASSED: admin -> admin_1 / super_admin');
+          console.log('ADMIN AUTH SMOKE TEST PASSED: database admin -> admin_1 / super_admin');
           NODE
       - name: Domain and persistence tests
         run: npm test
