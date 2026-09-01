@@ -14,4 +14,5 @@ if (/user = users\.find\(\(u\) => u\.id === "admin_1"/.test(server)) {
   throw new Error("SECURITY REGRESSION: in-memory admin login fallback remains");
 }
 
+// Fresh-audit checkpoint: production CI must validate the repaired auth path.
 console.log("ADMIN_AUTH_CONTRACT: PASS");
