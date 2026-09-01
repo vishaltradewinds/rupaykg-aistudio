@@ -1,6 +1,7 @@
 import { db } from './index.ts';
 import { users, password_reset_tokens } from './schema.ts';
 import { eq, and, gt } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 
 export async function getUser(uid: string) {
   const found = await db.select().from(users).where(eq(users.uid, uid));
@@ -35,6 +36,26 @@ export async function getUserByIdentifier(identifier: string) {
   if (identifier === 'admin') {
     const adminUser = all.find((u) => u.uid === 'admin_1' || u.email === 'admin@rupaykg.org' || (u as any).loginId === 'admin');
     if (adminUser) return adminUser;
+
+    // Production-safe bootstrap recovery: if the authoritative database is
+    // reachable but the initial admin seed raced database readiness, create the
+    // single canonical admin record from the required ADMIN_PASSWORD secret.
+    // Never fall back to a hard-coded/default credential.
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (adminPassword && adminPassword.length >= 16) {
+      const passwordHash = await bcrypt.hash(adminPassword, 10);
+      return await registerStakeholderUser({
+        uid: 'admin_1',
+        email: 'admin@rupaykg.org',
+        name: 'System Administrator',
+        role: 'super_admin',
+        passwordHash,
+        phone: '9999999999',
+        state: 'Delhi',
+        district: 'Delhi',
+        organization_name: 'RupayKg Central Directorate',
+      });
+    }
   }
   return all.find(
     (u) =>
