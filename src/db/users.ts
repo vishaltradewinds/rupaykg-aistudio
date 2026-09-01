@@ -172,9 +172,6 @@ export async function updateUserRole(uid: string, role: string) {
 export async function incrementPasswordResetTokenAttempts(id: number) {
   const rows = await db.select().from(password_reset_tokens).where(eq(password_reset_tokens.id, id));
   if (rows[0]) {
-    await db.update(users)
-      .set({})
-      .where(eq(users.uid, rows[0].identifier));
     await db.update(password_reset_tokens)
       .set({ attempts: (rows[0].attempts || 0) + 1 })
       .where(eq(password_reset_tokens.id, id));
