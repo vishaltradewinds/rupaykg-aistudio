@@ -34,13 +34,9 @@ export async function getUserByPhone(phone: string) {
 export async function getUserByIdentifier(identifier: string) {
   const all = await getAllUsers();
   if (identifier === 'admin') {
-    const adminUser = all.find((u) => u.uid === 'admin_1' || u.email === 'admin@rupaykg.org' || (u as any).loginId === 'admin');
-    if (adminUser) return adminUser;
-
-    // Production-safe bootstrap recovery: if the authoritative database is
-    // reachable but the initial admin seed raced database readiness, create the
-    // single canonical admin record from the required ADMIN_PASSWORD secret.
-    // Never fall back to a hard-coded/default credential.
+    // The platform secret is authoritative for the single canonical admin.
+    // Reconcile it before every admin lookup so a changed secret or a startup
+    // race cannot leave PostgreSQL holding a stale password hash.
     const adminPassword = process.env.ADMIN_PASSWORD;
     if (adminPassword && adminPassword.length >= 16) {
       const passwordHash = await bcrypt.hash(adminPassword, 10);
@@ -56,6 +52,9 @@ export async function getUserByIdentifier(identifier: string) {
         organization_name: 'RupayKg Central Directorate',
       });
     }
+
+    const adminUser = all.find((u) => u.uid === 'admin_1' || u.email === 'admin@rupaykg.org' || (u as any).loginId === 'admin');
+    if (adminUser) return adminUser;
   }
   return all.find(
     (u) =>
