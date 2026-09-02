@@ -76,10 +76,6 @@ export class AuthoritativeRegistryAdapter {
     return { url: undefined, apiKey: undefined, isConfigured: false };
   }
 
-  /**
-   * Authoritatively verifies that a credit certificate was legitimately issued by BEE/GCP.
-   * STRICT FAIL-CLOSED: Rejects without valid remote proof or offline authority verification token.
-   */
   public static async verifyIssuance(params: {
     creditType: AuthoritativeCreditType;
     authoritativeRegistry: AuthoritativeRegistryType;
@@ -96,7 +92,6 @@ export class AuthoritativeRegistryAdapter {
   }): Promise<AuthoritativeIssuanceVerification> {
     const { creditType, authoritativeRegistry, authoritativeCreditReference, registryAccountId, expectedQuantity, offlineVerificationProof } = params;
 
-    // Reject malformed or empty references
     if (!authoritativeCreditReference || authoritativeCreditReference.trim().length < 5) {
       return {
         isValid: false,
@@ -110,7 +105,6 @@ export class AuthoritativeRegistryAdapter {
       };
     }
 
-    // Registry / credit type alignment check
     if (creditType === 'CCC' && authoritativeRegistry !== 'BEE_ICM' && authoritativeRegistry !== 'CCTS_REGISTRY') {
       return {
         isValid: false,
@@ -139,7 +133,6 @@ export class AuthoritativeRegistryAdapter {
 
     const config = this.getRegistryConfig(authoritativeRegistry);
 
-    // 1. Live Remote Registry Gateway Call
     if (config.isConfigured && config.url) {
       try {
         const response = await fetch(`${config.url}/v1/verify-issuance`, {
@@ -201,7 +194,6 @@ export class AuthoritativeRegistryAdapter {
       }
     }
 
-    // 2. Cryptographic Offline Authority Proof (for air-gapped / test environments)
     if (offlineVerificationProof) {
       const isValidSig = Boolean(
         offlineVerificationProof.signature &&
@@ -226,7 +218,6 @@ export class AuthoritativeRegistryAdapter {
       }
     }
 
-    // 3. Strict Fail-Closed Fallback
     return {
       isValid: false,
       status: 'NOT_CONFIGURED',
@@ -239,9 +230,6 @@ export class AuthoritativeRegistryAdapter {
     };
   }
 
-  /**
-   * Verifies that the holder entity recorded in the registry matches the expected entity.
-   */
   public static async verifyHolder(params: {
     authoritativeRegistry: AuthoritativeRegistryType;
     authoritativeCreditReference: string;
@@ -284,9 +272,6 @@ export class AuthoritativeRegistryAdapter {
     }
   }
 
-  /**
-   * Verifies tradability status with the authoritative registry.
-   */
   public static async verifyTradability(params: {
     authoritativeRegistry: AuthoritativeRegistryType;
     authoritativeCreditReference: string;
@@ -328,7 +313,8 @@ export class AuthoritativeRegistryAdapter {
   }
 
   /**
-   * Records an authorized transfer on the external statutory registry if live integration is active.
+   * Records an authorized transfer on the external statutory registry.
+   * Strict fail-closed: local custody settlement is not represented as an authoritative transfer.
    */
   public static async recordAuthorizedTransfer(params: {
     authoritativeRegistry: AuthoritativeRegistryType;
@@ -341,13 +327,11 @@ export class AuthoritativeRegistryAdapter {
     const { authoritativeRegistry, authoritativeCreditReference, fromAccountId, toAccountId, quantity, depositorySettlementId } = params;
     const config = this.getRegistryConfig(authoritativeRegistry);
 
-    if (!config.isConfigured) {
+    if (!config.isConfigured || !config.url) {
       return {
-        isSuccess: true,
-        status: 'TRANSFERRED',
-        authoritativeTransferRef: `DEP-LOCAL-SYNC-${depositorySettlementId}`,
-        registryTimestamp: new Date().toISOString(),
-        message: 'Depository internal custody transfer executed. Statutory registry sync queued for external reconciliation.',
+        isSuccess: false,
+        status: 'NOT_CONFIGURED',
+        message: 'Authoritative registry endpoint is not configured. Statutory transfer failed closed; no authoritative transfer reference was created.',
       };
     }
 
@@ -370,12 +354,20 @@ export class AuthoritativeRegistryAdapter {
       if (!response.ok) {
         return {
           isSuccess: false,
-          status: 'FAILED',
+          status: response.status === 409 ? 'REJECTED' : 'FAILED',
           message: `External registry transfer rejected with HTTP ${response.status}`,
         };
       }
 
       const data = await response.json();
+      if (!data.transfer_reference) {
+        return {
+          isSuccess: false,
+          status: 'FAILED',
+          message: 'External registry reported success without an authoritative transfer reference. Operation failed closed.',
+        };
+      }
+
       return {
         isSuccess: true,
         status: 'TRANSFERRED',
@@ -394,6 +386,7 @@ export class AuthoritativeRegistryAdapter {
 
   /**
    * Records an authoritative retirement in the external statutory registry.
+   * Strict fail-closed: local retirement is not represented as statutory retirement.
    */
   public static async recordAuthoritativeRetirement(params: {
     authoritativeRegistry: AuthoritativeRegistryType;
@@ -406,13 +399,11 @@ export class AuthoritativeRegistryAdapter {
     const { authoritativeRegistry, authoritativeCreditReference, registryAccountId, quantity, beneficiary, reason } = params;
     const config = this.getRegistryConfig(authoritativeRegistry);
 
-    if (!config.isConfigured) {
+    if (!config.isConfigured || !config.url) {
       return {
-        isSuccess: true,
-        status: 'RETIRED',
-        retirementCertificateRef: `DEP-RETIREMENT-${Date.now()}`,
-        retirementTimestamp: new Date().toISOString(),
-        message: 'Depository custody retired. Statutory registry sync queued for offline filing.',
+        isSuccess: false,
+        status: 'NOT_CONFIGURED',
+        message: 'Authoritative registry endpoint is not configured. Statutory retirement failed closed; no retirement certificate was created.',
       };
     }
 
@@ -435,12 +426,20 @@ export class AuthoritativeRegistryAdapter {
       if (!response.ok) {
         return {
           isSuccess: false,
-          status: 'FAILED',
+          status: response.status === 409 ? 'REJECTED' : 'FAILED',
           message: `Retirement filing rejected with HTTP ${response.status}`,
         };
       }
 
       const data = await response.json();
+      if (!data.retirement_certificate_ref) {
+        return {
+          isSuccess: false,
+          status: 'FAILED',
+          message: 'External registry reported retirement success without an authoritative certificate reference. Operation failed closed.',
+        };
+      }
+
       return {
         isSuccess: true,
         status: 'RETIRED',
