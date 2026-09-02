@@ -8,6 +8,10 @@ declare global {
   var _postgresPool: Pool | undefined;
 }
 
+function isProductionEnvironment() {
+  return process.env.NODE_ENV === 'production' || process.env.APP_MODE === 'production';
+}
+
 export const createPool = () => {
   if (!global._postgresPool) {
     let config: PoolConfig = {
@@ -16,14 +20,25 @@ export const createPool = () => {
       connectionTimeoutMillis: 15000,
     };
 
-    // 1. Connection string support (DATABASE_URL)
+    // Prefer a complete DATABASE_URL. Otherwise require an explicit SQL configuration.
     if (process.env.DATABASE_URL) {
       config.connectionString = process.env.DATABASE_URL;
     } else {
-      config.host = process.env.SQL_HOST || 'localhost';
-      config.user = process.env.SQL_USER || 'postgres';
-      config.password = process.env.SQL_PASSWORD || '';
-      config.database = process.env.SQL_DB_NAME || 'rupaykg';
+      const host = process.env.SQL_HOST;
+      const user = process.env.SQL_USER;
+      const password = process.env.SQL_PASSWORD;
+      const database = process.env.SQL_DB_NAME;
+
+      if (isProductionEnvironment() && (!host || !user || !password || !database)) {
+        throw new Error(
+          'Production PostgreSQL is not configured. Set DATABASE_URL or SQL_HOST, SQL_USER, SQL_PASSWORD, and SQL_DB_NAME before starting RupayKg.'
+        );
+      }
+
+      config.host = host || 'localhost';
+      config.user = user || 'postgres';
+      config.password = password || '';
+      config.database = database || 'rupaykg';
 
       if (process.env.SQL_PORT) {
         const portNum = parseInt(process.env.SQL_PORT, 10);
@@ -31,9 +46,8 @@ export const createPool = () => {
       }
     }
 
-    // 2. Production TLS / SSL configuration
-    const isProduction = process.env.NODE_ENV === 'production';
-    const isSslEnabled = process.env.DB_SSL === 'true' || (isProduction && process.env.DB_SSL !== 'false');
+    // Production must verify the database server certificate unless explicitly configured otherwise.
+    const isSslEnabled = process.env.DB_SSL === 'true' || (isProductionEnvironment() && process.env.DB_SSL !== 'false');
 
     if (isSslEnabled) {
       if (process.env.DB_CA_CERT) {
