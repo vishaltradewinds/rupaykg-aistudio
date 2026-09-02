@@ -79,27 +79,20 @@ export class CredentialService {
   public static readonly DEFAULT_ISSUER_NAME = 'RupayKg Circular Economy Authority';
 
   public static canonicalize(obj: any): string {
-    if (obj === null || typeof obj !== 'object') {
-      return JSON.stringify(obj);
-    }
-    if (Array.isArray(obj)) {
-      return '[' + obj.map(item => this.canonicalize(item)).join(',') + ']';
-    }
+    if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+    if (Array.isArray(obj)) return '[' + obj.map(item => this.canonicalize(item)).join(',') + ']';
     const keys = Object.keys(obj).sort();
-    const keyValPairs = keys.map(key => `"${key}":${this.canonicalize(obj[key])}`);
-    return '{' + keyValPairs.join(',') + '}';
+    return '{' + keys.map(key => `"${key}":${this.canonicalize(obj[key])}`).join(',') + '}';
   }
 
   public static computeIntegrityHash(payload: any): string {
-    const canonical = this.canonicalize(payload);
-    return crypto.createHash('sha256').update(canonical).digest('hex');
+    return crypto.createHash('sha256').update(this.canonicalize(payload)).digest('hex');
   }
 
   public static generateLocalIntegrityArtifact(payload: any): LocalIntegrityDigestResult {
-    const hash = this.computeIntegrityHash(payload);
     return {
       artifactType: 'LOCAL_SHA256_INTEGRITY_DIGEST',
-      computedHash: hash,
+      computedHash: this.computeIntegrityHash(payload),
       timestamp: new Date().toISOString(),
       isVerifiableCredential: false,
       message: 'Local SHA-256 deterministic payload digest computed for provenance verification.'
@@ -107,20 +100,7 @@ export class CredentialService {
   }
 
   public static getWasteCarbonContext(): any {
-    return {
-      "@context": {
-        "@version": 1.1,
-        "@protected": true,
-        "id": "@id",
-        "type": "@type",
-        "RupayKgWasteCarbon": "https://rupaykg.org/contexts/waste-carbon#",
-        "WasteDiversionActivity": "https://rupaykg.org/contexts/waste-carbon#WasteDiversionActivity",
-        "wasteDetails": "https://rupaykg.org/contexts/waste-carbon#wasteDetails",
-        "carbonMetrics": "https://rupaykg.org/contexts/waste-carbon#carbonMetrics",
-        "mrvEvidence": "https://rupaykg.org/contexts/waste-carbon#mrvEvidence",
-        "compliance": "https://rupaykg.org/contexts/waste-carbon#compliance"
-      }
-    };
+    return { "@context": { "@version": 1.1, "@protected": true, "id": "@id", "type": "@type", "RupayKgWasteCarbon": "https://rupaykg.org/contexts/waste-carbon#", "WasteDiversionActivity": "https://rupaykg.org/contexts/waste-carbon#WasteDiversionActivity", "wasteDetails": "https://rupaykg.org/contexts/waste-carbon#wasteDetails", "carbonMetrics": "https://rupaykg.org/contexts/waste-carbon#carbonMetrics", "mrvEvidence": "https://rupaykg.org/contexts/waste-carbon#mrvEvidence", "compliance": "https://rupaykg.org/contexts/waste-carbon#compliance" } };
   }
 
   public static issueCredential(
@@ -129,24 +109,15 @@ export class CredentialService {
   ): CredentialIssuanceResult {
     const privateKeyEnv = process.env.VC_ISSUER_PRIVATE_KEY;
     const publicKeyEnv = process.env.VC_ISSUER_PUBLIC_KEY;
-    const hasSigningKey = Boolean(privateKeyEnv && privateKeyEnv.trim().length > 30 && !privateKeyEnv.includes('placeholder'));
-
-    if (!hasSigningKey) {
+    if (!privateKeyEnv || privateKeyEnv.trim().length <= 30 || privateKeyEnv.includes('placeholder')) {
       throw new Error('VC_ISSUER_PRIVATE_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.');
     }
-
-    if (issuer.id !== this.DEFAULT_ISSUER_DID) {
-      throw new Error('Untrusted VC issuer DID. Credential issuance is bound to the configured VC_ISSUER_DID.');
-    }
+    if (issuer.id !== this.DEFAULT_ISSUER_DID) throw new Error('Untrusted VC issuer DID. Credential issuance is bound to the configured VC_ISSUER_DID.');
 
     const credentialId = `urn:uuid:${crypto.randomUUID()}`;
     const issuanceDate = new Date().toISOString();
-    const vcPayloadWithoutProof: Omit<W3CCredentialVerifiable, 'proof'> = {
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-        'https://w3id.org/security/suites/ed25519-2020/v1',
-        'https://schema.rupaykg.org/v3/circular-economy.jsonld'
-      ],
+    const vcPayloadWithoutProof: Omit<W3CVerifiableCredential, 'proof'> = {
+      '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1', 'https://schema.rupaykg.org/v3/circular-economy.jsonld'],
       id: credentialId,
       type: ['VerifiableCredential', 'CircularEconomyActivityCredential'],
       issuer: issuer.id,
@@ -156,155 +127,75 @@ export class CredentialService {
 
     const integrityHash = this.computeIntegrityHash(vcPayloadWithoutProof);
     const canonicalData = this.canonicalize(vcPayloadWithoutProof);
+    const privateKey = crypto.createPrivateKey(privateKeyEnv);
     let signatureValue: string;
     let proofType: 'ED25519_SIGNATURE_2020' | 'JSON_WEB_SIGNATURE_2020' = 'ED25519_SIGNATURE_2020';
-    const privateKey = crypto.createPrivateKey(privateKeyEnv!);
     if (privateKey.asymmetricKeyType === 'ed25519') {
       signatureValue = crypto.sign(null, Buffer.from(canonicalData, 'utf8'), privateKey).toString('base64');
     } else {
-      const sign = crypto.createSign('SHA256');
-      sign.update(canonicalData);
-      sign.end();
-      signatureValue = sign.sign(privateKey, 'base64');
-      proofType = 'JSON_WEB_SIGNATURE_2020';
+      const sign = crypto.createSign('SHA256'); sign.update(canonicalData); sign.end();
+      signatureValue = sign.sign(privateKey, 'base64'); proofType = 'JSON_WEB_SIGNATURE_2020';
     }
 
-    const proof: W3CProof = {
-      type: proofType === 'ED25519_SIGNATURE_2020' ? 'Ed25519Signature2020' : 'JsonWebSignature2020',
-      created: issuanceDate,
-      verificationMethod: `${this.DEFAULT_ISSUER_DID}#key-1`,
-      proofPurpose: 'assertionMethod',
-      signatureValue
-    };
-
+    const proof: W3CProof = { type: proofType === 'ED25519_SIGNATURE_2020' ? 'Ed25519Signature2020' : 'JsonWebSignature2020', created: issuanceDate, verificationMethod: `${this.DEFAULT_ISSUER_DID}#key-1`, proofPurpose: 'assertionMethod', signatureValue };
     const signedVc: W3CVerifiableCredential = { ...vcPayloadWithoutProof, proof };
-    return {
-      credentialId,
-      issuerId: issuer.id,
-      issuanceDate,
-      proofType,
-      proofStatus: 'SIGNED',
-      integrityHash,
-      signature: signatureValue,
-      publicKey: publicKeyEnv || null,
-      isSimulated: false,
-      verifiableCredential: signedVc,
-      message: 'W3C Verifiable Credential successfully signed with asymmetric issuer private key.'
-    };
+    return { credentialId, issuerId: issuer.id, issuanceDate, proofType, proofStatus: 'SIGNED', integrityHash, signature: signatureValue, publicKey: publicKeyEnv || null, isSimulated: false, verifiableCredential: signedVc, message: 'W3C Verifiable Credential successfully signed with asymmetric issuer private key.' };
   }
 
   public static generateWasteCarbonVC(record: any, carbonEvent: any): W3CVerifiableCredential {
     const vcId = `urn:uuid:${uuidv4()}`;
     const timestamp = new Date().toISOString();
     const vcPayloadWithoutProof: Omit<W3CVerifiableCredential, 'proof'> = {
-      "@context": ["https://www.w3.org/ns/credentials/v2", "https://rupaykg.org/contexts/waste-carbon/v2"],
-      "id": vcId,
-      "type": ["VerifiableCredential", "CarbonReductionCredential", "WasteManagementCredential"],
-      "issuer": this.DEFAULT_ISSUER_DID,
-      "issuanceDate": timestamp,
-      "credentialSubject": {
-        "id": `did:rupaykg:event:${record.id}`,
-        "type": "WasteDiversionActivity",
-        "wasteDetails": {
-          "type": record.waste_type,
-          "weight": { "value": record.weight_kg, "unit": "kg" },
-          "geoPoint": { "latitude": record.geo_lat || 0, "longitude": record.geo_long || 0 },
-          "timestamp": record.timestamp || timestamp
+      '@context': ['https://www.w3.org/ns/credentials/v2', 'https://rupaykg.org/contexts/waste-carbon/v2'],
+      id: vcId,
+      type: ['VerifiableCredential', 'CarbonReductionCredential', 'WasteManagementCredential'],
+      issuer: this.DEFAULT_ISSUER_DID,
+      issuanceDate: timestamp,
+      credentialSubject: {
+        id: `did:rupaykg:event:${record.id}`,
+        type: 'WasteDiversionActivity',
+        wasteDetails: { type: record.waste_type, weight: { value: record.weight_kg, unit: 'kg' }, geoPoint: { latitude: record.geo_lat || 0, longitude: record.geo_long || 0 }, timestamp: record.timestamp || timestamp },
+        carbonMetrics: {
+          netReduction: { value: parseFloat((carbonEvent.net_carbon_reduction_kg_co2e || 0).toFixed(4)), unit: 'kgCO2e' },
+          methaneAvoidance: { value: parseFloat((carbonEvent.methane_estimate_kg_co2e || 0).toFixed(4)), unit: 'kgCO2e' },
+          landfillDiversion: { value: parseFloat((carbonEvent.diversion_estimate_kg_co2e || 0).toFixed(4)), unit: 'kgCO2e' }
         },
-        "carbonMetrics": {
-          "netReduction": { "value": parseFloat((carbonEvent.net_carbon_reduction_kg_co2e || 0).toFixed(4)), "unit": "kgCO2e" },
-          "methaneAvoidance": { "value": parseFloat((carbonEvent.methane_estimate_kg_co2e || 0).toFixed(4)), "unit": "kgCO2e" },
-          "landfillDiversion": { "value": parseFloat((carbonEvent.diversion_estimate_kg_co2e || 0).toFixed(4)), "unit": "kgCO2e" }
-        },
-        "mrvEvidence": {
-          "mrvScore": parseFloat((carbonEvent.mrv_score || 0).toFixed(2)),
-          "stakeholders": carbonEvent.stakeholder_chain || [],
-          "digitalTwinId": carbonEvent.id
-        },
-        "compliance": {
-          "standard": record.verification_standard || "ISO 14064-3 Readiness",
-          "methaneProtocol": "IPCC Tier 1 Diversion Model",
-          "auditability": "Full Stakeholder Chain Verification",
-          "icm_methodology_id": record.icm_methodology_id || undefined,
-          "ccts_sector": record.ccts_sector || undefined,
-          "acva_id": record.acva_id || undefined,
-          "lgd_state_code": record.lgd_state_code || undefined,
-          "lgd_district_code": record.lgd_district_code || undefined,
-          "lgd_local_body_code": record.lgd_local_body_code || undefined,
-          "lgd_ward_or_village_code": record.lgd_ward_or_village_code || undefined,
-          "lgd_local_body_name": record.lgd_local_body_name || undefined,
-          "lgd_local_body_type": record.lgd_local_body_type || undefined
-        }
+        mrvEvidence: { mrvScore: parseFloat((carbonEvent.mrv_score || 0).toFixed(2)), stakeholders: carbonEvent.stakeholder_chain || [], digitalTwinId: carbonEvent.id },
+        compliance: { standard: record.verification_standard || 'ISO 14064-3 Readiness', methaneProtocol: 'IPCC Tier 1 Diversion Model', auditability: 'Full Stakeholder Chain Verification', icm_methodology_id: record.icm_methodology_id || undefined, ccts_sector: record.ccts_sector || undefined, acva_id: record.acva_id || undefined, lgd_state_code: record.lgd_state_code || undefined, lgd_district_code: record.lgd_district_code || undefined, lgd_local_body_code: record.lgd_local_body_code || undefined, lgd_ward_or_village_code: record.lgd_ward_or_village_code || undefined, lgd_local_body_name: record.lgd_local_body_name || undefined, lgd_local_body_type: record.lgd_local_body_type || undefined }
       }
     };
 
     const privateKeyEnv = process.env.VC_ISSUER_PRIVATE_KEY;
-    const hasSigningKey = Boolean(privateKeyEnv && privateKeyEnv.trim().length > 30 && !privateKeyEnv.includes('placeholder'));
-    if (!hasSigningKey) throw new Error('VC_ISSUER_PRIVATE_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.');
-
+    if (!privateKeyEnv || privateKeyEnv.trim().length <= 30 || privateKeyEnv.includes('placeholder')) throw new Error('VC_ISSUER_PRIVATE_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.');
     const canonicalData = this.canonicalize(vcPayloadWithoutProof);
-    const privateKey = crypto.createPrivateKey(privateKeyEnv!);
+    const privateKey = crypto.createPrivateKey(privateKeyEnv);
     let signatureValue: string;
     let proofType = 'Ed25519Signature2020';
     if (privateKey.asymmetricKeyType === 'ed25519') {
       signatureValue = crypto.sign(null, Buffer.from(canonicalData, 'utf8'), privateKey).toString('base64');
     } else {
-      const sign = crypto.createSign('SHA256');
-      sign.update(canonicalData);
-      sign.end();
-      signatureValue = sign.sign(privateKey, 'base64');
-      proofType = 'JsonWebSignature2020';
+      const sign = crypto.createSign('SHA256'); sign.update(canonicalData); sign.end(); signatureValue = sign.sign(privateKey, 'base64'); proofType = 'JsonWebSignature2020';
     }
-
-    return {
-      ...vcPayloadWithoutProof,
-      proof: {
-        type: proofType,
-        created: timestamp,
-        verificationMethod: `${this.DEFAULT_ISSUER_DID}#key-1`,
-        proofPurpose: 'assertionMethod',
-        signatureValue
-      }
-    };
+    return { ...vcPayloadWithoutProof, proof: { type: proofType, created: timestamp, verificationMethod: `${this.DEFAULT_ISSUER_DID}#key-1`, proofPurpose: 'assertionMethod', signatureValue } };
   }
 
   public static verifyCredential(vc: W3CVerifiableCredential, claimedIntegrityHash?: string): CredentialVerificationResult {
-    if (!vc || typeof vc !== 'object') {
-      return { isValid: false, proofStatus: 'FAILED', integrityDigestMatch: false, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: true, details: { credentialId: 'UNKNOWN', issuer: 'UNKNOWN', computedHash: '', verificationError: 'Invalid credential payload structure.' }, message: 'Credential payload is invalid or empty.' };
-    }
-
+    if (!vc || typeof vc !== 'object') return { isValid: false, proofStatus: 'FAILED', integrityDigestMatch: false, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: true, details: { credentialId: 'UNKNOWN', issuer: 'UNKNOWN', computedHash: '', verificationError: 'Invalid credential payload structure.' }, message: 'Credential payload is invalid or empty.' };
     const { proof, ...payloadWithoutProof } = vc;
     const computedHash = this.computeIntegrityHash(payloadWithoutProof);
     const integrityDigestMatch = claimedIntegrityHash ? computedHash.toLowerCase() === claimedIntegrityHash.toLowerCase() : true;
     const credentialId = vc.id || 'UNKNOWN';
     const issuer = typeof vc.issuer === 'string' ? vc.issuer : vc.issuer?.id || 'UNKNOWN';
-
-    if (issuer !== this.DEFAULT_ISSUER_DID) {
-      return { isValid: false, proofStatus: 'UNTRUSTED_ISSUER', integrityDigestMatch, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: false, details: { credentialId, issuer, computedHash, claimedHash: claimedIntegrityHash, verificationError: 'Credential issuer does not match configured VC_ISSUER_DID.' }, message: 'Credential rejected: untrusted issuer.' };
-    }
-
-    if (!proof || !proof.signatureValue) {
-      return { isValid: false, proofStatus: 'FAILED', integrityDigestMatch, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: true, details: { credentialId, issuer, computedHash, claimedHash: claimedIntegrityHash, verificationError: 'Missing cryptographic proof block on Verifiable Credential.' }, message: 'Credential is missing cryptographic proof block.' };
-    }
-
+    if (issuer !== this.DEFAULT_ISSUER_DID) return { isValid: false, proofStatus: 'UNTRUSTED_ISSUER', integrityDigestMatch, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: false, details: { credentialId, issuer, computedHash, claimedHash: claimedIntegrityHash, verificationError: 'Credential issuer does not match configured VC_ISSUER_DID.' }, message: 'Credential rejected: untrusted issuer.' };
+    if (!proof || !proof.signatureValue) return { isValid: false, proofStatus: 'FAILED', integrityDigestMatch, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: true, details: { credentialId, issuer, computedHash, claimedHash: claimedIntegrityHash, verificationError: 'Missing cryptographic proof block on Verifiable Credential.' }, message: 'Credential is missing cryptographic proof block.' };
     const trustedPublicKey = process.env.VC_ISSUER_PUBLIC_KEY;
-    if (!trustedPublicKey) {
-      return { isValid: false, proofStatus: 'NOT_CONFIGURED', integrityDigestMatch, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: false, details: { credentialId, issuer, computedHash, claimedHash: claimedIntegrityHash, verificationError: 'VC_ISSUER_PUBLIC_KEY is not configured in server trust store.' }, message: 'Authoritative verification failed closed: VC_ISSUER_PUBLIC_KEY not configured in server environment.' };
-    }
-
+    if (!trustedPublicKey) return { isValid: false, proofStatus: 'NOT_CONFIGURED', integrityDigestMatch, signatureVerified: false, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: false, details: { credentialId, issuer, computedHash, claimedHash: claimedIntegrityHash, verificationError: 'VC_ISSUER_PUBLIC_KEY is not configured in server trust store.' }, message: 'Authoritative verification failed closed: VC_ISSUER_PUBLIC_KEY not configured in server environment.' };
     try {
       const canonicalData = this.canonicalize(payloadWithoutProof);
       const publicKey = crypto.createPublicKey(trustedPublicKey);
       let signatureVerified = false;
-      if (publicKey.asymmetricKeyType === 'ed25519') {
-        signatureVerified = crypto.verify(null, Buffer.from(canonicalData, 'utf8'), publicKey, Buffer.from(proof.signatureValue, 'base64'));
-      } else {
-        const verify = crypto.createVerify('SHA256');
-        verify.update(canonicalData);
-        verify.end();
-        signatureVerified = verify.verify(publicKey, proof.signatureValue, 'base64');
-      }
-
+      if (publicKey.asymmetricKeyType === 'ed25519') signatureVerified = crypto.verify(null, Buffer.from(canonicalData, 'utf8'), publicKey, Buffer.from(proof.signatureValue, 'base64'));
+      else { const verify = crypto.createVerify('SHA256'); verify.update(canonicalData); verify.end(); signatureVerified = verify.verify(publicKey, proof.signatureValue, 'base64'); }
       const isValid = integrityDigestMatch && signatureVerified;
       return { isValid, proofStatus: isValid ? 'VERIFIED' : 'FAILED', integrityDigestMatch, signatureVerified, guardianPolicyStatus: 'NOT_AVAILABLE', tampered: !isValid, details: { credentialId, issuer, computedHash, claimedHash: claimedIntegrityHash, verificationError: signatureVerified ? undefined : 'Asymmetric signature verification failed against trusted public key.' }, message: isValid ? 'W3C Verifiable Credential verified successfully against authoritative server trust store.' : signatureVerified ? 'Integrity digest mismatch: Credential content was altered after signing.' : 'Cryptographic signature verification failed: Invalid signature or mismatched server trust key.' };
     } catch (verErr: any) {
