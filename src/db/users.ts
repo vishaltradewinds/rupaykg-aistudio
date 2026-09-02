@@ -1,12 +1,15 @@
 import { db } from './index.ts';
 import { users, password_reset_tokens } from './schema.ts';
 import { eq, and, gt } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
+
+const ADMIN_UID = 'admin_1';
+const ADMIN_EMAIL = 'admin@rupaykg.org';
+const ADMIN_LOGIN_ID = 'admin';
 
 export async function getUser(uid: string) {
   const found = await db.select().from(users).where(eq(users.uid, uid));
-  if (found && found.length > 0) {
-    return found[0];
-  }
+  if (found && found.length > 0) return found[0];
   return null;
 }
 
@@ -16,52 +19,81 @@ export async function getAllUsers() {
 
 export async function getUserByEmail(email: string) {
   const found = await db.select().from(users).where(eq(users.email, email));
-  if (found && found.length > 0) {
-    return found[0];
-  }
+  if (found && found.length > 0) return found[0];
   return null;
 }
 
 export async function getUserByPhone(phone: string) {
   const found = await db.select().from(users).where(eq(users.phone, phone));
-  if (found && found.length > 0) {
-    return found[0];
-  }
+  if (found && found.length > 0) return found[0];
   return null;
 }
 
+/**
+ * Make the production super-admin DB-authoritative and self-healing.
+ * The application never authenticates against an in-memory admin record.
+ */
+export async function ensureAdminUser() {
+  const rawAdminPassword = process.env.ADMIN_PASSWORD;
+  if (!rawAdminPassword || rawAdminPassword.length < 16) {
+    throw new Error('ADMIN_PASSWORD must be configured with at least 16 characters; insecure/default admin credentials are prohibited.');
+  }
+
+  const existing = await getUser(ADMIN_UID);
+  const passwordMatches = existing?.passwordHash
+    ? await bcrypt.compare(rawAdminPassword, existing.passwordHash)
+    : false;
+
+  if (existing && passwordMatches && existing.role === 'super_admin' && existing.email === ADMIN_EMAIL) {
+    return existing;
+  }
+
+  const passwordHash = passwordMatches && existing?.passwordHash
+    ? existing.passwordHash
+    : await bcrypt.hash(rawAdminPassword, 10);
+
+  return await registerStakeholderUser({
+    uid: ADMIN_UID,
+    email: ADMIN_EMAIL,
+    name: 'System Administrator',
+    role: 'super_admin',
+    passwordHash,
+    phone: '9999999999',
+    state: 'Delhi',
+    district: 'Delhi',
+    organization_name: 'RupayKg Central Directorate',
+  });
+}
+
 export async function getUserByIdentifier(identifier: string) {
+  const normalized = identifier.trim();
+
+  // Legacy users table has no login_id column. Keep the documented admin
+  // login ID deterministic by resolving it to the authoritative admin UID.
+  if (normalized === ADMIN_LOGIN_ID || normalized === ADMIN_EMAIL || normalized === ADMIN_UID) {
+    return await ensureAdminUser();
+  }
+
   const all = await getAllUsers();
   return all.find(
     (u) =>
-      u.phone === identifier ||
-      u.email === identifier ||
-      u.uid === identifier ||
-      (u as any).loginId === identifier ||
-      u.id?.toString() === identifier ||
-      (identifier === 'admin' && (u.uid === 'admin_1' || u.email === 'admin@rupaykg.org'))
+      u.phone === normalized ||
+      u.email === normalized ||
+      u.uid === normalized ||
+      (u as any).loginId === normalized ||
+      u.id?.toString() === normalized
   ) || null;
 }
 
 export async function getOrCreateUser(uid: string, email: string, name: string) {
   const existing = await getUser(uid);
-  if (existing) {
-    return existing;
-  }
+  if (existing) return existing;
 
   const result = await db.insert(users)
-    .values({
-      uid,
-      email,
-      name,
-      role: null, // No default role auto-assigned
-    })
+    .values({ uid, email, name, role: null })
     .onConflictDoUpdate({
       target: users.uid,
-      set: {
-        email,
-        name,
-      },
+      set: { email, name },
     })
     .returning();
 
@@ -129,13 +161,7 @@ export async function updateUserPassword(identifier: string, passwordHash: strin
 
 export async function createPasswordResetToken(identifier: string, tokenHash: string, expiresAt: Date) {
   const res = await db.insert(password_reset_tokens)
-    .values({
-      identifier,
-      tokenHash,
-      expiresAt,
-      used: false,
-      attempts: 0
-    })
+    .values({ identifier, tokenHash, expiresAt, used: false, attempts: 0 })
     .returning();
   return res[0];
 }
@@ -144,14 +170,12 @@ export async function findValidPasswordResetToken(identifier: string, tokenHash:
   const now = new Date();
   const rows = await db.select()
     .from(password_reset_tokens)
-    .where(
-      and(
-        eq(password_reset_tokens.identifier, identifier),
-        eq(password_reset_tokens.tokenHash, tokenHash),
-        eq(password_reset_tokens.used, false),
-        gt(password_reset_tokens.expiresAt, now)
-      )
-    );
+    .where(and(
+      eq(password_reset_tokens.identifier, identifier),
+      eq(password_reset_tokens.tokenHash, tokenHash),
+      eq(password_reset_tokens.used, false),
+      gt(password_reset_tokens.expiresAt, now)
+    ));
   return rows[0] || null;
 }
 
