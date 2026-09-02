@@ -9,6 +9,33 @@ export interface ApiRequestConfig extends RequestInit {
   params?: Record<string, string | number | boolean | null | undefined>;
 }
 
+export interface ApiErrorResponse<T = unknown> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Headers;
+}
+
+export class ApiError extends Error {
+  readonly response: ApiErrorResponse;
+  readonly status: number;
+  readonly isAuthenticationError: boolean;
+  readonly isServerError: boolean;
+
+  constructor(message: string, response: ApiErrorResponse) {
+    super(message);
+    this.name = 'ApiError';
+    this.response = response;
+    this.status = response.status;
+    this.isAuthenticationError = response.status === 401;
+    this.isServerError = response.status >= 500;
+  }
+}
+
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError;
+}
+
 class ApiClient {
   private readonly baseURL = '/api';
   private readonly timeout = 10000;
@@ -49,9 +76,13 @@ class ApiClient {
 
       if (!response.ok) {
         if (response.status === 401) console.warn('Unauthorized. Token may be expired.');
-        const error = new Error(`HTTP error! status: ${response.status}`) as Error & { response?: ApiResponse<T> };
-        error.response = { data, status: response.status, statusText: response.statusText, headers: response.headers };
-        throw error;
+        const responseData: ApiErrorResponse<T> = {
+          data,
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        };
+        throw new ApiError(`HTTP error! status: ${response.status}`, responseData);
       }
 
       return { data, status: response.status, statusText: response.statusText, headers: response.headers };
