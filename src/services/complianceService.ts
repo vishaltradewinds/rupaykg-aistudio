@@ -4,18 +4,36 @@ import { eq, desc } from 'drizzle-orm';
 import crypto from 'crypto';
 
 export class ComplianceService {
+  static validateComplianceStatus(data: any) {
+    const requestedStatus = data.status || 'PENDING';
+    const evidenceUrls = Array.isArray(data.evidence_urls || data.evidenceUrls)
+      ? (data.evidence_urls || data.evidenceUrls)
+      : [];
+    const verifiedBy = data.verified_by || data.verifiedBy || null;
+
+    // A compliance record must not become authoritative merely because a caller
+    // supplied a COMPLIANT status. Require an identifiable verifier and evidence.
+    if (requestedStatus === 'COMPLIANT' && (!verifiedBy || evidenceUrls.length === 0)) {
+      throw new Error('COMPLIANT compliance status requires verified_by and at least one evidence URL.');
+    }
+
+    return { requestedStatus, evidenceUrls, verifiedBy };
+  }
+
   static async addRecord(data: any) {
     const id = data.id || `comp_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    const { requestedStatus, evidenceUrls, verifiedBy } = this.validateComplianceStatus(data);
+
     const mapped = {
       id,
       entityId: data.entity_id || data.entityId || null,
       complianceType: data.compliance_type || data.complianceType || 'EPR_PLASTIC',
       reportingPeriod: data.reporting_period || data.reportingPeriod || null,
-      status: data.status || 'COMPLIANT',
+      status: requestedStatus,
       targetQuantity: Number(data.target_quantity || data.targetQuantity || 0),
       achievedQuantity: Number(data.achieved_quantity || data.achievedQuantity || 0),
-      evidenceUrls: data.evidence_urls || data.evidenceUrls || [],
-      verifiedBy: data.verified_by || data.verifiedBy || null,
+      evidenceUrls,
+      verifiedBy,
       metadata: data.metadata || {},
       createdAt: new Date(data.createdAt || data.created_at || Date.now()),
       updatedAt: new Date(data.updatedAt || data.updated_at || Date.now()),
@@ -35,8 +53,20 @@ export class ComplianceService {
   }
 
   static async updateRecord(id: string, updates: any) {
+    const existing = await this.getRecord(id);
+    if (!existing) return null;
+
+    const merged = {
+      ...existing,
+      ...updates,
+    };
+    const { requestedStatus, evidenceUrls, verifiedBy } = this.validateComplianceStatus(merged);
+
     await db.update(compliance_records).set({
       ...updates,
+      status: requestedStatus,
+      evidenceUrls,
+      verifiedBy,
       updatedAt: new Date(),
     }).where(eq(compliance_records.id, id));
     return await this.getRecord(id);
@@ -47,4 +77,3 @@ export class ComplianceService {
     return records.filter(r => r.entityId === generatorId || (r.metadata as any)?.generator_id === generatorId);
   }
 }
-
