@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, PoolConfig } from "pg";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import * as fs from "fs";
@@ -6,32 +6,57 @@ import * as crypto from "crypto";
 
 dotenv.config();
 
-async function runMigrations() {
-  console.log("=== RUPAYKG ENTERPRISE 3.0: FORMAL DRIZZLE MIGRATION EXECUTION ===");
-  
-  const host = process.env.SQL_HOST;
-  const user = process.env.SQL_ADMIN_USER || process.env.SQL_USER;
-  const password = process.env.SQL_ADMIN_PASSWORD || process.env.SQL_PASSWORD;
-  const database = process.env.SQL_DB_NAME;
-  const port = parseInt(process.env.SQL_PORT || "5432");
+function buildPoolConfig(): PoolConfig {
+  const config: PoolConfig = {};
 
-  if (!host || !user || !password || !database) {
-    throw new Error("Database configuration environment variables are missing.");
+  if (process.env.DATABASE_URL) {
+    config.connectionString = process.env.DATABASE_URL;
+  } else {
+    const host = process.env.SQL_HOST;
+    const user = process.env.SQL_ADMIN_USER || process.env.SQL_USER;
+    const password = process.env.SQL_ADMIN_PASSWORD || process.env.SQL_PASSWORD;
+    const database = process.env.SQL_DB_NAME;
+    const port = parseInt(process.env.SQL_PORT || "5432", 10);
+
+    if (!host || !user || !password || !database) {
+      throw new Error(
+        "Database configuration environment variables are missing. Set DATABASE_URL or SQL_HOST, SQL_USER, SQL_PASSWORD, and SQL_DB_NAME."
+      );
+    }
+
+    Object.assign(config, { host, user, password, database, port });
   }
 
-  const pool = new Pool({
-    host,
-    user,
-    password,
-    database,
-    port,
-    ssl: false,
-  });
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.APP_MODE === 'production';
+  const sslEnabled = process.env.DB_SSL === 'true' || (isProduction && process.env.DB_SSL !== 'false');
 
+  if (sslEnabled) {
+    if (process.env.DB_CA_CERT) {
+      let caContent = process.env.DB_CA_CERT;
+      try {
+        if (fs.existsSync(caContent)) caContent = fs.readFileSync(caContent, 'utf8');
+      } catch {
+        // Treat the value as an inline PEM certificate when it is not a file path.
+      }
+      config.ssl = { ca: caContent, rejectUnauthorized: true };
+    } else if (process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false') {
+      config.ssl = { rejectUnauthorized: false };
+    } else {
+      config.ssl = { rejectUnauthorized: true };
+    }
+  }
+
+  return config;
+}
+
+async function runMigrations() {
+  console.log("=== RUPAYKG ENTERPRISE 3.0: FORMAL DRIZZLE MIGRATION EXECUTION ===");
+
+  const pool = new Pool(buildPoolConfig());
   const client = await pool.connect();
 
   try {
-    console.log(`Connected to database: ${database} on ${host} as ${user}`);
+    console.log("Connected to configured PostgreSQL database for migration execution.");
 
     await client.query(`CREATE SCHEMA IF NOT EXISTS drizzle;`);
     await client.query(`
