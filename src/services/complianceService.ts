@@ -6,16 +6,28 @@ import crypto from 'crypto';
 export class ComplianceService {
   static async addRecord(data: any) {
     const id = data.id || `comp_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    const evidenceUrls = Array.isArray(data.evidence_urls || data.evidenceUrls)
+      ? (data.evidence_urls || data.evidenceUrls)
+      : [];
+    const verifiedBy = data.verified_by || data.verifiedBy || null;
+    const requestedStatus = data.status || 'PENDING';
+
+    // A compliance record must not become authoritative merely because a caller
+    // supplied a COMPLIANT status. Require an identifiable verifier and evidence.
+    if (requestedStatus === 'COMPLIANT' && (!verifiedBy || evidenceUrls.length === 0)) {
+      throw new Error('COMPLIANT compliance status requires verified_by and at least one evidence URL.');
+    }
+
     const mapped = {
       id,
       entityId: data.entity_id || data.entityId || null,
       complianceType: data.compliance_type || data.complianceType || 'EPR_PLASTIC',
       reportingPeriod: data.reporting_period || data.reportingPeriod || null,
-      status: data.status || 'COMPLIANT',
+      status: requestedStatus,
       targetQuantity: Number(data.target_quantity || data.targetQuantity || 0),
       achievedQuantity: Number(data.achieved_quantity || data.achievedQuantity || 0),
-      evidenceUrls: data.evidence_urls || data.evidenceUrls || [],
-      verifiedBy: data.verified_by || data.verifiedBy || null,
+      evidenceUrls,
+      verifiedBy,
       metadata: data.metadata || {},
       createdAt: new Date(data.createdAt || data.created_at || Date.now()),
       updatedAt: new Date(data.updatedAt || data.updated_at || Date.now()),
@@ -47,4 +59,3 @@ export class ComplianceService {
     return records.filter(r => r.entityId === generatorId || (r.metadata as any)?.generator_id === generatorId);
   }
 }
-
