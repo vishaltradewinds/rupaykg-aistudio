@@ -9,7 +9,9 @@ on:
 permissions:
   contents: read
 
-# Fresh production-audit checkpoint for the admin authentication hardening.
+# Production-audit checkpoint for the DB-authoritative admin authentication path.
+# The authentication smoke test intentionally starts with an empty users table so
+# the runtime bootstrap path is exercised rather than hidden by CI pre-seeding.
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -62,6 +64,8 @@ jobs:
         run: npm ci
       - name: Lint / Typecheck
         run: npm run lint
+      - name: Admin authentication contract test
+        run: npx tsx tests/admin_auth_contract_test.ts
       - name: Consolidation call-graph check
         run: npm run test:consolidation
       - name: Production build
@@ -73,14 +77,12 @@ jobs:
           openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out private.pem
           openssl rsa -pubout -in private.pem -out public.pem
           chmod 600 private.pem public.pem
-      - name: Pre-seed database admin for authentication smoke test
+      - name: Generate CI admin password
         run: |
           set -euo pipefail
           CI_ADMIN_PASSWORD="$(openssl rand -hex 24)"
           echo "CI_ADMIN_PASSWORD=${CI_ADMIN_PASSWORD}" >> "$GITHUB_ENV"
-          export CI_ADMIN_PASSWORD
-          npx tsx scripts/ciSeedAdmin.ts
-      - name: Admin authentication smoke test
+      - name: Admin authentication smoke test from empty users table
         run: |
           set -euo pipefail
           export ADMIN_PASSWORD="${CI_ADMIN_PASSWORD}"
@@ -112,7 +114,7 @@ jobs:
             console.error('ADMIN AUTH SMOKE TEST FAILED:', response);
             process.exit(1);
           }
-          console.log('ADMIN AUTH SMOKE TEST PASSED: database admin -> admin_1 / super_admin');
+          console.log('ADMIN AUTH SMOKE TEST PASSED: empty DB bootstrap -> admin_1 / super_admin');
           NODE
       - name: Domain and persistence tests
         run: npm test
