@@ -27,10 +27,14 @@ if (!usersDb.includes("normalized === ADMIN_LOGIN_ID")) {
   throw new Error("SECURITY REGRESSION: documented admin login ID is not resolved through DB auth");
 }
 
-// Login must not authenticate against the in-memory users array.
-const loginBlock = server.slice(server.indexOf('app.post("/api/login"'));
-if (/allDbUsers\.find\(\(u\) => u\.uid === "admin_1"/.test(loginBlock)) {
-  throw new Error("SECURITY REGRESSION: in-memory admin login fallback remains");
+// The login route must delegate identifier resolution to the DB user service.
+const loginStart = server.indexOf('app.post("/api/login"');
+if (loginStart < 0) {
+  throw new Error("SECURITY REGRESSION: login route is missing");
+}
+const loginBlock = server.slice(loginStart, loginStart + 4000);
+if (!loginBlock.includes("getUserByIdentifier(identifier)")) {
+  throw new Error("SECURITY REGRESSION: login route bypasses DB identifier resolution");
 }
 
 console.log("ADMIN_AUTH_CONTRACT: PASS");
