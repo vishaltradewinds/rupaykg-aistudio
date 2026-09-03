@@ -9,10 +9,12 @@ interface EnterpriseSuiteProps {
 }
 
 export default function EnterpriseSuite({ user, token = null, onNavigate }: EnterpriseSuiteProps) {
+  const sessionToken = token || (typeof window !== 'undefined' ? localStorage.getItem('rupay_token') : null);
+
   return (
     <StakeholderDashboard
       user={user}
-      token={token}
+      token={sessionToken}
       onNavigate={onNavigate}
     />
   );
