@@ -14,7 +14,9 @@ ENV NODE_ENV=production
 ENV APP_MODE=production
 ENV PORT=3000
 
-# The current Express entry point binds to process.env.PORT (default 3000).
+# The current Express entry point binds to port 3000.
+# Cloud Run can target this explicit container port; PORT handling should be
+# revisited before changing the runtime port contract.
 EXPOSE 3000
 
 CMD ["npm", "start"]
