@@ -15,7 +15,7 @@ export function sanitizeValue(val: any): any {
   if (typeof val === 'string') {
     return val
       .replace(/\0/g, '')
-      .replace(/<script\b[^<]*(?:(?!<\/script>)[^<]*)*<\/script>/gi, '')
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .trim();
   }
 
