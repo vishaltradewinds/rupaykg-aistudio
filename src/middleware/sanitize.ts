@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { auth as requireAuth } from './auth.ts';
 
 /**
  * Recursively sanitizes a value by:
@@ -13,8 +14,8 @@ export function sanitizeValue(val: any): any {
 
   if (typeof val === 'string') {
     return val
-      .replace(/\0/g, '') // remove null bytes
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // strip script blocks
+      .replace(/\0/g, '')
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .trim();
   }
 
@@ -25,7 +26,6 @@ export function sanitizeValue(val: any): any {
   if (typeof val === 'object') {
     const cleanObj: Record<string, any> = {};
     for (const [key, value] of Object.entries(val)) {
-      // Prevent prototype pollution attacks
       if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
         continue;
       }
@@ -38,9 +38,32 @@ export function sanitizeValue(val: any): any {
 }
 
 /**
- * Express middleware to sanitize req.body, req.query, and req.params.
+ * Sensitive routers that historically contained endpoints without route-level
+ * auth. They are protected here as a defense-in-depth boundary. Existing
+ * route-level auth remains authoritative and is intentionally allowed to run
+ * again for routes that already declare it.
  */
-export function sanitizeMiddleware(req: Request, _res: Response, next: NextFunction) {
+function requiresCentralAuth(req: Request): boolean {
+  const pathName = req.originalUrl.split('?')[0];
+
+  if (pathName.startsWith('/api/carbon/public/')) return false;
+  if (pathName === '/api/health' || pathName === '/api/readiness' || pathName === '/api/login') return false;
+  if (pathName.startsWith('/api/auth/register')) return false;
+  if (pathName.startsWith('/api/carbon/')) return true;
+  if (pathName.startsWith('/api/depository/')) return true;
+  if (pathName.startsWith('/api/cpcb/')) return true;
+  if (pathName.startsWith('/api/swm/')) return true;
+  if (pathName.startsWith('/api/v1/guardian/')) return true;
+  if (pathName.startsWith('/api/v1/policies/')) return true;
+  if (pathName.startsWith('/api/blockchain/')) return true;
+  return false;
+}
+
+/**
+ * Express middleware to sanitize request input and enforce centralized auth
+ * on sensitive legacy routers that do not consistently declare auth locally.
+ */
+export function sanitizeMiddleware(req: Request, res: Response, next: NextFunction) {
   if (req.body && typeof req.body === 'object') {
     req.body = sanitizeValue(req.body);
   }
@@ -50,5 +73,10 @@ export function sanitizeMiddleware(req: Request, _res: Response, next: NextFunct
   if (req.params && typeof req.params === 'object') {
     req.params = sanitizeValue(req.params);
   }
+
+  if (requiresCentralAuth(req)) {
+    return requireAuth()(req as any, res, next);
+  }
+
   next();
 }
