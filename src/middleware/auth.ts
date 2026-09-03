@@ -31,16 +31,12 @@ function requiredPermissionForRequest(req: Request): Permission | null {
   const method = req.method.toUpperCase();
 
   if (pathName.startsWith('/api/carbon/public/')) return null;
-  if (pathName.startsWith('/api/carbon/guardian/')) {
-    return method === 'GET' ? 'guardian:read' : 'guardian:operate';
-  }
-  if (pathName.startsWith('/api/carbon/acva') || pathName.includes('/appoint-acva')) {
-    return method === 'GET' ? 'projects:read' : 'projects:review';
-  }
+  if (pathName.startsWith('/api/carbon/guardian/')) return method === 'GET' ? 'guardian:read' : 'guardian:operate';
+  if (pathName.startsWith('/api/carbon/acva') || pathName.includes('/appoint-acva')) return method === 'GET' ? 'projects:read' : 'projects:review';
   if (pathName.startsWith('/api/carbon/projects')) {
     if (method === 'GET') return 'projects:read';
     if (pathName.includes('/real-eligibility') || pathName.includes('/monitoring-report') || pathName.includes('/audit-package')) return 'projects:manage';
-    if (pathName.includes('/ccts-submit')) return 'projects:review';
+    if (pathName.includes('/ccts-submit')) return 'projects:manage';
     return 'projects:manage';
   }
   if (pathName.startsWith('/api/carbon/certificates')) return method === 'GET' ? 'credits:read' : 'credits:issue';
@@ -62,10 +58,7 @@ function enforceRequestPermission(req: AuthRequest, res: Response): boolean {
   const required = requiredPermissionForRequest(req);
   if (!required) return true;
   if (!hasPermission(req.user?.role, required)) {
-    res.status(403).json({
-      error: 'Forbidden: stakeholder role is not authorized for this operation',
-      requiredPermission: required,
-    });
+    res.status(403).json({ error: 'Forbidden: stakeholder role is not authorized for this operation', requiredPermission: required });
     return false;
   }
   return true;
@@ -74,9 +67,7 @@ function enforceRequestPermission(req: AuthRequest, res: Response): boolean {
 export const auth = (roles: string[] = []) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized: Missing token' });
-    }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized: Missing token' });
 
     const token = authHeader.split('Bearer ')[1];
     if (!token) return res.status(401).json({ error: 'Unauthorized: Empty token' });
@@ -84,27 +75,21 @@ export const auth = (roles: string[] = []) => {
     let decodedPayload: any = null;
     const publicKey = getPublicKey();
     if (publicKey) {
-      try {
-        decodedPayload = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
-      } catch (err) {
-      }
+      try { decodedPayload = jwt.verify(token, publicKey, { algorithms: ['RS256'] }); } catch (err) {}
     }
 
     if (!decodedPayload) {
       try {
         const decodedToken = await adminAuth.verifyIdToken(token);
         decodedPayload = { ...decodedToken, id: decodedToken.uid };
-      } catch (err) {
-      }
+      } catch (err) {}
     }
 
     if (!decodedPayload) return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
 
     try {
       const redis = await getRedisClient();
-      if (!isRedisConnected()) {
-        return res.status(503).json({ error: 'Service Unavailable: Token revocation service is offline. Failing closed.' });
-      }
+      if (!isRedisConnected()) return res.status(503).json({ error: 'Service Unavailable: Token revocation service is offline. Failing closed.' });
       if (decodedPayload.jti) {
         const isRevoked = await redis.get(`bl_${decodedPayload.jti}`);
         if (isRevoked) return res.status(401).json({ error: 'Unauthorized: Token has been revoked' });
@@ -119,17 +104,14 @@ export const auth = (roles: string[] = []) => {
 
     const activeUser = dbUser;
     const role = activeUser.role;
-    const permissions = getPermissionsForRole(role);
-    if (!isKnownRole(role)) {
-      return res.status(403).json({ error: 'Forbidden: stakeholder role is not registered in the RBAC policy' });
-    }
+    if (!isKnownRole(role)) return res.status(403).json({ error: 'Forbidden: stakeholder role is not registered in the RBAC policy' });
 
     req.user = {
       id: activeUser.uid,
       uid: activeUser.uid,
       email: activeUser.email,
       role,
-      permissions,
+      permissions: getPermissionsForRole(role),
       name: activeUser.name,
       phone: activeUser.phone,
       state: activeUser.state,
@@ -143,10 +125,7 @@ export const auth = (roles: string[] = []) => {
       exp: decodedPayload.exp
     };
 
-    if (roles.length > 0 && !roles.includes(role)) {
-      return res.status(403).json({ error: 'Insufficient permissions for this stakeholder role', requiresRegistration: false });
-    }
-
+    if (roles.length > 0 && !roles.includes(role)) return res.status(403).json({ error: 'Insufficient permissions for this stakeholder role', requiresRegistration: false });
     if (!enforceRequestPermission(req, res)) return;
     next();
   };
