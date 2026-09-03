@@ -21,13 +21,13 @@ export function getPublicKey(): string | null {
       const content = fs.readFileSync(pubPath, 'utf8');
       if (content && content.includes('KEY-----')) return content;
     }
-  } catch (err) {
-  }
+  } catch (err) {}
   return null;
 }
 
 function requiredPermissionForRequest(req: Request): Permission | null {
-  const pathName = req.path;
+  // originalUrl preserves the /api/... prefix when auth() is mounted on a router.
+  const pathName = req.originalUrl.split('?')[0];
   const method = req.method.toUpperCase();
 
   if (pathName.startsWith('/api/carbon/public/')) return null;
