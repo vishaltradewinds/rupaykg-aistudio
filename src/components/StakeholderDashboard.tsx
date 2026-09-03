@@ -36,14 +36,14 @@ export default function StakeholderDashboard({ user, token, safeFetch, safeParse
   const [kpi, setKpi] = useState<any>(null);
   const [carbon, setCarbon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const role = user?.role || 'citizen';
-  const meta = ROLE_META[role] || { title: 'Stakeholder Dashboard', subtitle: 'Role-aware circular economy operations.', actions: ['history', 'reports'] };
+  const role = user?.role;
+  const meta = role && ROLE_META[role] ? ROLE_META[role] : null;
   const fetcher = safeFetch || ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init));
   const parser = safeParseJson || ((response: Response) => response.json());
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   const refresh = async () => {
-    if (!token) { setLoading(false); return; }
+    if (!token || !meta) { setLoading(false); return; }
     setLoading(true);
     try {
       const [h, k, c] = await Promise.allSettled([
@@ -65,6 +65,16 @@ export default function StakeholderDashboard({ user, token, safeFetch, safeParse
     value: history.reduce((n, r) => n + Number(r.total_value || 0), 0),
     credits: history.reduce((n, r) => n + Number(r.ccc_amount_kg || 0), 0),
   }), [history]);
+
+  if (!meta) {
+    return (
+      <div className="os-card rounded-2xl p-8 border border-red-500/20 bg-red-500/5">
+        <div className="text-xs uppercase tracking-[0.2em] text-red-400 font-bold mb-2">ACCESS DENIED</div>
+        <h2 className="text-2xl font-black text-white">Stakeholder registration required</h2>
+        <p className="text-white/60 mt-2">No recognized stakeholder role is attached to this authenticated account. The dashboard will not default to another stakeholder role.</p>
+      </div>
+    );
+  }
 
   const go = (view: string) => onNavigate?.(view);
 
