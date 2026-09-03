@@ -15,7 +15,7 @@ export function sanitizeValue(val: any): any {
   if (typeof val === 'string') {
     return val
       .replace(/\0/g, '')
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<script\b[^<]*(?:(?!<\/script>)[^<]*)*<\/script>/gi, '')
       .trim();
   }
 
@@ -35,6 +35,31 @@ export function sanitizeValue(val: any): any {
   }
 
   return val;
+}
+
+/**
+ * Registration must never accept the legacy UI fallback password.
+ * The frontend is expected to require an explicit user-supplied password;
+ * this server-side boundary prevents older clients or direct API callers from
+ * silently creating accounts with the retired default credential.
+ */
+function rejectInsecureRegistrationPassword(req: Request, res: Response): boolean {
+  const pathName = req.originalUrl.split('?')[0];
+
+  if (req.method !== 'POST' || pathName !== '/api/auth/register') {
+    return false;
+  }
+
+  const password = typeof req.body?.password === 'string' ? req.body.password : '';
+  if (password === 'password123') {
+    res.status(400).json({
+      success: false,
+      error: 'A unique password is required. The default registration password is not allowed.'
+    });
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -72,6 +97,10 @@ export function sanitizeMiddleware(req: Request, res: Response, next: NextFuncti
   }
   if (req.params && typeof req.params === 'object') {
     req.params = sanitizeValue(req.params);
+  }
+
+  if (rejectInsecureRegistrationPassword(req, res)) {
+    return;
   }
 
   if (requiresCentralAuth(req)) {
