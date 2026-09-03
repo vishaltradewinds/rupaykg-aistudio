@@ -1,23 +1,19 @@
 import React from 'react';
-import { CCTSCarbonOS } from './CCTSCarbonOS';
+import StakeholderDashboard from './StakeholderDashboard';
 
 interface EnterpriseSuiteProps {
   user: any;
+  token?: string | null;
   onBackToDashboard: () => void;
+  onNavigate?: (view: string) => void;
 }
 
-/**
- * Compatibility shell for the legacy Enterprise Suite route.
- * The former localStorage/in-memory MRV implementation was removed.
- * The canonical enterprise MRV surface is now CCTSCarbonOS.
- */
-export default function EnterpriseSuite({ user }: EnterpriseSuiteProps) {
+export default function EnterpriseSuite({ user, token = null, onNavigate }: EnterpriseSuiteProps) {
   return (
-    <CCTSCarbonOS
-      token={null}
+    <StakeholderDashboard
       user={user}
-      safeFetch={async () => null}
-      safeParseJson={async () => null}
+      token={token}
+      onNavigate={onNavigate}
     />
   );
 }
