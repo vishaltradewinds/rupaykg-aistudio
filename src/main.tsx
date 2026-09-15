@@ -24,13 +24,23 @@ function PublicExperience() {
       const next = localStorage.getItem(OPERATING_CONTEXT_KEY) === 'rural' ? 'rural' : 'urban';
       setContext(next);
     };
+    const applyOperatingContext = () => {
+      // App.tsx already derives its complete operating labels, categories and
+      // role rules from the persisted operatingContext state. Reloading the
+      // application shell here guarantees the existing OS initializes from
+      // the newly selected context without duplicating or replacing that logic.
+      window.location.reload();
+    };
+
     window.addEventListener('storage', syncAuth);
     window.addEventListener('storage', syncContext);
     window.addEventListener('rupay:operating-context-change', syncContext);
+    window.addEventListener('rupay:operating-context-change', applyOperatingContext);
     return () => {
       window.removeEventListener('storage', syncAuth);
       window.removeEventListener('storage', syncContext);
       window.removeEventListener('rupay:operating-context-change', syncContext);
+      window.removeEventListener('rupay:operating-context-change', applyOperatingContext);
     };
   }, []);
 
