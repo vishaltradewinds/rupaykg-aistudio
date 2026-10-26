@@ -34,7 +34,7 @@ The separate `vishaltradewinds/rupaykg-aistudio` repository is a React/Vite + Ex
 
 1. **Physical instrument identity:** the existing field-device record is not, by itself, proof of the instrument's manufacturer, model, serial number, firmware, physical port/protocol, or ownership. A field-device UUID must not be treated as a calibrated measuring instrument.
 2. **Calibration gate:** the reviewed canonical measurement operation validates value/unit/method/source/time, but this review has not established a mandatory instrument-specific calibration certificate/validity check before a physical reading can enter an approved MRV dataset.
-3. **Raw device provenance:** confirm whether every measurement stores a durable link to the source field-sync envelope, instrument/device registry record, original payload, normalized value, unit conversion, and calibration record. Do not assume the envelope hash alone provides this full lineage.
+3. **Raw device provenance:** field-sync envelopes store device/identity, capture time, idempotency key, payload hash and applied entity type/ID, so a source-envelope-to-measurement link is available at the application ledger level. The physical measurement row itself does not appear in the reviewed `MEASUREMENT_CREATE` insert to directly persist a device/instrument or calibration ID. Keep the envelope join intact and add explicit instrument/calibration references before approving physical readings for MRV.
 4. **Interface compatibility:** no real weighbridge/sensor make/model, manual, register map, API credentials, serial settings, Modbus map, export file, or test payload has been supplied/verified. Therefore no physical protocol adapter can responsibly be selected or claimed operational.
 5. **Facility authorization and live data:** the Jabalpur source register labels important facility sources as pending or secondary; live facility evidence and exact instrument inventory remain required.
 6. **Deployment state:** repository source does not prove that a particular commit is deployed, a migration has run on production, or an external service is connected.
@@ -50,8 +50,8 @@ The separate `vishaltradewinds/rupaykg-aistudio` repository is a React/Vite + Ex
 ## 6. Required next implementation batch
 
 ### Batch A — Close source-level contract gaps
-1. Trace the full `/api/v1/operations/sync` path from envelope acceptance through `MEASUREMENT_CREATE`, evidence association and MRV observation creation.
-2. Add/confirm a canonical source-envelope reference on each physical measurement and ensure it is populated from the authenticated server context, not trusted from client-supplied metadata.
+1. Trace the full `/api/v1/field-sync/envelopes` intake and `/api/v1/field-sync/envelopes/:envelopeId/apply` path through `MEASUREMENT_CREATE`, evidence association and MRV observation creation.
+2. Preserve the existing envelope-to-applied-entity linkage; add an explicit source-envelope and instrument/calibration reference on physical measurement records if required by the MRV evidence contract. Populate these only from authenticated server context, never trusted client-supplied IDs.
 3. Define a versioned instrument profile with manufacturer, model, serial number, firmware, site/facility binding, protocol, units, provenance/origin evidence and applicable compliance status.
 4. Add calibration records and a fail-closed gate for any methodology-required calibration. Expired, missing, mismatched or unverifiable calibration must leave the reading quarantined/pending and excluded from approved MRV calculation.
 5. Add regression tests for valid/invalid instrument binding, duplicate/replayed readings, source-envelope lineage, unit handling, missing/expired calibration, cross-organization access and offline retry.
