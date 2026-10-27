@@ -66,3 +66,16 @@ Every ICVCM control should bind: framework version and source hash; applicabilit
 3. Add negative tests for missing methodology version, unknown applicability, missing evidence, duplicate/overlap conflicts and unsupported public claims.
 4. Run the existing test/build/security suite on the exact PR head and preserve logs.
 5. Close each finding only with a commit, test evidence and reviewer record.
+
+## Batch B — implementation hardening (2026-10-27)
+
+### F-REG-001 update — configuration is not consensus proof
+- Updated `src/services/hederaAnchor.ts` status wording: configured operator credentials no longer imply “Live anchoring active”; it explicitly states that each payload still requires a successful transaction receipt and consensus timestamp.
+- Added `tests/hedera_status_claim_test.ts` and wired it into the default `npm test` chain.
+- The regression asserts that configured credentials yield `CONFIGURED`, not `CONFIRMED`, and that the public status message cannot claim live anchoring merely from configuration.
+- This is a narrow claims-accuracy correction. It does **not** establish that live Hedera writes, persistence, or independent mirror-node read-back have passed end-to-end testing.
+
+### Verification boundary
+- Change commits on the audit branch: `c183270` (status wording), `87b8829` (regression test), `9375281` (test-chain wiring).
+- At the time of this update, GitHub Actions `RBAC Contract` and `RupayKg Production Audit` were still in progress and both Vercel checks were pending for `9375281c9c3435a9a48c0759755d1beb8480a972`. Do not treat this batch as CI-passed until checks complete.
+- Next: await exact-head checks; then add isolated negative tests for methodology version/applicability and duplicate/overlap controls before wiring any ICVCM release gate into issuance workflows.
