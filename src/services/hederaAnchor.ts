@@ -103,7 +103,7 @@ export class HederaAnchorProvider {
       topicId: effectiveTopicId || 'NOT_CONFIGURED',
       isConfigured: configured,
       message: configured
-        ? `Hedera HCS Operator Credentials Configured for ${network.toUpperCase()} on Topic ${effectiveTopicId}. Live anchoring active.`
+        ? `Hedera HCS operator credentials are configured for ${network.toUpperCase()} on Topic ${effectiveTopicId}. Configuration is not proof of a confirmed anchor; each payload requires a successful transaction receipt and consensus timestamp.`
         : effectiveTopicId
         ? `Hedera HCS Read Stream is Active via Public Mirror Node (${mirrorNodeEndpoint}). HCS Write Anchoring is NOT_AVAILABLE until HEDERA_OPERATOR_ID and HEDERA_OPERATOR_KEY are configured in the runtime environment.`
         : `Hedera HCS Topic ID is not configured (HEDERA_TOPIC_ID). Write Anchoring is NOT_AVAILABLE.`
