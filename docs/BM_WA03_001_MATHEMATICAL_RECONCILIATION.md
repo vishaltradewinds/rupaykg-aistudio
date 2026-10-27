@@ -1,66 +1,40 @@
-# BM WA03.001 Mathematical Step-by-Step Reconciliation
+# BM WA03.001 — Mathematical Reconciliation Status
 
-## Executive Overview
-This document provides an independent, full step-by-step mathematical reconciliation for the golden test fixture calculation producing **$ER_y = 21,406 \text{ tCO}_2\text{e}$** under Bureau of Energy Efficiency (BEE) CCTS Methodology **BM WA03.001** (Landfill Methane Recovery & Avoidance).
+**Status: AMBER — synthetic arithmetic example only; authoritative methodology reconciliation is not established.**
 
----
+## Scope
+This document records a software arithmetic example, not an independently verified BEE reference calculation. The values below are illustrative and must not be used to substantiate regulatory equivalence, project eligibility, or credit issuance.
 
-## 1. Methodology Equations
-Under BEE CCTS **BM WA03.001**:
+## Example arithmetic (non-authoritative)
+Illustrative inputs:
+- Project methane captured/destroyed: 1,000 tCH4/year
+- Baseline methane: 150 tCH4/year
+- Illustrative GWP: 28 tCO2e/tCH4
+- Illustrative oxidation factor: 0.10
+- Illustrative project emissions: 14 tCO2e/year
+- Illustrative leakage emissions: 0 tCO2e/year
 
-$$ER_y = BE_y - PE_y - LE_y$$
+Arithmetic:
+- Net methane: 1,000 - 150 = 850 tCH4/year
+- Illustrative gross amount: 850 × 28 = 23,800 tCO2e/year
+- After illustrative oxidation adjustment: 23,800 × (1 - 0.10) = 21,420 tCO2e/year
+- Illustrative net amount: 21,420 - 14 - 0 = 21,406 tCO2e/year
 
-Where:
-- $ER_y$: Emission reductions achieved by the project activity in year $y$ ($\text{tCO}_2\text{e}$)
-- $BE_y$: Baseline emissions in year $y$ ($\text{tCO}_2\text{e}$)
-- $PE_y$: Project emissions in year $y$ ($\text{tCO}_2\text{e}$)
-- $LE_y$: Leakage emissions in year $y$ ($\text{tCO}_2\text{e}$)
+This only verifies arithmetic under the stated assumptions. It does not prove the assumptions, boundaries, equations, parameter choices or units conform to the currently applicable BEE BM WA03.001 methodology.
 
-### Baseline Emissions Equation
-$$BE_y = (F_{\text{CH4,PJ,y}} - F_{\text{CH4,BL,y}}) \times \text{GWP}_{\text{CH4}} \times (1 - O_f)$$
+## Material evidence conflicts requiring resolution
+1. The repository's BM-T-011 BEE Reference Evidence Register records GWP_CH4 = 29.8 tCO2e/tCH4 from IPCC AR6 for the described BM-T-011 use case, while this older example used 28 from AR5. The applicable value must be selected from the exact methodology/tool version and use case, not by preference or hard-coded global default.
+2. The BEE reference register states BM WA03.001's use of BM-T-011 for BE_CH4,SWDS,y specifies f = 0.0 in that use case because captured/destructed landfill gas is already accounted for. The project-specific calculation must preserve that boundary and must not double-count captured methane.
+3. The previous title and conclusion described the example as a "golden test fixture", "independent reconciliation", and "100% mathematically verified & reproducible." Those claims exceeded the available evidence and are withdrawn by this revision.
+4. The repository's BM-T-011 reference evidence register explicitly states that a complete authoritative numerical worked case was not located in the reviewed public sources and that end-to-end numerical equivalence is not proven.
 
-Where:
-- $F_{\text{CH4,PJ,y}}$: Amount of methane captured and destroyed/utilised by the project activity ($\text{tCH}_4/\text{yr}$)
-- $F_{\text{CH4,BL,y}}$: Amount of methane that would have been captured and destroyed in the baseline scenario ($\text{tCH}_4/\text{yr}$)
-- $\text{GWP}_{\text{CH4}}$: Global Warming Potential of Methane = **$28 \text{ tCO}_2\text{e}/\text{tCH}_4$** (IPCC AR5 / BEE standard)
-- $O_f$: Oxidation factor of top cover soil = **$0.10$** (10% natural topsoil oxidation)
+## Required closure evidence
+- Pin the exact BEE methodology/tool version and applicability to the project.
+- Archive the authoritative source and its hash, publication/version details, retrieval date and relevant page/equation.
+- Independently verify all inputs, units, project/baseline boundaries and parameter-selection procedures.
+- Obtain or independently derive a reference case with documented provenance, intermediate values and final output; label synthetic vectors as NON_AUTHORITATIVE_TEST_VECTOR.
+- Reconcile implementation output at intermediate and final stages with documented tolerances.
+- Obtain independent technical review and preserve reviewer/date/evidence references.
 
----
-
-## 2. Input Dataset & Parameters (Golden Test Fixture)
-
-| Parameter Code | Description | Value | Unit | Source / Standard |
-| :--- | :--- | :--- | :--- | :--- |
-| $F_{\text{CH4,PJ,y}}$ | Methane captured by project LFG flare/generator | **$1,000$** | $\text{tCH}_4/\text{yr}$ | Gas Flow Meter + Methane Analyzer |
-| $F_{\text{CH4,BL,y}}$ | Baseline methane capture (pre-project regulatory obligation) | **$150$** | $\text{tCH}_4/\text{yr}$ | Historical Baseline Audit |
-| $\text{GWP}_{\text{CH4}}$ | Global Warming Potential of Methane | **$28$** | $\text{tCO}_2\text{e}/\text{tCH}_4$ | IPCC AR5 / BEE CCTS Registry |
-| $O_f$ | Topsoil Methane Oxidation Factor | **$0.10$** | dimensionless | Default BEE CCTS standard |
-| $PE_y$ | Project electricity & auxiliary fuel emissions | **$14$** | $\text{tCO}_2\text{e}/\text{yr}$ | On-site Electricity Meter |
-| $LE_y$ | Leakage emissions from transportation/equipment | **$0$** | $\text{tCO}_2\text{e}/\text{yr}$ | Verified zero leakage boundary |
-
----
-
-## 3. Step-by-Step Intermediate Calculation Trace
-
-### Step 3.1: Net Methane Destroyed Above Baseline ($\Delta F_{\text{CH4}}$)
-$$\Delta F_{\text{CH4}} = F_{\text{CH4,PJ,y}} - F_{\text{CH4,BL,y}}$$
-$$\Delta F_{\text{CH4}} = 1,000 \text{ tCH}_4 - 150 \text{ tCH}_4 = \mathbf{850 \text{ tCH}_4/\text{yr}}$$
-
-### Step 3.2: Baseline Methane CO₂ Equivalent Before Oxidation Adjustment
-$$BE_{\text{raw}} = \Delta F_{\text{CH4}} \times \text{GWP}_{\text{CH4}}$$
-$$BE_{\text{raw}} = 850 \text{ tCH}_4 \times 28 \text{ tCO}_2\text{e}/\text{tCH}_4 = \mathbf{23,800 \text{ tCO}_2\text{e}/\text{yr}}$$
-
-### Step 3.3: Baseline Emissions After Soil Oxidation Factor ($O_f = 0.10$)
-$$BE_y = BE_{\text{raw}} \times (1 - O_f)$$
-$$BE_y = 23,800 \text{ tCO}_2\text{e} \times (1 - 0.10) = 23,800 \times 0.90 = \mathbf{21,420 \text{ tCO}_2\text{e}/\text{yr}}$$
-
-### Step 3.4: Final Emission Reductions ($ER_y$)
-$$ER_y = BE_y - PE_y - LE_y$$
-$$ER_y = 21,420 \text{ tCO}_2\text{e} - 14 \text{ tCO}_2\text{e} - 0 \text{ tCO}_2\text{e} = \mathbf{21,406 \text{ tCO}_2\text{e}/\text{yr}}$$
-
----
-
-## 4. Verification Summary
-- **Calculated Result**: $21,406 \text{ tCO}_2\text{e}$
-- **Golden Fixture Output**: $21,406 \text{ tCO}_2\text{e}$
-- **Reconciliation Status**: **100% MATHEMATICALLY VERIFIED & REPRODUCIBLE**.
+## Release rule
+Until these gates pass, status remains **AMBER**. Passing a unit test confirms only the tested software behaviour; it does not establish regulatory equivalence or credit issuance eligibility.
