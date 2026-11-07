@@ -23,7 +23,7 @@ Engineering maturity is materially advanced, but TRL 9 requires evidence across 
 | ID | Gate | Current evidence | Required closure evidence | Status |
 |---|---|---|---|---|
 | G-001 | Authoritative baseline | main is identifiable | Freeze repo + deployed revision + DB identity as one release baseline | OPEN |
-| G-002 | Database authority | Neon primary branch identified; 1 database, 67 public tables, 92 applied production migrations; repo Drizzle journal has only 2 entries and production has no Drizzle ledger; production-derived rehearsal contains a NOBYPASSRLS runtime-role model and owner-role model; live schema has 31 organization-related columns and an identity→membership→organization FK boundary | Reconcile migration authority; prove deployed runtime DB identity; use the existing NOBYPASSRLS role-split rehearsal; map authoritative identity→membership→organization scope; implement and test RLS/tenant isolation; enforce non-bypass runtime access | **BLOCKING / FAIL / OPEN** |
+| G-002 | Database authority | Neon primary branch identified; 1 database, 67 public tables, 92 applied production migrations; repo Drizzle journal has only 2 entries and production has no Drizzle ledger; production-derived rehearsal contains a NOBYPASSRLS runtime-role model and owner-role model; live schema has 31 organization-related columns and an identity→membership→organization FK boundary; tenant-sensitive call-path inventory is now recorded | Reconcile migration authority; prove deployed runtime DB identity; use the existing NOBYPASSRLS role-split rehearsal; map authoritative identity→membership→organization scope; convert tenant-sensitive call paths; implement and test RLS/tenant isolation; enforce non-bypass runtime access | **BLOCKING / FAIL / OPEN** |
 | G-003 | Production deployment | Vercel checks are green for recorded main commit | Verify live Cloud Run/container revision, env/secrets, health, rollback and runtime acceptance | OPEN |
 | G-004 | BM-T-011 | Engine/tests exist | Independent authoritative numerical reconciliation fixture and signed evidence | OPEN |
 | G-005 | BM-WA03.001 | Canonical adapter integrated | Complete methodology reconciliation, boundary conditions and authoritative reference evidence | OPEN |
@@ -81,6 +81,16 @@ Historical repository evidence has now been recovered from non-main branches and
 This proves the current two-entry `main` Drizzle journal is not a complete historical representation of the live 92-row production ledger. It does **not** recover the missing 001–096 production SQL sequence. The safe next step is controlled baseline reconstruction from the live schema plus preserved production ledger, with missing historical SQL explicitly inventoried rather than fabricated.
 
 Detailed evidence is recorded in `docs/MIGRATION_AUTHORITY_RECONSTRUCTION_20261107.md`.
+
+**G-002 remains BLOCKING / FAIL / OPEN. No production mutation has been performed.**
+
+## Tenant call-path conversion update — 2026-11-07
+
+Repository inspection confirms that tenant-sensitive execution is still materially dependent on global DB access and legacy identity/ownership fields. Confirmed examples include `src/routes/carbon.ts`, `src/services/recordService.ts`, `src/services/carbonEventService.ts`, `src/services/complianceService.ts`, and `src/services/pilotService.ts`.
+
+A dedicated inventory is now recorded in `docs/TENANT_SENSITIVE_CALL_PATH_INVENTORY_20261107.md`, and execution is tracked as GitHub Issue #23.
+
+The first conversion batch is carbon/project CRUD and its child workflows. This work must first reconcile the live `carbon_projects` schema with the repository ORM before query changes are made; legacy `ownerId` is not to be promoted to authoritative tenant scope.
 
 **G-002 remains BLOCKING / FAIL / OPEN. No production mutation has been performed.**
 
