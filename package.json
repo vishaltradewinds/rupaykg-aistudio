@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "db:migrate": "tsx scripts/migrate.ts",
+    "db:runtime-guard": "tsx scripts/runtimeDbRoleGuard.ts",
     "lint": "tsc --noEmit",
     "test": "tsx tests/rbac_contract_test.ts && tsx tests/bm_t011_fod_engine_test.ts && tsx tests/wa03_002_mapping_contract_test.ts && tsx tests/wa03_002_engine_test.ts && tsx tests/methodology_context_test.ts && tsx tests/methodology_registry_test.ts && tsx tests/wave1_adapter_contract_test.ts && tsx tests/wave1_methodology_engine_test.ts && tsx tests/wa03_003_engine_test.ts && tsx tests/in02_002_engine_test.ts && tsx tests/ag04_001_engine_test.ts && tsx tests/pilot_persistence_test.ts && tsx tests/two_process_survival_test.ts && tsx tests/two_process_reader.ts && tsx tests/urban_rural_test.ts && tsx tests/fail_closed_test.ts && npm run test:environmental",
     "test:environmental": "tsx tests/environmental_credit_routing_test.ts",

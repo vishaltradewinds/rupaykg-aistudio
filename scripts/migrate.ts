@@ -58,6 +58,14 @@ async function runMigrations() {
   try {
     console.log("Connected to configured PostgreSQL database for migration execution.");
 
+    // FAIL-CLOSED MIGRATION AUTHORITY GUARD: never create a second migration ledger when production uses public.schema_migrations.
+    const authorityCheck = await client.query("SELECT to_regclass('public.schema_migrations') AS custom_ledger, to_regclass('drizzle.__drizzle_migrations') AS drizzle_ledger");
+    const customLedgerExists = Boolean(authorityCheck.rows[0]?.custom_ledger);
+    const drizzleLedgerExists = Boolean(authorityCheck.rows[0]?.drizzle_ledger);
+    if (customLedgerExists && !drizzleLedgerExists) {
+      throw new Error("MIGRATION AUTHORITY BLOCKED: public.schema_migrations exists but drizzle.__drizzle_migrations is absent. Reconcile migration history before running Drizzle migrations.");
+    }
+
     await client.query(`CREATE SCHEMA IF NOT EXISTS drizzle;`);
     await client.query(`
       CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
