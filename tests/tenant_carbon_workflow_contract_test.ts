@@ -1,24 +1,11 @@
 import fs from 'node:fs';
-
 const service = fs.readFileSync('src/security/tenantCarbonWorkflow.ts', 'utf8');
 const routes = fs.readFileSync('src/routes/carbon.ts', 'utf8');
-
-const required = [
-  'resolveTenantWorkflowScope',
-  'withTenantTransaction',
-  'public.carbon_projects',
-  'organization_id',
-  'public.activities',
-  'public.evidence',
-  'public.carbon_calculations'
-];
-
-for (const token of required) {
-  if (!service.includes(token)) throw new Error(`Missing tenant workflow control: ${token}`);
-}
-
+const required = ['resolveTenantWorkflowScope','withTenantTransaction','public.carbon_projects','organization_id','public.activities','public.evidence','public.carbon_calculations'];
+for (const token of required) if (!service.includes(token)) throw new Error(`Missing tenant workflow control: ${token}`);
 if (service.includes('organization_name')) throw new Error('Legacy organization_name authorization detected');
 if (service.includes('ownerId')) throw new Error('Legacy ownerId authorization detected');
 if (!routes.includes('requireTenantCarbonProject')) throw new Error('Parent project tenant gate missing from carbon routes');
-
+if (service.includes('cc.activity_id = a.id') && service.includes('listProjectActivities')) throw new Error('Activity listing still depends on calculation existence');
+if (!service.includes("a.metadata->>'carbonProjectId' = ${scope.projectId}")) throw new Error('Activity project linkage guard missing');
 console.log('PASS: tenant carbon workflow contract');
