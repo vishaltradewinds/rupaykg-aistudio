@@ -56,6 +56,8 @@ import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonPro
 import { createProjectActivity, createProjectMeasurement, createProjectEvidence, createProjectCalculation } from '../security/tenantCarbonWorkflowWrites.ts';
 import { rejectLegacyWorkflow } from '../security/legacyWorkflowGate.ts';
 import { createTenantVerification, listTenantVerifications } from '../security/tenantVerification.ts';
+import { createTenantClaim, listTenantClaims, createTenantCredential, listTenantCredentials } from '../security/tenantClaimCredential.ts';
+import { createTenantRegistryEvent, listTenantRegistryEvents } from '../security/tenantRegistryEvent.ts';
 
 export const carbonRouter = Router();
 
@@ -169,6 +171,62 @@ carbonRouter.get('/projects/:id/activities/:activityId/verifications', requireTe
     res.json(result);
   } catch {
     res.status(503).json({ error: 'Live verification service unavailable', code: 'LIVE_VERIFICATION_SERVICE_UNAVAILABLE' });
+  }
+});
+
+// --- AUTHORITATIVE LIVE CLAIM / CREDENTIAL / REGISTRY ENDPOINTS ---
+carbonRouter.post('/projects/:id/activities/:activityId/claims', requireTenantContext, async (req, res) => {
+  try {
+    const result = await createTenantClaim(req as TenantRequest, { ...req.body, activityId: req.params.activityId });
+    if (!result) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.status(201).json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: String(err?.message || err) });
+  }
+});
+carbonRouter.get('/projects/:id/activities/:activityId/claims', requireTenantContext, async (req, res) => {
+  try {
+    const result = await listTenantClaims(req as TenantRequest, req.params.activityId);
+    if (!result) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.json(result);
+  } catch {
+    res.status(503).json({ error: 'Live claim service unavailable', code: 'LIVE_CLAIM_SERVICE_UNAVAILABLE' });
+  }
+});
+carbonRouter.post('/projects/:id/activities/:activityId/credentials', requireTenantContext, async (req, res) => {
+  try {
+    const result = await createTenantCredential(req as TenantRequest, { ...req.body, activityId: req.params.activityId });
+    if (!result) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.status(201).json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: String(err?.message || err) });
+  }
+});
+carbonRouter.get('/projects/:id/activities/:activityId/credentials', requireTenantContext, async (req, res) => {
+  try {
+    const result = await listTenantCredentials(req as TenantRequest, req.params.activityId);
+    if (!result) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.json(result);
+  } catch {
+    res.status(503).json({ error: 'Live credential service unavailable', code: 'LIVE_CREDENTIAL_SERVICE_UNAVAILABLE' });
+  }
+});
+carbonRouter.post('/credentials/:credentialId/registry-events', requireTenantContext, async (req, res) => {
+  try {
+    const result = await createTenantRegistryEvent(req as TenantRequest, { ...req.body, credentialId: req.params.credentialId });
+    if (!result) return res.status(404).json({ error: 'Credential not found or not authorized' });
+    res.status(201).json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: String(err?.message || err) });
+  }
+});
+carbonRouter.get('/credentials/:credentialId/registry-events', requireTenantContext, async (req, res) => {
+  try {
+    const result = await listTenantRegistryEvents(req as TenantRequest, req.params.credentialId);
+    if (!result) return res.status(404).json({ error: 'Credential not found or not authorized' });
+    res.json(result);
+  } catch {
+    res.status(503).json({ error: 'Live registry service unavailable', code: 'LIVE_REGISTRY_SERVICE_UNAVAILABLE' });
   }
 });
 
