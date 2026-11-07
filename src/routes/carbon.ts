@@ -56,7 +56,7 @@ import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonPro
 import { createProjectActivity, createProjectMeasurement, createProjectEvidence, createProjectCalculation } from '../security/tenantCarbonWorkflowWrites.ts';
 import { rejectLegacyWorkflow } from '../security/legacyWorkflowGate.ts';
 import { createTenantVerification, listTenantVerifications } from '../security/tenantVerification.ts';
-import { listTenantCpcbWorkspaces, createTenantCpcbWorkspace, recordCpcbStatus, listTenantEprApplicability, upsertTenantEprApplicability, listTenantBwgAssessments, createTenantBwgAssessment } from '../security/tenantCpcbCompliance.ts';
+import { listTenantCpcbWorkspaces, createTenantCpcbWorkspace, recordCpcbStatus, listTenantEprApplicability, upsertTenantEprApplicability, listTenantBwgAssessments, createTenantBwgAssessment, listTenantBwgReportingPeriods, createTenantBwgReportingPeriod, listTenantEprReturns, createTenantEprReturn } from '../security/tenantCpcbCompliance.ts';
 import { createTenantClaim, listTenantClaims, createTenantCredential, listTenantCredentials } from '../security/tenantClaimCredential.ts';
 import { createTenantRegistryEvent, listTenantRegistryEvents } from '../security/tenantRegistryEvent.ts';
 
@@ -253,6 +253,11 @@ carbonRouter.get('/compliance/bwg/assessments', requireTenantContext, async (req
 carbonRouter.post('/compliance/bwg/assessments', requireTenantContext, async (req,res)=>{
  try{const r=await createTenantBwgAssessment(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}
 });
+
+carbonRouter.get('/compliance/bwg/reporting-periods', requireTenantContext, async (req,res)=>{try{res.json(await listTenantBwgReportingPeriods(req as TenantRequest));}catch{res.status(503).json({error:'BWG reporting service unavailable'});}});
+carbonRouter.post('/compliance/bwg/reporting-periods', requireTenantContext, async (req,res)=>{try{const r=await createTenantBwgReportingPeriod(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}});
+carbonRouter.get('/compliance/epr/returns', requireTenantContext, async (req,res)=>{try{res.json(await listTenantEprReturns(req as TenantRequest));}catch{res.status(503).json({error:'EPR return service unavailable'});}});
+carbonRouter.post('/compliance/epr/returns', requireTenantContext, async (req,res)=>{try{const r=await createTenantEprReturn(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}});
 
 // --- LEGACY PHASE-5 WORKFLOW BOUNDARY ---
 // These repository-era workflow routes are retained as explicit fail-closed boundaries.
