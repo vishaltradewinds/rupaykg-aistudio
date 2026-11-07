@@ -17,13 +17,31 @@ export async function createTenantRegistryEvent(req: TenantRequest, input: any) 
     `);
     if (credential.length !== 1) return null;
 
+    const fromOwnerId = input.fromOwnerId ? String(input.fromOwnerId) : tenant.organizationId;
+    const toOwnerId = input.toOwnerId ? String(input.toOwnerId) : tenant.organizationId;
+    if (fromOwnerId !== tenant.organizationId) return null;
+    const counterparty = await tx.execute(sql`
+      SELECT id FROM public.organizations WHERE id = ${toOwnerId}::uuid LIMIT 1
+    `);
+    if (counterparty.length !== 1) return null;
+    if (input.verificationId) {
+      const verification = await tx.execute(sql`
+        SELECT v.id
+        FROM public.verifications v
+        JOIN public.activities a ON a.id = v.activity_id
+        WHERE v.id = ${String(input.verificationId)}::uuid
+          AND a.organization_id = ${tenant.organizationId}::uuid
+        LIMIT 1
+      `);
+      if (verification.length !== 1) return null;
+    }
     const rows = await tx.execute(sql`
       INSERT INTO public.registry_events
         (credential_id, event_type, from_owner_id, to_owner_id, external_reference,
          event_hash, verification_id, recorded_by_identity_id)
       VALUES
         (${String(input.credentialId)}::uuid, ${String(input.eventType)},
-         ${input.fromOwnerId || null}::uuid, ${input.toOwnerId || tenant.organizationId}::uuid,
+         ${fromOwnerId}::uuid, ${toOwnerId}::uuid,
          ${input.externalReference || null}, ${String(input.eventHash)},
          ${input.verificationId || null}::uuid, ${tenant.identityId}::uuid)
       RETURNING *
