@@ -90,7 +90,7 @@ Repository inspection confirms that tenant-sensitive execution is still material
 
 A dedicated inventory is now recorded in `docs/TENANT_SENSITIVE_CALL_PATH_INVENTORY_20261107.md`, and execution is tracked as GitHub Issue #23.
 
-The first conversion batch is carbon/project CRUD and its child workflows. This work must first reconcile the live `carbon_projects` schema with the repository ORM before query changes are made; legacy `ownerId` is not to be promoted to authoritative tenant scope.
+The first conversion batch is carbon/project CRUD and its child workflows. The live `public.carbon_projects` schema has now been read-only reconciled: it is organization-scoped and does not match the legacy repository ORM definition. A new authoritative tenant project access layer now performs project list/create/read inside transaction-local tenant context, and `/projects/:id` child routes have an authoritative parent-project tenant gate. The legacy `ownerId` authorization path has been removed from project CRUD. This is application-layer enforcement only; production RLS and DB roles remain unchanged. Child workflow services still require conversion.
 
 **G-002 remains BLOCKING / FAIL / OPEN. No production mutation has been performed.**
 
