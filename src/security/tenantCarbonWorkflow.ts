@@ -28,12 +28,7 @@ export async function listProjectActivities(req: TenantRequest, projectId: strin
     SELECT a.*
     FROM public.activities a
     WHERE a.organization_id = ${scope.organizationId}::uuid
-      AND EXISTS (
-        SELECT 1
-        FROM public.carbon_calculations cc
-        WHERE cc.activity_id = a.id
-          AND cc.carbon_project_id = ${scope.projectId}::uuid
-      )
+      AND a.metadata->>'carbonProjectId' = ${scope.projectId}
     ORDER BY a.created_at DESC
   `));
 }
@@ -46,12 +41,7 @@ export async function listProjectEvidence(req: TenantRequest, projectId: string)
     FROM public.evidence e
     JOIN public.activities a ON a.id = e.activity_id
     WHERE a.organization_id = ${scope.organizationId}::uuid
-      AND EXISTS (
-        SELECT 1
-        FROM public.carbon_calculations cc
-        WHERE cc.activity_id = a.id
-          AND cc.carbon_project_id = ${scope.projectId}::uuid
-      )
+      AND a.metadata->>'carbonProjectId' = ${scope.projectId}
     ORDER BY e.captured_at DESC
   `));
 }
