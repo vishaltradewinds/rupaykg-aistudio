@@ -56,6 +56,7 @@ import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonPro
 import { createProjectActivity, createProjectMeasurement, createProjectEvidence, createProjectCalculation } from '../security/tenantCarbonWorkflowWrites.ts';
 import { rejectLegacyWorkflow } from '../security/legacyWorkflowGate.ts';
 import { createTenantVerification, listTenantVerifications } from '../security/tenantVerification.ts';
+import { listTenantCpcbWorkspaces, createTenantCpcbWorkspace, recordCpcbStatus, listTenantEprApplicability, upsertTenantEprApplicability, listTenantBwgAssessments, createTenantBwgAssessment } from '../security/tenantCpcbCompliance.ts';
 import { createTenantClaim, listTenantClaims, createTenantCredential, listTenantCredentials } from '../security/tenantClaimCredential.ts';
 import { createTenantRegistryEvent, listTenantRegistryEvents } from '../security/tenantRegistryEvent.ts';
 
@@ -228,6 +229,29 @@ carbonRouter.get('/credentials/:credentialId/registry-events', requireTenantCont
   } catch {
     res.status(503).json({ error: 'Live registry service unavailable', code: 'LIVE_REGISTRY_SERVICE_UNAVAILABLE' });
   }
+});
+
+// --- AUTHORITATIVE LIVE CPCB/SWM COMPLIANCE ENDPOINTS ---
+carbonRouter.get('/compliance/cpcb/workspaces', requireTenantContext, async (req,res)=>{
+ try{const r=await listTenantCpcbWorkspaces(req as TenantRequest);res.json(r);}catch{res.status(503).json({error:'CPCB workspace service unavailable'});}
+});
+carbonRouter.post('/compliance/cpcb/workspaces', requireTenantContext, async (req,res)=>{
+ try{const r=await createTenantCpcbWorkspace(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}
+});
+carbonRouter.post('/compliance/cpcb/workspaces/:workspaceId/status', requireTenantContext, async (req,res)=>{
+ try{const r=await recordCpcbStatus(req as TenantRequest,req.params.workspaceId,req.body||{});if(!r)return res.status(404).json({error:'Workspace not found or not authorized'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}
+});
+carbonRouter.get('/compliance/epr/applicability', requireTenantContext, async (req,res)=>{
+ try{res.json(await listTenantEprApplicability(req as TenantRequest));}catch{res.status(503).json({error:'EPR applicability service unavailable'});}
+});
+carbonRouter.post('/compliance/epr/applicability', requireTenantContext, async (req,res)=>{
+ try{const r=await upsertTenantEprApplicability(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}
+});
+carbonRouter.get('/compliance/bwg/assessments', requireTenantContext, async (req,res)=>{
+ try{res.json(await listTenantBwgAssessments(req as TenantRequest));}catch{res.status(503).json({error:'BWG assessment service unavailable'});}
+});
+carbonRouter.post('/compliance/bwg/assessments', requireTenantContext, async (req,res)=>{
+ try{const r=await createTenantBwgAssessment(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}
 });
 
 // --- LEGACY PHASE-5 WORKFLOW BOUNDARY ---
