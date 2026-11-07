@@ -7,4 +7,6 @@ for (const forbidden of ['ownerId', 'organization_name', 'project_intakes', 'cct
   if (service.includes(forbidden)) throw new Error(`legacy authorization/schema dependency: ${forbidden}`);
 }
 if (!service.includes('withTenantTransaction')) throw new Error('tenant transaction context missing');
+if (service.includes("WHERE cc.activity_id = a.id AND cc.carbon_project_id = ${projectId}::uuid")) throw new Error('measurement/evidence lifecycle still depends on a calculation row');
+if (!service.includes("a.metadata->>'carbonProjectId' = ${projectId}")) throw new Error('project/activity linkage guard missing');
 console.log('PASS tenant carbon workflow write contract');
