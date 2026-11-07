@@ -22,11 +22,10 @@ export async function createTenantVerification(req: TenantRequest, input: Verifi
       LEFT JOIN public.evidence e ON e.activity_id = a.id
       WHERE a.organization_id = ${tenant.organizationId}::uuid
         AND a.metadata->>'carbonProjectId' IS NOT NULL
-        AND a.metadata->>'carbonProjectId' = (
-          SELECT cp.id::text FROM public.carbon_projects cp
-          WHERE cp.organization_id = ${tenant.organizationId}::uuid
-          AND cp.id::text = a.metadata->>'carbonProjectId'
-          LIMIT 1
+        AND EXISTS (
+          SELECT 1 FROM public.carbon_projects cp
+          WHERE cp.id::text = a.metadata->>'carbonProjectId'
+            AND cp.organization_id = ${tenant.organizationId}::uuid
         )
         AND a.id = COALESCE(${input.activityId || null}::uuid, e.activity_id)
         AND (${input.evidenceId || null}::uuid IS NULL OR e.id = ${input.evidenceId || null}::uuid)
