@@ -19,7 +19,8 @@
     "test:depository": "tsx tests/environmental_credit_depository_suite.ts",
     "test:cert": "tsx tests/production_certification_suite.ts",
     "test:consolidation": "tsx scripts/consolidationCallgraphCheck.ts",
-    "start": "node dist/server.cjs"
+    "start": "node dist/server.cjs",
+    "db:migration-authority-guard": "tsx scripts/migrationAuthorityGuard.ts"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
