@@ -55,6 +55,7 @@ import { requireTenantContext, type TenantRequest } from '../security/tenantCont
 import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonProject, requireTenantCarbonProject } from '../security/tenantCarbonProject.ts';
 import { createProjectActivity, createProjectMeasurement, createProjectEvidence, createProjectCalculation } from '../security/tenantCarbonWorkflowWrites.ts';
 import { rejectLegacyWorkflow } from '../security/legacyWorkflowGate.ts';
+import { createTenantVerification, listTenantVerifications } from '../security/tenantVerification.ts';
 
 export const carbonRouter = Router();
 
@@ -141,6 +142,33 @@ carbonRouter.post('/projects/:id/activities/:activityId/calculations', requireTe
     res.status(201).json(calculation);
   } catch (err: any) {
     res.status(400).json({ error: String(err?.message || err) });
+  }
+});
+
+// --- AUTHORITATIVE LIVE VERIFICATION ENDPOINTS ---
+carbonRouter.post('/projects/:id/activities/:activityId/verifications', requireTenantContext, async (req, res) => {
+  try {
+    const result = await createTenantVerification(req as TenantRequest, {
+      activityId: req.params.activityId,
+      evidenceId: req.body?.evidenceId,
+      decision: req.body?.decision,
+      scope: req.body?.scope,
+      rationale: req.body?.rationale
+    });
+    if (!result) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.status(201).json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: String(err?.message || err) });
+  }
+});
+
+carbonRouter.get('/projects/:id/activities/:activityId/verifications', requireTenantContext, async (req, res) => {
+  try {
+    const result = await listTenantVerifications(req as TenantRequest, req.params.activityId);
+    if (!result) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.json(result);
+  } catch {
+    res.status(503).json({ error: 'Live verification service unavailable', code: 'LIVE_VERIFICATION_SERVICE_UNAVAILABLE' });
   }
 });
 
