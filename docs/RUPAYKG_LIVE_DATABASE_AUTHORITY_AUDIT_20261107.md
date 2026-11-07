@@ -78,17 +78,24 @@ Therefore, even if RLS policies are introduced, the production application must 
 
 Neon documents database-level RLS as an authorization boundary and recommends RLS for important core authorization logic in multi-tenant applications. citeturn637140search1turn637140search9
 
-### 5. Migration ledger currently reports 92 migrations
+### 5. Repository ↔ production migration authority is materially divergent
 
-`public.schema_migrations` reports:
+The production database reports:
 
-- 92 applied migrations
+- `public.schema_migrations`: 92 applied migrations
 - first version: `001`
 - last version: `20261021`
 - first applied: 2026-10-17T10:47:58.762Z
 - last applied: 2026-10-27T13:46:14.262Z
 
-This is consistent with the previously identified 92-migration production state, but repository-to-database migration parity has **not yet been proven** in this audit.
+The current `main` repository reports a different migration system:
+
+- `drizzle/meta/_journal.json`: **2** migration entries
+- migration tags: `0000_sloppy_misty_knight`, `0001_environmental_credit_depository`
+- `drizzle.__drizzle_migrations`: **does not exist** on the inspected production database
+- `public.schema_migrations`: **does exist** on the inspected production database
+
+Therefore repository-to-production migration parity is not merely unproven; the inspected artifacts show a **migration-authority mismatch**. The repository's current formal Drizzle migration ledger cannot be used to explain the 92-migration production schema. This is a blocking release-baseline finding.
 
 ### 6. Multiple Neon rehearsal branches exist
 
@@ -110,8 +117,8 @@ These are useful engineering evidence environments, but they are not the product
 |---|---|
 | One Neon project identified | PASS — project `rupaykg-production-fresh` |
 | One database on primary branch | PASS — `rupaykg` |
-| Migration ledger present | PASS — 92 rows |
-| Repository ↔ DB migration parity | OPEN |
+| Production migration ledger present | PASS — 92 rows in `public.schema_migrations` |
+| Repository migration ledger parity | **FAIL / BLOCKING** — repo journal has 2 entries while production has 92; Drizzle ledger absent |
 | Runtime points to this DB | OPEN |
 | PostgreSQL RLS enabled | **FAIL / BLOCKING** |
 | PostgreSQL RLS policies present | **FAIL / BLOCKING** |
@@ -123,15 +130,17 @@ These are useful engineering evidence environments, but they are not the product
 ## Required remediation sequence
 
 1. Freeze the inspected primary database as the candidate authoritative DB.
-2. Reconcile the repository migration set against the 92 applied database migrations.
-3. Identify every tenant-bearing table and classify its access model.
-4. Implement PostgreSQL RLS policies for tenant-scoped tables.
-5. Establish a non-bypass application role with least privilege.
-6. Keep privileged migration/administrative access separate from application traffic.
-7. Add automated cross-tenant isolation tests for SELECT/INSERT/UPDATE/DELETE.
-8. Verify the deployed runtime connection target and credentials.
-9. Re-run the same read-only database audit and preserve the result as release evidence.
-10. Only then close G-002.
+2. Freeze the 92-row production migration ledger as evidence; reconstruct/reconcile the full authoritative migration history before any new migration is applied.
+3. Determine whether `public.schema_migrations` or the Drizzle journal is the intended canonical migration authority; select exactly one and retire the other path.
+4. Reconcile the repository migration set against the 92 applied database migrations.
+5. Identify every tenant-bearing table and classify its access model.
+6. Implement PostgreSQL RLS policies for tenant-scoped tables.
+7. Establish a non-bypass application role with least privilege.
+8. Keep privileged migration/administrative access separate from application traffic.
+9. Add automated cross-tenant isolation tests for SELECT/INSERT/UPDATE/DELETE.
+10. Verify the deployed runtime connection target and credentials.
+11. Re-run the same read-only database audit and preserve the result as release evidence.
+12. Only then close G-002.
 
 ## Safety boundary
 
@@ -142,3 +151,8 @@ No production database mutation was performed during this audit. RLS enablement,
 **G-002 remains OPEN and BLOCKING.**
 
 The authoritative database candidate is now concretely identified, but the production tenant-isolation control is not yet demonstrated. The platform therefore remains **advanced engineering / pre-TRL-9 assurance**.
+
+
+## Additional application architecture finding
+
+The current `main` repository contains `src/db/index.ts` using `DATABASE_URL` or fallback SQL environment variables, while `scripts/migrate.ts` executes a Drizzle journal from `./drizzle/meta/_journal.json`. The live production database instead exposes `public.schema_migrations` and no `drizzle.__drizzle_migrations` ledger. This creates a release-process risk: application schema, migration authority, and production database history are not presently demonstrated to be one coherent lifecycle.
