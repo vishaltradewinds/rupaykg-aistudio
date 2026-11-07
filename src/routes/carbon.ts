@@ -51,8 +51,13 @@ import {
 } from '../services/ruralBoundaryService.ts';
 import { WA03_001 } from '../../packages/methodology/wa03-001/index.ts';
 import crypto from 'crypto';
+import { requireTenantContext, type TenantRequest } from '../security/tenantContext.ts';
+import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonProject, requireTenantCarbonProject } from '../security/tenantCarbonProject.ts';
 
 export const carbonRouter = Router();
+
+// Authoritative tenant gate for project-scoped routes. Production RLS remains disabled; this is application-layer enforcement pending rehearsal.
+carbonRouter.use('/projects/:id', requireTenantCarbonProject);
 
 carbonRouter.get('/methodologies', async (req, res) => {
   try {
@@ -63,53 +68,33 @@ carbonRouter.get('/methodologies', async (req, res) => {
   }
 });
 
-carbonRouter.get('/projects', async (req, res) => {
+carbonRouter.get('/projects', requireTenantContext, async (req, res) => {
   try {
-    const userRole = (req as any).user?.role;
-    const uid = (req as any).user?.uid;
-    let data;
-    if (["super_admin", "regulator", "auditor"].includes(userRole)) {
-       data = await db.select().from(carbon_projects);
-    } else {
-       data = await db.select().from(carbon_projects).where(eq(carbon_projects.ownerId, uid));
-    }
+    const data = await listTenantCarbonProjects(req as TenantRequest);
     res.json(data);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(503).json({ error: 'Tenant project service unavailable', code: 'TENANT_PROJECT_SERVICE_UNAVAILABLE' });
   }
 });
 
-carbonRouter.post('/projects', async (req, res) => {
+carbonRouter.post('/projects', requireTenantContext, async (req, res) => {
   try {
-    const { name, description, wasteSourceRecordId, methodologyId } = req.body;
-    const ownerId = (req as any).user?.uid || (req as any).user?.id;
-    if (!ownerId) return res.status(401).json({ error: "Missing authenticated user" });
-    const newProject = {
-      id: crypto.randomUUID(),
-      name,
-      description,
-      ownerId,
-      wasteSourceRecordId,
-      methodologyId,
-      status: 'DRAFT',
-    };
-    await db.insert(carbon_projects).values(newProject);
-    res.json(newProject);
+    const project = await createTenantCarbonProject(req as TenantRequest, req.body || {});
+    res.status(201).json(project);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    const message = String(err?.message || err);
+    if (message.includes('required')) return res.status(400).json({ error: message });
+    res.status(503).json({ error: 'Tenant project service unavailable', code: 'TENANT_PROJECT_SERVICE_UNAVAILABLE' });
   }
 });
 
 carbonRouter.get('/projects/:id', async (req, res) => {
   try {
-    const data = await db.select().from(carbon_projects).where(eq(carbon_projects.id, req.params.id));
-    if (data.length && data[0].ownerId && data[0].ownerId !== (req as any).user?.uid && !["super_admin", "regulator", "auditor"].includes((req as any).user?.role)) {
-      return res.status(403).json({ error: "Cross-tenant access denied" });
-    }
-    if (!data.length) return res.status(404).json({ error: "Not found" });
-    res.json(data[0]);
+    const project = (req as any).tenantProject || await getTenantCarbonProject(req as TenantRequest, req.params.id);
+    if (!project) return res.status(404).json({ error: 'Not found' });
+    res.json(project);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(503).json({ error: 'Tenant project service unavailable', code: 'TENANT_PROJECT_SERVICE_UNAVAILABLE' });
   }
 });
 
