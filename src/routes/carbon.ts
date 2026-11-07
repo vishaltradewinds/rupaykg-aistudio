@@ -53,6 +53,7 @@ import { WA03_001 } from '../../packages/methodology/wa03-001/index.ts';
 import crypto from 'crypto';
 import { requireTenantContext, type TenantRequest } from '../security/tenantContext.ts';
 import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonProject, requireTenantCarbonProject } from '../security/tenantCarbonProject.ts';
+import { createProjectActivity, createProjectMeasurement, createProjectEvidence, createProjectCalculation } from '../security/tenantCarbonWorkflowWrites.ts';
 
 export const carbonRouter = Router();
 
@@ -95,6 +96,50 @@ carbonRouter.get('/projects/:id', async (req, res) => {
     res.json(project);
   } catch (err: any) {
     res.status(503).json({ error: 'Tenant project service unavailable', code: 'TENANT_PROJECT_SERVICE_UNAVAILABLE' });
+  }
+});
+
+// --- AUTHORITATIVE LIVE MRV WORKFLOW ENDPOINTS ---
+// These endpoints use the live production workflow model: activities -> measurements/evidence -> carbon_calculations.
+// They are tenant-scoped and transaction-bound. Legacy Phase-5 endpoints remain pending replacement/reconciliation.
+
+carbonRouter.post('/projects/:id/activities', requireTenantContext, async (req, res) => {
+  try {
+    const activity = await createProjectActivity(req as TenantRequest, req.params.id, req.body || {});
+    if (!activity) return res.status(404).json({ error: 'Project not found or not authorized' });
+    res.status(201).json(activity);
+  } catch {
+    res.status(503).json({ error: 'Live activity service unavailable', code: 'LIVE_ACTIVITY_SERVICE_UNAVAILABLE' });
+  }
+});
+
+carbonRouter.post('/projects/:id/activities/:activityId/measurements', requireTenantContext, async (req, res) => {
+  try {
+    const measurement = await createProjectMeasurement(req as TenantRequest, req.params.id, req.params.activityId, req.body || {});
+    if (!measurement) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.status(201).json(measurement);
+  } catch (err: any) {
+    res.status(400).json({ error: String(err?.message || err) });
+  }
+});
+
+carbonRouter.post('/projects/:id/activities/:activityId/evidence', requireTenantContext, async (req, res) => {
+  try {
+    const evidence = await createProjectEvidence(req as TenantRequest, req.params.id, req.params.activityId, req.body || {});
+    if (!evidence) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.status(201).json(evidence);
+  } catch (err: any) {
+    res.status(400).json({ error: String(err?.message || err) });
+  }
+});
+
+carbonRouter.post('/projects/:id/activities/:activityId/calculations', requireTenantContext, async (req, res) => {
+  try {
+    const calculation = await createProjectCalculation(req as TenantRequest, req.params.id, req.params.activityId, req.body || {});
+    if (!calculation) return res.status(404).json({ error: 'Activity not found or not authorized' });
+    res.status(201).json(calculation);
+  } catch (err: any) {
+    res.status(400).json({ error: String(err?.message || err) });
   }
 });
 
