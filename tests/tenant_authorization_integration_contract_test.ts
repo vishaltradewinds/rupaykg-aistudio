@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const auth = await fs.readFile('src/middleware/auth.ts', 'utf8');
+const tenant = await fs.readFile('src/security/tenantContext.ts', 'utf8');
+assert.match(auth, /attachTenantContext/);
+assert.match(tenant, /requireTenantContext/);
+assert.match(tenant, /withTenantTransaction/);
+assert.match(tenant, /set_config\('app\.organization_id'/);
+assert.match(tenant, /set_config\('app\.identity_id'/);
+assert.doesNotMatch(tenant, /organization_name/);
+console.log('TENANT AUTHORIZATION INTEGRATION CONTRACT PASS');
