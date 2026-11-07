@@ -23,7 +23,7 @@ Engineering maturity is materially advanced, but TRL 9 requires evidence across 
 | ID | Gate | Current evidence | Required closure evidence | Status |
 |---|---|---|---|---|
 | G-001 | Authoritative baseline | main is identifiable | Freeze repo + deployed revision + DB identity as one release baseline | OPEN |
-| G-002 | Database authority | Neon primary branch concretely identified; 1 database, 67 public tables, 92 applied migrations | Prove repository↔DB migration parity, runtime DB target, RLS/tenant isolation and non-bypass application access controls | **BLOCKING / OPEN** |
+| G-002 | Database authority | Neon primary branch identified; 1 database, 67 public tables, 92 applied production migrations; repo Drizzle journal has only 2 entries and production has no Drizzle ledger | Reconcile migration authority, verify runtime DB target, implement RLS/tenant isolation and non-bypass application access controls | **BLOCKING / FAIL / OPEN** |
 | G-003 | Production deployment | Vercel checks are green for recorded main commit | Verify live Cloud Run/container revision, env/secrets, health, rollback and runtime acceptance | OPEN |
 | G-004 | BM-T-011 | Engine/tests exist | Independent authoritative numerical reconciliation fixture and signed evidence | OPEN |
 | G-005 | BM-WA03.001 | Canonical adapter integrated | Complete methodology reconciliation, boundary conditions and authoritative reference evidence | OPEN |
@@ -62,6 +62,17 @@ Read-only Neon inspection of project `rupaykg-production-fresh` (`steep-mud-7990
 This evidence is recorded in `docs/RUPAYKG_LIVE_DATABASE_AUTHORITY_AUDIT_20261107.md`.
 
 **Implication:** the candidate authoritative DB is identified, but tenant isolation is not yet demonstrated. G-002 is therefore a blocking open gate. No production DB mutation was performed in this audit.
+
+## Migration-authority finding — 2026-11-07
+
+The inspected production database and current `main` repository do not presently share a demonstrated migration authority:
+
+- Production: `public.schema_migrations` = 92 rows, through `20261021`.
+- Repository: `drizzle/meta/_journal.json` = 2 entries (`0000...`, `0001...`).
+- Production: `drizzle.__drizzle_migrations` does not exist.
+- Repository migration executor: `scripts/migrate.ts` expects the Drizzle journal and `drizzle.__drizzle_migrations`.
+
+This is a **blocking release-baseline defect**. Do not apply new production migrations until the authoritative migration history is reconstructed/reconciled and exactly one migration authority is selected.
 
 ## Branch-only work requiring controlled disposition
 
