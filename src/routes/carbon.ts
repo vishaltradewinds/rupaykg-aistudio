@@ -287,7 +287,8 @@ for (const path of [
   '/carbon-rights',
   '/mrv-packages',
   '/acva-engagements',
-  '/urban'
+  '/urban',
+  '/pilot/issues'
 ]) {
   carbonRouter.use(path, legacyGlobalWorkflow);
 }
