@@ -265,6 +265,33 @@ carbonRouter.get('/projects/:id/activities/:activityId/mrv-observations', requir
 carbonRouter.get('/projects/:id/activities/:activityId/mrv-provenance', requireTenantContext, async (req,res)=>{try{const r=await listTenantMrvProvenance(req as TenantRequest,req.params.activityId);res.json(r||[]);}catch{res.status(503).json({error:'MRV provenance service unavailable'});}});
 carbonRouter.get('/projects/:id/activities/:activityId/evidence-artifacts', requireTenantContext, async (req,res)=>{try{const r=await listTenantEvidenceArtifacts(req as TenantRequest,req.params.activityId);res.json(r||[]);}catch{res.status(503).json({error:'Evidence artifact service unavailable'});}});
 
+// --- LEGACY GLOBAL WORKFLOW BOUNDARY ---
+// These namespaces still depend on repository-era/global DB models and have not yet
+// been reconciled to the live tenant-scoped schema. Fail closed rather than expose
+// cross-tenant reads or writes. Public informational routes remain outside this boundary.
+const legacyGlobalWorkflow = (_req: any, res: any) =>
+  res.status(409).json({
+    error: 'LEGACY_WORKFLOW_NOT_AUTHORITATIVE',
+    code: 'LEGACY_WORKFLOW_NOT_AUTHORITATIVE'
+  });
+
+for (const path of [
+  '/kathonda',
+  '/rural',
+  '/legal-entities',
+  '/icm',
+  '/programmes',
+  '/generic-cpas',
+  '/cpas',
+  '/monitoring-periods',
+  '/carbon-rights',
+  '/mrv-packages',
+  '/acva-engagements',
+  '/urban'
+]) {
+  carbonRouter.use(path, legacyGlobalWorkflow);
+}
+
 // --- LEGACY PHASE-5 WORKFLOW BOUNDARY ---
 // These repository-era workflow routes are retained as explicit fail-closed boundaries.
 // The authoritative live model is implemented through the MRV endpoints above.
