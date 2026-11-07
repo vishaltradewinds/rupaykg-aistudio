@@ -74,6 +74,16 @@ The inspected production database and current `main` repository do not presently
 
 This is a **blocking release-baseline defect**. Do not apply new production migrations until the authoritative migration history is reconstructed/reconciled and exactly one migration authority is selected.
 
+## Migration-authority reconstruction update — 2026-11-07
+
+Historical repository evidence has now been recovered from non-main branches and cleanup commits. The freeze branch `freeze/rupaykg-enterprise-3.0-post-consolidation-20260830` contains a three-entry Drizzle lineage (`0000_sloppy_misty_knight`, `0001_gcp_commercial_lifecycle_ledger`, `0002_environmental_credit_custody`) plus SQL/snapshot artifacts. The `feat/environmental-credit-depository` branch contains an older `0000_regular_cloak` lineage. Cleanup commits explicitly removed obsolete duplicate migration journals, trees and metadata.
+
+This proves the current two-entry `main` Drizzle journal is not a complete historical representation of the live 92-row production ledger. It does **not** recover the missing 001–096 production SQL sequence. The safe next step is controlled baseline reconstruction from the live schema plus preserved production ledger, with missing historical SQL explicitly inventoried rather than fabricated.
+
+Detailed evidence is recorded in `docs/MIGRATION_AUTHORITY_RECONSTRUCTION_20261107.md`.
+
+**G-002 remains BLOCKING / FAIL / OPEN. No production mutation has been performed.**
+
 ## Branch-only work requiring controlled disposition
 
 ### PR #16 — TRL + ICVCM
