@@ -144,79 +144,29 @@ carbonRouter.post('/projects/:id/activities/:activityId/calculations', requireTe
   }
 });
 
-// --- PHASE 5: INTAKE & ELIGIBILITY ENDPOINTS ---
+// --- LEGACY PHASE-5 WORKFLOW BOUNDARY ---
+// These repository-era workflow routes are retained as explicit fail-closed boundaries.
+// The authoritative live model is implemented through the MRV endpoints above.
+// No stale-schema/global-authorization write path is allowed to execute.
 
-carbonRouter.post('/projects/:id/intake', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /* legacy body intentionally disabled */
-/*
-  try {
-    const project = await db.select().from(carbon_projects).where(eq(carbon_projects.id, req.params.id));
-    if (!project.length) return res.status(404).json({ error: "Not found" });
-    if (project[0].ownerId && project[0].ownerId !== (req as any).user?.uid && !["super_admin"].includes((req as any).user?.role)) {
-      return res.status(403).json({ error: "Cross-tenant mutation denied" });
-    }
-    const result = await realProjectIntakeEngine.processIntake(req.params.id, req.body);
-    res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
+const legacyWorkflowWrite = (req: TenantRequest, res: any) => rejectLegacyWorkflow(req, res);
 
-carbonRouter.get('/projects/:id/intake', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const data = await db.select().from(project_intakes).where(eq(project_intakes.projectId, req.params.id)).orderBy(desc(project_intakes.createdAt)).limit(1);
-    if (!data.length) return res.status(404).json({ error: "No intake record found for this project." });
-    res.json(data[0]);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
+for (const path of [
+  '/projects/:id/intake',
+  '/projects/:id/real-eligibility',
+  '/projects/:id/ccts-submit',
+  '/certificates/:id/transition',
+  '/projects/:id/appoint-acva',
+  '/acva-cases/:id/action',
+  '/projects/:id/monitoring-report',
+  '/projects/:id/audit-package',
+  '/pilot/issues',
+  '/pilot/issues/:issueId/resolve'
+]) {
+  carbonRouter.post(path, requireTenantContext, legacyWorkflowWrite);
+}
 
-carbonRouter.post('/projects/:id/real-eligibility', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const assessment = await realProjectEligibilityEngine.evaluateRealProject(req.params.id);
-    res.json(assessment);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- PHASE 5: CCTS SUBMISSION GATEWAY ---
-
-carbonRouter.post('/projects/:id/ccts-submit', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const canProceed = await realProjectIntakeEngine.canProceedToCalculation(req.params.id);
-    if (!canProceed) {
-      return res.status(400).json({ error: "BLOCKED — Real project intake is incomplete. Cannot submit to CCTS gateway." });
-    }
-
-    const { submissionType, documents, monitoringPeriodId, acvaId } = req.body;
-    const result = await cctsSubmissionGateway.submitProject(
-      req.params.id,
-      submissionType || 'PROJECT_REGISTRATION',
-      documents || [],
-      monitoringPeriodId,
-      acvaId
-    );
-    res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- PHASE 5: CERTIFICATE STATE MACHINE ---
-
-carbonRouter.post('/certificates/:id/transition', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const { newState, officialCertificateIdentifier } = req.body;
-    const result = await certificateModel.transitionState(req.params.id, newState, officialCertificateIdentifier);
-    res.json(result);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// --- PHASE 5: ACVA REGISTRY & APPOINTMENT ---
-
+carbonRouter.get('/projects/:id/intake', requireTenantContext, legacyWorkflowWrite);
 carbonRouter.get('/acva-registry', async (req, res) => {
   try {
     const data = await acvaSelectionEngine.findAccreditedACVAs();
@@ -226,59 +176,11 @@ carbonRouter.get('/acva-registry', async (req, res) => {
   }
 });
 
-carbonRouter.post('/projects/:id/appoint-acva', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const { acvaRegistryId, selectionReason, conflictDeclared } = req.body;
-    const result = await acvaSelectionEngine.appointACVA(req.params.id, acvaRegistryId, selectionReason, conflictDeclared || false);
-    res.json(result);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-carbonRouter.post('/acva-cases/:id/action', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const { action, payload } = req.body;
-    const result = await acvaBackend.executeACVAAction(req.params.id, action, payload || {});
-    res.json(result);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// --- PHASE 5: MONITORING REPORT & AUDIT PACKAGE ---
-
-carbonRouter.post('/projects/:id/monitoring-report', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const { monitoringPeriodId, methodologyId, datasetId, calculationRunId, claimedTco2e, qaQcSummary } = req.body;
-    const report = await monitoringReportEngine.generateAndFreezeReport(
-      req.params.id, monitoringPeriodId, methodologyId, datasetId, calculationRunId, claimedTco2e, qaQcSummary || 'QA/QC Verified'
-    );
-    res.json(report);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-carbonRouter.post('/projects/:id/audit-package', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
-  try {
-    const pkg = await auditPackageGenerator.generatePackage(req.params.id, req.body.monitoringPeriodId, req.body.requestedBy);
-    res.json(pkg);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- PHASE 5: PUBLIC PROJECT DISCLOSURE ---
-
+// Public disclosure is informational only; it must not perform tenant-sensitive mutation.
 carbonRouter.get('/public/projects/:id', async (req, res) => {
   try {
     const data = await db.select().from(carbon_projects).where(eq(carbon_projects.id, req.params.id));
-    if (data.length && data[0].ownerId && data[0].ownerId !== (req as any).user?.uid && !["super_admin", "regulator", "auditor"].includes((req as any).user?.role)) {
-      return res.status(403).json({ error: "Cross-tenant access denied" });
-    }
     if (!data.length) return res.status(404).json({ error: "Public project record not found." });
-
     const proj = data[0];
     res.json({
       id: proj.id,
