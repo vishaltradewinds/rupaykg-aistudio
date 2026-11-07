@@ -54,6 +54,7 @@ import crypto from 'crypto';
 import { requireTenantContext, type TenantRequest } from '../security/tenantContext.ts';
 import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonProject, requireTenantCarbonProject } from '../security/tenantCarbonProject.ts';
 import { createProjectActivity, createProjectMeasurement, createProjectEvidence, createProjectCalculation } from '../security/tenantCarbonWorkflowWrites.ts';
+import { rejectLegacyWorkflow } from '../security/legacyWorkflowGate.ts';
 
 export const carbonRouter = Router();
 
@@ -145,7 +146,8 @@ carbonRouter.post('/projects/:id/activities/:activityId/calculations', requireTe
 
 // --- PHASE 5: INTAKE & ELIGIBILITY ENDPOINTS ---
 
-carbonRouter.post('/projects/:id/intake', async (req, res) => {
+carbonRouter.post('/projects/:id/intake', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /* legacy body intentionally disabled */
+/*
   try {
     const project = await db.select().from(carbon_projects).where(eq(carbon_projects.id, req.params.id));
     if (!project.length) return res.status(404).json({ error: "Not found" });
@@ -159,7 +161,7 @@ carbonRouter.post('/projects/:id/intake', async (req, res) => {
   }
 });
 
-carbonRouter.get('/projects/:id/intake', async (req, res) => {
+carbonRouter.get('/projects/:id/intake', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const data = await db.select().from(project_intakes).where(eq(project_intakes.projectId, req.params.id)).orderBy(desc(project_intakes.createdAt)).limit(1);
     if (!data.length) return res.status(404).json({ error: "No intake record found for this project." });
@@ -169,7 +171,7 @@ carbonRouter.get('/projects/:id/intake', async (req, res) => {
   }
 });
 
-carbonRouter.post('/projects/:id/real-eligibility', async (req, res) => {
+carbonRouter.post('/projects/:id/real-eligibility', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const assessment = await realProjectEligibilityEngine.evaluateRealProject(req.params.id);
     res.json(assessment);
@@ -180,7 +182,7 @@ carbonRouter.post('/projects/:id/real-eligibility', async (req, res) => {
 
 // --- PHASE 5: CCTS SUBMISSION GATEWAY ---
 
-carbonRouter.post('/projects/:id/ccts-submit', async (req, res) => {
+carbonRouter.post('/projects/:id/ccts-submit', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const canProceed = await realProjectIntakeEngine.canProceedToCalculation(req.params.id);
     if (!canProceed) {
@@ -203,7 +205,7 @@ carbonRouter.post('/projects/:id/ccts-submit', async (req, res) => {
 
 // --- PHASE 5: CERTIFICATE STATE MACHINE ---
 
-carbonRouter.post('/certificates/:id/transition', async (req, res) => {
+carbonRouter.post('/certificates/:id/transition', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const { newState, officialCertificateIdentifier } = req.body;
     const result = await certificateModel.transitionState(req.params.id, newState, officialCertificateIdentifier);
@@ -224,7 +226,7 @@ carbonRouter.get('/acva-registry', async (req, res) => {
   }
 });
 
-carbonRouter.post('/projects/:id/appoint-acva', async (req, res) => {
+carbonRouter.post('/projects/:id/appoint-acva', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const { acvaRegistryId, selectionReason, conflictDeclared } = req.body;
     const result = await acvaSelectionEngine.appointACVA(req.params.id, acvaRegistryId, selectionReason, conflictDeclared || false);
@@ -234,7 +236,7 @@ carbonRouter.post('/projects/:id/appoint-acva', async (req, res) => {
   }
 });
 
-carbonRouter.post('/acva-cases/:id/action', async (req, res) => {
+carbonRouter.post('/acva-cases/:id/action', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const { action, payload } = req.body;
     const result = await acvaBackend.executeACVAAction(req.params.id, action, payload || {});
@@ -246,7 +248,7 @@ carbonRouter.post('/acva-cases/:id/action', async (req, res) => {
 
 // --- PHASE 5: MONITORING REPORT & AUDIT PACKAGE ---
 
-carbonRouter.post('/projects/:id/monitoring-report', async (req, res) => {
+carbonRouter.post('/projects/:id/monitoring-report', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const { monitoringPeriodId, methodologyId, datasetId, calculationRunId, claimedTco2e, qaQcSummary } = req.body;
     const report = await monitoringReportEngine.generateAndFreezeReport(
@@ -258,7 +260,7 @@ carbonRouter.post('/projects/:id/monitoring-report', async (req, res) => {
   }
 });
 
-carbonRouter.post('/projects/:id/audit-package', async (req, res) => {
+carbonRouter.post('/projects/:id/audit-package', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const pkg = await auditPackageGenerator.generatePackage(req.params.id, req.body.monitoringPeriodId, req.body.requestedBy);
     res.json(pkg);
@@ -320,7 +322,7 @@ carbonRouter.get('/pilot/issues/:projectId', async (req, res) => {
   }
 });
 
-carbonRouter.post('/pilot/issues', async (req, res) => {
+carbonRouter.post('/pilot/issues', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const { projectId, issueType, title, description, impact, rootCause } = req.body;
     const result = await pilotIssueTracker.logIssue(projectId || 'RKG-JBP-WA03-001-001', {
@@ -332,7 +334,7 @@ carbonRouter.post('/pilot/issues', async (req, res) => {
   }
 });
 
-carbonRouter.post('/pilot/issues/:issueId/resolve', async (req, res) => {
+carbonRouter.post('/pilot/issues/:issueId/resolve', requireTenantContext, (req, res) => { return rejectLegacyWorkflow(req as TenantRequest, res); /*
   try {
     const { evidenceAccepted, resolutionTimeHours, acvaSatisfied, futureIntakeGuidanceUpdate } = req.body;
     const result = await pilotIssueTracker.resolveIssue(req.params.issueId, {
