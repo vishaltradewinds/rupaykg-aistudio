@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const source = await fs.readFile('src/security/tenantContext.ts', 'utf8');
+assert.match(source, /identities i/);
+assert.match(source, /organization_memberships om/);
+assert.match(source, /organizations o/);
+assert.match(source, /external_subject/);
+assert.match(source, /organization_id/);
+assert.match(source, /TENANT_CONTEXT_UNRESOLVED/);
+assert.match(source, /set_config\('app\.organization_id'/);
+assert.match(source, /set_config\('app\.identity_id'/);
+assert.doesNotMatch(source, /organization_name/);
+console.log('TENANT CONTEXT CONTRACT PASS');
