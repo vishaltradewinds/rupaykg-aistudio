@@ -22,6 +22,16 @@ export async function resolveTenantContext(req: Request): Promise<TenantContext 
   return { identityId: String(row.identity_id), organizationId: String(row.organization_id), membershipId: String(row.membership_id), roleId: String(row.role_id) };
 }
 
+export async function attachTenantContext(req: TenantRequest): Promise<TenantContext | null> {
+  try {
+    const context = await resolveTenantContext(req);
+    if (context) req.tenant = context;
+    return context;
+  } catch {
+    return null;
+  }
+}
+
 export async function requireTenantContext(req: TenantRequest, res: Response, next: NextFunction) {
   try {
     const context = await resolveTenantContext(req);
