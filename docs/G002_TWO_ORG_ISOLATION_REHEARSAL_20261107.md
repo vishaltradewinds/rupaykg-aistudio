@@ -1,43 +1,28 @@
 # G-002 Two-Organization Isolation Rehearsal — 2026-11-07
 
 ## Rehearsal branch
-Neon branch: `rupaykg-tenant-isolation-lab-20261101`.
+Neon: `rupaykg-tenant-isolation-lab-20261101`.
 
-## Changes applied
-RLS was enabled on the direct organization-scoped rehearsal tables:
-- activities
-- carbon_projects
-- cpcb_swm_stakeholder_workspaces
-- organization_epr_applicability
-- organization_bwg_assessments
-- bwg_reporting_periods
-- epr_returns
-- evidence_artifact_series
-- environmental_attribute_claims
-- credentials
-- registry_events
+## Direct organization isolation
+RLS and tenant CRUD policies are enabled for direct organization-scoped tables including activities, carbon projects, CPCB/SWM, EPR, BWG, evidence artifact series, claims, credentials and registry events.
 
-The dedicated `rupaykg_app_runtime` role is NOBYPASSRLS/non-admin. Tenant CRUD policies were added for direct organization-owned tables. Credentials are scoped by `issuer_organization_id`. Registry events are intentionally bilateral: visibility is based on `from_owner_id` or `to_owner_id`, while creation requires the current organization to be the originating owner.
+## Child MRV lineage isolation
+RLS was additionally enabled on:
+- measurements
+- evidence
+- evidence_artifact_versions
+- mrv_observations
+- mrv_provenance_events
+- carbon_calculations
+- verifications
 
-## A/B fixture
-The branch contains:
-- Org A: `11111111-1111-4111-8111-111111111111`
-- Org B: `22222222-2222-4222-8222-222222222222`
+Child policies resolve authorization through the parent `activities.organization_id`. This prevents a tenant from reaching another tenant's measurement/evidence/MRV/calculation/verification rows merely because the child row itself has no organization_id.
 
-Temporary activity fixtures were created and removed after rehearsal preparation.
+## Important boundary
+`credentials` remains issuer-organization scoped. `registry_events` remains deliberately bilateral and must be governed separately from ordinary tenant CRUD.
 
-## Executable evidence
-`tests/g002_two_org_runtime_isolation_test.ts` performs the actual A/B read-isolation test when executed with `G002_RUNTIME_DATABASE_URL` pointing to the dedicated NOBYPASSRLS runtime connection. The test runs inside a transaction and rolls back its fixtures.
+## Evidence
+The rehearsal database inspection confirms RLS + four CRUD policies on the seven child tables above. The actual A/B runtime test still requires execution through the dedicated NOBYPASSRLS runtime connection; the administrative Neon SQL connection cannot provide valid runtime-isolation evidence.
 
-## Current result
-Database inspection confirms RLS is enabled and G-002 policies exist:
-- 10 direct-org tables: 4 CRUD policies each.
-- registry_events: 2 explicit bilateral policies.
-- credentials: 4 issuer-organization policies.
-
-The runtime A/B test has **not been executed from this ChatGPT session**, because the available Neon SQL connection is the administrative BYPASSRLS connection and cannot substitute for the dedicated runtime identity. Therefore G-002 is **not marked PASS**.
-
-## Production boundary
-No production/main branch schema or role mutation was performed.
-
-Next gate: execute the runtime test against the dedicated NOBYPASSRLS connection, then extend the same policy model to child/relationship tables and perform the full two-organization MRV lineage test before any production RLS change.
+## Production gate
+No production/main branch mutation was performed. G-002 remains OPEN until runtime A/B evidence and the remaining relationship/cross-tenant authorization tests are executed and recorded.
