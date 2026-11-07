@@ -36,3 +36,12 @@ This is application-layer enforcement only. Production RLS remains disabled and 
 Convert the project child workflow services (intake, eligibility, CCTS submission, monitoring, audit package and pilot issues) so their database work executes inside the same authoritative tenant transaction boundary. Then run two-organization A/B rehearsal tests. Cross-organization transaction tables require bilateral authorization semantics and must not be covered by a simplistic `organization_id = current_organization_id()` policy.
 
 Production database and roles remain unchanged.
+
+
+## Live workflow-schema reconciliation — 2026-11-07
+
+Read-only production inspection established that the legacy Phase-5 workflow tables (`project_intakes`, `ccts_submissions`, `monitoring_reports`, `audit_packages`, `pilot_issues`) are absent from the authoritative Neon database. The live model instead uses organization-scoped primitives including `activities`, `measurements`, `evidence`, `evidence_artifact_series`, `evidence_artifact_versions`, `verifications`, `carbon_calculations`, `environmental_attribute_claims`, `credentials`, `registry_events`, and CPCB/SWM workspace/reporting structures.
+
+A live-schema tenant workflow adapter was added for project scope, activities, evidence and carbon calculations. It verifies the parent `carbon_projects.organization_id` and requires transaction-local tenant context. This is an application-layer step only; production RLS/roles/schema remain unchanged.
+
+P0 Issue #24 remains open for full workflow replacement mapping and write-path conversion.
