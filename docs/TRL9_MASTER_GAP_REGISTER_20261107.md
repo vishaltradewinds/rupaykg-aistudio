@@ -23,7 +23,7 @@ Engineering maturity is materially advanced, but TRL 9 requires evidence across 
 | ID | Gate | Current evidence | Required closure evidence | Status |
 |---|---|---|---|---|
 | G-001 | Authoritative baseline | main is identifiable | Freeze repo + deployed revision + DB identity as one release baseline | OPEN |
-| G-002 | Database authority | PostgreSQL/Drizzle architecture exists | Prove one authoritative live DB, migration parity, RLS/tenant isolation and production access controls | OPEN |
+| G-002 | Database authority | Neon primary branch concretely identified; 1 database, 67 public tables, 92 applied migrations | Prove repository↔DB migration parity, runtime DB target, RLS/tenant isolation and non-bypass application access controls | **BLOCKING / OPEN** |
 | G-003 | Production deployment | Vercel checks are green for recorded main commit | Verify live Cloud Run/container revision, env/secrets, health, rollback and runtime acceptance | OPEN |
 | G-004 | BM-T-011 | Engine/tests exist | Independent authoritative numerical reconciliation fixture and signed evidence | OPEN |
 | G-005 | BM-WA03.001 | Canonical adapter integrated | Complete methodology reconciliation, boundary conditions and authoritative reference evidence | OPEN |
@@ -46,6 +46,22 @@ Engineering maturity is materially advanced, but TRL 9 requires evidence across 
 | G-022 | Operational resilience | Fail-closed and persistence tests exist | Prove backup/restore, restart survival, offline/replay behavior and incident recovery in deployed environment | OPEN |
 | G-023 | Independent assurance | Internal engineering evidence exists | Independent validation/verification of relevant carbon claims and field evidence | OPEN |
 | G-024 | Production certification | No platform-wide certification established | Formal release gate showing all mandatory engineering + operational + regulatory evidence closed | OPEN |
+
+## Live database evidence — 2026-11-07
+
+Read-only Neon inspection of project `rupaykg-production-fresh` (`steep-mud-79906940`), primary branch `main` (`br-restless-base-b44cip2h`), database `rupaykg`:
+
+- One PostgreSQL database is present on the primary branch.
+- 67 public tables are present.
+- `schema_migrations` contains 92 applied migrations, through version `20261021`.
+- 0 public PostgreSQL RLS policies are present.
+- All 67 inspected public tables report `rls_enabled = false` and `rls_forced = false`.
+- The `rupaykg` database role reports `rolbypassrls = true`, plus role-creation/database-creation privileges.
+- Multiple rehearsal/lab Neon branches exist, but they are not treated as production authority.
+
+This evidence is recorded in `docs/RUPAYKG_LIVE_DATABASE_AUTHORITY_AUDIT_20261107.md`.
+
+**Implication:** the candidate authoritative DB is identified, but tenant isolation is not yet demonstrated. G-002 is therefore a blocking open gate. No production DB mutation was performed in this audit.
 
 ## Branch-only work requiring controlled disposition
 
