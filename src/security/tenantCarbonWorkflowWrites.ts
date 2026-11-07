@@ -34,10 +34,7 @@ export async function createProjectMeasurement(req: TenantRequest, projectId: st
       SELECT a.id FROM public.activities a
       WHERE a.id = ${activityId}::uuid
         AND a.organization_id = ${tenant.organizationId}::uuid
-        AND EXISTS (
-          SELECT 1 FROM public.carbon_calculations cc
-          WHERE cc.activity_id = a.id AND cc.carbon_project_id = ${projectId}::uuid
-        )
+        AND a.metadata->>'carbonProjectId' = ${projectId}
       LIMIT 1
     `);
     if (activity.length !== 1) return null;
@@ -65,10 +62,7 @@ export async function createProjectEvidence(req: TenantRequest, projectId: strin
       SELECT a.id FROM public.activities a
       WHERE a.id = ${activityId}::uuid
         AND a.organization_id = ${tenant.organizationId}::uuid
-        AND EXISTS (
-          SELECT 1 FROM public.carbon_calculations cc
-          WHERE cc.activity_id = a.id AND cc.carbon_project_id = ${projectId}::uuid
-        )
+        AND a.metadata->>'carbonProjectId' = ${projectId}
       LIMIT 1
     `);
     if (activity.length !== 1) return null;
@@ -96,6 +90,7 @@ export async function createProjectCalculation(req: TenantRequest, projectId: st
       SELECT a.id FROM public.activities a
       WHERE a.id = ${activityId}::uuid
         AND a.organization_id = ${tenant.organizationId}::uuid
+        AND a.metadata->>'carbonProjectId' = ${projectId}
       LIMIT 1
     `);
     if (activity.length !== 1) return null;
