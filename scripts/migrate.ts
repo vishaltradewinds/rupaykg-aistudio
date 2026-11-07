@@ -65,6 +65,9 @@ async function runMigrations() {
     if (customLedgerExists && !drizzleLedgerExists) {
       throw new Error("MIGRATION AUTHORITY BLOCKED: public.schema_migrations exists but drizzle.__drizzle_migrations is absent. Reconcile migration history before running Drizzle migrations.");
     }
+    if (customLedgerExists && process.env.MIGRATION_AUTHORITY_RECONCILED !== 'true') {
+      throw new Error("MIGRATION AUTHORITY BLOCKED: public.schema_migrations is present. Set MIGRATION_AUTHORITY_RECONCILED=true only after the authoritative production migration history has been reconciled and CI parity evidence is recorded.");
+    }
 
     await client.query(`CREATE SCHEMA IF NOT EXISTS drizzle;`);
     await client.query(`
