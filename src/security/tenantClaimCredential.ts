@@ -20,10 +20,17 @@ export async function createTenantClaim(req: TenantRequest, input: any) {
     `);
     if (activity.length !== 1) return null;
     const verification = input.verificationId ? await tx.execute(sql`
-      SELECT id FROM public.verifications
-      WHERE id = ${String(input.verificationId)}::uuid AND activity_id = ${String(input.activityId)}::uuid
-        AND verifier_identity_id IN (
-          SELECT id FROM public.identities WHERE id = verifier_identity_id
+      SELECT v.id
+      FROM public.verifications v
+      JOIN public.activities a ON a.id = v.activity_id
+      WHERE v.id = ${String(input.verificationId)}::uuid
+        AND v.activity_id = ${String(input.activityId)}::uuid
+        AND a.organization_id = ${tenant.organizationId}::uuid
+        AND a.metadata->>'carbonProjectId' IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM public.carbon_projects cp
+          WHERE cp.id::text = a.metadata->>'carbonProjectId'
+            AND cp.organization_id = ${tenant.organizationId}::uuid
         )
       LIMIT 1
     `) : [];
@@ -69,10 +76,9 @@ export async function createTenantCredential(req: TenantRequest, input: any) {
       WHERE id = ${String(input.activityId)}::uuid
         AND organization_id = ${tenant.organizationId}::uuid
         AND metadata->>'carbonProjectId' IS NOT NULL
-        AND EXISTS (
-          SELECT 1 FROM public.carbon_projects cp
-          WHERE cp.id::text = metadata->>'carbonProjectId'
-            AND cp.organization_id = ${tenant.organizationId}::uuid
+        AND metadata->>'carbonProjectId' = ANY (
+          SELECT cp.id::text FROM public.carbon_projects cp
+          WHERE cp.organization_id = ${tenant.organizationId}::uuid
         )
       LIMIT 1
     `);
