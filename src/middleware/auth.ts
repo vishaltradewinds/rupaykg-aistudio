@@ -6,6 +6,7 @@ import { adminAuth } from '../lib/firebase-admin.ts';
 import { getUser } from '../db/users.ts';
 import { getRedisClient, isRedisConnected } from '../lib/redis.ts';
 import { getPermissionsForRole, hasPermission, isKnownRole, Permission } from './rbac.ts';
+import { attachTenantContext } from '../security/tenantContext.ts';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -125,7 +126,7 @@ export const auth = (roles: string[] = []) => {
       exp: decodedPayload.exp
     };
 
-    if (roles.length > 0 && !roles.includes(role)) return res.status(403).json({ error: 'Insufficient permissions for this stakeholder role', requiresRegistration: false });
+    // Tenant context is attached opportunistically during migration. It is not an authorization decision here; tenant-scoped routes must call requireTenantContext.\n    await attachTenantContext(req);\n\n    if (roles.length > 0 && !roles.includes(role)) return res.status(403).json({ error: 'Insufficient permissions for this stakeholder role', requiresRegistration: false });
     if (!enforceRequestPermission(req, res)) return;
     next();
   };
