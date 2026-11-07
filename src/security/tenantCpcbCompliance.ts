@@ -1,0 +1,84 @@
+import { sql } from 'drizzle-orm';
+import type { TenantRequest } from './tenantContext.ts';
+import { withTenantTransaction } from './tenantContext.ts';
+
+export async function listTenantCpcbWorkspaces(req: TenantRequest) {
+  const tenant=req.tenant; if(!tenant) return null;
+  return withTenantTransaction(tenant, async tx => tx.execute(sql`
+    SELECT w.* FROM public.cpcb_swm_stakeholder_workspaces w
+    WHERE w.organization_id=${tenant.organizationId}::uuid
+    ORDER BY w.updated_at DESC
+  `));
+}
+export async function createTenantCpcbWorkspace(req: TenantRequest,input:any) {
+  const tenant=req.tenant; if(!tenant) return null;
+  return withTenantTransaction(tenant, async tx => {
+    const r=await tx.execute(sql`
+      INSERT INTO public.cpcb_swm_stakeholder_workspaces
+      (organization_id,geography_id,stakeholder_type,title,eligibility_observations,checklist,
+       cpcb_application_reference,cpcb_status_claim,cpcb_status_source_reference,
+       cpcb_status_reference_recorded_at,due_date,notes,created_by_identity_id,updated_by_identity_id,
+       local_workflow_stage,cpcb_status_note,cpcb_reported_status)
+      VALUES
+      (${tenant.organizationId}::uuid,${input.geographyId||null}::uuid,${String(input.stakeholderType)},
+       ${String(input.title)},${JSON.stringify(input.eligibilityObservations||{})}::jsonb,
+       ${JSON.stringify(input.checklist||[])}::jsonb,${input.cpcbApplicationReference||null},
+       ${String(input.cpcbStatusClaim||'USER_REPORTED_UNVERIFIED')},
+       ${input.cpcbStatusSourceReference||null},
+       ${input.cpcbStatusReferenceRecordedAt?new Date(input.cpcbStatusReferenceRecordedAt):null},
+       ${input.dueDate||null}::date,${input.notes||null},${tenant.identityId}::uuid,${tenant.identityId}::uuid,
+       ${String(input.localWorkflowStage||'LOCAL_PREPARATION')},
+       ${input.cpcbStatusNote||null},${String(input.cpcbReportedStatus||'NOT_REPORTED')})
+      RETURNING *
+    `); return r[0]||null;
+  });
+}
+export async function recordCpcbStatus(req: TenantRequest,workspaceId:string,input:any){
+ const tenant=req.tenant;if(!tenant)return null;
+ return withTenantTransaction(tenant,async tx=>{
+  const w=await tx.execute(sql`SELECT id,cpcb_reported_status FROM public.cpcb_swm_stakeholder_workspaces WHERE id=${workspaceId}::uuid AND organization_id=${tenant.organizationId}::uuid LIMIT 1`);
+  if(w.length!==1)return null;
+  await tx.execute(sql`UPDATE public.cpcb_swm_stakeholder_workspaces SET cpcb_reported_status=${String(input.reportedStatus)},cpcb_status_source_reference=${input.sourceReference||null},cpcb_status_note=${input.statusNote||null},updated_by_identity_id=${tenant.identityId}::uuid,updated_at=now() WHERE id=${workspaceId}::uuid AND organization_id=${tenant.organizationId}::uuid`);
+  const r=await tx.execute(sql`INSERT INTO public.cpcb_swm_status_history (workspace_id,organization_id,previous_reported_status,reported_status,source_reference,status_note,actor_identity_id) VALUES (${workspaceId}::uuid,${tenant.organizationId}::uuid,${String((w[0] as any).cpcb_reported_status)},${String(input.reportedStatus)},${input.sourceReference||null},${input.statusNote||null},${tenant.identityId}::uuid) RETURNING *`);
+  return r[0]||null;
+ });
+}
+export async function listTenantEprApplicability(req:TenantRequest){
+ const tenant=req.tenant;if(!tenant)return null;
+ return withTenantTransaction(tenant,async tx=>tx.execute(sql`SELECT * FROM public.organization_epr_applicability WHERE organization_id=${tenant.organizationId}::uuid ORDER BY created_at DESC`));
+}
+export async function upsertTenantEprApplicability(req:TenantRequest,input:any){
+ const tenant=req.tenant;if(!tenant)return null;
+ return withTenantTransaction(tenant,async tx=>{
+  const r=await tx.execute(sql`
+   INSERT INTO public.organization_epr_applicability
+   (organization_id,scheme,rule_reference,applicability_status,basis,cpcb_registration_status,cpcb_registration_reference,
+    evidence_id,verification_id,determination_note,determined_by_identity_id,determined_at,registration_evidence_id,registration_verification_id,registration_recorded_at)
+   VALUES (${tenant.organizationId}::uuid,${String(input.scheme)},${input.ruleReference||null},${String(input.applicabilityStatus||'UNKNOWN')},
+   ${JSON.stringify(input.basis||{})}::jsonb,${String(input.cpcbRegistrationStatus||'NOT_ASSERTED')},${input.cpcbRegistrationReference||null},
+   ${input.evidenceId||null}::uuid,${input.verificationId||null}::uuid,${input.determinationNote||null},
+   ${tenant.identityId}::uuid,${input.determinedAt?new Date(input.determinedAt):new Date()},
+   ${input.registrationEvidenceId||null}::uuid,${input.registrationVerificationId||null}::uuid,
+   ${input.registrationRecordedAt?new Date(input.registrationRecordedAt):null}) RETURNING *`);return r[0]||null;
+ });
+}
+export async function listTenantBwgAssessments(req:TenantRequest){
+ const tenant=req.tenant;if(!tenant)return null;
+ return withTenantTransaction(tenant,async tx=>tx.execute(sql`SELECT * FROM public.organization_bwg_assessments WHERE organization_id=${tenant.organizationId}::uuid ORDER BY assessment_date DESC,created_at DESC`));
+}
+export async function createTenantBwgAssessment(req:TenantRequest,input:any){
+ const tenant=req.tenant;if(!tenant)return null;
+ return withTenantTransaction(tenant,async tx=>{
+  const r=await tx.execute(sql`
+   INSERT INTO public.organization_bwg_assessments
+   (organization_id,assessment_date,floor_area_sq_m,water_consumption_lpd,solid_waste_kgpd,
+    floor_area_threshold_sq_m,water_threshold_lpd,waste_threshold_kgpd,threshold_basis,
+    applicability_status,evidence_id,verification_id,determination_note,determined_by_identity_id,determined_at)
+   VALUES (${tenant.organizationId}::uuid,${input.assessmentDate||new Date().toISOString().slice(0,10)}::date,
+   ${input.floorAreaSqM??null},${input.waterConsumptionLpd??null},${input.solidWasteKgpd??null},
+   ${input.floorAreaThresholdSqM??20000},${input.waterThresholdLpd??40000},${input.wasteThresholdKgpd??100},
+   ${String(input.thresholdBasis||'SWM_RULES_2026_S_O_388_E')},${String(input.applicabilityStatus||'UNKNOWN')},
+   ${input.evidenceId||null}::uuid,${input.verificationId||null}::uuid,${input.determinationNote||null},
+   ${tenant.identityId}::uuid,${input.determinedAt?new Date(input.determinedAt):new Date()}) RETURNING *`);return r[0]||null;
+ });
+}
