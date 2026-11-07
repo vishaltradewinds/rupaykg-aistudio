@@ -56,7 +56,7 @@ import { listTenantCarbonProjects, createTenantCarbonProject, getTenantCarbonPro
 import { createProjectActivity, createProjectMeasurement, createProjectEvidence, createProjectCalculation } from '../security/tenantCarbonWorkflowWrites.ts';
 import { rejectLegacyWorkflow } from '../security/legacyWorkflowGate.ts';
 import { createTenantVerification, listTenantVerifications } from '../security/tenantVerification.ts';
-import { listTenantCpcbWorkspaces, createTenantCpcbWorkspace, recordCpcbStatus, listTenantEprApplicability, upsertTenantEprApplicability, listTenantBwgAssessments, createTenantBwgAssessment, listTenantBwgReportingPeriods, createTenantBwgReportingPeriod, listTenantEprReturns, createTenantEprReturn } from '../security/tenantCpcbCompliance.ts';
+import { listTenantCpcbWorkspaces, createTenantCpcbWorkspace, recordCpcbStatus, listTenantEprApplicability, upsertTenantEprApplicability, listTenantBwgAssessments, createTenantBwgAssessment, listTenantBwgReportingPeriods, createTenantBwgReportingPeriod, listTenantEprReturns, createTenantEprReturn, listTenantEvidenceRequirements, listTenantMrvObservations, listTenantMrvProvenance, listTenantEvidenceArtifacts, listTenantAuditEvents } from '../security/tenantCpcbCompliance.ts';
 import { createTenantClaim, listTenantClaims, createTenantCredential, listTenantCredentials } from '../security/tenantClaimCredential.ts';
 import { createTenantRegistryEvent, listTenantRegistryEvents } from '../security/tenantRegistryEvent.ts';
 
@@ -258,6 +258,12 @@ carbonRouter.get('/compliance/bwg/reporting-periods', requireTenantContext, asyn
 carbonRouter.post('/compliance/bwg/reporting-periods', requireTenantContext, async (req,res)=>{try{const r=await createTenantBwgReportingPeriod(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}});
 carbonRouter.get('/compliance/epr/returns', requireTenantContext, async (req,res)=>{try{res.json(await listTenantEprReturns(req as TenantRequest));}catch{res.status(503).json({error:'EPR return service unavailable'});}});
 carbonRouter.post('/compliance/epr/returns', requireTenantContext, async (req,res)=>{try{const r=await createTenantEprReturn(req as TenantRequest,req.body||{});if(!r)return res.status(403).json({error:'Tenant context required'});res.status(201).json(r);}catch(err:any){res.status(400).json({error:String(err?.message||err)});}});
+
+carbonRouter.get('/compliance/assurance/audit-events', requireTenantContext, async (req,res)=>{try{res.json(await listTenantAuditEvents(req as TenantRequest));}catch{res.status(503).json({error:'Audit service unavailable'});}});
+carbonRouter.get('/projects/:id/activities/:activityId/evidence-requirements', requireTenantContext, async (req,res)=>{try{const r=await listTenantEvidenceRequirements(req as TenantRequest,req.params.activityId);res.json(r||[]);}catch{res.status(503).json({error:'Evidence requirements service unavailable'});}});
+carbonRouter.get('/projects/:id/activities/:activityId/mrv-observations', requireTenantContext, async (req,res)=>{try{const r=await listTenantMrvObservations(req as TenantRequest,req.params.activityId);res.json(r||[]);}catch{res.status(503).json({error:'MRV observations service unavailable'});}});
+carbonRouter.get('/projects/:id/activities/:activityId/mrv-provenance', requireTenantContext, async (req,res)=>{try{const r=await listTenantMrvProvenance(req as TenantRequest,req.params.activityId);res.json(r||[]);}catch{res.status(503).json({error:'MRV provenance service unavailable'});}});
+carbonRouter.get('/projects/:id/activities/:activityId/evidence-artifacts', requireTenantContext, async (req,res)=>{try{const r=await listTenantEvidenceArtifacts(req as TenantRequest,req.params.activityId);res.json(r||[]);}catch{res.status(503).json({error:'Evidence artifact service unavailable'});}});
 
 // --- LEGACY PHASE-5 WORKFLOW BOUNDARY ---
 // These repository-era workflow routes are retained as explicit fail-closed boundaries.
