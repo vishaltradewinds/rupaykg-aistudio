@@ -7,3 +7,10 @@ for (const path of ['/projects/:id/intake','/projects/:id/ccts-submit','/project
 }
 if (!routes.includes('rejectLegacyWorkflow')) throw new Error('carbon routes not wired to legacy workflow gate');
 console.log('PASS legacy workflow fail-closed contract');
+
+const routes = await Bun.file('src/routes/carbon.ts').text();
+for (const path of ['/kathonda', '/rural', '/legal-entities', '/icm', '/programmes', '/generic-cpas', '/cpas', '/monitoring-periods', '/carbon-rights', '/mrv-packages', '/acva-engagements', '/urban']) {
+  if (!routes.includes(path)) throw new Error('missing legacy global boundary: ' + path);
+}
+if (!routes.includes('LEGACY_WORKFLOW_NOT_AUTHORITATIVE')) throw new Error('legacy global boundary missing');
+console.log('PASS legacy global carbon namespaces fail closed');
