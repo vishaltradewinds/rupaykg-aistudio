@@ -1,27 +1,47 @@
-# G-002 Legacy Workflow Fail-Closed Boundary — 2026-11-07
+# G-002 Legacy Global Workflow Fail-Closed Boundary — 2026-11-07
 
-The repository still contains Phase-5 route/service/table definitions that do not match the authoritative live Neon workflow schema.
+## Decision
 
-This batch prevents those legacy project workflow endpoints from performing global or stale-schema writes while the live replacement is being completed.
+Repository-era global carbon namespaces that have not yet been reconciled to the live tenant-scoped Neon schema are now explicitly fail-closed at the router boundary.
 
-## Disabled legacy write surfaces
+Blocked namespaces:
+- /kathonda
+- /rural
+- /legal-entities
+- /icm
+- /programmes
+- /generic-cpas
+- /cpas
+- /monitoring-periods
+- /carbon-rights
+- /mrv-packages
+- /acva-engagements
+- /urban
+- /pilot/issues
 
-- project intake
-- CCTS submission
-- monitoring report
-- audit package
-- pilot issue creation/resolution
+## Reason
 
-They now fail closed with `LEGACY_WORKFLOW_NOT_AUTHORITATIVE` after tenant context is established.
+The live production database and ORM are not yet schema-equivalent for these legacy surfaces. Allowing global queries or writes to continue would create a cross-tenant authorization and data-lineage risk.
 
-## Authoritative replacement direction
+The response is deterministic:
+`409 LEGACY_WORKFLOW_NOT_AUTHORITATIVE`
 
-Use the live lineage:
+This is a containment control, not a claim that the underlying capability is complete.
 
-Organization -> Carbon Project -> Activity -> Measurement/Evidence -> Carbon Calculation -> Verification -> Environmental Attribute Claim / Credential / Registry Event.
+## Still allowed
 
-No compatibility tables are created and no production database mutation is performed.
+Public/informational surfaces that do not expose tenant-private records remain outside this boundary, including the public project summary and methodology calculation/reconciliation exposure.
 
-## Gate status
+## Next conversion target
 
-G-002 remains BLOCKING / FAIL / OPEN until live-schema ORM reconciliation, remaining workflow conversion, two-organization A/B isolation rehearsal, migration-authority reconciliation, and runtime NOBYPASSRLS proof are complete.
+Replace each blocked namespace with a live-schema adapter only after:
+1. live schema/FK reconciliation,
+2. tenant authorization design,
+3. two-organization rehearsal,
+4. contract/regression test,
+5. runtime NOBYPASSRLS proof,
+6. production deployment evidence.
+
+No production database mutation was performed by this change.
+
+G-002 remains BLOCKING / FAIL / OPEN.
