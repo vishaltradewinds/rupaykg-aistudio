@@ -112,6 +112,9 @@ export class CredentialService {
     if (!privateKeyEnv || privateKeyEnv.trim().length <= 30 || privateKeyEnv.includes('placeholder')) {
       throw new Error('VC_ISSUER_PRIVATE_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.');
     }
+    if (!publicKeyEnv || publicKeyEnv.trim().length <= 30 || publicKeyEnv.includes('placeholder')) {
+      throw new Error('VC_ISSUER_PUBLIC_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.');
+    }
     if (issuer.id !== this.DEFAULT_ISSUER_DID) throw new Error('Untrusted VC issuer DID. Credential issuance is bound to the configured VC_ISSUER_DID.');
 
     const credentialId = `urn:uuid:${crypto.randomUUID()}`;
@@ -128,6 +131,16 @@ export class CredentialService {
     const integrityHash = this.computeIntegrityHash(vcPayloadWithoutProof);
     const canonicalData = this.canonicalize(vcPayloadWithoutProof);
     const privateKey = crypto.createPrivateKey(privateKeyEnv);
+    const trustedPublicKey = crypto.createPublicKey(publicKeyEnv);
+    if (privateKey.asymmetricKeyType !== trustedPublicKey.asymmetricKeyType) {
+      throw new Error('VC issuer key mismatch: configured private/public keys use different algorithms.');
+    }
+    const derivedPublicKey = crypto.createPublicKey(privateKey);
+    const derivedPublicKeySpki = derivedPublicKey.export({ type: 'spki', format: 'der' });
+    const trustedPublicKeySpki = trustedPublicKey.export({ type: 'spki', format: 'der' });
+    if (!Buffer.from(derivedPublicKeySpki).equals(Buffer.from(trustedPublicKeySpki))) {
+      throw new Error('VC issuer key mismatch: configured public key does not correspond to VC_ISSUER_PRIVATE_KEY.');
+    }
     let signatureValue: string;
     let proofType: 'ED25519_SIGNATURE_2020' | 'JSON_WEB_SIGNATURE_2020' = 'ED25519_SIGNATURE_2020';
     if (privateKey.asymmetricKeyType === 'ed25519') {
@@ -166,9 +179,17 @@ export class CredentialService {
     };
 
     const privateKeyEnv = process.env.VC_ISSUER_PRIVATE_KEY;
+    const publicKeyEnv = process.env.VC_ISSUER_PUBLIC_KEY;
     if (!privateKeyEnv || privateKeyEnv.trim().length <= 30 || privateKeyEnv.includes('placeholder')) throw new Error('VC_ISSUER_PRIVATE_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.');
+    if (!publicKeyEnv || publicKeyEnv.trim().length <= 30 || publicKeyEnv.includes('placeholder')) throw new Error('VC_ISSUER_PUBLIC_KEY is missing or invalid in server runtime environment. W3C Verifiable Credential issuance failed closed.');
     const canonicalData = this.canonicalize(vcPayloadWithoutProof);
     const privateKey = crypto.createPrivateKey(privateKeyEnv);
+    const trustedPublicKey = crypto.createPublicKey(publicKeyEnv);
+    if (privateKey.asymmetricKeyType !== trustedPublicKey.asymmetricKeyType) throw new Error('VC issuer key mismatch: configured private/public keys use different algorithms.');
+    const derivedPublicKey = crypto.createPublicKey(privateKey);
+    const derivedPublicKeySpki = derivedPublicKey.export({ type: 'spki', format: 'der' });
+    const trustedPublicKeySpki = trustedPublicKey.export({ type: 'spki', format: 'der' });
+    if (!Buffer.from(derivedPublicKeySpki).equals(Buffer.from(trustedPublicKeySpki))) throw new Error('VC issuer key mismatch: configured public key does not correspond to VC_ISSUER_PRIVATE_KEY.');
     let signatureValue: string;
     let proofType = 'Ed25519Signature2020';
     if (privateKey.asymmetricKeyType === 'ed25519') {
