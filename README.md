@@ -153,3 +153,9 @@ RupayKg is engineered as an **environmental operating system composed of interop
 Individual deployments are controlled implementations of the canonical platform, combining reusable capabilities with deployment-specific regulatory profiles, site evidence, measurements, adapters, integrations and operational configuration. Architecture completion is not itself TRL 9; engineering, field, operational, regulatory and production acceptance remain separately evidenced.
 
 See the canonical architecture and deployment rules in docs/RUPAYKG_ENVIRONMENTAL_OPERATING_SYSTEM_ARCHITECTURE.md.
+
+
+### Shakti and assurance controls
+
+- `docs/SHAKTI_STANDARDS_EXTERNAL_REFERENCE_ECOSYSTEM.md` — controlled use of UNIN, FAIR Forward/BMZ, DPGA, Global DPI Repository and relevant Indian DPI ecosystems.
+- `docs/RUPAYKG_ENVIRONMENTAL_OPERATING_SYSTEM_CONTROL_MATRIX.md` — layer-by-layer engineering, evidence, acceptance and TRL control register.
