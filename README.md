@@ -142,3 +142,14 @@ The remaining external gates are:
 - Production Cloud Run + Secret Manager verification
 
 These should be completed only after the repository/build is frozen and the required production credentials and hardware are provisioned securely.
+
+
+## Canonical Environmental Operating System Architecture
+
+RupayKg is engineered as an **environmental operating system composed of interoperable capabilities**, rather than a collection of independent project applications.
+
+**Regulatory → Evidence → MRV → IoT / Measurement → Data → AI → Registry / Integrity → Workflow → Reporting → Ecosystem Integrations**
+
+Individual deployments are controlled implementations of the canonical platform, combining reusable capabilities with deployment-specific regulatory profiles, site evidence, measurements, adapters, integrations and operational configuration. Architecture completion is not itself TRL 9; engineering, field, operational, regulatory and production acceptance remain separately evidenced.
+
+See the canonical architecture and deployment rules in docs/RUPAYKG_ENVIRONMENTAL_OPERATING_SYSTEM_ARCHITECTURE.md.
