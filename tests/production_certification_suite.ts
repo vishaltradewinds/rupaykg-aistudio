@@ -128,13 +128,31 @@ async function runProductionCertification() {
 
   // 2. W3C Verifiable Credentials Test & Tamper Resistance
   try {
-    if (!process.env.VC_ISSUER_PRIVATE_KEY) {
-      const keyPair = crypto.generateKeyPairSync('ed25519');
-      process.env.VC_ISSUER_PRIVATE_KEY = keyPair.privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
-      process.env.VC_ISSUER_PUBLIC_KEY = keyPair.publicKey.export({ type: 'spki', format: 'pem' }) as string;
-    }
-
-    const subject = {
+    // Production certification must never generate an ephemeral issuer key.
+    // Missing production trust material is an acceptance failure, not a test fixture condition.
+    if (!process.env.VC_ISSUER_PRIVATE_KEY || !process.env.VC_ISSUER_PUBLIC_KEY) {
+      recordTest(
+        'CERT-VC-01',
+        'W3C VC Production Trust Boundary',
+        'Verify production VC certification does not substitute generated test keys for configured issuer trust material',
+        'Run certification without VC_ISSUER_PRIVATE_KEY / VC_ISSUER_PUBLIC_KEY',
+        'Certification fails closed and records missing production trust material',
+        'Production issuer trust material is not configured',
+        'FAIL',
+        'Ephemeral key generation is prohibited in production certification because it would test a synthetic trust root rather than the deployed issuer.'
+      );
+      recordTest(
+        'CERT-VC-02',
+        'W3C VC Production Trust Boundary',
+        'VC tamper verification requires the configured production issuer trust root',
+        'Attempt VC verification without configured issuer trust material',
+        'Verification remains unavailable until authoritative trust material is configured',
+        'Authoritative issuer trust material unavailable',
+        'FAIL',
+        'No synthetic keypair is generated for certification.'
+      );
+    } else {
+      const subject = {
       id: 'did:rupaykg:mrf:facility-001',
       claims: {
         facilityType: 'Material Recovery Facility',
@@ -173,6 +191,7 @@ async function runProductionCertification() {
       !tamperedVerification.isValid && tamperedVerification.tampered ? 'PASS' : 'FAIL',
       `Tamper correctly detected: ${tamperedVerification.message}`
     );
+    }
   } catch (err: any) {
     console.error('VC test error:', err);
     recordTest(
