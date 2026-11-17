@@ -1,4 +1,4 @@
-import { db } from './index.ts';
+import { db, withDbRetry } from './index.ts';
 import { users, password_reset_tokens } from './schema.ts';
 import { eq, and, gt } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
@@ -8,23 +8,23 @@ const ADMIN_EMAIL = 'admin@rupaykg.org';
 const ADMIN_LOGIN_ID = 'admin';
 
 export async function getUser(uid: string) {
-  const found = await db.select().from(users).where(eq(users.uid, uid));
+  const found = await withDbRetry(() => db.select().from(users).where(eq(users.uid, uid)));
   if (found && found.length > 0) return found[0];
   return null;
 }
 
 export async function getAllUsers() {
-  return await db.select().from(users);
+  return await withDbRetry(() => db.select().from(users));
 }
 
 export async function getUserByEmail(email: string) {
-  const found = await db.select().from(users).where(eq(users.email, email));
+  const found = await withDbRetry(() => db.select().from(users).where(eq(users.email, email)));
   if (found && found.length > 0) return found[0];
   return null;
 }
 
 export async function getUserByPhone(phone: string) {
-  const found = await db.select().from(users).where(eq(users.phone, phone));
+  const found = await withDbRetry(() => db.select().from(users).where(eq(users.phone, phone)));
   if (found && found.length > 0) return found[0];
   return null;
 }
@@ -67,10 +67,21 @@ export async function ensureAdminUser() {
 
 export async function getUserByIdentifier(identifier: string) {
   const normalized = identifier.trim();
+  const normalizedLower = normalized.toLowerCase();
+  const configuredAdminLoginId = (process.env.ADMIN_LOGIN_ID || 'rupaykg').trim().toLowerCase();
 
   // Legacy users table has no login_id column. Keep the documented admin
-  // login ID deterministic by resolving it to the authoritative admin UID.
-  if (normalized === ADMIN_LOGIN_ID || normalized === ADMIN_EMAIL || normalized === ADMIN_UID) {
+  // login IDs deterministic by resolving them to the authoritative admin UID.
+  if (
+    normalized === ADMIN_LOGIN_ID ||
+    normalized === ADMIN_EMAIL ||
+    normalized === ADMIN_UID ||
+    normalizedLower === ADMIN_LOGIN_ID ||
+    normalizedLower === ADMIN_EMAIL ||
+    normalizedLower === ADMIN_UID ||
+    normalizedLower === configuredAdminLoginId ||
+    normalizedLower === 'rupaykg'
+  ) {
     return await ensureAdminUser();
   }
 
@@ -114,24 +125,11 @@ export async function registerStakeholderUser(data: {
   village?: string;
   organization_name?: string;
 }) {
-  const result = await db.insert(users)
-    .values({
-      uid: data.uid,
-      email: data.email,
-      name: data.name,
-      role: data.role,
-      passwordHash: data.passwordHash,
-      phone: data.phone,
-      state: data.state,
-      district: data.district,
-      subdistrict: data.subdistrict,
-      local_area: data.local_area,
-      village: data.village || data.local_area,
-      organization_name: data.organization_name,
-    })
-    .onConflictDoUpdate({
-      target: users.uid,
-      set: {
+  const result = await withDbRetry(() =>
+    db.insert(users)
+      .values({
+        uid: data.uid,
+        email: data.email,
         name: data.name,
         role: data.role,
         passwordHash: data.passwordHash,
@@ -142,9 +140,24 @@ export async function registerStakeholderUser(data: {
         local_area: data.local_area,
         village: data.village || data.local_area,
         organization_name: data.organization_name,
-      },
-    })
-    .returning();
+      })
+      .onConflictDoUpdate({
+        target: users.uid,
+        set: {
+          name: data.name,
+          role: data.role,
+          passwordHash: data.passwordHash,
+          phone: data.phone,
+          state: data.state,
+          district: data.district,
+          subdistrict: data.subdistrict,
+          local_area: data.local_area,
+          village: data.village || data.local_area,
+          organization_name: data.organization_name,
+        },
+      })
+      .returning()
+  );
 
   return result[0];
 }

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Mic, MapPin, Volume2, Loader2, StopCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { ai } from "../lib/gemini";
 import { useTranslation } from 'react-i18next';
 
@@ -71,7 +70,7 @@ export const Chatbot = () => {
       let response;
       if (useMaps && location) {
         response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-4-hydrogen",
           contents: userMsg.text,
           config: {
             systemInstruction,
@@ -83,7 +82,7 @@ export const Chatbot = () => {
         });
       } else {
         response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-4-hydrogen",
           contents: userMsg.text,
           config: { systemInstruction }
         });
@@ -97,8 +96,10 @@ export const Chatbot = () => {
       }]);
     } catch (err: any) {
       console.error(err);
-      let errorMsg = t('Sorry, I encountered an error.');
-      if (err.message?.includes('Daily Quota Exhausted') || err.message?.includes('limit: 20')) {
+      let errorMsg = err?.message || t('Sorry, I encountered an error.');
+      if (err.message?.includes('not configured') || err.message?.includes('GEMINI_NOT_CONFIGURED')) {
+        errorMsg = 'Live Gemini AI is not configured on this server yet. Add GEMINI_API_KEY in Settings > Secrets to enable AI responses.';
+      } else if (err.message?.includes('Daily Quota Exhausted') || err.message?.includes('limit: 20')) {
         sessionStorage.setItem('ai_daily_blocked', 'true');
         errorMsg = "My daily quota (20 requests/day) has been reached. Please upgrade the API key or come back tomorrow for more AI-powered insights!";
       } else if (err.message?.includes('Quota') || err.message?.includes('429')) {
@@ -136,7 +137,7 @@ export const Chatbot = () => {
             setIsLoading(true);
             try {
               const response = await ai.models.generateContent({
-                model: "gemini-3-flash-preview",
+                model: "gemini-3.5-transcribe",
                 contents: [
                   {
                     parts: [
@@ -190,10 +191,10 @@ export const Chatbot = () => {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.8-flash-lite-tts",
         contents: [{ parts: [{ text }] }],
         config: {
-          responseModalities: [Modality.AUDIO],
+          responseModalities: ["AUDIO"],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
         }
       });

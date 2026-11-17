@@ -24,32 +24,33 @@ function PublicExperience() {
       const next = localStorage.getItem(OPERATING_CONTEXT_KEY) === 'rural' ? 'rural' : 'urban';
       setContext(next);
     };
-    const applyOperatingContext = () => {
-      // App.tsx already derives its complete operating labels, categories and
-      // role rules from the persisted operatingContext state. Reloading the
-      // application shell here guarantees the existing OS initializes from
-      // the newly selected context without duplicating or replacing that logic.
-      window.location.reload();
-    };
 
     window.addEventListener('storage', syncAuth);
+    window.addEventListener('rupay:auth-change', syncAuth);
     window.addEventListener('storage', syncContext);
     window.addEventListener('rupay:operating-context-change', syncContext);
-    window.addEventListener('rupay:operating-context-change', applyOperatingContext);
     return () => {
       window.removeEventListener('storage', syncAuth);
+      window.removeEventListener('rupay:auth-change', syncAuth);
       window.removeEventListener('storage', syncContext);
       window.removeEventListener('rupay:operating-context-change', syncContext);
-      window.removeEventListener('rupay:operating-context-change', applyOperatingContext);
     };
   }, []);
 
-  const openExistingAuth = (preferredText: string) => {
+  const openExistingAuth = (trigger: 'login' | 'register', preferredText: string) => {
     setShowLanding(false);
     window.setTimeout(() => {
-      const button = Array.from(document.querySelectorAll('button')).find((el) =>
-        el.textContent?.replace(/\s+/g, ' ').trim().toLowerCase().includes(preferredText.toLowerCase())
-      ) as HTMLButtonElement | undefined;
+      const selectorButton =
+        (document.querySelector(`[data-auth-trigger="${trigger}"]`) as HTMLButtonElement | null) ||
+        (trigger === 'register'
+          ? (document.querySelector('[data-auth-trigger="register-hero"]') as HTMLButtonElement | null)
+          : null);
+      const fallbackButton = selectorButton
+        ? null
+        : (Array.from(document.querySelectorAll('button')).find((el) =>
+            el.textContent?.replace(/\s+/g, ' ').trim().toLowerCase().includes(preferredText.toLowerCase())
+          ) as HTMLButtonElement | undefined);
+      const button = selectorButton || fallbackButton;
       if (button) button.click();
       else setShowLanding(true);
     }, 50);
@@ -63,8 +64,8 @@ function PublicExperience() {
       </div>
       {showLanding && (
         <MinimalPublicLanding
-          onLogin={() => openExistingAuth('Launch OS')}
-          onRegister={() => openExistingAuth('Register Stakeholder')}
+          onLogin={() => openExistingAuth('login', 'Launch OS')}
+          onRegister={() => openExistingAuth('register', 'Register Stakeholder')}
         />
       )}
       <span className="sr-only" aria-live="polite">Operating context: {context}</span>

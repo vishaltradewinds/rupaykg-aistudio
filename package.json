@@ -21,7 +21,7 @@
     "start": "node dist/server.cjs"
   },
   "dependencies": {
-    "@google/genai": "^1.52.0",
+    "@google/genai": "^3.4.0",
     "@hashgraph/sdk": "^2.81.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/d3": "^7.4.3",

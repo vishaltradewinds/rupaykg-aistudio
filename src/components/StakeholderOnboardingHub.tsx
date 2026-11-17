@@ -306,7 +306,10 @@ export const StakeholderOnboardingHub: React.FC<StakeholderOnboardingHubProps> =
       if (!formData.name.trim()) throw new Error('Please enter your Full Name.');
       if (!formData.phone.trim() && !formData.loginId.trim()) throw new Error('Please enter your Mobile Number or Login ID.');
       
-      const regPassword = formData.password.trim() || 'password123';
+      const regPassword = formData.password.trim();
+      if (!token && regPassword.length < 8) {
+        throw new Error('Please create a strong password of at least 8 characters.');
+      }
       const identifier = formData.phone.trim() || formData.loginId.trim();
 
       if (token) {
@@ -334,6 +337,7 @@ export const StakeholderOnboardingHub: React.FC<StakeholderOnboardingHubProps> =
 
         if (data.token) {
           localStorage.setItem('rupay_token', data.token);
+          window.dispatchEvent(new Event('rupay:auth-change'));
         }
 
         setIsSuccess(true);
@@ -371,6 +375,7 @@ export const StakeholderOnboardingHub: React.FC<StakeholderOnboardingHubProps> =
 
         if (data.token && data.user) {
           localStorage.setItem('rupay_token', data.token);
+          window.dispatchEvent(new Event('rupay:auth-change'));
           setIsSuccess(true);
           setRegisteredData(data.user);
           setMessage({
@@ -669,9 +674,10 @@ export const StakeholderOnboardingHub: React.FC<StakeholderOnboardingHubProps> =
                       <input
                         type="password"
                         required={!token}
+                        minLength={8}
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        placeholder="Create strong password"
+                        placeholder="Create strong password (min 8 chars)"
                         className="w-full bg-[#1C1C20] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                       />
                     </div>

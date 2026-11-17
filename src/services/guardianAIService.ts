@@ -59,7 +59,7 @@ export class GuardianAIToolkit {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-4-hydrogen",
         contents: prompt
       });
       const result = response.text || "Failed to generate alignment report.";
@@ -98,7 +98,7 @@ export class GuardianAIToolkit {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-4-hydrogen",
         contents: prompt
       });
       return response.text || "I cannot interpret the HCS ledger at this moment.";

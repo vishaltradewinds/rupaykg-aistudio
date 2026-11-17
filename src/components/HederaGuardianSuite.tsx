@@ -46,18 +46,18 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
   
   // 1. MONITOR LEDGER HEALTH STATE
   const [healthData, setHealthData] = useState<any>({
-    status: 'OPERATIONAL',
+    status: 'CHECKING...',
     network: 'Hedera Testnet (Consensus Service)',
-    topic_id: import.meta.env.VITE_HEDERA_TOPIC_ID || '',
-    consensus_latency_ms: 38,
-    mirror_node_status: 'CONNECTED (testnet.mirrornode.hedera.com)',
-    tps: '12.8',
-    total_anchored_messages: 24,
-    latest_sequence_number: 1042,
-    active_guardians: 4,
-    chain_integrity: '100% Intact (0 Tamper Anomalies)',
-    signature_verification_rate: '100.0%',
-    last_ping: new Date().toISOString()
+    topic_id: import.meta.env.VITE_HEDERA_TOPIC_ID || 'NOT_CONFIGURED',
+    consensus_latency_ms: null,
+    mirror_node_status: 'CHECKING...',
+    tps: null,
+    total_anchored_messages: 0,
+    latest_sequence_number: null,
+    active_guardians: 0,
+    chain_integrity: 'Pending Verification',
+    signature_verification_rate: 'N/A',
+    last_ping: null
   });
   const [isRefreshingHealth, setIsRefreshingHealth] = useState(false);
 
@@ -144,12 +144,33 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
       const res = await safeFetch('/api/carbon/guardian/health', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      if (res && res.ok) {
-        const data = await safeParseJson(res);
-        if (data) setHealthData(data);
+      const data = res ? await safeParseJson(res) : null;
+      if (res && res.ok && data) {
+        setHealthData(data);
+      } else {
+        setHealthData((prev: any) => ({
+          ...prev,
+          status: res?.status === 401 || res?.status === 403 ? 'AUTH_REQUIRED' : 'UNAVAILABLE',
+          mirror_node_status: data?.error || `Unavailable (HTTP ${res?.status ?? 'NETWORK'})`,
+          consensus_latency_ms: null,
+          tps: null,
+          chain_integrity: 'Verification Unavailable',
+          signature_verification_rate: 'N/A',
+          last_ping: new Date().toISOString()
+        }));
       }
     } catch (err) {
       console.error("Failed to fetch Hedera health:", err);
+      setHealthData((prev: any) => ({
+        ...prev,
+        status: 'UNAVAILABLE',
+        mirror_node_status: 'Connection Error',
+        consensus_latency_ms: null,
+        tps: null,
+        chain_integrity: 'Verification Unavailable',
+        signature_verification_rate: 'N/A',
+        last_ping: new Date().toISOString()
+      }));
     } finally {
       setIsRefreshingHealth(false);
     }
@@ -227,24 +248,39 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      if (res.ok) {
-        const data = await safeParseJson(res);
-        if (data) {
-          if (tamperMode) {
-            data.status = 'FAIL';
-            data.chain_integrity_score = 66;
-            data.anomalies_detected = 1;
-            data.sequence_continuity = 'DISRUPTED_AT_SEQ_1041';
-            if (data.verified_items && data.verified_items.length > 1) {
-              data.verified_items[1].status = 'INTEGRITY_COMPROMISED';
-              data.verified_items[1].runningHash = '0xCORRUPTED_RUNNING_HASH_ANOMALY';
-            }
+      const data = await safeParseJson(res);
+      if (res.ok && data) {
+        if (tamperMode) {
+          data.status = 'FAIL';
+          data.chain_integrity_score = 66;
+          data.anomalies_detected = 1;
+          data.sequence_continuity = 'DISRUPTED_AT_SEQ_1041';
+          if (data.verified_items && data.verified_items.length > 1) {
+            data.verified_items[1].status = 'INTEGRITY_COMPROMISED';
+            data.verified_items[1].runningHash = '0xCORRUPTED_RUNNING_HASH_ANOMALY';
           }
-          setAuditResult(data);
         }
+        setAuditResult(data);
+      } else {
+        setAuditResult({
+          status: 'UNAVAILABLE',
+          chain_integrity_score: 0,
+          anomalies_detected: 0,
+          sequence_continuity: 'NOT_AVAILABLE',
+          message: data?.error || `Verification unavailable (HTTP ${res.status})`,
+          verified_items: []
+        });
       }
     } catch (err) {
       console.error("Failed chain verification:", err);
+      setAuditResult({
+        status: 'UNAVAILABLE',
+        chain_integrity_score: 0,
+        anomalies_detected: 0,
+        sequence_continuity: 'NOT_AVAILABLE',
+        message: 'Network error while verifying Hedera chain integrity.',
+        verified_items: []
+      });
     } finally {
       setIsVerifyingChain(false);
     }
@@ -526,23 +562,27 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
         >
           {/* Main Status Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-black/40 border border-emerald-500/30 p-5 rounded-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+            <div className={`bg-black/40 border p-5 rounded-2xl relative overflow-hidden ${healthData.status === 'OPERATIONAL' ? 'border-emerald-500/30' : healthData.status === 'READ_ONLY_MIRROR' ? 'border-amber-500/30' : 'border-rose-500/30'}`}>
+              <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-xl pointer-events-none ${healthData.status === 'OPERATIONAL' ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`} />
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-white/40 uppercase tracking-wider">HCS Consensus Engine</span>
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className={`w-2.5 h-2.5 rounded-full ${healthData.status === 'OPERATIONAL' ? 'bg-emerald-400 animate-ping' : healthData.status === 'READ_ONLY_MIRROR' ? 'bg-amber-400' : 'bg-rose-400'}`} />
               </div>
-              <p className="text-xl font-extrabold text-emerald-400">{healthData.status}</p>
+              <p className={`text-xl font-extrabold ${healthData.status === 'OPERATIONAL' ? 'text-emerald-400' : healthData.status === 'READ_ONLY_MIRROR' ? 'text-amber-400' : 'text-rose-400'}`}>{healthData.status}</p>
               <p className="text-[11px] text-white/50 mt-1 font-mono">{healthData.network}</p>
             </div>
 
             <div className="bg-black/40 border border-white/10 p-5 rounded-2xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-white/40 uppercase tracking-wider">Consensus Latency</span>
+                <span className="text-xs font-bold text-white/40 uppercase tracking-wider">Mirror Probe Latency</span>
                 <Zap size={16} className="text-amber-400" />
               </div>
-              <p className="text-xl font-extrabold text-white">{healthData.consensus_latency_ms} ms</p>
-              <p className="text-[11px] text-emerald-400 mt-1 font-mono">Sub-second Finality</p>
+              <p className="text-xl font-extrabold text-white">
+                {typeof healthData.consensus_latency_ms === 'number' ? `${healthData.consensus_latency_ms} ms` : 'N/A'}
+              </p>
+              <p className={`text-[11px] mt-1 font-mono ${typeof healthData.consensus_latency_ms === 'number' ? 'text-emerald-400' : 'text-white/40'}`}>
+                {typeof healthData.consensus_latency_ms === 'number' ? 'Live Mirror Node Response' : 'Operator Write Credentials Required'}
+              </p>
             </div>
 
             <div className="bg-black/40 border border-white/10 p-5 rounded-2xl">
@@ -550,17 +590,17 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
                 <span className="text-xs font-bold text-white/40 uppercase tracking-wider">Target HCS Topic</span>
                 <Radio size={16} className="text-cyan-400" />
               </div>
-              <p className="text-xl font-extrabold text-cyan-400 font-mono">{healthData.topic_id}</p>
+              <p className="text-xl font-extrabold text-cyan-400 font-mono">{healthData.topic_id || 'NOT_CONFIGURED'}</p>
               <p className="text-[11px] text-white/50 mt-1">National Carbon Registry Topic</p>
             </div>
 
             <div className="bg-black/40 border border-white/10 p-5 rounded-2xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-white/40 uppercase tracking-wider">Chain Integrity Score</span>
-                <ShieldCheck size={16} className="text-emerald-400" />
+                <span className="text-xs font-bold text-white/40 uppercase tracking-wider">Chain Integrity Status</span>
+                <ShieldCheck size={16} className={healthData.status === 'OPERATIONAL' ? 'text-emerald-400' : 'text-amber-400'} />
               </div>
-              <p className="text-xl font-extrabold text-emerald-400">100%</p>
-              <p className="text-[11px] text-white/50 mt-1 font-mono">0 Tamper Anomalies Detected</p>
+              <p className={`text-base font-extrabold ${healthData.status === 'OPERATIONAL' ? 'text-emerald-400' : 'text-amber-300'}`}>{healthData.chain_integrity}</p>
+              <p className="text-[11px] text-white/50 mt-1 font-mono">Verification Rate: {healthData.signature_verification_rate || 'N/A'}</p>
             </div>
           </div>
 
@@ -574,19 +614,19 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
               <div className="space-y-3 font-mono text-xs">
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
                   <span className="text-white/60">Mirror Node Status:</span>
-                  <span className="text-emerald-400 font-bold">{healthData.mirror_node_status}</span>
+                  <span className={`font-bold ${String(healthData.mirror_node_status || '').startsWith('CONNECTED') ? 'text-emerald-400' : 'text-amber-400'}`}>{healthData.mirror_node_status}</span>
                 </div>
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
                   <span className="text-white/60">Throughput (TPS):</span>
-                  <span className="text-white font-bold">{healthData.tps} msg/sec</span>
+                  <span className="text-white font-bold">{healthData.tps != null && healthData.tps !== 'NOT_AVAILABLE' ? `${healthData.tps} msg/sec` : 'N/A'}</span>
                 </div>
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
                   <span className="text-white/60">Total Anchored Messages:</span>
-                  <span className="text-emerald-400 font-bold">{healthData.total_anchored_messages}</span>
+                  <span className="text-emerald-400 font-bold">{healthData.total_anchored_messages ?? 0}</span>
                 </div>
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
                   <span className="text-white/60">Latest Sequence Height:</span>
-                  <span className="text-cyan-400 font-bold">#{healthData.latest_sequence_number}</span>
+                  <span className="text-cyan-400 font-bold">{healthData.latest_sequence_number != null ? `#${healthData.latest_sequence_number}` : 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -598,20 +638,20 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
               </h4>
               <div className="space-y-3 font-mono text-xs">
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
-                  <span className="text-white/60">Active Guardian Node Instances:</span>
-                  <span className="text-white font-bold">{healthData.active_guardians} Federated Nodes</span>
+                  <span className="text-white/60">Confirmed Guardian Anchors:</span>
+                  <span className="text-white font-bold">{healthData.active_guardians ?? 0} Active Nodes</span>
                 </div>
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
                   <span className="text-white/60">Signature Verification Rate:</span>
-                  <span className="text-emerald-400 font-bold">{healthData.signature_verification_rate}</span>
+                  <span className="text-emerald-400 font-bold">{healthData.signature_verification_rate || 'N/A'}</span>
                 </div>
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
                   <span className="text-white/60">Consensus Hash Algorithm:</span>
-                  <span className="text-amber-400 font-bold">SHA-384 / Ed25519</span>
+                  <span className="text-amber-400 font-bold">SHA-256 / Ed25519</span>
                 </div>
                 <div className="p-3 bg-slate-900/80 rounded-xl border border-white/5 flex justify-between items-center">
                   <span className="text-white/60">Last Consensus Ping:</span>
-                  <span className="text-white/50">{new Date(healthData.last_ping).toLocaleTimeString()}</span>
+                  <span className="text-white/50">{healthData.last_ping ? new Date(healthData.last_ping).toLocaleTimeString() : 'Not pinged'}</span>
                 </div>
               </div>
             </div>

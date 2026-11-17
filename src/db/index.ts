@@ -12,12 +12,48 @@ function isProductionEnvironment() {
   return process.env.NODE_ENV === 'production' || process.env.APP_MODE === 'production';
 }
 
+export function isTransientDbError(err: any): boolean {
+  const code = err?.code || err?.cause?.code;
+  const message = String(err?.message || '') + ' ' + String(err?.cause?.message || '');
+  return (
+    code === 'ENOENT' ||
+    code === 'ECONNREFUSED' ||
+    code === 'ECONNRESET' ||
+    code === 'ETIMEDOUT' ||
+    code === 'EPIPE' ||
+    code === '57P01' ||
+    code === '57P03' ||
+    message.includes('Connection terminated unexpectedly') ||
+    message.includes('Client has encountered a connection error') ||
+    message.includes('.s.PGSQL.')
+  );
+}
+
+export async function withDbRetry<T>(operation: () => Promise<T>, maxAttempts = 4): Promise<T> {
+  let lastError: any;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await operation();
+    } catch (err: any) {
+      lastError = err;
+      if (!isTransientDbError(err) || attempt === maxAttempts) {
+        throw err;
+      }
+      const delayMs = 150 * Math.pow(2, attempt - 1);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  throw lastError;
+}
+
 export const createPool = () => {
   if (!global._postgresPool) {
     let config: PoolConfig = {
       max: 20,
-      idleTimeoutMillis: 30000,
+      idleTimeoutMillis: 20000,
       connectionTimeoutMillis: 15000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
     };
 
     // Prefer a complete DATABASE_URL. Otherwise require an explicit SQL configuration.
@@ -68,11 +104,11 @@ export const createPool = () => {
     global._postgresPool = new Pool(config);
 
     global._postgresPool.on('error', (err) => {
-      console.error('Unexpected error on idle SQL pool client:', err);
+      console.warn('SQL pool idle client notice (pool will reconnect automatically):', err?.message || err);
     });
 
-    // Runtime performs read-only schema verification. DDL is deployment-owned.
-    ensureDatabaseSchema(global._postgresPool).catch(err => {
+    // Runtime performs read-only schema verification with transient socket retry.
+    withDbRetry(() => ensureDatabaseSchema(global._postgresPool!), 5).catch(err => {
       console.warn('Non-blocking schema verification note:', err.message);
     });
   }

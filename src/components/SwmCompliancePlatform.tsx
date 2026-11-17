@@ -41,6 +41,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   });
   const [registeredEntitiesList, setRegisteredEntitiesList] = useState<any[]>([]);
   const [regSuccessMessage, setRegSuccessMessage] = useState('');
+  const [regErrorMessage, setRegErrorMessage] = useState('');
 
   // BWG Eligibility Auto-Calculator State (Layer 2)
   const [bwgCalcWasteKg, setBwgCalcWasteKg] = useState(0);
@@ -54,12 +55,14 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const [bins, setBins] = useState<any[]>([]);
 
   // Weighbridge State (Layer 7)
-  const [wbForm, setWbForm] = useState({ grossKg: 0, tareKg: 0, vehicleNo: '', facilityName: '' });
+  const [wbForm, setWbForm] = useState({ grossKg: 0, tareKg: 0, vehicleNo: '', facilityName: '', material: 'Mixed MSW' });
   const [generatedSlip, setGeneratedSlip] = useState<any>(null);
+  const [wbError, setWbError] = useState('');
 
   // CPCB Sync Bridge State (Layer 11)
   const [cpcbSyncLogs, setCpcbSyncLogs] = useState<any[]>([]);
   const [syncingActive, setSyncingActive] = useState(false);
+  const [cpcbSyncError, setCpcbSyncError] = useState('');
 
   // GIS Map Filter State (Layer 14)
   const [gisFilter, setGisFilter] = useState('ALL');
@@ -68,12 +71,22 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   const [aiZone, setAiZone] = useState('East Zone Ward 12');
   const [aiForecastResult, setAiForecastResult] = useState<any>(null);
   const [loadingAiForecast, setLoadingAiForecast] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   // REST API Tester State (Layer 18)
   const [apiEndpoint, setApiEndpoint] = useState('/api/swm/cpcb-sync');
   const [apiMethod, setApiMethod] = useState('POST');
   const [apiResponse, setApiResponse] = useState<any>(null);
+  const [apiStatusLabel, setApiStatusLabel] = useState<string>('READY');
   const [copiedCurl, setCopiedCurl] = useState(false);
+
+  const getAuthHeaders = (includeJson = true): Record<string, string> => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('rupay_token') : null;
+    return {
+      ...(includeJson ? { 'Content-Type': 'application/json' } : {}),
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+  };
 
 
   const handleDeleteEntity = (id: string) => {
@@ -95,36 +108,37 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   // Handle Register Entity (Layer 1)
   const handleRegisterEntity = async (e: React.FormEvent) => {
     e.preventDefault();
+    setRegErrorMessage('');
+    setRegSuccessMessage('');
     try {
       const res = await safeFetch('/api/swm/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(regForm)
+        headers: getAuthHeaders(true),
+        body: JSON.stringify({
+          type: regForm.entityType,
+          name: regForm.name,
+          gstPanCin: { gstin: regForm.gstin, pan: regForm.pan, cin: regForm.cin },
+          location: { state: regForm.state, district: regForm.district, ulb: regForm.ulb, ward: regForm.ward, address: regForm.address },
+          contactPersons: regForm.contactPerson ? [{ name: regForm.contactPerson, designation: 'Nodal Officer', phone: regForm.phone, email: regForm.email }] : [],
+          operationalMetrics: {
+            builtUpAreaSqm: regForm.builtUpAreaSqm,
+            waterConsumptionKlDay: regForm.waterConsumptionKlDay,
+            dailyWasteGenerationKg: regForm.dailyWasteGenerationKg,
+            wasteCategories: regForm.wasteCategories
+          }
+        })
       });
-      const data = await safeParseJson(res);
+      const data = res ? await safeParseJson(res) : null;
       if (res && res.ok && data) {
         setRegisteredEntitiesList(prev => [data.registeredEntity, ...prev]);
-        setRegSuccessMessage(`Entity "${regForm.name}" registered successfully with CPCB Token ${data.registeredEntity.cpcbToken}`);
+        setRegSuccessMessage(`Entity "${regForm.name}" persisted in PostgreSQL with Reference ${data.registeredEntity?.registryId || data.registeredEntity?.cpcbToken || 'OK'}`);
         setTimeout(() => setRegSuccessMessage(''), 6000);
+      } else {
+        setRegErrorMessage(data?.error || `Registration failed (HTTP ${res?.status ?? 'NETWORK'}). Ensure you are logged in with SWM management permissions.`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      // Fallback
-      const newEntity = {
-        id: `REG-CPCB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        type: regForm.entityType,
-        name: regForm.name,
-        location: `${regForm.district}, ${regForm.state}`,
-        ulb: regForm.ulb,
-        dailyKg: regForm.dailyWasteGenerationKg,
-        areaSqm: regForm.builtUpAreaSqm,
-        cpcbStatus: 'CPCB Synced',
-        complianceScore: 95,
-        cpcbToken: `CPCB-AUTH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-      };
-      setRegisteredEntitiesList(prev => [newEntity, ...prev]);
-      setRegSuccessMessage(`Entity "${regForm.name}" registered successfully with CPCB Token ${newEntity.cpcbToken}`);
-      setTimeout(() => setRegSuccessMessage(''), 6000);
+      setRegErrorMessage(err?.message || 'Failed to register entity against PostgreSQL SWM registry.');
     }
   };
 
@@ -146,77 +160,92 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
 
   // Generate Weighbridge Slip (Layer 7)
   const handleGenerateWbSlip = async () => {
+    setWbError('');
     try {
       const res = await safeFetch('/api/swm/weighbridge/slip', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(true),
         body: JSON.stringify(wbForm)
       });
-      const data = await safeParseJson(res);
+      const data = res ? await safeParseJson(res) : null;
       if (res && res.ok && data) {
         setGeneratedSlip(data);
+      } else {
+        setGeneratedSlip(null);
+        setWbError(data?.error || `Failed to issue weighbridge ticket (HTTP ${res?.status ?? 'NETWORK'}).`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      const net = wbForm.grossKg - wbForm.tareKg;
-      setGeneratedSlip({
-        slipNo: 'NOT_AVAILABLE',
-        vehicleNo: wbForm.vehicleNo,
-        facilityName: wbForm.facilityName,
-        grossWeightKg: wbForm.grossKg,
-        tareWeightKg: wbForm.tareKg,
-        netWeightKg: net,
-        timestamp: new Date().toISOString(),
-        integrityHash: 'NOT_AVAILABLE',
-        verifiedBy: 'Electronic Weighbridge SCADA Interface'
-      });
+      setGeneratedSlip(null);
+      setWbError(err?.message || 'Network failure while recording weighbridge ticket.');
     }
   };
 
-  // Trigger CPCB Sync Simulation (Layer 11)
+  // Trigger CPCB Sync (Layer 11)
   const handleTriggerCpcbSync = async () => {
     setSyncingActive(true);
+    setCpcbSyncError('');
     try {
       const res = await safeFetch('/api/swm/cpcb-sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: 'LIVE_OPERATIONAL_SYNC', entityId: 'MUNI-MUMBAI-01' })
+        headers: getAuthHeaders(true),
+        body: JSON.stringify({ channel: 'LIVE_OPERATIONAL_SYNC', entityId: user?.organization_name || user?.uid || 'ULB_ENTITY' })
       });
-      const data = await safeParseJson(res);
+      const data = res ? await safeParseJson(res) : null;
       if (res && res.ok && data) {
         setCpcbSyncLogs(prev => [
           {
-            channel: 'LIVE_OPERATIONAL_FEED',
-            status: '200 OK',
-            syncToken: data.cpcbSyncToken,
+            channel: data.channel || 'LIVE_OPERATIONAL_FEED',
+            status: `${res.status} SYNCED`,
+            syncToken: data.cpcbSyncToken || data.auditLogId,
             timestamp: new Date().toLocaleTimeString(),
-            recordsCount: 320
+            recordsCount: data.recordsCount ?? 0
           },
           ...prev
         ]);
+      } else {
+        const isUnconfigured = res?.status === 503 && data?.status === 'CPCB_PORTAL_NOT_CONFIGURED';
+        setCpcbSyncError(data?.error || `CPCB sync unavailable (HTTP ${res?.status ?? 'NETWORK'}).`);
+        if (isUnconfigured && data?.stagedAuditId) {
+          setCpcbSyncLogs(prev => [
+            {
+              channel: data.channel || 'LIVE_OPERATIONAL_FEED',
+              status: '503 STAGED_OFFLINE',
+              syncToken: data.stagedAuditId,
+              timestamp: new Date().toLocaleTimeString(),
+              recordsCount: data.recordsStaged ?? 0
+            },
+            ...prev
+          ]);
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setCpcbSyncError(err?.message || 'Failed to contact CPCB compliance sync bridge.');
     } finally {
-      setTimeout(() => setSyncingActive(false), 1200);
+      setSyncingActive(false);
     }
   };
 
   // Run AI Forecast (Layer 17)
   const handleRunAiForecast = async () => {
     setLoadingAiForecast(true);
+    setAiError('');
     try {
       const res = await safeFetch('/api/swm/ai-forecast', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({ zone: aiZone, pastDailyAvgKg: 450 })
       });
-      const data = await safeParseJson(res);
+      const data = res ? await safeParseJson(res) : null;
       if (res && res.ok && data) {
         setAiForecastResult(data);
+      } else {
+        setAiError(data?.error || `Forecast unavailable (HTTP ${res?.status ?? 'NETWORK'}).`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setAiError(err?.message || 'Failed to generate AI waste forecast.');
     } finally {
       setLoadingAiForecast(false);
     }
@@ -225,14 +254,18 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
   // Run REST API Tester (Layer 18)
   const handleTestApi = async () => {
     try {
+      const isGet = apiEndpoint === '/api/status';
+      const methodToUse = isGet ? 'GET' : apiMethod;
       const res = await safeFetch(apiEndpoint, {
-        method: apiMethod,
-        headers: { 'Content-Type': 'application/json' },
-        body: apiMethod === 'POST' ? JSON.stringify({ test: 'payload', timestamp: new Date().toISOString() }) : undefined
+        method: methodToUse,
+        headers: getAuthHeaders(!isGet),
+        body: methodToUse === 'POST' ? JSON.stringify({ test: 'payload', timestamp: new Date().toISOString() }) : undefined
       });
-      const data = await safeParseJson(res);
+      const data = res ? await safeParseJson(res) : null;
+      setApiStatusLabel(res ? `${res.status} ${res.statusText}` : 'NETWORK ERROR');
       setApiResponse(data || { status: res ? res.status : 'error', message: res ? res.statusText : 'Network failure' });
     } catch (err: any) {
+      setApiStatusLabel('ERROR');
       setApiResponse({ error: err.message });
     }
   };
@@ -480,6 +513,13 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                   <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs font-bold flex items-center gap-2">
                     <CheckCircle size={16} />
                     {regSuccessMessage}
+                  </div>
+                )}
+
+                {regErrorMessage && (
+                  <div className="p-3 bg-rose-500/20 border border-rose-500/40 rounded-xl text-rose-300 text-xs font-bold flex items-center gap-2">
+                    <AlertTriangle size={16} />
+                    {regErrorMessage}
                   </div>
                 )}
 
@@ -1130,10 +1170,34 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                       <label className="text-white/60 block mb-1 font-medium">Vehicle Registration No.</label>
                       <input
                         type="text"
+                        placeholder="e.g. MH-01-AB-1234"
                         value={wbForm.vehicleNo}
                         onChange={e => setWbForm({ ...wbForm, vehicleNo: e.target.value })}
                         className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-white font-mono"
                       />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-white/60 block mb-1 font-medium">Facility / Weighbridge Name</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Ward 12 Transfer Weighbridge"
+                          value={wbForm.facilityName}
+                          onChange={e => setWbForm({ ...wbForm, facilityName: e.target.value })}
+                          className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-white font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/60 block mb-1 font-medium">Waste Stream Material</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Organic Wet Waste"
+                          value={wbForm.material}
+                          onChange={e => setWbForm({ ...wbForm, material: e.target.value })}
+                          className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-white font-mono"
+                        />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -1159,14 +1223,21 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
 
                     <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between font-mono">
                       <span className="text-white/60">Calculated Net Weight:</span>
-                      <span className="text-emerald-400 font-bold text-sm">{wbForm.grossKg - wbForm.tareKg} kg</span>
+                      <span className={`font-bold text-sm ${(wbForm.grossKg - wbForm.tareKg) > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{wbForm.grossKg - wbForm.tareKg} kg</span>
                     </div>
+
+                    {wbError && (
+                      <div className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
+                        <AlertTriangle size={15} className="shrink-0" />
+                        <span>{wbError}</span>
+                      </div>
+                    )}
 
                     <button
                       onClick={handleGenerateWbSlip}
                       className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all flex items-center justify-center gap-2"
                     >
-                      <Scale size={16} /> Generate SCADA Weight Ticket
+                      <Scale size={16} /> Record Signed Weighbridge Ticket
                     </button>
                   </div>
 
@@ -1206,7 +1277,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                       </div>
                     ) : (
                       <div className="text-center text-white/40 text-xs py-12">
-                        Click "Generate SCADA Weight Ticket" to create a digitally signed weighbridge slip.
+                        Click "Record Signed Weighbridge Ticket" to create and persist a SHA-256 signed weighbridge slip in PostgreSQL.
                       </div>
                     )}
                   </div>
@@ -1365,6 +1436,13 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                     </button>
                   </div>
 
+                  {cpcbSyncError && (
+                    <div className="p-3 bg-amber-500/15 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-center gap-2">
+                      <AlertTriangle size={15} className="shrink-0" />
+                      <span>{cpcbSyncError}</span>
+                    </div>
+                  )}
+
                   <div className="space-y-2 text-xs font-mono">
                     {cpcbSyncLogs.length === 0 ? (
                       <div className="p-8 text-center text-white/50 text-xs italic font-sans">
@@ -1379,7 +1457,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="text-right">
-                              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[10px] font-bold block">{log.status}</span>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold block ${String(log.status).includes('STAGED') ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-400'}`}>{log.status}</span>
                               <span className="text-[9px] text-blue-300">{log.syncToken}</span>
                             </div>
                             <button
@@ -1705,11 +1783,18 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                     </button>
                   </div>
 
+                  {aiError && (
+                    <div className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
+                      <AlertTriangle size={15} className="shrink-0" />
+                      <span>{aiError}</span>
+                    </div>
+                  )}
+
                   {aiForecastResult ? (
                     <div className="space-y-4">
                       <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300">
-                        <p className="font-bold">AI Model Confidence: {aiForecastResult.confidenceScore}</p>
-                        <p className="text-[11px] opacity-80">Zone: {aiForecastResult.zone} • Baseline Avg: {aiForecastResult.baselineAvgKg} kg/day</p>
+                        <p className="font-bold">Model Confidence: {aiForecastResult.confidenceScore} ({aiForecastResult.modelType || 'STATISTICAL'})</p>
+                        <p className="text-[11px] opacity-80">Zone: {aiForecastResult.zone} • Baseline Avg: {aiForecastResult.baselineAvgKg} kg/day • DB Samples: {aiForecastResult.sampleCount ?? 0}</p>
                       </div>
 
                       <div className="space-y-2">
@@ -1775,7 +1860,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                   <div className="bg-slate-950 border border-emerald-500/30 rounded-2xl p-4 space-y-2">
                     <h4 className="font-bold text-white text-sm border-b border-white/10 pb-2 flex items-center justify-between">
                       <span>HTTP Response Payload</span>
-                      <span className="text-[10px] text-emerald-400 font-mono">200 OK</span>
+                      <span className={`text-[10px] font-mono ${apiStatusLabel.startsWith('2') ? 'text-emerald-400' : apiStatusLabel === 'READY' ? 'text-white/50' : 'text-amber-400'}`}>{apiStatusLabel}</span>
                     </h4>
 
                     {apiResponse ? (

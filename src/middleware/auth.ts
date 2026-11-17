@@ -11,15 +11,28 @@ export interface AuthRequest extends Request {
   user?: any;
 }
 
+function normalizePem(pem: string): string {
+  if (pem.includes('BEGIN') && !pem.includes('\n')) {
+    const parts = pem.trim().split(/\s+/);
+    if (parts.length > 6) {
+      const header = parts.slice(0, 3).join(' ');
+      const footer = parts.slice(parts.length - 3).join(' ');
+      const body = parts.slice(3, parts.length - 3).join('\n');
+      return `${header}\n${body}\n${footer}`;
+    }
+  }
+  return pem;
+}
+
 export function getPublicKey(): string | null {
   try {
     if (process.env.RUPAYKG_JWT_PUBLIC_KEY && process.env.RUPAYKG_JWT_PUBLIC_KEY.includes('KEY-----')) {
-      return process.env.RUPAYKG_JWT_PUBLIC_KEY;
+      return normalizePem(process.env.RUPAYKG_JWT_PUBLIC_KEY);
     }
     const pubPath = path.resolve(process.cwd(), 'public.pem');
     if (fs.existsSync(pubPath)) {
       const content = fs.readFileSync(pubPath, 'utf8');
-      if (content && content.includes('KEY-----')) return content;
+      if (content && content.includes('KEY-----')) return normalizePem(content);
     }
   } catch (err) {}
   return null;
@@ -99,7 +112,13 @@ export const auth = (roles: string[] = []) => {
     }
 
     const uid = decodedPayload.id || decodedPayload.uid;
-    const dbUser = await getUser(uid);
+    let dbUser: any = null;
+    try {
+      dbUser = await getUser(uid);
+    } catch (err: any) {
+      console.error('[AUTH DB ERROR] Authoritative user lookup failed:', err?.message || err);
+      return res.status(503).json({ error: 'Service Unavailable: Authoritative database lookup failed. Please retry.' });
+    }
     if (!dbUser) return res.status(401).json({ error: 'Unauthorized: User not found in authoritative database' });
 
     const activeUser = dbUser;

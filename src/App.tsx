@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
 import { ai } from "./lib/gemini";
 import { 
   Leaf, 
@@ -590,7 +589,21 @@ export default function App() {
   const setOperatingContext = (ctx: 'urban' | 'rural') => {
     setOperatingContextState(ctx);
     localStorage.setItem('rupay_operating_context', ctx);
+    window.dispatchEvent(new CustomEvent('rupay:operating-context-change', { detail: ctx }));
   };
+
+  useEffect(() => {
+    const syncOperatingContext = () => {
+      const next = localStorage.getItem('rupay_operating_context') === 'rural' ? 'rural' : 'urban';
+      setOperatingContextState(next);
+    };
+    window.addEventListener('storage', syncOperatingContext);
+    window.addEventListener('rupay:operating-context-change', syncOperatingContext);
+    return () => {
+      window.removeEventListener('storage', syncOperatingContext);
+      window.removeEventListener('rupay:operating-context-change', syncOperatingContext);
+    };
+  }, []);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('rupay_theme') as 'dark' | 'light') || 'dark';
   });
@@ -1279,13 +1292,13 @@ export default function App() {
           try {
             const prompt = `Based on the user's recent waste recycling history: ${JSON.stringify(history.slice(0, 5))}, provide 3 short, actionable, and encouraging eco-tips to help them reduce waste or recycle better. Return as a JSON array of strings.`;
             const response = await ai.models.generateContent({
-              model: "gemini-3-flash-preview",
+              model: "gemini-4-hydrogen",
               contents: prompt,
               config: {
                 responseMimeType: "application/json",
                 responseSchema: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING }
+                  type: "ARRAY",
+                  items: { type: "STRING" }
                 }
               }
             });
@@ -1340,7 +1353,7 @@ export default function App() {
         try {
           const prompt = `Based on the following aggregated waste management statistics: ${JSON.stringify(adminStats)}, provide a short predictive analysis (forecast) for the next month. What trends should the municipality prepare for? Keep it concise and actionable.`;
           const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-4-hydrogen",
             contents: prompt
           });
           if (response.text) {
@@ -2051,9 +2064,15 @@ export default function App() {
         })
       });
       const data = await safeParseJson(res);
-      if (!res.ok || !data) throw new Error(data?.error || 'Invalid Login ID or Password');
+      if (!res.ok || !data) {
+        const fallbackError = res.status >= 500
+          ? 'Authentication service unavailable. Please verify database and server configuration.'
+          : 'Invalid Login ID or Password';
+        throw new Error(data?.error || fallbackError);
+      }
 
       localStorage.setItem('rupay_token', data.token);
+      window.dispatchEvent(new Event('rupay:auth-change'));
       setToken(data.token);
 
       if (data.requiresRegistration || !data.user?.role) {
@@ -2110,6 +2129,7 @@ export default function App() {
 
         if (data.token) {
           localStorage.setItem('rupay_token', data.token);
+          window.dispatchEvent(new Event('rupay:auth-change'));
           setToken(data.token);
         }
         if (data.user) {
@@ -2122,7 +2142,10 @@ export default function App() {
         if (!formData.phone && !formData.name) {
           throw new Error('Please enter your Phone / Login ID and Name.');
         }
-        const regPassword = formData.password || 'password123';
+        const regPassword = formData.password.trim();
+        if (regPassword.length < 8) {
+          throw new Error('Please create a password of at least 8 characters.');
+        }
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
@@ -2146,6 +2169,7 @@ export default function App() {
 
         if (data.token && data.user) {
           localStorage.setItem('rupay_token', data.token);
+          window.dispatchEvent(new Event('rupay:auth-change'));
           setToken(data.token);
           setUser(data.user);
           setShowAuth(false);
@@ -2319,17 +2343,17 @@ export default function App() {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-4-hydrogen",
         contents: { parts },
         config: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.OBJECT,
+            type: "OBJECT",
             properties: {
-              waste_type: { type: Type.STRING },
-              weight_kg: { type: Type.NUMBER },
-              confidence: { type: Type.NUMBER },
-              contamination: { type: Type.STRING }
+              waste_type: { type: "STRING" },
+              weight_kg: { type: "NUMBER" },
+              confidence: { type: "NUMBER" },
+              contamination: { type: "STRING" }
             },
             required: ["waste_type", "weight_kg"]
           }
@@ -2390,7 +2414,7 @@ export default function App() {
           const mimeType = mimeInfo.split(':')[1];
           
           const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-4-hydrogen",
             contents: {
               parts: [
                 {
@@ -2411,10 +2435,10 @@ export default function App() {
             config: {
               responseMimeType: "application/json",
               responseSchema: {
-                type: Type.OBJECT,
+                type: "OBJECT",
                 properties: {
-                  risk_score: { type: Type.NUMBER },
-                  assessment: { type: Type.STRING }
+                  risk_score: { type: "NUMBER" },
+                  assessment: { type: "STRING" }
                 },
                 required: ["risk_score", "assessment"]
               }
@@ -2591,15 +2615,15 @@ export default function App() {
       
       const prompt = `Analyze this waste recycling record for potential fraud or anomalies: ${JSON.stringify(record)}. Consider the waste type, weight, and any AI verification details. Provide a risk score (0-100, where 100 is high risk) and a brief explanation. Return as JSON.`;
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-4-hydrogen",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.OBJECT,
+            type: "OBJECT",
             properties: {
-              risk_score: { type: Type.NUMBER },
-              explanation: { type: Type.STRING }
+              risk_score: { type: "NUMBER" },
+              explanation: { type: "STRING" }
             }
           }
         }
@@ -2672,6 +2696,7 @@ export default function App() {
       console.error(err);
     }
     localStorage.removeItem('rupay_token');
+    window.dispatchEvent(new Event('rupay:auth-change'));
     setToken(null);
     setUser(null);
   };
@@ -2745,6 +2770,7 @@ export default function App() {
                 )}
               </div>
               <button 
+                data-auth-trigger="register"
                 onClick={() => {
                   setAuthMode('register');
                   setShowAuth(true);
@@ -2755,7 +2781,11 @@ export default function App() {
                 {t('Register Stakeholder')}
               </button>
               <button 
-                onClick={() => setShowAuth(true)}
+                data-auth-trigger="login"
+                onClick={() => {
+                  setAuthMode('login');
+                  setShowAuth(true);
+                }}
                 className="bg-white text-black px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-white/90 transition-all flex items-center gap-2 shadow-lg"
               >
                 {t('Launch OS')} <ArrowRight size={16} />
@@ -2790,6 +2820,7 @@ export default function App() {
                   {t('Access the OS')} <ArrowRight size={20} />
                 </button>
                 <button 
+                  data-auth-trigger="register-hero"
                   onClick={() => {
                     setAuthMode('register');
                     setShowAuth(true);
@@ -3206,7 +3237,7 @@ export default function App() {
                       type="text"
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
-                      placeholder="e.g. 9999999999 or admin"
+                      placeholder="e.g. rupaykg or 9999999999"
                       required
                       className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-emerald-500 outline-none transition-colors"
                     />
@@ -3332,7 +3363,8 @@ export default function App() {
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="••••••••"
+                      placeholder="Minimum 8 characters"
+                      minLength={8}
                       required={!token}
                       className="w-full bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
                     />

@@ -152,7 +152,7 @@ export const MinimalPublicLanding: React.FC<MinimalPublicLandingProps> = ({ onLo
     setOperatingContext(context);
     localStorage.setItem('rupay_operating_context', context);
     setActive(context === 'rural' ? 'rural' : 'government');
-    window.dispatchEvent(new CustomEvent('rupay-operating-context-change', { detail: context }));
+    window.dispatchEvent(new CustomEvent('rupay:operating-context-change', { detail: context }));
   };
 
   const goRegister = () => {
