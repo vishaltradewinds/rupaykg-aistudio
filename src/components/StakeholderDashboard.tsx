@@ -81,10 +81,13 @@ export default function StakeholderDashboard({ user, token, safeFetch, safeParse
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="text-xs uppercase tracking-[0.2em] text-emerald-400 font-bold mb-2">{role}</div>
-          <h2 className="text-3xl font-black text-white">{meta.title}</h2>
-          <p className="text-white/50 mt-1">{meta.subtitle}</p>
+        <div className="flex items-center gap-4">
+          <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-12 w-12 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" />
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-emerald-400 font-bold mb-1">{role}</div>
+            <h2 className="text-3xl font-black text-white">{meta.title}</h2>
+            <p className="text-white/50 mt-1">{meta.subtitle}</p>
+          </div>
         </div>
         <button onClick={refresh} disabled={loading} className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white flex items-center gap-2">
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh live data

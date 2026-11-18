@@ -861,10 +861,37 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
     }
   };
 
-  const downloadPdfReport = () => {
+  const loadLogoDataUrl = (): Promise<string | null> => {
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth || 256;
+            canvas.height = img.naturalHeight || 256;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return resolve(null);
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
+          } catch {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+        img.src = '/assets/aistudio/logo_f62ab143.jpeg';
+      } catch {
+        resolve(null);
+      }
+    });
+  };
+
+  const downloadPdfReport = async () => {
     if (!generatedReport) return;
 
     try {
+      const logoDataUrl = await loadLogoDataUrl();
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -875,10 +902,16 @@ export const StakeholderReportsCenter: React.FC<StakeholderReportsCenterProps> =
       doc.setFillColor(16, 185, 129);
       doc.rect(0, 0, 210, 18, 'F');
 
+      if (logoDataUrl) {
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(10, 2, 14, 14, 2, 2, 'F');
+        doc.addImage(logoDataUrl, 'JPEG', 10.5, 2.5, 13, 13);
+      }
+
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(13);
       doc.setFont('helvetica', 'bold');
-      doc.text('RUPAYKG ENTERPRISE 3.0 CIRCULAR OS', 12, 12);
+      doc.text('RUPAYKG ENTERPRISE 3.0 CIRCULAR OS', logoDataUrl ? 28 : 12, 12);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.text('OFFICIAL STATUTORY COMPLIANCE DOSSIER', 132, 12);
@@ -1123,17 +1156,20 @@ ${statutoryCsvRows}"Core Metrics","Total Waste Processed","${generatedReport.met
         <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-bold text-emerald-400">
-              <ShieldCheck size={14} />
-              SOVEREIGN COMPLIANCE REPORTING HUB
+          <div className="flex items-start gap-4">
+            <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-14 w-14 rounded-2xl bg-white p-1 object-contain shadow-xl shrink-0 hidden sm:block" />
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-bold text-emerald-400">
+                <ShieldCheck size={14} />
+                SOVEREIGN COMPLIANCE REPORTING HUB
+              </div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                Stakeholder Compliance & Regulatory Reports Center
+              </h1>
+              <p className="text-sm text-white/70 max-w-2xl leading-relaxed">
+                Generate official statutory returns, CPCB Form IV dossiers, SEBI BRSR Core ESG disclosures, SBM 2.0 Survekshan reports, and Hedera Guardian cryptographic carbon audit certificates across all Urban and Rural stakeholder tiers.
+              </p>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-              Stakeholder Compliance & Regulatory Reports Center
-            </h1>
-            <p className="text-sm text-white/70 max-w-2xl leading-relaxed">
-              Generate official statutory returns, CPCB Form IV dossiers, SEBI BRSR Core ESG disclosures, SBM 2.0 Survekshan reports, and Hedera Guardian cryptographic carbon audit certificates across all Urban and Rural stakeholder tiers.
-            </p>
           </div>
 
           <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-3 shrink-0">
@@ -1361,15 +1397,18 @@ ${statutoryCsvRows}"Core Metrics","Total Waste Processed","${generatedReport.met
 
                 {/* Report Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6 relative z-10">
-                  <div className="space-y-1">
-                    <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-md text-[10px] font-bold uppercase tracking-widest">
-                      <CheckCircle2 size={12} />
-                      CPCB / SPCB VERIFIED & STAMPED
+                  <div className="flex items-start gap-3.5">
+                    <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-12 w-12 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" />
+                    <div className="space-y-1">
+                      <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-md text-[10px] font-bold uppercase tracking-widest">
+                        <CheckCircle2 size={12} />
+                        CPCB / SPCB VERIFIED & STAMPED
+                      </div>
+                      <h2 className="text-xl font-black text-white">{generatedReport.title}</h2>
+                      <p className="text-xs text-white/60">
+                        Issuer: {generatedReport.stakeholderInfo.name} ({generatedReport.stakeholderInfo.role}) | {generatedReport.jurisdiction.organization}
+                      </p>
                     </div>
-                    <h2 className="text-xl font-black text-white">{generatedReport.title}</h2>
-                    <p className="text-xs text-white/60">
-                      Issuer: {generatedReport.stakeholderInfo.name} ({generatedReport.stakeholderInfo.role}) | {generatedReport.jurisdiction.organization}
-                    </p>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">

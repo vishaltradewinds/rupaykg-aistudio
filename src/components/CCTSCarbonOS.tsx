@@ -34,13 +34,16 @@ export const CCTSCarbonOS: React.FC<CCTSCarbonOSProps> = ({ token }) => {
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="bg-slate-900 border border-white/10 rounded-2xl p-6">
-        <h1 className="text-2xl font-black text-emerald-400 uppercase tracking-wide">
-          RupayKg Environmental Credit & MRV OS
-        </h1>
-        <p className="text-sm text-white/60 mt-1">
-          Evidence and MRV infrastructure for CCTS/CCC and Green Credit pathways — government issuance remains external.
-        </p>
+      <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 flex items-center gap-4">
+        <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-12 w-12 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" />
+        <div>
+          <h1 className="text-2xl font-black text-emerald-400 uppercase tracking-wide">
+            RupayKg Environmental Credit & MRV OS
+          </h1>
+          <p className="text-sm text-white/60 mt-1">
+            Evidence and MRV infrastructure for CCTS/CCC and Green Credit pathways — government issuance remains external.
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-4">

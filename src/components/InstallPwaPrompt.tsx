@@ -56,9 +56,7 @@ export const InstallPwaPrompt: React.FC = () => {
         className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-emerald-600 shadow-xl shadow-emerald-500/20 rounded-2xl p-4 flex items-center justify-between border border-emerald-400/30"
       >
         <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-xl text-white">
-            <Download size={20} />
-          </div>
+          <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-10 w-10 rounded-xl bg-white p-0.5 object-contain shadow-sm shrink-0" />
           <div>
             <h4 className="text-white font-bold text-sm leading-tight">{t('Install RupayKg OS')}</h4>
             <p className="text-emerald-100 text-xs mt-0.5">{t('Add to home screen for faster access offline.')}</p>

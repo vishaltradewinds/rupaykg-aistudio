@@ -252,7 +252,8 @@ export const Chatbot = () => {
             className="fixed bottom-24 right-6 w-96 h-[500px] bg-[#1A1A1B] border border-white/10 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
           >
             <div className="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
+                <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-7 w-7 rounded-lg bg-white p-0.5 object-contain shrink-0" />
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                 <h3 className="font-bold text-white">{t('RupayKg AI')}</h3>
               </div>

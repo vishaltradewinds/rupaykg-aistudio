@@ -214,9 +214,7 @@ const WhitepaperModal: React.FC<WhitepaperModalProps> = ({ isOpen, onClose }) =>
             {/* Header */}
             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#1A1A1C]/50 backdrop-blur-md sticky top-0 z-10">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
-                  <FileText size={20} />
-                </div>
+                <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-10 w-10 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" />
                 <div>
                   <h2 className="text-xl font-bold text-white">{t('Genesis Whitepaper')}</h2>
                   <p className="text-xs text-white/50 uppercase tracking-widest font-medium">{t('Foundational Structure & Operating Doctrine')}</p>

@@ -348,9 +348,12 @@ export const PlatformWorkingManual: React.FC = () => {
             </div>
           </div>
 
-          <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">
-            Comprehensive Platform Working & Carbon Project Lifecycle Manual
-          </h1>
+          <div className="flex items-center gap-4">
+            <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-14 w-14 rounded-2xl bg-white p-1 object-contain shadow-xl shrink-0" />
+            <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">
+              Comprehensive Platform Working & Carbon Project Lifecycle Manual
+            </h1>
+          </div>
 
           <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-4xl">
             Authoritative operating handbook governing CCC Carbon Project lifecycles, non-CCC physical commodity settlements, multi-stakeholder governance, and statutory Indian compliance under BEE CCTS 2023 & SWM 2016.

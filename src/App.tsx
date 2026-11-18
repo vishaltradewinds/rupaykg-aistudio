@@ -397,18 +397,14 @@ const BrandIdentity = ({
     return (
       <div className="text-center mb-8">
         {!imgFailed ? (
-           <img src="/logo.png" alt="RupayKg Logo" className="h-32 w-auto mx-auto mb-4 object-contain" onError={handleImageError} />
+           <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-28 w-28 mx-auto mb-4 rounded-2xl bg-white p-1.5 object-contain shadow-xl shadow-emerald-500/20 border border-white/10" onError={handleImageError} />
         ) : (
            <div className="inline-flex items-center justify-center p-3 bg-emerald-500/20 rounded-2xl text-emerald-400 mb-4">
               <Leaf size={40} />
            </div>
         )}
-        {imgFailed && (
-          <>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">{t('RUPAYKG')}</h1>
-            <p className="text-white/50 italic font-serif">{t('Circular Economy Operating System')}</p>
-          </>
-        )}
+        <h1 className="text-3xl font-bold tracking-tight mb-1">{t('RUPAYKG')}</h1>
+        <p className="text-white/50 text-sm italic font-serif">{t('Circular Economy Operating System')}</p>
       </div>
     );
   }
@@ -417,41 +413,37 @@ const BrandIdentity = ({
     return (
       <div className="flex items-center gap-3">
         {!imgFailed ? (
-          <img src="/logo.png" alt="RupayKg Logo" className="h-12 w-auto object-contain" onError={handleImageError} />
+          <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-10 w-10 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" onError={handleImageError} />
         ) : (
-          <>
-            <div className="p-1.5 bg-emerald-500 rounded-lg text-black">
-              <Leaf size={18} />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tighter leading-none">RUPAYKG</span>
-              <span className="text-[8px] font-mono text-emerald-400 tracking-widest mt-1 uppercase">Circular Economy OS</span>
-            </div>
-          </>
+          <div className="p-1.5 bg-emerald-500 rounded-lg text-black shrink-0">
+            <Leaf size={18} />
+          </div>
         )}
+        <div className="flex flex-col">
+          <span className="text-lg font-bold tracking-tighter leading-none">RUPAYKG</span>
+          <span className="text-[8px] font-mono text-emerald-400 tracking-widest mt-1 uppercase">Circular Economy OS</span>
+        </div>
       </div>
     );
   }
 
   // nav and sidebar
   return (
-    <div className={`flex items-center gap-3 ${variant === 'sidebar' ? 'mb-12 px-2' : ''}`}>
+    <div className={`flex items-center gap-3 ${variant === 'sidebar' ? 'mb-6 px-1' : ''}`}>
       {!imgFailed ? (
-        <img src="/logo.png" alt="RupayKg Logo" className="h-16 w-auto object-contain" onError={handleImageError} />
+        <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-11 w-11 rounded-xl bg-white p-0.5 object-contain shadow-lg shadow-emerald-500/20 shrink-0" onError={handleImageError} />
       ) : (
-        <>
-          <div className="p-2 bg-emerald-500 rounded-xl text-black shadow-lg shadow-emerald-500/20 shrink-0">
-            <Leaf size={24} />
-          </div>
-          <div className={`${variant === 'sidebar' ? 'hidden md:block' : 'flex flex-col'}`}>
-            <span className="text-xl font-bold tracking-tighter leading-none block">RUPAYKG</span>
-            <span className="text-[9px] font-mono text-emerald-400 tracking-widest mt-1 uppercase flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${isLiveConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              {isLiveConnected ? (variant === 'sidebar' ? 'LIVE REALTIME' : 'LIVE REALTIME OS') : 'CONNECTING...'}
-            </span>
-          </div>
-        </>
+        <div className="p-2 bg-emerald-500 rounded-xl text-black shadow-lg shadow-emerald-500/20 shrink-0">
+          <Leaf size={24} />
+        </div>
       )}
+      <div className={`${variant === 'sidebar' ? 'hidden md:block' : 'flex flex-col'}`}>
+        <span className="text-xl font-bold tracking-tighter leading-none block">RUPAYKG</span>
+        <span className="text-[9px] font-mono text-emerald-400 tracking-widest mt-1 uppercase flex items-center gap-1.5">
+          <span className={`w-1.5 h-1.5 rounded-full ${isLiveConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+          {isLiveConnected ? (variant === 'sidebar' ? 'LIVE REALTIME' : 'LIVE REALTIME OS') : 'CONNECTING...'}
+        </span>
+      </div>
     </div>
   );
 };
@@ -6365,6 +6357,7 @@ export default function App() {
             >
               {/* Hero Section */}
               <section className="text-center space-y-4 py-12">
+                <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-24 w-24 mx-auto rounded-2xl bg-white p-1.5 object-contain shadow-xl shadow-emerald-500/20" />
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">
                   <Activity size={12} /> {t('Currently Active: ')}{operatingContext}{t(' Context (')}{labels.anchor})
                 </div>

@@ -407,17 +407,20 @@ export const StakeholderOnboardingHub: React.FC<StakeholderOnboardingHubProps> =
       <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#121214] via-[#16161A] to-[#0D1812] p-6 md:p-10 shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
-              <ShieldCheck size={14} />
-              {t('Enterprise Stakeholder Onboarding Engine')}
+          <div className="flex items-start gap-4">
+            <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-14 w-14 rounded-2xl bg-white p-1 object-contain shadow-xl shrink-0 hidden sm:block" />
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
+                <ShieldCheck size={14} />
+                {t('Enterprise Stakeholder Onboarding Engine')}
+              </div>
+              <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
+                {t('Stakeholder Registration & Operational Activation')}
+              </h1>
+              <p className="text-white/60 text-sm md:text-base mt-2 max-w-2xl">
+                {t('Official onboarding portal for Urban Local Bodies, Panchayats, Bulk Waste Generators, Recyclers, Carbon Project Developers, and Environmental Regulators under SWM Rules 2016/2026 and CCTS.')}
+              </p>
             </div>
-            <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
-              {t('Stakeholder Registration & Operational Activation')}
-            </h1>
-            <p className="text-white/60 text-sm md:text-base mt-2 max-w-2xl">
-              {t('Official onboarding portal for Urban Local Bodies, Panchayats, Bulk Waste Generators, Recyclers, Carbon Project Developers, and Environmental Regulators under SWM Rules 2016/2026 and CCTS.')}
-            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

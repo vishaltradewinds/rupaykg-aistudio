@@ -308,7 +308,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
               </span>
             </div>
             <h1 className="text-2xl lg:text-3xl font-extrabold text-white flex items-center gap-3">
-              <ShieldCheck className="text-emerald-400" size={32} />
+              <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-11 w-11 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" />
               RupayKg National SWM Compliance Platform
             </h1>
             <p className="text-white/70 text-sm mt-2 max-w-3xl leading-relaxed">
@@ -1592,6 +1592,7 @@ export default function SwmCompliancePlatform({ user, onBackToDashboard }: any) 
                 <div className="max-w-xs mx-auto bg-slate-950 border-4 border-slate-800 rounded-[36px] p-4 space-y-4 shadow-2xl relative">
                   <div className="w-20 h-4 bg-slate-800 rounded-full mx-auto mb-2"></div>
                   <div className="text-center">
+                    <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-8 w-8 rounded-lg bg-white p-0.5 object-contain mx-auto mb-1 shadow" />
                     <span className="text-[9px] text-emerald-400 font-mono font-bold uppercase">RupayKg Field App</span>
                     <h5 className="font-bold text-white text-xs capitalize">{activeMobileRole.replace('_', ' ')} Viewport</h5>
                   </div>

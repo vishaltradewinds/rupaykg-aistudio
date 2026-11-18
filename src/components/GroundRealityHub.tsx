@@ -296,11 +296,14 @@ export default function GroundRealityHub({
                 </span>
               )}
             </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-              {isUrban 
-                ? 'Scrap Aggregator Yard Hub & Supply Chain Operations' 
-                : 'Rural Biomass & Village Resource Centre (VRC) Aggregator Hub'}
-            </h2>
+            <div className="flex items-center gap-3.5">
+              <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-12 w-12 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" />
+              <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                {isUrban 
+                  ? 'Scrap Aggregator Yard Hub & Supply Chain Operations' 
+                  : 'Rural Biomass & Village Resource Centre (VRC) Aggregator Hub'}
+              </h2>
+            </div>
             <p className="text-white/60 text-xs md:text-sm mt-1 max-w-3xl">
               {isUrban 
                 ? 'Connecting daily small scrap inflows from informal Safai Mitras & small Kabadiwalas to bulk processing (baling/shredding) and B2B metric-tonne dispatches to CPCB Registered Industrial Recyclers.'

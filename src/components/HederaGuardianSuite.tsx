@@ -411,7 +411,7 @@ export const HederaGuardianSuite: React.FC<HederaGuardianSuiteProps> = ({ user, 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
-            <Cpu className="text-emerald-400 animate-pulse" size={28} />
+            <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-9 w-9 rounded-xl bg-white p-0.5 object-contain shadow shrink-0" />
             Hedera Guardian & HCS Ledger Suite
           </h3>
           <p className="text-xs text-white/50 mt-1">

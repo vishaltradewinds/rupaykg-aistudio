@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   MapPinned,
   Wheat,
-  Scale,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -166,7 +165,7 @@ export const MinimalPublicLanding: React.FC<MinimalPublicLandingProps> = ({ onLo
         <header className="sticky top-0 z-20 border-b border-white/10 bg-[#090A0B]/90 backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:px-8">
             <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"><Scale size={19} /></div>
+              <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-10 w-10 rounded-xl bg-white p-0.5 object-contain shadow-lg shadow-emerald-500/20" />
               <div className="text-left leading-none">
                 <div className="text-lg font-black tracking-tight">RUPAYKG</div>
                 <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.22em] text-emerald-400">Circular Economy OS</div>
@@ -206,6 +205,7 @@ export const MinimalPublicLanding: React.FC<MinimalPublicLandingProps> = ({ onLo
         <main>
           <section id="platform" className="mx-auto max-w-7xl px-5 pb-20 pt-20 md:px-8 md:pb-28 md:pt-28">
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-4xl text-center">
+              <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="mx-auto mb-6 h-24 w-24 rounded-2xl bg-white p-1.5 object-contain shadow-2xl shadow-emerald-500/20 border border-white/10" />
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300">
                 <Globe size={14} /> One operating layer for the circular economy
               </div>
@@ -275,7 +275,7 @@ export const MinimalPublicLanding: React.FC<MinimalPublicLandingProps> = ({ onLo
           <section id="impact" className="border-t border-white/8 bg-white/[0.02] px-5 py-20 md:px-8"><div className="mx-auto max-w-3xl text-center"><p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400">Impact</p><h2 className="mt-3 text-3xl font-black">One record. One evidence trail. One accountable network.</h2><p className="mt-4 text-sm leading-7 text-white/50">Operational data becomes useful when every stakeholder can see the part that belongs to them — without losing the full chain of evidence.</p></div></section>
         </main>
 
-        <footer className="border-t border-white/10 px-5 py-10 md:px-8"><div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left"><div className="flex items-center gap-2 text-sm font-bold"><Scale size={16} className="text-emerald-400" /> RUPAYKG</div><p className="text-xs text-white/35">Sovereign Digital MRV Infrastructure for Waste-to-Carbon Economies</p><button onClick={goRegister} className="text-sm font-bold text-emerald-400 hover:text-emerald-300">Get Started <ArrowRight size={14} className="inline" /></button></div></footer>
+        <footer className="border-t border-white/10 px-5 py-10 md:px-8"><div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left"><div className="flex items-center gap-2.5 text-sm font-bold"><img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-8 w-8 rounded-lg bg-white p-0.5 object-contain" /> RUPAYKG</div><p className="text-xs text-white/35">Sovereign Digital MRV Infrastructure for Waste-to-Carbon Economies</p><button onClick={goRegister} className="text-sm font-bold text-emerald-400 hover:text-emerald-300">Get Started <ArrowRight size={14} className="inline" /></button></div></footer>
       </div>
     </div>
   );

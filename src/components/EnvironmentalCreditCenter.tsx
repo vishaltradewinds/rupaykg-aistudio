@@ -10,7 +10,7 @@ export const EnvironmentalCreditCenter: React.FC = () => {
     <div className="space-y-6">
       <div className="bg-slate-900 border border-white/10 rounded-2xl p-6">
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400"><Leaf size={24} /></div>
+          <img src="/assets/aistudio/logo_f62ab143.jpeg" alt="RupayKg Logo" className="h-12 w-12 rounded-xl bg-white p-0.5 object-contain shadow-md shrink-0" />
           <div>
             <h2 className="text-xl font-black text-white">Environmental Credit & MRV Router</h2>
             <p className="text-sm text-white/60 mt-1">One evidence layer. Government-specific credit pathways. RupayKg does not issue government credits.</p>
